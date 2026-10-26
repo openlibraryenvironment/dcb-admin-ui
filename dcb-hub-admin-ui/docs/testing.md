@@ -662,7 +662,7 @@ hook file the tracked shim is a no-op, and every release up to 1.58.1 committed 
 check and hand you a quieter version of the same problem: `CHANGELOG.md` matches the
 prettier glob in `.lintstagedrc.json`, so lint-staged would reformat, on every release, the
 changelog semantic-release had generated seconds earlier — and the two would disagree
-forever.
+forever. The CI image has since moved to `node:24.21.0-bookworm`, with git 2.39, for other reasons; `HUSKY=0` is still what keeps the hook out of the release, not the git version.
 
 `HUSKY=0` is husky's own switch, honoured in both places it matters: `index.mjs` returns
 early so `core.hooksPath` is never set, and the runner copied to `.husky/_/h` exits 0.

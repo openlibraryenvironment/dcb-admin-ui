@@ -3,13 +3,18 @@ variables:
   # These can be specified per job or per pipeline
   ARTIFACT_COMPRESSION_LEVEL: "fast"
   CACHE_COMPRESSION_LEVEL: "fast"
-  # Git hooks off in CI - husky's own switch, honoured at install and in the runner.
-  # The release job commits (@semantic-release/git), which fired lint-staged, which
-  # needs git >= 2.32.0 against the 2.30.2 in node:22-bullseye. Do NOT "fix" this by
-  # bumping the image: lint-staged would then reformat the changelog semantic-release
-  # had just generated. The checks themselves run as verify_* jobs.
+  # Git hooks off in CI - husky's own switch, honoured at install and in the runner. The
+  # release job commits (@semantic-release/git), and a hook would run lint-staged over the
+  # changelog semantic-release had just written. The checks run as verify_* jobs.
   # See docs/testing.md, "Hooks are not the CI gates".
   HUSKY: "0"
+
+  # Must equal @playwright/test in package.json: the browsers are baked into the image.
+  # verify_quality fails if the two drift.
+  PLAYWRIGHT_VERSION: "1.64.1"
+
+  # The runner's clone of gitlab.com has failed on a refused connection; retry it, not the job.
+  GET_SOURCES_ATTEMPTS: "3"
 
   # See the `cache:` block below: without this npm writes to $HOME/.npm and the cache
   # entry covers a directory npm never touches.
@@ -22,12 +27,22 @@ variables:
     description: "true runs every check and the release report on the chosen branch or tag, and ships nothing."
 
 default:
+  # Node 24, as the Playwright image already is, and as dcb-admin-for-libraries runs.
   image:
-    name: node:22.23.1-bullseye
+    name: node:24.21.0-bookworm
     pull_policy: if-not-present
 
   tags:
     - ki-onprem
+
+  # A failure of the runner or GitLab, retried; a failed check is not
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - scheduler_failure
+      - api_failure
 
 stages:
   - verify
@@ -118,7 +133,7 @@ nightly_flake_hunt:
   stage: verify
   rules: !reference [.rules, nightly]
   image:
-    name: mcr.microsoft.com/playwright:v1.64.1-noble
+    name: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
     pull_policy: if-not-present
   resource_group: browser-suites
   timeout: 3h
@@ -239,6 +254,7 @@ verify_quality:
     - export NPM_TOKEN="$NPMJS_TOKEN"
     - cd dcb-hub-admin-ui
     - npm ci
+    - test "$(node -p "require('./package.json').devDependencies['@playwright/test']")" = "$PLAYWRIGHT_VERSION"
     - npm run lint -- --max-warnings=0
     - npx tsc --noEmit
     # --coverage rather than a bare run: it costs about three seconds on top of the
@@ -288,7 +304,7 @@ verify_e2e:
   stage: verify
   rules: !reference [.rules, app]
   image:
-    name: mcr.microsoft.com/playwright:v1.64.1-noble
+    name: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
     pull_policy: if-not-present
   script:
     - echo "runner=$CI_RUNNER_DESCRIPTION cpus=$(nproc) cpu.max=$(cat /sys/fs/cgroup/cpu.max 2>/dev/null || echo n/a) mem_mb=$(awk '/^MemTotal/{print int($2/1024)}' /proc/meminfo)"
@@ -327,7 +343,7 @@ verify_lighthouse:
   stage: verify
   rules: !reference [.rules, app]
   image:
-    name: mcr.microsoft.com/playwright:v1.64.1-noble
+    name: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
     pull_policy: if-not-present
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
@@ -364,7 +380,7 @@ verify_base_path:
   stage: verify
   rules: !reference [.rules, app]
   image:
-    name: mcr.microsoft.com/playwright:v1.64.1-noble
+    name: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
     pull_policy: if-not-present
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
@@ -419,7 +435,7 @@ verify_container:
           - dcb-hub-admin-ui/vite.config.mts
   timeout: 40m
   image:
-    name: mcr.microsoft.com/playwright:v1.64.1-noble
+    name: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
     pull_policy: if-not-present
   services:
     - name: docker:27-dind
