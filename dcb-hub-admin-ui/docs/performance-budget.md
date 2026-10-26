@@ -125,6 +125,45 @@ recovered 562. What remained is the page check the sidebar makes on every page:
 Both keep the headroom they had: 173 and 213. Measure on a fresh checkout. A working
 copy holding CRLF files builds a few hundred bytes heavier than CI does.
 
+### When an upgrade costs every page
+
+The same rule, for a dependency rather than a feature: raise by the measured cost of
+the named upgrade, net of anything the same upgrade saved, and only after checking the
+weight cannot move.
+
+On 2026-10-26 the dependency upgrade put the first load 14,946 over its budget,
+`DataGrid.js` 1,609 over and `DateLocalization.js` 717 over. Each package was measured
+on its own against the build before it:
+
+| Upgrade                                 | First load | `DataGrid.js` | `DateLocalization.js` |
+| --------------------------------------- | ---------: | ------------: | --------------------: |
+| React 19.2.7 → 19.3.1                   |     +8,832 |            -5 |                    -1 |
+| zod 4.4.3 → 4.6.6                       |     +7,029 |             0 |                     0 |
+| MUI 9.4.0 → 9.5.0, lab beta.9 → beta.10 |       +574 |            -2 |                  +343 |
+| MUI X 9.15.0 → 9.16.0                   |        +76 |        +3,571 |                  +421 |
+| Patch and tooling releases              |     -1,444 |           +25 |                    -9 |
+| The whole upgrade, measured together    |    +15,164 |        +3,588 |                  +764 |
+
+None of it could move:
+
+- React DOM's production client grew from 94,758 to 110,528 bytes gzipped (View
+  Transitions, Fragment refs), and every page loads it.
+- zod 4.6.6 carries the fix for GHSA-mrhx-c7xc-m3w5, and the route schemas that
+  `validateSearch` needs keep it on every page. `zod/mini` would cost about 17 KB less
+  for the same schemas; that is the lever if the first load has to come down.
+- MUI X 9.16 fixes a memory leak on row updates and the grid popovers' ARIA roles, and
+  moves in lockstep with `dcb-admin-for-libraries`.
+
+| Measure (gzipped, LF, no `.env`) |  Before |   After | Raised by | Budget            |
+| -------------------------------- | ------: | ------: | --------: | ----------------- |
+| First load                       | 344,978 | 360,142 |   +15,164 | 345,196 → 360,360 |
+| `DataGrid.js`                    | 216,121 | 219,709 |    +3,588 | 218,100 → 221,688 |
+| `DateLocalization.js`            |  68,353 |  69,117 |      +764 | 68,400 → 69,164   |
+
+Each keeps the headroom it had: 218, 1,979 and 47. A local `.env` adds about 500 bytes
+to the first load, because Vite inlines every `VITE_*` value into the feature flags.
+Measure without it.
+
 ### What this is telling us to do
 
 `exceljs` and `rasterizeHTML` are 303 KB gzipped — 18% of the artefact — and both come
