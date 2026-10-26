@@ -118,7 +118,7 @@ nightly_flake_hunt:
   stage: verify
   rules: !reference [.rules, nightly]
   image:
-    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    name: mcr.microsoft.com/playwright:v1.64.1-noble
     pull_policy: if-not-present
   resource_group: browser-suites
   timeout: 3h
@@ -288,7 +288,7 @@ verify_e2e:
   stage: verify
   rules: !reference [.rules, app]
   image:
-    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    name: mcr.microsoft.com/playwright:v1.64.1-noble
     pull_policy: if-not-present
   script:
     - echo "runner=$CI_RUNNER_DESCRIPTION cpus=$(nproc) cpu.max=$(cat /sys/fs/cgroup/cpu.max 2>/dev/null || echo n/a) mem_mb=$(awk '/^MemTotal/{print int($2/1024)}' /proc/meminfo)"
@@ -327,7 +327,7 @@ verify_lighthouse:
   stage: verify
   rules: !reference [.rules, app]
   image:
-    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    name: mcr.microsoft.com/playwright:v1.64.1-noble
     pull_policy: if-not-present
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
@@ -364,7 +364,7 @@ verify_base_path:
   stage: verify
   rules: !reference [.rules, app]
   image:
-    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    name: mcr.microsoft.com/playwright:v1.64.1-noble
     pull_policy: if-not-present
   script:
     - export NPM_TOKEN="$NPMJS_TOKEN"
@@ -419,7 +419,7 @@ verify_container:
           - dcb-hub-admin-ui/vite.config.mts
   timeout: 40m
   image:
-    name: mcr.microsoft.com/playwright:v1.61.1-noble
+    name: mcr.microsoft.com/playwright:v1.64.1-noble
     pull_policy: if-not-present
   services:
     - name: docker:27-dind
