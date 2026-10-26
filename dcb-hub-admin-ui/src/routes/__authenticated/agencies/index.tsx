@@ -1,57 +1,50 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
+import type { GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { agenciesView } from "@constants/dataGrid/gridViews";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { agenciesQuery } from "@/queryOptions/gridQueries";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 
-import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { getAgencies } from "@queries/getAgencies";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
-import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import type { LoadAgenciesQueryVariables } from "@generated/graphql";
-
-// Default-state prefetch: the component reads pagination/sort/filter state
-// from useGridStore (a Zustand store) at mount time, which the loader
-// cannot access (it isn't a hook and runs outside React). We can only
-// prefetch the grid's own hardcoded default first page/sort here - these
-// values must mirror the component's initial useState fallbacks below so
-// the cache entry lines up on a fresh (unauthenticated-store) render.
-const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: 10 };
-const DEFAULT_SORT_MODEL = [{ field: "name", sort: "asc" }];
-const DEFAULT_FILTER_MODEL = { items: [] };
 
 export const Route = createFileRoute("/__authenticated/agencies/")({
-	loader: ({ context: { queryClient, cfg, auth } }) => {
-		// Skip prefetching for unauthenticated visitors - the request would
-		// fail (no token) and its failure would trigger the global
-		// network/401 error handler in main.tsx before __authenticated.tsx's
-		// own component-level auth-gate redirect to /login ever runs.
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			agenciesView,
+			search,
+			location.state,
+		);
+		if (restore) throw redirect({ to: "/agencies", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
 		if (!auth?.isAuthenticated) return;
-		return queryClient.ensureQueryData({
-			queryKey: [
-				"agencies",
-				DEFAULT_PAGINATION_MODEL,
-				DEFAULT_SORT_MODEL,
-				DEFAULT_FILTER_MODEL,
-			],
-			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<any, LoadAgenciesQueryVariables>(
-					getAgencies,
-					{
-						query: "",
-						pageno: DEFAULT_PAGINATION_MODEL.page,
-						pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
-						order: DEFAULT_SORT_MODEL[0].field,
-						orderBy: "ASC",
-					},
-				),
-		});
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(agenciesView, deps, location.state);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			agenciesQuery(createGraphQLClient(cfg, auth), models),
+		);
 	},
 	component: AgenciesRouteComponent,
 });
@@ -61,48 +54,9 @@ function AgenciesRouteComponent() {
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 
-	const gridId = "agencies";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 10 },
-		sort: [{ field: "name", sort: "asc" }],
-		columnVisibility: {
-			id: false,
-			latitude: false,
-			longitude: false,
-		},
-	});
-
-	const {
-		data: gridData,
-		isLoading,
-		isFetching,
-	} = useQuery({
-		queryKey: [gridId, paginationModel, sortModel, filterModel],
-		queryFn: () =>
-			gqlClient.request<any, LoadAgenciesQueryVariables>(
-				getAgencies,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					defaultOrder: "name",
-					defaultPageSize: 10,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
+	const gridId = agenciesView.id;
+	const search = useSearch({ from: "/__authenticated/agencies/" });
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const columns = useMemo(
 		() => [
@@ -148,27 +102,48 @@ function AgenciesRouteComponent() {
 		[customColumns, t],
 	);
 
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(agenciesView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading,
+		isFetching,
+	} = useQuery(
+		agenciesQuery(gqlClient, {
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
+	);
+
 	return (
 		<PageContainer title={t("nav.agencies")}>
 			<DataGrid
 				identifier={gridId}
 				type="agencies"
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={gridData?.agencies?.content ?? []}
 				rowCount={gridData?.agencies?.totalSize ?? 0}
 				loading={isLoading || isFetching}
 				paginationMode="server"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
 				sortingMode="server"
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
 				filterMode="server"
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				exportConfig={{
 					query: getAgencies,
 					coreType: "agencies",

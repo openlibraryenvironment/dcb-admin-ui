@@ -14,11 +14,13 @@ import {
 } from "@helpers/actions/entityMutationLogic";
 import { unsupportedInputKeys } from "@helpers/capabilityFields";
 import { graphQLErrorsIn } from "@helpers/graphQLErrors";
+import { requestReferenceOf } from "@helpers/requestReference";
 import {
 	ENTITY_REGISTRY,
 	entityOwnsQueryKey,
 	type EntityKey,
 } from "@constants/entityRegistry";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface AuditFields {
 	reason: string;
@@ -79,6 +81,8 @@ export interface AlertState {
 	severity: "success" | "error";
 	text: string | null;
 	title: string | null;
+	/** The reference the failed call was sent with, to quote to support. */
+	reference?: string | null;
 }
 
 /**
@@ -169,6 +173,7 @@ export function useEntityMutation(entity: EntityKey) {
 				severity: "error",
 				text: mutationFailureText(error, summary),
 				title: t("ui.data_grid.error"),
+				reference: requestReferenceOf(error),
 			}),
 		[t],
 	);
@@ -276,7 +281,10 @@ export function useEntityMutation(entity: EntityKey) {
 					}
 					succeed("ui.data_grid.delete_success", "ui.data_grid.deleted", name);
 				} catch (error) {
-					console.error(`Error deleting ${entity} ${name}:`, error);
+					console.error(
+						`Error deleting ${entity} ${name}:`,
+						errorForLog(error),
+					);
 					setPending(null);
 					failWith(error, failText("ui.data_grid.delete_error", name));
 				}
@@ -341,7 +349,7 @@ export function useEntityMutation(entity: EntityKey) {
 					succeed("ui.data_grid.edit_success", "ui.data_grid.updated", name);
 				}
 			} catch (error) {
-				console.error(`Error updating ${entity} ${name}:`, error);
+				console.error(`Error updating ${entity} ${name}:`, errorForLog(error));
 				if (isGridEdit) pending.reject(error);
 				const errorText = !isGridEdit ? pending.errorText : undefined;
 				setPending(null);

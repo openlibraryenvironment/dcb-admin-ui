@@ -16,6 +16,7 @@ import Confirmation from "@components/Confirmation/Confirmation";
 import i18n from "@/i18n";
 import { appUrl, clearAppStorage, storageKey } from "@helpers/appBase";
 import { canAccessDcbAdmin } from "@helpers/consortiumAccess";
+import { errorForDisplay } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute("/__authenticated")({
 	component: AuthenticatedLayout,
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/__authenticated")({
 		<StructuralLayout>
 			<Error
 				title={i18n.t("ui.error.something_wrong")}
-				message={error.message}
+				message={errorForDisplay(error)}
 				action={i18n.t("ui.actions.reload")}
 				onAction={() => location.reload()}
 			/>

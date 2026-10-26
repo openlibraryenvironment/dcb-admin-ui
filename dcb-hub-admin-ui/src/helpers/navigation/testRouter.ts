@@ -1,9 +1,9 @@
 import {
+	createMemoryHistory,
 	createRootRoute,
 	createRoute,
 	createRouter,
 } from "@tanstack/react-router";
-import { createMemoryHistory } from "@tanstack/history";
 
 import { readRouteTreePaths } from "./routeTreePaths";
 
@@ -39,11 +39,8 @@ export function createRouteMatcher(): (pathname: string) => RouteResolution {
 	});
 
 	return (pathname: string) => {
-		const matched = router.getMatchedRoutes(pathname);
-		return {
-			route: matched.foundRoute?.fullPath,
-			params: (matched.routeParams ?? {}) as Record<string, string>,
-		};
+		const [, rawParams, foundRoute] = router.getMatchedRoutes(pathname);
+		return { route: foundRoute?.fullPath, params: rawParams };
 	};
 }
 

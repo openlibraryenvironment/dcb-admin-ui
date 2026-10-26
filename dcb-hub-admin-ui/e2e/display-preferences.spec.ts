@@ -6,6 +6,7 @@ import { seedTheme } from "./fixtures/theme";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import { scanForViolations } from "./fixtures/axe";
+import { covers } from "./fixtures/coverage";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import consortium from "./fixtures-data/consortium.json";
 import libraries from "./fixtures-data/libraries.json";
@@ -46,27 +47,34 @@ const headingFontSizePx = (page: Page) =>
 	});
 
 test.describe("text size", () => {
-	test("scales the root and the headings with it", async ({ page }) => {
-		await seedTheme(page, { textSize: "normal" });
-		await page.goto("/");
-		await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+	test(
+		"scales the root and the headings with it",
+		covers(
+			"Choosing a larger text size enlarges the text, and the headings with it.",
+			["1.4.4"],
+		),
+		async ({ page }) => {
+			await seedTheme(page, { textSize: "normal" });
+			await page.goto("/");
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-		const baseRoot = await rootFontSizePx(page);
-		const baseHeading = await headingFontSizePx(page);
-		expect(baseRoot).toBeCloseTo(16, 1);
-		// h1 is 2rem. If it were still the 32px literal it used to be, this would read
-		// 32 here AND 32 below - which is the whole failure mode this guards.
-		expect(baseHeading).toBeCloseTo(32, 1);
+			const baseRoot = await rootFontSizePx(page);
+			const baseHeading = await headingFontSizePx(page);
+			expect(baseRoot).toBeCloseTo(16, 1);
+			// h1 is 2rem. If it were still the 32px literal it used to be, this would read
+			// 32 here AND 32 below - which is the whole failure mode this guards.
+			expect(baseHeading).toBeCloseTo(32, 1);
 
-		await seedTheme(page, { textSize: "largest" });
-		await page.goto("/");
-		await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+			await seedTheme(page, { textSize: "largest" });
+			await page.goto("/");
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-		expect(await rootFontSizePx(page)).toBeCloseTo(18, 1);
-		// THE ASSERTION THAT MATTERS: the heading moved too. A text-size setting that
-		// scales body copy and leaves every heading behind is worse than none.
-		expect(await headingFontSizePx(page)).toBeGreaterThan(baseHeading);
-	});
+			expect(await rootFontSizePx(page)).toBeCloseTo(18, 1);
+			// THE ASSERTION THAT MATTERS: the heading moved too. A text-size setting that
+			// scales body copy and leaves every heading behind is worse than none.
+			expect(await headingFontSizePx(page)).toBeGreaterThan(baseHeading);
+		},
+	);
 });
 
 test.describe("spacing", () => {
@@ -100,40 +108,53 @@ test.describe("animation", () => {
 				.filter((duration) => duration && duration !== "0s"),
 		);
 
-	test("reduced suppresses transitions across the whole page", async ({
-		page,
-	}) => {
-		await seedTheme(page, { motion: "reduced" });
-		await page.goto("/libraries");
-		await expect(page.getByText("Alpha Test Library")).toBeVisible();
+	test(
+		"reduced suppresses transitions across the whole page",
+		covers(
+			"Choosing reduced animation stops transitions across the whole page.",
+			["2.3.3"],
+		),
+		async ({ page }) => {
+			await seedTheme(page, { motion: "reduced" });
+			await page.goto("/libraries");
+			await expect(page.getByText("Alpha Test Library")).toBeVisible();
 
-		await expect(page.locator("html")).toHaveAttribute(
-			"data-motion",
-			"reduced",
-		);
+			await expect(page.locator("html")).toHaveAttribute(
+				"data-motion",
+				"reduced",
+			);
 
-		// Everything that still declares a duration must be at the 0.01ms floor. Not
-		// zero: a zero duration skips transitionend, and MUI's own transition callbacks
-		// wait on it.
-		const durations = await transitionDurations(page);
-		const tooSlow = durations.filter(
-			(duration) => parseFloat(duration) > 0.001,
-		);
-		expect(tooSlow).toEqual([]);
-	});
+			// Everything that still declares a duration must be at the 0.01ms floor. Not
+			// zero: a zero duration skips transitionend, and MUI's own transition callbacks
+			// wait on it.
+			const durations = await transitionDurations(page);
+			const tooSlow = durations.filter(
+				(duration) => parseFloat(duration) > 0.001,
+			);
+			expect(tooSlow).toEqual([]);
+		},
+	);
 
-	test("system writes no attribute, so the media query answers it alone", async ({
-		page,
-	}) => {
-		await seedTheme(page, { motion: "system" });
-		await page.goto("/libraries");
-		await expect(page.getByText("Alpha Test Library")).toBeVisible();
+	test(
+		"system writes no attribute, so the media query answers it alone",
+		covers(
+			"With no choice made, the operating system's reduced-motion setting is followed.",
+			["2.3.3"],
+		),
+		async ({ page }) => {
+			await seedTheme(page, { motion: "system" });
+			await page.goto("/libraries");
+			await expect(page.getByText("Alpha Test Library")).toBeVisible();
 
-		// The absence IS the mechanism: the CSS selects on `:not([data-motion="full"])`
-		// inside the media query, so the default case needs no JavaScript and works on
-		// the first paint.
-		await expect(page.locator("html")).not.toHaveAttribute("data-motion", /.*/);
-	});
+			// The absence IS the mechanism: the CSS selects on `:not([data-motion="full"])`
+			// inside the media query, so the default case needs no JavaScript and works on
+			// the first paint.
+			await expect(page.locator("html")).not.toHaveAttribute(
+				"data-motion",
+				/.*/,
+			);
+		},
+	);
 
 	test("full overrides an operating system that asks for reduced motion", async ({
 		page,
@@ -193,14 +214,19 @@ test.describe("the settings panel", () => {
 		expect(await rootFontSizePx(page)).toBeCloseTo(16, 1);
 	});
 
-	test("has no accessibility violations with every control on show", async ({
-		page,
-	}) => {
-		await page.goto("/settings");
-		await expect(
-			page.getByRole("radiogroup", { name: /animation/i }),
-		).toBeVisible();
+	test(
+		"has no accessibility violations with every control on show",
+		covers(
+			"Every check axe can automate passes on the display settings panel.",
+			[],
+		),
+		async ({ page }) => {
+			await page.goto("/settings");
+			await expect(
+				page.getByRole("radiogroup", { name: /animation/i }),
+			).toBeVisible();
 
-		await scanForViolations(page);
-	});
+			await scanForViolations(page);
+		},
+	);
 });

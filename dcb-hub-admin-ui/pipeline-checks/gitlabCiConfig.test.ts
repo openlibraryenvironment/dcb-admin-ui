@@ -11,7 +11,7 @@ import { resolve } from "path";
  * a valid pipeline".
  */
 const ciConfig = readFileSync(
-	resolve(__dirname, "../../../.gitlab-ci.yml"),
+	resolve(__dirname, "../../.gitlab-ci.yml"),
 	"utf8",
 );
 
@@ -50,5 +50,53 @@ describe("expose_as in .gitlab-ci.yml", () => {
 		for (const block of exposing) {
 			expect(block).toContain("paths:");
 		}
+	});
+});
+
+/** Every job runs on the ki-onprem runner and nothing else: docs/testing.md, "Where the pipeline runs". */
+describe("the runner every job runs on", () => {
+	const RUNNER = "ki-onprem";
+	const lines = ciConfig.split("\n");
+
+	/** Each `tags:` key, with the list under it or beside it */
+	const tagLists = lines.flatMap((line, index) => {
+		const key = /^(\s*)tags:\s*(.*)$/.exec(line);
+		if (!key) return [];
+		const [, indent, inline] = key;
+		if (inline.trim()) {
+			const items = inline
+				.replace(/[[\]]/g, "")
+				.split(",")
+				.map((item) => item.trim());
+			return [{ line: index + 1, items: items.filter(Boolean) }];
+		}
+		const items: string[] = [];
+		for (const next of lines.slice(index + 1)) {
+			const item = /^(\s*)-\s+(\S+)\s*$/.exec(next);
+			if (!item || item[1].length < indent.length) break;
+			items.push(item[2]);
+		}
+		return [{ line: index + 1, items }];
+	});
+
+	it("is the default for every job", () => {
+		const defaults = ciConfig
+			.split(/^(?=\S)/m)
+			.find((block) => block.startsWith("default:"));
+		expect(defaults).toMatch(
+			new RegExp(String.raw`\n\s+tags:\n\s+- ${RUNNER}\n`),
+		);
+	});
+
+	it("is the only runner any job names", () => {
+		expect(tagLists.length).toBeGreaterThan(0);
+		const elsewhere = tagLists.filter(
+			({ items }) => items.length !== 1 || items[0] !== RUNNER,
+		);
+		expect(elsewhere).toEqual([]);
+	});
+
+	it("cannot be dropped by a job opting out of the defaults", () => {
+		expect(ciConfig).not.toMatch(/^\s+inherit:/m);
 	});
 });

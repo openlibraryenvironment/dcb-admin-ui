@@ -66,7 +66,7 @@ async function mount(page: Page, path: string): Promise<void> {
 test("mounts at the host root with runtime configuration", async ({ page }) => {
 	await mount(page, "/");
 
-	await expect(page).toHaveURL(/\/login\?redirect=%2F$/);
+	await expect(page).toHaveURL(/\/login\?redirect=\/$/);
 	await expect(page.getByRole("button", { name: /login/i })).toBeVisible();
 	await expect(page.locator("#bootloader-mount")).not.toBeEmpty();
 
@@ -91,7 +91,7 @@ test("mounts at the host root with runtime configuration", async ({ page }) => {
 
 test("preserves a deep-link redirect target", async ({ page }) => {
 	await mount(page, "/libraries");
-	await expect(page).toHaveURL(/\/login\?redirect=%2Flibraries$/);
+	await expect(page).toHaveURL(/\/login\?redirect=\/libraries$/);
 });
 
 test("the same artifact retains its standalone entrypoint", async ({
@@ -105,7 +105,7 @@ test("the same artifact retains its standalone entrypoint", async ({
 
 	await page.goto("/dcb-admin/");
 
-	await expect(page).toHaveURL(/\/dcb-admin\/login\?redirect=%2F$/);
+	await expect(page).toHaveURL(/\/dcb-admin\/login\?redirect=\/$/);
 	await expect(page.getByRole("button", { name: /login/i })).toBeVisible();
 	await page.waitForLoadState("networkidle");
 });

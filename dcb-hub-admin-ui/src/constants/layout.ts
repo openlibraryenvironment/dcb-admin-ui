@@ -11,10 +11,9 @@ export const HEADER_HEIGHT_PX = 70;
 export const HEADER_HEIGHT = `${HEADER_HEIGHT_PX}px`;
 
 /**
- * The minimum height of the row holding the sidebar and the page, so the footer never
- * paints inside the first viewport. On the row, not the shell: on the shell, flex gives
- * the row `viewport - footer` and the footer jumps when content arrives. `vh`, not `dvh`,
- * which changes as a mobile URL bar hides. docs/performance-budget.md, "Layout shift on
- * every route".
+ * The viewport below the fixed Header. A route reserves it only where its loaded page is
+ * taller than the viewport, or can land either side of it, so the footer starts below the
+ * fold and does not move when the data lands. docs/performance-budget.md, "Layout shift
+ * on every route".
  */
-export const PAGE_ROW_MIN_HEIGHT = "100vh";
+export const VIEWPORT_BELOW_HEADER = `calc(100vh - ${HEADER_HEIGHT})`;

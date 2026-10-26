@@ -1,5 +1,5 @@
 import Link from "@components/Link/Link";
-import { Stack, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 export default function LinkedFooter() {
@@ -104,24 +104,23 @@ export default function LinkedFooter() {
 	];
 
 	return (
-		<Stack
-			direction={{ xs: "column", sm: "row", md: "row", lg: "row" }}
+		<Box
 			sx={{
+				display: "grid",
+				// Two columns on a phone: one section per row made the footer 562px of an
+				// 844px viewport.
+				gridTemplateColumns: {
+					xs: "repeat(2, minmax(0, 1fr))",
+					sm: "repeat(3, minmax(0, 250px))",
+				},
 				justifyContent: "center",
-				alignItems: "stretch",
+				columnGap: { xs: 2, sm: 5 },
+				rowGap: 2,
+				px: { xs: 2, sm: 0 },
 			}}
 		>
 			{sections.map((section) => (
-				<div
-					key={section.title}
-					style={{
-						padding: 10,
-						width: "250px",
-						height: "100%",
-						//shorthand for mt, mr, mb, ml
-						margin: "0px 20px 0px 20px",
-					}}
-				>
+				<Box key={section.title} sx={{ p: { xs: 0, sm: 1.25 } }}>
 					<Typography
 						variant="linkedFooterHeader"
 						sx={{
@@ -133,8 +132,8 @@ export default function LinkedFooter() {
 					</Typography>
 					<br />
 					{generateLinks(section.links)}
-				</div>
+				</Box>
 			))}
-		</Stack>
+		</Box>
 	);
 }

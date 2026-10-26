@@ -44,6 +44,7 @@ const NOT_FIGURES = new Set([
 	"CollectionPanel",
 	"KpiTile",
 	"LazyPanel",
+	"PanelRow",
 	"MetricInfo",
 	"PanelState",
 	"InsightsDashboard",

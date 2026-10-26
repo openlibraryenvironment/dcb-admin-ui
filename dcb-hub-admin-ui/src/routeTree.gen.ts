@@ -9,118 +9,100 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as NetworkErrorRouteImport } from './routes/networkError'
-import { Route as MaintenanceRouteImport } from './routes/maintenance'
-import { Route as LogoutRouteImport } from './routes/logout'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as _authenticatedRouteImport } from './routes/__authenticated'
-import { Route as R500RouteImport } from './routes/500'
 import { Route as R404RouteImport } from './routes/404'
+import { Route as R500RouteImport } from './routes/500'
+import { Route as _authenticatedRouteImport } from './routes/__authenticated'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LogoutRouteImport } from './routes/logout'
+import { Route as MaintenanceRouteImport } from './routes/maintenance'
+import { Route as NetworkErrorRouteImport } from './routes/networkError'
 import { Route as _authenticatedIndexRouteImport } from './routes/__authenticated/index'
-import { Route as _authenticatedUnauthorisedRouteImport } from './routes/__authenticated/unauthorised'
 import { Route as _authenticatedProfileRouteImport } from './routes/__authenticated/profile'
-import { Route as _authenticatedSetupIndexRouteImport } from './routes/__authenticated/setup/index'
-import { Route as _authenticatedSettingsIndexRouteImport } from './routes/__authenticated/settings/index'
-import { Route as _authenticatedServiceInfoIndexRouteImport } from './routes/__authenticated/serviceInfo/index'
-import { Route as _authenticatedSearchIndexRouteImport } from './routes/__authenticated/search/index'
-import { Route as _authenticatedMappingsIndexRouteImport } from './routes/__authenticated/mappings/index'
-import { Route as _authenticatedLocationsIndexRouteImport } from './routes/__authenticated/locations/index'
-import { Route as _authenticatedLibrariesIndexRouteImport } from './routes/__authenticated/libraries/index'
-import { Route as _authenticatedHostlmssIndexRouteImport } from './routes/__authenticated/hostlmss/index'
-import { Route as _authenticatedGroupsIndexRouteImport } from './routes/__authenticated/groups/index'
-import { Route as _authenticatedConsortiumIndexRouteImport } from './routes/__authenticated/consortium/index'
-import { Route as _authenticatedBibsIndexRouteImport } from './routes/__authenticated/bibs/index'
+import { Route as _authenticatedUnauthorisedRouteImport } from './routes/__authenticated/unauthorised'
 import { Route as _authenticatedAgenciesIndexRouteImport } from './routes/__authenticated/agencies/index'
-import { Route as _authenticatedSetupDoneRouteImport } from './routes/__authenticated/setup/done'
-import { Route as _authenticatedSetupStepRouteImport } from './routes/__authenticated/setup/$step'
-import { Route as _authenticatedSearchClusterIdRouteImport } from './routes/__authenticated/search/$clusterId'
-import { Route as _authenticatedPatronRequestsOutOfSequenceRouteImport } from './routes/__authenticated/patronRequests/outOfSequence'
-import { Route as _authenticatedPatronRequestsExceptionRouteImport } from './routes/__authenticated/patronRequests/exception'
-import { Route as _authenticatedPatronRequestsCompletedRouteImport } from './routes/__authenticated/patronRequests/completed'
-import { Route as _authenticatedPatronRequestsAllRouteImport } from './routes/__authenticated/patronRequests/all'
-import { Route as _authenticatedPatronRequestsActiveRouteImport } from './routes/__authenticated/patronRequests/active'
-import { Route as _authenticatedLocationsLocationIdRouteImport } from './routes/__authenticated/locations/$locationId'
-import { Route as _authenticatedHostlmssNewRouteImport } from './routes/__authenticated/hostlmss/new'
-import { Route as _authenticatedHostlmssHostlmsIdRouteImport } from './routes/__authenticated/hostlmss/$hostlmsId'
-import { Route as _authenticatedConsortiumRequestTagsRouteImport } from './routes/__authenticated/consortium/requestTags'
-import { Route as _authenticatedConsortiumOnboardingRouteImport } from './routes/__authenticated/consortium/onboarding'
-import { Route as _authenticatedConsortiumInsightsRouteImport } from './routes/__authenticated/consortium/insights'
-import { Route as _authenticatedConsortiumFunctionalSettingsRouteImport } from './routes/__authenticated/consortium/functionalSettings'
-import { Route as _authenticatedConsortiumEnvironmentRouteImport } from './routes/__authenticated/consortium/environment'
-import { Route as _authenticatedConsortiumContactsRouteImport } from './routes/__authenticated/consortium/contacts'
-import { Route as _authenticatedConsortiumBrandingRouteImport } from './routes/__authenticated/consortium/branding'
-import { Route as _authenticatedConsortiumAnnouncementsRouteImport } from './routes/__authenticated/consortium/announcements'
-import { Route as _authenticatedBibsBibIdRouteImport } from './routes/__authenticated/bibs/$bibId'
 import { Route as _authenticatedAgenciesAgencyIdRouteImport } from './routes/__authenticated/agencies/$agencyId'
-import { Route as _authenticatedServiceInfoServiceStatusIndexRouteImport } from './routes/__authenticated/serviceInfo/serviceStatus/index'
-import { Route as _authenticatedServiceInfoRequestErrorsIndexRouteImport } from './routes/__authenticated/serviceInfo/requestErrors/index'
-import { Route as _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport } from './routes/__authenticated/serviceInfo/dcbNcipOnboarding/index'
-import { Route as _authenticatedServiceInfoDataChangeLogIndexRouteImport } from './routes/__authenticated/serviceInfo/dataChangeLog/index'
-import { Route as _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport } from './routes/__authenticated/serviceInfo/catalogMetricsByHostLms/index'
-import { Route as _authenticatedServiceInfoAuditExplorerIndexRouteImport } from './routes/__authenticated/serviceInfo/auditExplorer/index'
-import { Route as _authenticatedServiceInfoAlarmsIndexRouteImport } from './routes/__authenticated/serviceInfo/alarms/index'
-import { Route as _authenticatedSearchClusterIdIndexRouteImport } from './routes/__authenticated/search/$clusterId/index'
-import { Route as _authenticatedPatronRequestsIdIndexRouteImport } from './routes/__authenticated/patronRequests/$id/index'
-import { Route as _authenticatedMappingsAllReferenceValueIndexRouteImport } from './routes/__authenticated/mappings/allReferenceValue/index'
-import { Route as _authenticatedMappingsAllNumericRangeIndexRouteImport } from './routes/__authenticated/mappings/allNumericRange/index'
-import { Route as _authenticatedLibrariesLibraryIdIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/index'
+import { Route as _authenticatedBibsIndexRouteImport } from './routes/__authenticated/bibs/index'
+import { Route as _authenticatedBibsBibIdRouteImport } from './routes/__authenticated/bibs/$bibId'
+import { Route as _authenticatedConsortiumIndexRouteImport } from './routes/__authenticated/consortium/index'
+import { Route as _authenticatedConsortiumAnnouncementsRouteImport } from './routes/__authenticated/consortium/announcements'
+import { Route as _authenticatedConsortiumBrandingRouteImport } from './routes/__authenticated/consortium/branding'
+import { Route as _authenticatedConsortiumContactsRouteImport } from './routes/__authenticated/consortium/contacts'
+import { Route as _authenticatedConsortiumEnvironmentRouteImport } from './routes/__authenticated/consortium/environment'
+import { Route as _authenticatedConsortiumFunctionalSettingsRouteImport } from './routes/__authenticated/consortium/functionalSettings'
+import { Route as _authenticatedConsortiumInsightsRouteImport } from './routes/__authenticated/consortium/insights'
+import { Route as _authenticatedConsortiumOnboardingRouteImport } from './routes/__authenticated/consortium/onboarding'
+import { Route as _authenticatedConsortiumRequestTagsRouteImport } from './routes/__authenticated/consortium/requestTags'
+import { Route as _authenticatedGroupsIndexRouteImport } from './routes/__authenticated/groups/index'
+import { Route as _authenticatedHostlmssIndexRouteImport } from './routes/__authenticated/hostlmss/index'
+import { Route as _authenticatedHostlmssHostlmsIdRouteImport } from './routes/__authenticated/hostlmss/$hostlmsId'
+import { Route as _authenticatedHostlmssNewRouteImport } from './routes/__authenticated/hostlmss/new'
+import { Route as _authenticatedLibrariesIndexRouteImport } from './routes/__authenticated/libraries/index'
+import { Route as _authenticatedLocationsIndexRouteImport } from './routes/__authenticated/locations/index'
+import { Route as _authenticatedLocationsLocationIdRouteImport } from './routes/__authenticated/locations/$locationId'
+import { Route as _authenticatedMappingsIndexRouteImport } from './routes/__authenticated/mappings/index'
+import { Route as _authenticatedPatronRequestsActiveRouteImport } from './routes/__authenticated/patronRequests/active'
+import { Route as _authenticatedPatronRequestsAllRouteImport } from './routes/__authenticated/patronRequests/all'
+import { Route as _authenticatedPatronRequestsCompletedRouteImport } from './routes/__authenticated/patronRequests/completed'
+import { Route as _authenticatedPatronRequestsExceptionRouteImport } from './routes/__authenticated/patronRequests/exception'
+import { Route as _authenticatedPatronRequestsOutOfSequenceRouteImport } from './routes/__authenticated/patronRequests/outOfSequence'
+import { Route as _authenticatedSearchIndexRouteImport } from './routes/__authenticated/search/index'
+import { Route as _authenticatedSearchClusterIdRouteImport } from './routes/__authenticated/search/$clusterId'
+import { Route as _authenticatedServiceInfoIndexRouteImport } from './routes/__authenticated/serviceInfo/index'
+import { Route as _authenticatedSettingsIndexRouteImport } from './routes/__authenticated/settings/index'
+import { Route as _authenticatedSetupIndexRouteImport } from './routes/__authenticated/setup/index'
+import { Route as _authenticatedSetupStepRouteImport } from './routes/__authenticated/setup/$step'
+import { Route as _authenticatedSetupDoneRouteImport } from './routes/__authenticated/setup/done'
 import { Route as _authenticatedGroupsGroupIdIndexRouteImport } from './routes/__authenticated/groups/$groupId/index'
-import { Route as _authenticatedServiceInfoRequestErrorsRequestsRouteImport } from './routes/__authenticated/serviceInfo/requestErrors/requests'
-import { Route as _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport } from './routes/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId'
-import { Route as _authenticatedSearchClusterIdRequestingHistoryRouteImport } from './routes/__authenticated/search/$clusterId/requestingHistory'
-import { Route as _authenticatedSearchClusterIdItemsRouteImport } from './routes/__authenticated/search/$clusterId/items'
-import { Route as _authenticatedSearchClusterIdIdentifiersRouteImport } from './routes/__authenticated/search/$clusterId/identifiers'
-import { Route as _authenticatedSearchClusterIdClusterExplanationRouteImport } from './routes/__authenticated/search/$clusterId/clusterExplanation'
-import { Route as _authenticatedSearchClusterIdClusterRouteImport } from './routes/__authenticated/search/$clusterId/cluster'
-import { Route as _authenticatedLibrariesLibraryIdSettingsRouteImport } from './routes/__authenticated/libraries/$libraryId/settings'
-import { Route as _authenticatedLibrariesLibraryIdServiceRouteImport } from './routes/__authenticated/libraries/$libraryId/service'
-import { Route as _authenticatedLibrariesLibraryIdInsightsRouteImport } from './routes/__authenticated/libraries/$libraryId/insights'
-import { Route as _authenticatedLibrariesLibraryIdContactsRouteImport } from './routes/__authenticated/libraries/$libraryId/contacts'
-import { Route as _authenticatedLibrariesLibraryIdBrandingRouteImport } from './routes/__authenticated/libraries/$libraryId/branding'
-import { Route as _authenticatedLibrariesLibraryIdAccountsRouteImport } from './routes/__authenticated/libraries/$libraryId/accounts'
-import { Route as _authenticatedGroupsGroupIdSettingsRouteImport } from './routes/__authenticated/groups/$groupId/settings'
 import { Route as _authenticatedGroupsGroupIdInsightsRouteImport } from './routes/__authenticated/groups/$groupId/insights'
-import { Route as _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport } from './routes/__authenticated/patronRequests/audits/$auditId/index'
-import { Route as _authenticatedLibrariesLibraryIdLocationsIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/locations/index'
-import { Route as _authenticatedLibrariesLibraryIdBibsIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/bibs/index'
-import { Route as _authenticatedGroupsGroupIdSupplierRequestsIndexRouteImport } from './routes/__authenticated/groups/$groupId/supplierRequests/index'
+import { Route as _authenticatedGroupsGroupIdSettingsRouteImport } from './routes/__authenticated/groups/$groupId/settings'
+import { Route as _authenticatedLibrariesLibraryIdIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/index'
+import { Route as _authenticatedLibrariesLibraryIdAccountsRouteImport } from './routes/__authenticated/libraries/$libraryId/accounts'
+import { Route as _authenticatedLibrariesLibraryIdBrandingRouteImport } from './routes/__authenticated/libraries/$libraryId/branding'
+import { Route as _authenticatedLibrariesLibraryIdContactsRouteImport } from './routes/__authenticated/libraries/$libraryId/contacts'
+import { Route as _authenticatedLibrariesLibraryIdInsightsRouteImport } from './routes/__authenticated/libraries/$libraryId/insights'
+import { Route as _authenticatedLibrariesLibraryIdServiceRouteImport } from './routes/__authenticated/libraries/$libraryId/service'
+import { Route as _authenticatedLibrariesLibraryIdSettingsRouteImport } from './routes/__authenticated/libraries/$libraryId/settings'
+import { Route as _authenticatedMappingsAllNumericRangeIndexRouteImport } from './routes/__authenticated/mappings/allNumericRange/index'
+import { Route as _authenticatedMappingsAllReferenceValueIndexRouteImport } from './routes/__authenticated/mappings/allReferenceValue/index'
+import { Route as _authenticatedPatronRequestsIdIndexRouteImport } from './routes/__authenticated/patronRequests/$id/index'
+import { Route as _authenticatedSearchClusterIdIndexRouteImport } from './routes/__authenticated/search/$clusterId/index'
+import { Route as _authenticatedSearchClusterIdClusterRouteImport } from './routes/__authenticated/search/$clusterId/cluster'
+import { Route as _authenticatedSearchClusterIdClusterExplanationRouteImport } from './routes/__authenticated/search/$clusterId/clusterExplanation'
+import { Route as _authenticatedSearchClusterIdIdentifiersRouteImport } from './routes/__authenticated/search/$clusterId/identifiers'
+import { Route as _authenticatedSearchClusterIdItemsRouteImport } from './routes/__authenticated/search/$clusterId/items'
+import { Route as _authenticatedSearchClusterIdRequestingHistoryRouteImport } from './routes/__authenticated/search/$clusterId/requestingHistory'
+import { Route as _authenticatedServiceInfoAlarmsIndexRouteImport } from './routes/__authenticated/serviceInfo/alarms/index'
+import { Route as _authenticatedServiceInfoAuditExplorerIndexRouteImport } from './routes/__authenticated/serviceInfo/auditExplorer/index'
+import { Route as _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport } from './routes/__authenticated/serviceInfo/catalogMetricsByHostLms/index'
+import { Route as _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRouteImport } from './routes/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
+import { Route as _authenticatedServiceInfoDataChangeLogIndexRouteImport } from './routes/__authenticated/serviceInfo/dataChangeLog/index'
+import { Route as _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport } from './routes/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId'
+import { Route as _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport } from './routes/__authenticated/serviceInfo/dcbNcipOnboarding/index'
+import { Route as _authenticatedServiceInfoRequestErrorsIndexRouteImport } from './routes/__authenticated/serviceInfo/requestErrors/index'
+import { Route as _authenticatedServiceInfoRequestErrorsRequestsRouteImport } from './routes/__authenticated/serviceInfo/requestErrors/requests'
+import { Route as _authenticatedServiceInfoServiceStatusIndexRouteImport } from './routes/__authenticated/serviceInfo/serviceStatus/index'
 import { Route as _authenticatedGroupsGroupIdPatronRequestsIndexRouteImport } from './routes/__authenticated/groups/$groupId/patronRequests/index'
-import { Route as _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/supplierRequests/all'
-import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/patronType'
-import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/location'
-import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/itemType'
-import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/all'
-import { Route as _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/outOfSequence'
-import { Route as _authenticatedLibrariesLibraryIdPatronRequestsExceptionRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/exception'
-import { Route as _authenticatedLibrariesLibraryIdPatronRequestsCompletedRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/completed'
-import { Route as _authenticatedLibrariesLibraryIdPatronRequestsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/all'
-import { Route as _authenticatedLibrariesLibraryIdPatronRequestsActiveRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/active'
-import { Route as _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/numericRangeMappings/patronType'
-import { Route as _authenticatedLibrariesLibraryIdNumericRangeMappingsItemTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/numericRangeMappings/itemType'
+import { Route as _authenticatedGroupsGroupIdSupplierRequestsIndexRouteImport } from './routes/__authenticated/groups/$groupId/supplierRequests/index'
+import { Route as _authenticatedLibrariesLibraryIdBibsIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/bibs/index'
+import { Route as _authenticatedLibrariesLibraryIdLocationsIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/locations/index'
 import { Route as _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/numericRangeMappings/all'
+import { Route as _authenticatedLibrariesLibraryIdNumericRangeMappingsItemTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/numericRangeMappings/itemType'
+import { Route as _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/numericRangeMappings/patronType'
+import { Route as _authenticatedLibrariesLibraryIdPatronRequestsActiveRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/active'
+import { Route as _authenticatedLibrariesLibraryIdPatronRequestsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/all'
+import { Route as _authenticatedLibrariesLibraryIdPatronRequestsCompletedRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/completed'
+import { Route as _authenticatedLibrariesLibraryIdPatronRequestsExceptionRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/exception'
+import { Route as _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRouteImport } from './routes/__authenticated/libraries/$libraryId/patronRequests/outOfSequence'
+import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/all'
+import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/itemType'
+import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/location'
+import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/patronType'
+import { Route as _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/supplierRequests/all'
+import { Route as _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport } from './routes/__authenticated/patronRequests/audits/$auditId/index'
 
-const NetworkErrorRoute = NetworkErrorRouteImport.update({
-  id: '/networkError',
-  path: '/networkError',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MaintenanceRoute = MaintenanceRouteImport.update({
-  id: '/maintenance',
-  path: '/maintenance',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LogoutRoute = LogoutRouteImport.update({
-  id: '/logout',
-  path: '/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const _authenticatedRoute = _authenticatedRouteImport.update({
-  id: '/__authenticated',
+const R404Route = R404RouteImport.update({
+  id: '/404',
+  path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
 const R500Route = R500RouteImport.update({
@@ -128,14 +110,38 @@ const R500Route = R500RouteImport.update({
   path: '/500',
   getParentRoute: () => rootRouteImport,
 } as any)
-const R404Route = R404RouteImport.update({
-  id: '/404',
-  path: '/404',
+const _authenticatedRoute = _authenticatedRouteImport.update({
+  id: '/__authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogoutRoute = LogoutRouteImport.update({
+  id: '/logout',
+  path: '/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaintenanceRoute = MaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NetworkErrorRoute = NetworkErrorRouteImport.update({
+  id: '/networkError',
+  path: '/networkError',
   getParentRoute: () => rootRouteImport,
 } as any)
 const _authenticatedIndexRoute = _authenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => _authenticatedRoute,
+} as any)
+const _authenticatedProfileRoute = _authenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => _authenticatedRoute,
 } as any)
 const _authenticatedUnauthorisedRoute =
@@ -144,69 +150,16 @@ const _authenticatedUnauthorisedRoute =
     path: '/unauthorised',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedProfileRoute = _authenticatedProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => _authenticatedRoute,
-} as any)
-const _authenticatedSetupIndexRoute =
-  _authenticatedSetupIndexRouteImport.update({
-    id: '/setup/',
-    path: '/setup/',
+const _authenticatedAgenciesIndexRoute =
+  _authenticatedAgenciesIndexRouteImport.update({
+    id: '/agencies/',
+    path: '/agencies/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedSettingsIndexRoute =
-  _authenticatedSettingsIndexRouteImport.update({
-    id: '/settings/',
-    path: '/settings/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoIndexRoute =
-  _authenticatedServiceInfoIndexRouteImport.update({
-    id: '/serviceInfo/',
-    path: '/serviceInfo/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedSearchIndexRoute =
-  _authenticatedSearchIndexRouteImport.update({
-    id: '/search/',
-    path: '/search/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedMappingsIndexRoute =
-  _authenticatedMappingsIndexRouteImport.update({
-    id: '/mappings/',
-    path: '/mappings/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLocationsIndexRoute =
-  _authenticatedLocationsIndexRouteImport.update({
-    id: '/locations/',
-    path: '/locations/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesIndexRoute =
-  _authenticatedLibrariesIndexRouteImport.update({
-    id: '/libraries/',
-    path: '/libraries/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedHostlmssIndexRoute =
-  _authenticatedHostlmssIndexRouteImport.update({
-    id: '/hostlmss/',
-    path: '/hostlmss/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedGroupsIndexRoute =
-  _authenticatedGroupsIndexRouteImport.update({
-    id: '/groups/',
-    path: '/groups/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumIndexRoute =
-  _authenticatedConsortiumIndexRouteImport.update({
-    id: '/consortium/',
-    path: '/consortium/',
+const _authenticatedAgenciesAgencyIdRoute =
+  _authenticatedAgenciesAgencyIdRouteImport.update({
+    id: '/agencies/$agencyId',
+    path: '/agencies/$agencyId',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedBibsIndexRoute = _authenticatedBibsIndexRouteImport.update({
@@ -214,116 +167,15 @@ const _authenticatedBibsIndexRoute = _authenticatedBibsIndexRouteImport.update({
   path: '/bibs/',
   getParentRoute: () => _authenticatedRoute,
 } as any)
-const _authenticatedAgenciesIndexRoute =
-  _authenticatedAgenciesIndexRouteImport.update({
-    id: '/agencies/',
-    path: '/agencies/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedSetupDoneRoute = _authenticatedSetupDoneRouteImport.update({
-  id: '/setup/done',
-  path: '/setup/done',
+const _authenticatedBibsBibIdRoute = _authenticatedBibsBibIdRouteImport.update({
+  id: '/bibs/$bibId',
+  path: '/bibs/$bibId',
   getParentRoute: () => _authenticatedRoute,
 } as any)
-const _authenticatedSetupStepRoute = _authenticatedSetupStepRouteImport.update({
-  id: '/setup/$step',
-  path: '/setup/$step',
-  getParentRoute: () => _authenticatedRoute,
-} as any)
-const _authenticatedSearchClusterIdRoute =
-  _authenticatedSearchClusterIdRouteImport.update({
-    id: '/search/$clusterId',
-    path: '/search/$clusterId',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedPatronRequestsOutOfSequenceRoute =
-  _authenticatedPatronRequestsOutOfSequenceRouteImport.update({
-    id: '/patronRequests/outOfSequence',
-    path: '/patronRequests/outOfSequence',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedPatronRequestsExceptionRoute =
-  _authenticatedPatronRequestsExceptionRouteImport.update({
-    id: '/patronRequests/exception',
-    path: '/patronRequests/exception',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedPatronRequestsCompletedRoute =
-  _authenticatedPatronRequestsCompletedRouteImport.update({
-    id: '/patronRequests/completed',
-    path: '/patronRequests/completed',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedPatronRequestsAllRoute =
-  _authenticatedPatronRequestsAllRouteImport.update({
-    id: '/patronRequests/all',
-    path: '/patronRequests/all',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedPatronRequestsActiveRoute =
-  _authenticatedPatronRequestsActiveRouteImport.update({
-    id: '/patronRequests/active',
-    path: '/patronRequests/active',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLocationsLocationIdRoute =
-  _authenticatedLocationsLocationIdRouteImport.update({
-    id: '/locations/$locationId',
-    path: '/locations/$locationId',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedHostlmssNewRoute =
-  _authenticatedHostlmssNewRouteImport.update({
-    id: '/hostlmss/new',
-    path: '/hostlmss/new',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedHostlmssHostlmsIdRoute =
-  _authenticatedHostlmssHostlmsIdRouteImport.update({
-    id: '/hostlmss/$hostlmsId',
-    path: '/hostlmss/$hostlmsId',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumRequestTagsRoute =
-  _authenticatedConsortiumRequestTagsRouteImport.update({
-    id: '/consortium/requestTags',
-    path: '/consortium/requestTags',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumOnboardingRoute =
-  _authenticatedConsortiumOnboardingRouteImport.update({
-    id: '/consortium/onboarding',
-    path: '/consortium/onboarding',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumInsightsRoute =
-  _authenticatedConsortiumInsightsRouteImport.update({
-    id: '/consortium/insights',
-    path: '/consortium/insights',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumFunctionalSettingsRoute =
-  _authenticatedConsortiumFunctionalSettingsRouteImport.update({
-    id: '/consortium/functionalSettings',
-    path: '/consortium/functionalSettings',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumEnvironmentRoute =
-  _authenticatedConsortiumEnvironmentRouteImport.update({
-    id: '/consortium/environment',
-    path: '/consortium/environment',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumContactsRoute =
-  _authenticatedConsortiumContactsRouteImport.update({
-    id: '/consortium/contacts',
-    path: '/consortium/contacts',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedConsortiumBrandingRoute =
-  _authenticatedConsortiumBrandingRouteImport.update({
-    id: '/consortium/branding',
-    path: '/consortium/branding',
+const _authenticatedConsortiumIndexRoute =
+  _authenticatedConsortiumIndexRouteImport.update({
+    id: '/consortium/',
+    path: '/consortium/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedConsortiumAnnouncementsRoute =
@@ -332,177 +184,170 @@ const _authenticatedConsortiumAnnouncementsRoute =
     path: '/consortium/announcements',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedBibsBibIdRoute = _authenticatedBibsBibIdRouteImport.update({
-  id: '/bibs/$bibId',
-  path: '/bibs/$bibId',
+const _authenticatedConsortiumBrandingRoute =
+  _authenticatedConsortiumBrandingRouteImport.update({
+    id: '/consortium/branding',
+    path: '/consortium/branding',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumContactsRoute =
+  _authenticatedConsortiumContactsRouteImport.update({
+    id: '/consortium/contacts',
+    path: '/consortium/contacts',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumEnvironmentRoute =
+  _authenticatedConsortiumEnvironmentRouteImport.update({
+    id: '/consortium/environment',
+    path: '/consortium/environment',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumFunctionalSettingsRoute =
+  _authenticatedConsortiumFunctionalSettingsRouteImport.update({
+    id: '/consortium/functionalSettings',
+    path: '/consortium/functionalSettings',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumInsightsRoute =
+  _authenticatedConsortiumInsightsRouteImport.update({
+    id: '/consortium/insights',
+    path: '/consortium/insights',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumOnboardingRoute =
+  _authenticatedConsortiumOnboardingRouteImport.update({
+    id: '/consortium/onboarding',
+    path: '/consortium/onboarding',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedConsortiumRequestTagsRoute =
+  _authenticatedConsortiumRequestTagsRouteImport.update({
+    id: '/consortium/requestTags',
+    path: '/consortium/requestTags',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedGroupsIndexRoute =
+  _authenticatedGroupsIndexRouteImport.update({
+    id: '/groups/',
+    path: '/groups/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedHostlmssIndexRoute =
+  _authenticatedHostlmssIndexRouteImport.update({
+    id: '/hostlmss/',
+    path: '/hostlmss/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedHostlmssHostlmsIdRoute =
+  _authenticatedHostlmssHostlmsIdRouteImport.update({
+    id: '/hostlmss/$hostlmsId',
+    path: '/hostlmss/$hostlmsId',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedHostlmssNewRoute =
+  _authenticatedHostlmssNewRouteImport.update({
+    id: '/hostlmss/new',
+    path: '/hostlmss/new',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesIndexRoute =
+  _authenticatedLibrariesIndexRouteImport.update({
+    id: '/libraries/',
+    path: '/libraries/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLocationsIndexRoute =
+  _authenticatedLocationsIndexRouteImport.update({
+    id: '/locations/',
+    path: '/locations/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLocationsLocationIdRoute =
+  _authenticatedLocationsLocationIdRouteImport.update({
+    id: '/locations/$locationId',
+    path: '/locations/$locationId',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedMappingsIndexRoute =
+  _authenticatedMappingsIndexRouteImport.update({
+    id: '/mappings/',
+    path: '/mappings/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedPatronRequestsActiveRoute =
+  _authenticatedPatronRequestsActiveRouteImport.update({
+    id: '/patronRequests/active',
+    path: '/patronRequests/active',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedPatronRequestsAllRoute =
+  _authenticatedPatronRequestsAllRouteImport.update({
+    id: '/patronRequests/all',
+    path: '/patronRequests/all',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedPatronRequestsCompletedRoute =
+  _authenticatedPatronRequestsCompletedRouteImport.update({
+    id: '/patronRequests/completed',
+    path: '/patronRequests/completed',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedPatronRequestsExceptionRoute =
+  _authenticatedPatronRequestsExceptionRouteImport.update({
+    id: '/patronRequests/exception',
+    path: '/patronRequests/exception',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedPatronRequestsOutOfSequenceRoute =
+  _authenticatedPatronRequestsOutOfSequenceRouteImport.update({
+    id: '/patronRequests/outOfSequence',
+    path: '/patronRequests/outOfSequence',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedSearchIndexRoute =
+  _authenticatedSearchIndexRouteImport.update({
+    id: '/search/',
+    path: '/search/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedSearchClusterIdRoute =
+  _authenticatedSearchClusterIdRouteImport.update({
+    id: '/search/$clusterId',
+    path: '/search/$clusterId',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoIndexRoute =
+  _authenticatedServiceInfoIndexRouteImport.update({
+    id: '/serviceInfo/',
+    path: '/serviceInfo/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedSettingsIndexRoute =
+  _authenticatedSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedSetupIndexRoute =
+  _authenticatedSetupIndexRouteImport.update({
+    id: '/setup/',
+    path: '/setup/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedSetupStepRoute = _authenticatedSetupStepRouteImport.update({
+  id: '/setup/$step',
+  path: '/setup/$step',
   getParentRoute: () => _authenticatedRoute,
 } as any)
-const _authenticatedAgenciesAgencyIdRoute =
-  _authenticatedAgenciesAgencyIdRouteImport.update({
-    id: '/agencies/$agencyId',
-    path: '/agencies/$agencyId',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoServiceStatusIndexRoute =
-  _authenticatedServiceInfoServiceStatusIndexRouteImport.update({
-    id: '/serviceInfo/serviceStatus/',
-    path: '/serviceInfo/serviceStatus/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoRequestErrorsIndexRoute =
-  _authenticatedServiceInfoRequestErrorsIndexRouteImport.update({
-    id: '/serviceInfo/requestErrors/',
-    path: '/serviceInfo/requestErrors/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoDcbNcipOnboardingIndexRoute =
-  _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport.update({
-    id: '/serviceInfo/dcbNcipOnboarding/',
-    path: '/serviceInfo/dcbNcipOnboarding/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoDataChangeLogIndexRoute =
-  _authenticatedServiceInfoDataChangeLogIndexRouteImport.update({
-    id: '/serviceInfo/dataChangeLog/',
-    path: '/serviceInfo/dataChangeLog/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute =
-  _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport.update({
-    id: '/serviceInfo/catalogMetricsByHostLms/',
-    path: '/serviceInfo/catalogMetricsByHostLms/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoAuditExplorerIndexRoute =
-  _authenticatedServiceInfoAuditExplorerIndexRouteImport.update({
-    id: '/serviceInfo/auditExplorer/',
-    path: '/serviceInfo/auditExplorer/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoAlarmsIndexRoute =
-  _authenticatedServiceInfoAlarmsIndexRouteImport.update({
-    id: '/serviceInfo/alarms/',
-    path: '/serviceInfo/alarms/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedSearchClusterIdIndexRoute =
-  _authenticatedSearchClusterIdIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => _authenticatedSearchClusterIdRoute,
-  } as any)
-const _authenticatedPatronRequestsIdIndexRoute =
-  _authenticatedPatronRequestsIdIndexRouteImport.update({
-    id: '/patronRequests/$id/',
-    path: '/patronRequests/$id/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedMappingsAllReferenceValueIndexRoute =
-  _authenticatedMappingsAllReferenceValueIndexRouteImport.update({
-    id: '/mappings/allReferenceValue/',
-    path: '/mappings/allReferenceValue/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedMappingsAllNumericRangeIndexRoute =
-  _authenticatedMappingsAllNumericRangeIndexRouteImport.update({
-    id: '/mappings/allNumericRange/',
-    path: '/mappings/allNumericRange/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdIndexRoute =
-  _authenticatedLibrariesLibraryIdIndexRouteImport.update({
-    id: '/libraries/$libraryId/',
-    path: '/libraries/$libraryId/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
+const _authenticatedSetupDoneRoute = _authenticatedSetupDoneRouteImport.update({
+  id: '/setup/done',
+  path: '/setup/done',
+  getParentRoute: () => _authenticatedRoute,
+} as any)
 const _authenticatedGroupsGroupIdIndexRoute =
   _authenticatedGroupsGroupIdIndexRouteImport.update({
     id: '/groups/$groupId/',
     path: '/groups/$groupId/',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoRequestErrorsRequestsRoute =
-  _authenticatedServiceInfoRequestErrorsRequestsRouteImport.update({
-    id: '/serviceInfo/requestErrors/requests',
-    path: '/serviceInfo/requestErrors/requests',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute =
-  _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport.update({
-    id: '/serviceInfo/dataChangeLog/$dataChangeLogId',
-    path: '/serviceInfo/dataChangeLog/$dataChangeLogId',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedSearchClusterIdRequestingHistoryRoute =
-  _authenticatedSearchClusterIdRequestingHistoryRouteImport.update({
-    id: '/requestingHistory',
-    path: '/requestingHistory',
-    getParentRoute: () => _authenticatedSearchClusterIdRoute,
-  } as any)
-const _authenticatedSearchClusterIdItemsRoute =
-  _authenticatedSearchClusterIdItemsRouteImport.update({
-    id: '/items',
-    path: '/items',
-    getParentRoute: () => _authenticatedSearchClusterIdRoute,
-  } as any)
-const _authenticatedSearchClusterIdIdentifiersRoute =
-  _authenticatedSearchClusterIdIdentifiersRouteImport.update({
-    id: '/identifiers',
-    path: '/identifiers',
-    getParentRoute: () => _authenticatedSearchClusterIdRoute,
-  } as any)
-const _authenticatedSearchClusterIdClusterExplanationRoute =
-  _authenticatedSearchClusterIdClusterExplanationRouteImport.update({
-    id: '/clusterExplanation',
-    path: '/clusterExplanation',
-    getParentRoute: () => _authenticatedSearchClusterIdRoute,
-  } as any)
-const _authenticatedSearchClusterIdClusterRoute =
-  _authenticatedSearchClusterIdClusterRouteImport.update({
-    id: '/cluster',
-    path: '/cluster',
-    getParentRoute: () => _authenticatedSearchClusterIdRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdSettingsRoute =
-  _authenticatedLibrariesLibraryIdSettingsRouteImport.update({
-    id: '/libraries/$libraryId/settings',
-    path: '/libraries/$libraryId/settings',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdServiceRoute =
-  _authenticatedLibrariesLibraryIdServiceRouteImport.update({
-    id: '/libraries/$libraryId/service',
-    path: '/libraries/$libraryId/service',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdInsightsRoute =
-  _authenticatedLibrariesLibraryIdInsightsRouteImport.update({
-    id: '/libraries/$libraryId/insights',
-    path: '/libraries/$libraryId/insights',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdContactsRoute =
-  _authenticatedLibrariesLibraryIdContactsRouteImport.update({
-    id: '/libraries/$libraryId/contacts',
-    path: '/libraries/$libraryId/contacts',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdBrandingRoute =
-  _authenticatedLibrariesLibraryIdBrandingRouteImport.update({
-    id: '/libraries/$libraryId/branding',
-    path: '/libraries/$libraryId/branding',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdAccountsRoute =
-  _authenticatedLibrariesLibraryIdAccountsRouteImport.update({
-    id: '/libraries/$libraryId/accounts',
-    path: '/libraries/$libraryId/accounts',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedGroupsGroupIdSettingsRoute =
-  _authenticatedGroupsGroupIdSettingsRouteImport.update({
-    id: '/groups/$groupId/settings',
-    path: '/groups/$groupId/settings',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedGroupsGroupIdInsightsRoute =
@@ -511,28 +356,166 @@ const _authenticatedGroupsGroupIdInsightsRoute =
     path: '/groups/$groupId/insights',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedPatronRequestsAuditsAuditIdIndexRoute =
-  _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport.update({
-    id: '/patronRequests/audits/$auditId/',
-    path: '/patronRequests/audits/$auditId/',
+const _authenticatedGroupsGroupIdSettingsRoute =
+  _authenticatedGroupsGroupIdSettingsRouteImport.update({
+    id: '/groups/$groupId/settings',
+    path: '/groups/$groupId/settings',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedLibrariesLibraryIdLocationsIndexRoute =
-  _authenticatedLibrariesLibraryIdLocationsIndexRouteImport.update({
-    id: '/libraries/$libraryId/locations/',
-    path: '/libraries/$libraryId/locations/',
+const _authenticatedLibrariesLibraryIdIndexRoute =
+  _authenticatedLibrariesLibraryIdIndexRouteImport.update({
+    id: '/libraries/$libraryId/',
+    path: '/libraries/$libraryId/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedLibrariesLibraryIdBibsIndexRoute =
-  _authenticatedLibrariesLibraryIdBibsIndexRouteImport.update({
-    id: '/libraries/$libraryId/bibs/',
-    path: '/libraries/$libraryId/bibs/',
+const _authenticatedLibrariesLibraryIdAccountsRoute =
+  _authenticatedLibrariesLibraryIdAccountsRouteImport.update({
+    id: '/libraries/$libraryId/accounts',
+    path: '/libraries/$libraryId/accounts',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedGroupsGroupIdSupplierRequestsIndexRoute =
-  _authenticatedGroupsGroupIdSupplierRequestsIndexRouteImport.update({
-    id: '/groups/$groupId/supplierRequests/',
-    path: '/groups/$groupId/supplierRequests/',
+const _authenticatedLibrariesLibraryIdBrandingRoute =
+  _authenticatedLibrariesLibraryIdBrandingRouteImport.update({
+    id: '/libraries/$libraryId/branding',
+    path: '/libraries/$libraryId/branding',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdContactsRoute =
+  _authenticatedLibrariesLibraryIdContactsRouteImport.update({
+    id: '/libraries/$libraryId/contacts',
+    path: '/libraries/$libraryId/contacts',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdInsightsRoute =
+  _authenticatedLibrariesLibraryIdInsightsRouteImport.update({
+    id: '/libraries/$libraryId/insights',
+    path: '/libraries/$libraryId/insights',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdServiceRoute =
+  _authenticatedLibrariesLibraryIdServiceRouteImport.update({
+    id: '/libraries/$libraryId/service',
+    path: '/libraries/$libraryId/service',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdSettingsRoute =
+  _authenticatedLibrariesLibraryIdSettingsRouteImport.update({
+    id: '/libraries/$libraryId/settings',
+    path: '/libraries/$libraryId/settings',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedMappingsAllNumericRangeIndexRoute =
+  _authenticatedMappingsAllNumericRangeIndexRouteImport.update({
+    id: '/mappings/allNumericRange/',
+    path: '/mappings/allNumericRange/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedMappingsAllReferenceValueIndexRoute =
+  _authenticatedMappingsAllReferenceValueIndexRouteImport.update({
+    id: '/mappings/allReferenceValue/',
+    path: '/mappings/allReferenceValue/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedPatronRequestsIdIndexRoute =
+  _authenticatedPatronRequestsIdIndexRouteImport.update({
+    id: '/patronRequests/$id/',
+    path: '/patronRequests/$id/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedSearchClusterIdIndexRoute =
+  _authenticatedSearchClusterIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => _authenticatedSearchClusterIdRoute,
+  } as any)
+const _authenticatedSearchClusterIdClusterRoute =
+  _authenticatedSearchClusterIdClusterRouteImport.update({
+    id: '/cluster',
+    path: '/cluster',
+    getParentRoute: () => _authenticatedSearchClusterIdRoute,
+  } as any)
+const _authenticatedSearchClusterIdClusterExplanationRoute =
+  _authenticatedSearchClusterIdClusterExplanationRouteImport.update({
+    id: '/clusterExplanation',
+    path: '/clusterExplanation',
+    getParentRoute: () => _authenticatedSearchClusterIdRoute,
+  } as any)
+const _authenticatedSearchClusterIdIdentifiersRoute =
+  _authenticatedSearchClusterIdIdentifiersRouteImport.update({
+    id: '/identifiers',
+    path: '/identifiers',
+    getParentRoute: () => _authenticatedSearchClusterIdRoute,
+  } as any)
+const _authenticatedSearchClusterIdItemsRoute =
+  _authenticatedSearchClusterIdItemsRouteImport.update({
+    id: '/items',
+    path: '/items',
+    getParentRoute: () => _authenticatedSearchClusterIdRoute,
+  } as any)
+const _authenticatedSearchClusterIdRequestingHistoryRoute =
+  _authenticatedSearchClusterIdRequestingHistoryRouteImport.update({
+    id: '/requestingHistory',
+    path: '/requestingHistory',
+    getParentRoute: () => _authenticatedSearchClusterIdRoute,
+  } as any)
+const _authenticatedServiceInfoAlarmsIndexRoute =
+  _authenticatedServiceInfoAlarmsIndexRouteImport.update({
+    id: '/serviceInfo/alarms/',
+    path: '/serviceInfo/alarms/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoAuditExplorerIndexRoute =
+  _authenticatedServiceInfoAuditExplorerIndexRouteImport.update({
+    id: '/serviceInfo/auditExplorer/',
+    path: '/serviceInfo/auditExplorer/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRoute =
+  _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport.update({
+    id: '/serviceInfo/catalogMetricsByHostLms/',
+    path: '/serviceInfo/catalogMetricsByHostLms/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute =
+  _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRouteImport.update({
+    id: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId',
+    path: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoDataChangeLogIndexRoute =
+  _authenticatedServiceInfoDataChangeLogIndexRouteImport.update({
+    id: '/serviceInfo/dataChangeLog/',
+    path: '/serviceInfo/dataChangeLog/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute =
+  _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport.update({
+    id: '/serviceInfo/dataChangeLog/$dataChangeLogId',
+    path: '/serviceInfo/dataChangeLog/$dataChangeLogId',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoDcbNcipOnboardingIndexRoute =
+  _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport.update({
+    id: '/serviceInfo/dcbNcipOnboarding/',
+    path: '/serviceInfo/dcbNcipOnboarding/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoRequestErrorsIndexRoute =
+  _authenticatedServiceInfoRequestErrorsIndexRouteImport.update({
+    id: '/serviceInfo/requestErrors/',
+    path: '/serviceInfo/requestErrors/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoRequestErrorsRequestsRoute =
+  _authenticatedServiceInfoRequestErrorsRequestsRouteImport.update({
+    id: '/serviceInfo/requestErrors/requests',
+    path: '/serviceInfo/requestErrors/requests',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedServiceInfoServiceStatusIndexRoute =
+  _authenticatedServiceInfoServiceStatusIndexRouteImport.update({
+    id: '/serviceInfo/serviceStatus/',
+    path: '/serviceInfo/serviceStatus/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedGroupsGroupIdPatronRequestsIndexRoute =
@@ -541,17 +524,89 @@ const _authenticatedGroupsGroupIdPatronRequestsIndexRoute =
     path: '/groups/$groupId/patronRequests/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute =
-  _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport.update({
-    id: '/libraries/$libraryId/supplierRequests/all',
-    path: '/libraries/$libraryId/supplierRequests/all',
+const _authenticatedGroupsGroupIdSupplierRequestsIndexRoute =
+  _authenticatedGroupsGroupIdSupplierRequestsIndexRouteImport.update({
+    id: '/groups/$groupId/supplierRequests/',
+    path: '/groups/$groupId/supplierRequests/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute =
-  _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport.update(
+const _authenticatedLibrariesLibraryIdBibsIndexRoute =
+  _authenticatedLibrariesLibraryIdBibsIndexRouteImport.update({
+    id: '/libraries/$libraryId/bibs/',
+    path: '/libraries/$libraryId/bibs/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdLocationsIndexRoute =
+  _authenticatedLibrariesLibraryIdLocationsIndexRouteImport.update({
+    id: '/libraries/$libraryId/locations/',
+    path: '/libraries/$libraryId/locations/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRoute =
+  _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRouteImport.update({
+    id: '/libraries/$libraryId/numericRangeMappings/all',
+    path: '/libraries/$libraryId/numericRangeMappings/all',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdNumericRangeMappingsItemTypeRoute =
+  _authenticatedLibrariesLibraryIdNumericRangeMappingsItemTypeRouteImport.update(
     {
-      id: '/libraries/$libraryId/referenceValueMappings/patronType',
-      path: '/libraries/$libraryId/referenceValueMappings/patronType',
+      id: '/libraries/$libraryId/numericRangeMappings/itemType',
+      path: '/libraries/$libraryId/numericRangeMappings/itemType',
+      getParentRoute: () => _authenticatedRoute,
+    } as any,
+  )
+const _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRoute =
+  _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRouteImport.update(
+    {
+      id: '/libraries/$libraryId/numericRangeMappings/patronType',
+      path: '/libraries/$libraryId/numericRangeMappings/patronType',
+      getParentRoute: () => _authenticatedRoute,
+    } as any,
+  )
+const _authenticatedLibrariesLibraryIdPatronRequestsActiveRoute =
+  _authenticatedLibrariesLibraryIdPatronRequestsActiveRouteImport.update({
+    id: '/libraries/$libraryId/patronRequests/active',
+    path: '/libraries/$libraryId/patronRequests/active',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdPatronRequestsAllRoute =
+  _authenticatedLibrariesLibraryIdPatronRequestsAllRouteImport.update({
+    id: '/libraries/$libraryId/patronRequests/all',
+    path: '/libraries/$libraryId/patronRequests/all',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdPatronRequestsCompletedRoute =
+  _authenticatedLibrariesLibraryIdPatronRequestsCompletedRouteImport.update({
+    id: '/libraries/$libraryId/patronRequests/completed',
+    path: '/libraries/$libraryId/patronRequests/completed',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdPatronRequestsExceptionRoute =
+  _authenticatedLibrariesLibraryIdPatronRequestsExceptionRouteImport.update({
+    id: '/libraries/$libraryId/patronRequests/exception',
+    path: '/libraries/$libraryId/patronRequests/exception',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRoute =
+  _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRouteImport.update(
+    {
+      id: '/libraries/$libraryId/patronRequests/outOfSequence',
+      path: '/libraries/$libraryId/patronRequests/outOfSequence',
+      getParentRoute: () => _authenticatedRoute,
+    } as any,
+  )
+const _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRoute =
+  _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRouteImport.update({
+    id: '/libraries/$libraryId/referenceValueMappings/all',
+    path: '/libraries/$libraryId/referenceValueMappings/all',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRoute =
+  _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRouteImport.update(
+    {
+      id: '/libraries/$libraryId/referenceValueMappings/itemType',
+      path: '/libraries/$libraryId/referenceValueMappings/itemType',
       getParentRoute: () => _authenticatedRoute,
     } as any,
   )
@@ -563,72 +618,24 @@ const _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRoute =
       getParentRoute: () => _authenticatedRoute,
     } as any,
   )
-const _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRoute =
-  _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRouteImport.update(
+const _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute =
+  _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport.update(
     {
-      id: '/libraries/$libraryId/referenceValueMappings/itemType',
-      path: '/libraries/$libraryId/referenceValueMappings/itemType',
+      id: '/libraries/$libraryId/referenceValueMappings/patronType',
+      path: '/libraries/$libraryId/referenceValueMappings/patronType',
       getParentRoute: () => _authenticatedRoute,
     } as any,
   )
-const _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRoute =
-  _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRouteImport.update({
-    id: '/libraries/$libraryId/referenceValueMappings/all',
-    path: '/libraries/$libraryId/referenceValueMappings/all',
+const _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute =
+  _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport.update({
+    id: '/libraries/$libraryId/supplierRequests/all',
+    path: '/libraries/$libraryId/supplierRequests/all',
     getParentRoute: () => _authenticatedRoute,
   } as any)
-const _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRoute =
-  _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRouteImport.update(
-    {
-      id: '/libraries/$libraryId/patronRequests/outOfSequence',
-      path: '/libraries/$libraryId/patronRequests/outOfSequence',
-      getParentRoute: () => _authenticatedRoute,
-    } as any,
-  )
-const _authenticatedLibrariesLibraryIdPatronRequestsExceptionRoute =
-  _authenticatedLibrariesLibraryIdPatronRequestsExceptionRouteImport.update({
-    id: '/libraries/$libraryId/patronRequests/exception',
-    path: '/libraries/$libraryId/patronRequests/exception',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdPatronRequestsCompletedRoute =
-  _authenticatedLibrariesLibraryIdPatronRequestsCompletedRouteImport.update({
-    id: '/libraries/$libraryId/patronRequests/completed',
-    path: '/libraries/$libraryId/patronRequests/completed',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdPatronRequestsAllRoute =
-  _authenticatedLibrariesLibraryIdPatronRequestsAllRouteImport.update({
-    id: '/libraries/$libraryId/patronRequests/all',
-    path: '/libraries/$libraryId/patronRequests/all',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdPatronRequestsActiveRoute =
-  _authenticatedLibrariesLibraryIdPatronRequestsActiveRouteImport.update({
-    id: '/libraries/$libraryId/patronRequests/active',
-    path: '/libraries/$libraryId/patronRequests/active',
-    getParentRoute: () => _authenticatedRoute,
-  } as any)
-const _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRoute =
-  _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRouteImport.update(
-    {
-      id: '/libraries/$libraryId/numericRangeMappings/patronType',
-      path: '/libraries/$libraryId/numericRangeMappings/patronType',
-      getParentRoute: () => _authenticatedRoute,
-    } as any,
-  )
-const _authenticatedLibrariesLibraryIdNumericRangeMappingsItemTypeRoute =
-  _authenticatedLibrariesLibraryIdNumericRangeMappingsItemTypeRouteImport.update(
-    {
-      id: '/libraries/$libraryId/numericRangeMappings/itemType',
-      path: '/libraries/$libraryId/numericRangeMappings/itemType',
-      getParentRoute: () => _authenticatedRoute,
-    } as any,
-  )
-const _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRoute =
-  _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRouteImport.update({
-    id: '/libraries/$libraryId/numericRangeMappings/all',
-    path: '/libraries/$libraryId/numericRangeMappings/all',
+const _authenticatedPatronRequestsAuditsAuditIdIndexRoute =
+  _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport.update({
+    id: '/patronRequests/audits/$auditId/',
+    path: '/patronRequests/audits/$auditId/',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 
@@ -688,6 +695,7 @@ export interface FileRoutesByFullPath {
   '/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
   '/search/$clusterId/items': typeof _authenticatedSearchClusterIdItemsRoute
   '/search/$clusterId/requestingHistory': typeof _authenticatedSearchClusterIdRequestingHistoryRoute
+  '/serviceInfo/catalogMetricsByHostLms/$hostlmsId': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   '/serviceInfo/dataChangeLog/$dataChangeLogId': typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   '/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/groups/$groupId/': typeof _authenticatedGroupsGroupIdIndexRoute
@@ -777,6 +785,7 @@ export interface FileRoutesByTo {
   '/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
   '/search/$clusterId/items': typeof _authenticatedSearchClusterIdItemsRoute
   '/search/$clusterId/requestingHistory': typeof _authenticatedSearchClusterIdRequestingHistoryRoute
+  '/serviceInfo/catalogMetricsByHostLms/$hostlmsId': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   '/serviceInfo/dataChangeLog/$dataChangeLogId': typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   '/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/groups/$groupId': typeof _authenticatedGroupsGroupIdIndexRoute
@@ -869,6 +878,7 @@ export interface FileRoutesById {
   '/__authenticated/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
   '/__authenticated/search/$clusterId/items': typeof _authenticatedSearchClusterIdItemsRoute
   '/__authenticated/search/$clusterId/requestingHistory': typeof _authenticatedSearchClusterIdRequestingHistoryRoute
+  '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId': typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId': typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   '/__authenticated/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/__authenticated/groups/$groupId/': typeof _authenticatedGroupsGroupIdIndexRoute
@@ -961,6 +971,7 @@ export interface FileRouteTypes {
     | '/search/$clusterId/identifiers'
     | '/search/$clusterId/items'
     | '/search/$clusterId/requestingHistory'
+    | '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
     | '/serviceInfo/dataChangeLog/$dataChangeLogId'
     | '/serviceInfo/requestErrors/requests'
     | '/groups/$groupId/'
@@ -1050,6 +1061,7 @@ export interface FileRouteTypes {
     | '/search/$clusterId/identifiers'
     | '/search/$clusterId/items'
     | '/search/$clusterId/requestingHistory'
+    | '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
     | '/serviceInfo/dataChangeLog/$dataChangeLogId'
     | '/serviceInfo/requestErrors/requests'
     | '/groups/$groupId'
@@ -1141,6 +1153,7 @@ export interface FileRouteTypes {
     | '/__authenticated/search/$clusterId/identifiers'
     | '/__authenticated/search/$clusterId/items'
     | '/__authenticated/search/$clusterId/requestingHistory'
+    | '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
     | '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId'
     | '/__authenticated/serviceInfo/requestErrors/requests'
     | '/__authenticated/groups/$groupId/'
@@ -1188,39 +1201,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/networkError': {
-      id: '/networkError'
-      path: '/networkError'
-      fullPath: '/networkError'
-      preLoaderRoute: typeof NetworkErrorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/maintenance': {
-      id: '/maintenance'
-      path: '/maintenance'
-      fullPath: '/maintenance'
-      preLoaderRoute: typeof MaintenanceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/logout': {
-      id: '/logout'
-      path: '/logout'
-      fullPath: '/logout'
-      preLoaderRoute: typeof LogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/__authenticated': {
-      id: '/__authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof _authenticatedRouteImport
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/500': {
@@ -1230,11 +1215,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R500RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/404': {
-      id: '/404'
-      path: '/404'
-      fullPath: '/404'
-      preLoaderRoute: typeof R404RouteImport
+    '/__authenticated': {
+      id: '/__authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof _authenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maintenance': {
+      id: '/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof MaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/networkError': {
+      id: '/networkError'
+      path: '/networkError'
+      fullPath: '/networkError'
+      preLoaderRoute: typeof NetworkErrorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/__authenticated/': {
@@ -1244,13 +1257,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/unauthorised': {
-      id: '/__authenticated/unauthorised'
-      path: '/unauthorised'
-      fullPath: '/unauthorised'
-      preLoaderRoute: typeof _authenticatedUnauthorisedRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
     '/__authenticated/profile': {
       id: '/__authenticated/profile'
       path: '/profile'
@@ -1258,81 +1264,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedProfileRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/setup/': {
-      id: '/__authenticated/setup/'
-      path: '/setup'
-      fullPath: '/setup/'
-      preLoaderRoute: typeof _authenticatedSetupIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/settings/': {
-      id: '/__authenticated/settings/'
-      path: '/settings'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof _authenticatedSettingsIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/serviceInfo/': {
-      id: '/__authenticated/serviceInfo/'
-      path: '/serviceInfo'
-      fullPath: '/serviceInfo/'
-      preLoaderRoute: typeof _authenticatedServiceInfoIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/search/': {
-      id: '/__authenticated/search/'
-      path: '/search'
-      fullPath: '/search/'
-      preLoaderRoute: typeof _authenticatedSearchIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/mappings/': {
-      id: '/__authenticated/mappings/'
-      path: '/mappings'
-      fullPath: '/mappings/'
-      preLoaderRoute: typeof _authenticatedMappingsIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/locations/': {
-      id: '/__authenticated/locations/'
-      path: '/locations'
-      fullPath: '/locations/'
-      preLoaderRoute: typeof _authenticatedLocationsIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/': {
-      id: '/__authenticated/libraries/'
-      path: '/libraries'
-      fullPath: '/libraries/'
-      preLoaderRoute: typeof _authenticatedLibrariesIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/hostlmss/': {
-      id: '/__authenticated/hostlmss/'
-      path: '/hostlmss'
-      fullPath: '/hostlmss/'
-      preLoaderRoute: typeof _authenticatedHostlmssIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/groups/': {
-      id: '/__authenticated/groups/'
-      path: '/groups'
-      fullPath: '/groups/'
-      preLoaderRoute: typeof _authenticatedGroupsIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/': {
-      id: '/__authenticated/consortium/'
-      path: '/consortium'
-      fullPath: '/consortium/'
-      preLoaderRoute: typeof _authenticatedConsortiumIndexRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/bibs/': {
-      id: '/__authenticated/bibs/'
-      path: '/bibs'
-      fullPath: '/bibs/'
-      preLoaderRoute: typeof _authenticatedBibsIndexRouteImport
+    '/__authenticated/unauthorised': {
+      id: '/__authenticated/unauthorised'
+      path: '/unauthorised'
+      fullPath: '/unauthorised'
+      preLoaderRoute: typeof _authenticatedUnauthorisedRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/agencies/': {
@@ -1342,137 +1278,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedAgenciesIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/setup/done': {
-      id: '/__authenticated/setup/done'
-      path: '/setup/done'
-      fullPath: '/setup/done'
-      preLoaderRoute: typeof _authenticatedSetupDoneRouteImport
+    '/__authenticated/agencies/$agencyId': {
+      id: '/__authenticated/agencies/$agencyId'
+      path: '/agencies/$agencyId'
+      fullPath: '/agencies/$agencyId'
+      preLoaderRoute: typeof _authenticatedAgenciesAgencyIdRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/setup/$step': {
-      id: '/__authenticated/setup/$step'
-      path: '/setup/$step'
-      fullPath: '/setup/$step'
-      preLoaderRoute: typeof _authenticatedSetupStepRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/search/$clusterId': {
-      id: '/__authenticated/search/$clusterId'
-      path: '/search/$clusterId'
-      fullPath: '/search/$clusterId'
-      preLoaderRoute: typeof _authenticatedSearchClusterIdRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/patronRequests/outOfSequence': {
-      id: '/__authenticated/patronRequests/outOfSequence'
-      path: '/patronRequests/outOfSequence'
-      fullPath: '/patronRequests/outOfSequence'
-      preLoaderRoute: typeof _authenticatedPatronRequestsOutOfSequenceRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/patronRequests/exception': {
-      id: '/__authenticated/patronRequests/exception'
-      path: '/patronRequests/exception'
-      fullPath: '/patronRequests/exception'
-      preLoaderRoute: typeof _authenticatedPatronRequestsExceptionRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/patronRequests/completed': {
-      id: '/__authenticated/patronRequests/completed'
-      path: '/patronRequests/completed'
-      fullPath: '/patronRequests/completed'
-      preLoaderRoute: typeof _authenticatedPatronRequestsCompletedRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/patronRequests/all': {
-      id: '/__authenticated/patronRequests/all'
-      path: '/patronRequests/all'
-      fullPath: '/patronRequests/all'
-      preLoaderRoute: typeof _authenticatedPatronRequestsAllRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/patronRequests/active': {
-      id: '/__authenticated/patronRequests/active'
-      path: '/patronRequests/active'
-      fullPath: '/patronRequests/active'
-      preLoaderRoute: typeof _authenticatedPatronRequestsActiveRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/locations/$locationId': {
-      id: '/__authenticated/locations/$locationId'
-      path: '/locations/$locationId'
-      fullPath: '/locations/$locationId'
-      preLoaderRoute: typeof _authenticatedLocationsLocationIdRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/hostlmss/new': {
-      id: '/__authenticated/hostlmss/new'
-      path: '/hostlmss/new'
-      fullPath: '/hostlmss/new'
-      preLoaderRoute: typeof _authenticatedHostlmssNewRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/hostlmss/$hostlmsId': {
-      id: '/__authenticated/hostlmss/$hostlmsId'
-      path: '/hostlmss/$hostlmsId'
-      fullPath: '/hostlmss/$hostlmsId'
-      preLoaderRoute: typeof _authenticatedHostlmssHostlmsIdRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/requestTags': {
-      id: '/__authenticated/consortium/requestTags'
-      path: '/consortium/requestTags'
-      fullPath: '/consortium/requestTags'
-      preLoaderRoute: typeof _authenticatedConsortiumRequestTagsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/onboarding': {
-      id: '/__authenticated/consortium/onboarding'
-      path: '/consortium/onboarding'
-      fullPath: '/consortium/onboarding'
-      preLoaderRoute: typeof _authenticatedConsortiumOnboardingRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/insights': {
-      id: '/__authenticated/consortium/insights'
-      path: '/consortium/insights'
-      fullPath: '/consortium/insights'
-      preLoaderRoute: typeof _authenticatedConsortiumInsightsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/functionalSettings': {
-      id: '/__authenticated/consortium/functionalSettings'
-      path: '/consortium/functionalSettings'
-      fullPath: '/consortium/functionalSettings'
-      preLoaderRoute: typeof _authenticatedConsortiumFunctionalSettingsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/environment': {
-      id: '/__authenticated/consortium/environment'
-      path: '/consortium/environment'
-      fullPath: '/consortium/environment'
-      preLoaderRoute: typeof _authenticatedConsortiumEnvironmentRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/contacts': {
-      id: '/__authenticated/consortium/contacts'
-      path: '/consortium/contacts'
-      fullPath: '/consortium/contacts'
-      preLoaderRoute: typeof _authenticatedConsortiumContactsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/branding': {
-      id: '/__authenticated/consortium/branding'
-      path: '/consortium/branding'
-      fullPath: '/consortium/branding'
-      preLoaderRoute: typeof _authenticatedConsortiumBrandingRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/consortium/announcements': {
-      id: '/__authenticated/consortium/announcements'
-      path: '/consortium/announcements'
-      fullPath: '/consortium/announcements'
-      preLoaderRoute: typeof _authenticatedConsortiumAnnouncementsRouteImport
+    '/__authenticated/bibs/': {
+      id: '/__authenticated/bibs/'
+      path: '/bibs'
+      fullPath: '/bibs/'
+      preLoaderRoute: typeof _authenticatedBibsIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/bibs/$bibId': {
@@ -1482,95 +1299,207 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedBibsBibIdRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/agencies/$agencyId': {
-      id: '/__authenticated/agencies/$agencyId'
-      path: '/agencies/$agencyId'
-      fullPath: '/agencies/$agencyId'
-      preLoaderRoute: typeof _authenticatedAgenciesAgencyIdRouteImport
+    '/__authenticated/consortium/': {
+      id: '/__authenticated/consortium/'
+      path: '/consortium'
+      fullPath: '/consortium/'
+      preLoaderRoute: typeof _authenticatedConsortiumIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/serviceStatus/': {
-      id: '/__authenticated/serviceInfo/serviceStatus/'
-      path: '/serviceInfo/serviceStatus'
-      fullPath: '/serviceInfo/serviceStatus/'
-      preLoaderRoute: typeof _authenticatedServiceInfoServiceStatusIndexRouteImport
+    '/__authenticated/consortium/announcements': {
+      id: '/__authenticated/consortium/announcements'
+      path: '/consortium/announcements'
+      fullPath: '/consortium/announcements'
+      preLoaderRoute: typeof _authenticatedConsortiumAnnouncementsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/requestErrors/': {
-      id: '/__authenticated/serviceInfo/requestErrors/'
-      path: '/serviceInfo/requestErrors'
-      fullPath: '/serviceInfo/requestErrors/'
-      preLoaderRoute: typeof _authenticatedServiceInfoRequestErrorsIndexRouteImport
+    '/__authenticated/consortium/branding': {
+      id: '/__authenticated/consortium/branding'
+      path: '/consortium/branding'
+      fullPath: '/consortium/branding'
+      preLoaderRoute: typeof _authenticatedConsortiumBrandingRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/dcbNcipOnboarding/': {
-      id: '/__authenticated/serviceInfo/dcbNcipOnboarding/'
-      path: '/serviceInfo/dcbNcipOnboarding'
-      fullPath: '/serviceInfo/dcbNcipOnboarding/'
-      preLoaderRoute: typeof _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport
+    '/__authenticated/consortium/contacts': {
+      id: '/__authenticated/consortium/contacts'
+      path: '/consortium/contacts'
+      fullPath: '/consortium/contacts'
+      preLoaderRoute: typeof _authenticatedConsortiumContactsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/dataChangeLog/': {
-      id: '/__authenticated/serviceInfo/dataChangeLog/'
-      path: '/serviceInfo/dataChangeLog'
-      fullPath: '/serviceInfo/dataChangeLog/'
-      preLoaderRoute: typeof _authenticatedServiceInfoDataChangeLogIndexRouteImport
+    '/__authenticated/consortium/environment': {
+      id: '/__authenticated/consortium/environment'
+      path: '/consortium/environment'
+      fullPath: '/consortium/environment'
+      preLoaderRoute: typeof _authenticatedConsortiumEnvironmentRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/catalogMetricsByHostLms/': {
-      id: '/__authenticated/serviceInfo/catalogMetricsByHostLms/'
-      path: '/serviceInfo/catalogMetricsByHostLms'
-      fullPath: '/serviceInfo/catalogMetricsByHostLms/'
-      preLoaderRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport
+    '/__authenticated/consortium/functionalSettings': {
+      id: '/__authenticated/consortium/functionalSettings'
+      path: '/consortium/functionalSettings'
+      fullPath: '/consortium/functionalSettings'
+      preLoaderRoute: typeof _authenticatedConsortiumFunctionalSettingsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/auditExplorer/': {
-      id: '/__authenticated/serviceInfo/auditExplorer/'
-      path: '/serviceInfo/auditExplorer'
-      fullPath: '/serviceInfo/auditExplorer/'
-      preLoaderRoute: typeof _authenticatedServiceInfoAuditExplorerIndexRouteImport
+    '/__authenticated/consortium/insights': {
+      id: '/__authenticated/consortium/insights'
+      path: '/consortium/insights'
+      fullPath: '/consortium/insights'
+      preLoaderRoute: typeof _authenticatedConsortiumInsightsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/alarms/': {
-      id: '/__authenticated/serviceInfo/alarms/'
-      path: '/serviceInfo/alarms'
-      fullPath: '/serviceInfo/alarms/'
-      preLoaderRoute: typeof _authenticatedServiceInfoAlarmsIndexRouteImport
+    '/__authenticated/consortium/onboarding': {
+      id: '/__authenticated/consortium/onboarding'
+      path: '/consortium/onboarding'
+      fullPath: '/consortium/onboarding'
+      preLoaderRoute: typeof _authenticatedConsortiumOnboardingRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/search/$clusterId/': {
-      id: '/__authenticated/search/$clusterId/'
-      path: '/'
-      fullPath: '/search/$clusterId/'
-      preLoaderRoute: typeof _authenticatedSearchClusterIdIndexRouteImport
-      parentRoute: typeof _authenticatedSearchClusterIdRoute
-    }
-    '/__authenticated/patronRequests/$id/': {
-      id: '/__authenticated/patronRequests/$id/'
-      path: '/patronRequests/$id'
-      fullPath: '/patronRequests/$id/'
-      preLoaderRoute: typeof _authenticatedPatronRequestsIdIndexRouteImport
+    '/__authenticated/consortium/requestTags': {
+      id: '/__authenticated/consortium/requestTags'
+      path: '/consortium/requestTags'
+      fullPath: '/consortium/requestTags'
+      preLoaderRoute: typeof _authenticatedConsortiumRequestTagsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/mappings/allReferenceValue/': {
-      id: '/__authenticated/mappings/allReferenceValue/'
-      path: '/mappings/allReferenceValue'
-      fullPath: '/mappings/allReferenceValue/'
-      preLoaderRoute: typeof _authenticatedMappingsAllReferenceValueIndexRouteImport
+    '/__authenticated/groups/': {
+      id: '/__authenticated/groups/'
+      path: '/groups'
+      fullPath: '/groups/'
+      preLoaderRoute: typeof _authenticatedGroupsIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/mappings/allNumericRange/': {
-      id: '/__authenticated/mappings/allNumericRange/'
-      path: '/mappings/allNumericRange'
-      fullPath: '/mappings/allNumericRange/'
-      preLoaderRoute: typeof _authenticatedMappingsAllNumericRangeIndexRouteImport
+    '/__authenticated/hostlmss/': {
+      id: '/__authenticated/hostlmss/'
+      path: '/hostlmss'
+      fullPath: '/hostlmss/'
+      preLoaderRoute: typeof _authenticatedHostlmssIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/': {
-      id: '/__authenticated/libraries/$libraryId/'
-      path: '/libraries/$libraryId'
-      fullPath: '/libraries/$libraryId/'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdIndexRouteImport
+    '/__authenticated/hostlmss/$hostlmsId': {
+      id: '/__authenticated/hostlmss/$hostlmsId'
+      path: '/hostlmss/$hostlmsId'
+      fullPath: '/hostlmss/$hostlmsId'
+      preLoaderRoute: typeof _authenticatedHostlmssHostlmsIdRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/hostlmss/new': {
+      id: '/__authenticated/hostlmss/new'
+      path: '/hostlmss/new'
+      fullPath: '/hostlmss/new'
+      preLoaderRoute: typeof _authenticatedHostlmssNewRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/': {
+      id: '/__authenticated/libraries/'
+      path: '/libraries'
+      fullPath: '/libraries/'
+      preLoaderRoute: typeof _authenticatedLibrariesIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/locations/': {
+      id: '/__authenticated/locations/'
+      path: '/locations'
+      fullPath: '/locations/'
+      preLoaderRoute: typeof _authenticatedLocationsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/locations/$locationId': {
+      id: '/__authenticated/locations/$locationId'
+      path: '/locations/$locationId'
+      fullPath: '/locations/$locationId'
+      preLoaderRoute: typeof _authenticatedLocationsLocationIdRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/mappings/': {
+      id: '/__authenticated/mappings/'
+      path: '/mappings'
+      fullPath: '/mappings/'
+      preLoaderRoute: typeof _authenticatedMappingsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/patronRequests/active': {
+      id: '/__authenticated/patronRequests/active'
+      path: '/patronRequests/active'
+      fullPath: '/patronRequests/active'
+      preLoaderRoute: typeof _authenticatedPatronRequestsActiveRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/patronRequests/all': {
+      id: '/__authenticated/patronRequests/all'
+      path: '/patronRequests/all'
+      fullPath: '/patronRequests/all'
+      preLoaderRoute: typeof _authenticatedPatronRequestsAllRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/patronRequests/completed': {
+      id: '/__authenticated/patronRequests/completed'
+      path: '/patronRequests/completed'
+      fullPath: '/patronRequests/completed'
+      preLoaderRoute: typeof _authenticatedPatronRequestsCompletedRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/patronRequests/exception': {
+      id: '/__authenticated/patronRequests/exception'
+      path: '/patronRequests/exception'
+      fullPath: '/patronRequests/exception'
+      preLoaderRoute: typeof _authenticatedPatronRequestsExceptionRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/patronRequests/outOfSequence': {
+      id: '/__authenticated/patronRequests/outOfSequence'
+      path: '/patronRequests/outOfSequence'
+      fullPath: '/patronRequests/outOfSequence'
+      preLoaderRoute: typeof _authenticatedPatronRequestsOutOfSequenceRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/search/': {
+      id: '/__authenticated/search/'
+      path: '/search'
+      fullPath: '/search/'
+      preLoaderRoute: typeof _authenticatedSearchIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/search/$clusterId': {
+      id: '/__authenticated/search/$clusterId'
+      path: '/search/$clusterId'
+      fullPath: '/search/$clusterId'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/': {
+      id: '/__authenticated/serviceInfo/'
+      path: '/serviceInfo'
+      fullPath: '/serviceInfo/'
+      preLoaderRoute: typeof _authenticatedServiceInfoIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/settings/': {
+      id: '/__authenticated/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof _authenticatedSettingsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/setup/': {
+      id: '/__authenticated/setup/'
+      path: '/setup'
+      fullPath: '/setup/'
+      preLoaderRoute: typeof _authenticatedSetupIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/setup/$step': {
+      id: '/__authenticated/setup/$step'
+      path: '/setup/$step'
+      fullPath: '/setup/$step'
+      preLoaderRoute: typeof _authenticatedSetupStepRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/setup/done': {
+      id: '/__authenticated/setup/done'
+      path: '/setup/done'
+      fullPath: '/setup/done'
+      preLoaderRoute: typeof _authenticatedSetupDoneRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/groups/$groupId/': {
@@ -1580,95 +1509,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedGroupsGroupIdIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/serviceInfo/requestErrors/requests': {
-      id: '/__authenticated/serviceInfo/requestErrors/requests'
-      path: '/serviceInfo/requestErrors/requests'
-      fullPath: '/serviceInfo/requestErrors/requests'
-      preLoaderRoute: typeof _authenticatedServiceInfoRequestErrorsRequestsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId': {
-      id: '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId'
-      path: '/serviceInfo/dataChangeLog/$dataChangeLogId'
-      fullPath: '/serviceInfo/dataChangeLog/$dataChangeLogId'
-      preLoaderRoute: typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/search/$clusterId/requestingHistory': {
-      id: '/__authenticated/search/$clusterId/requestingHistory'
-      path: '/requestingHistory'
-      fullPath: '/search/$clusterId/requestingHistory'
-      preLoaderRoute: typeof _authenticatedSearchClusterIdRequestingHistoryRouteImport
-      parentRoute: typeof _authenticatedSearchClusterIdRoute
-    }
-    '/__authenticated/search/$clusterId/items': {
-      id: '/__authenticated/search/$clusterId/items'
-      path: '/items'
-      fullPath: '/search/$clusterId/items'
-      preLoaderRoute: typeof _authenticatedSearchClusterIdItemsRouteImport
-      parentRoute: typeof _authenticatedSearchClusterIdRoute
-    }
-    '/__authenticated/search/$clusterId/identifiers': {
-      id: '/__authenticated/search/$clusterId/identifiers'
-      path: '/identifiers'
-      fullPath: '/search/$clusterId/identifiers'
-      preLoaderRoute: typeof _authenticatedSearchClusterIdIdentifiersRouteImport
-      parentRoute: typeof _authenticatedSearchClusterIdRoute
-    }
-    '/__authenticated/search/$clusterId/clusterExplanation': {
-      id: '/__authenticated/search/$clusterId/clusterExplanation'
-      path: '/clusterExplanation'
-      fullPath: '/search/$clusterId/clusterExplanation'
-      preLoaderRoute: typeof _authenticatedSearchClusterIdClusterExplanationRouteImport
-      parentRoute: typeof _authenticatedSearchClusterIdRoute
-    }
-    '/__authenticated/search/$clusterId/cluster': {
-      id: '/__authenticated/search/$clusterId/cluster'
-      path: '/cluster'
-      fullPath: '/search/$clusterId/cluster'
-      preLoaderRoute: typeof _authenticatedSearchClusterIdClusterRouteImport
-      parentRoute: typeof _authenticatedSearchClusterIdRoute
-    }
-    '/__authenticated/libraries/$libraryId/settings': {
-      id: '/__authenticated/libraries/$libraryId/settings'
-      path: '/libraries/$libraryId/settings'
-      fullPath: '/libraries/$libraryId/settings'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSettingsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/service': {
-      id: '/__authenticated/libraries/$libraryId/service'
-      path: '/libraries/$libraryId/service'
-      fullPath: '/libraries/$libraryId/service'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdServiceRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/insights': {
-      id: '/__authenticated/libraries/$libraryId/insights'
-      path: '/libraries/$libraryId/insights'
-      fullPath: '/libraries/$libraryId/insights'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdInsightsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/contacts': {
-      id: '/__authenticated/libraries/$libraryId/contacts'
-      path: '/libraries/$libraryId/contacts'
-      fullPath: '/libraries/$libraryId/contacts'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdContactsRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/branding': {
-      id: '/__authenticated/libraries/$libraryId/branding'
-      path: '/libraries/$libraryId/branding'
-      fullPath: '/libraries/$libraryId/branding'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdBrandingRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/accounts': {
-      id: '/__authenticated/libraries/$libraryId/accounts'
-      path: '/libraries/$libraryId/accounts'
-      fullPath: '/libraries/$libraryId/accounts'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdAccountsRouteImport
+    '/__authenticated/groups/$groupId/insights': {
+      id: '/__authenticated/groups/$groupId/insights'
+      path: '/groups/$groupId/insights'
+      fullPath: '/groups/$groupId/insights'
+      preLoaderRoute: typeof _authenticatedGroupsGroupIdInsightsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/groups/$groupId/settings': {
@@ -1678,39 +1523,186 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedGroupsGroupIdSettingsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/groups/$groupId/insights': {
-      id: '/__authenticated/groups/$groupId/insights'
-      path: '/groups/$groupId/insights'
-      fullPath: '/groups/$groupId/insights'
-      preLoaderRoute: typeof _authenticatedGroupsGroupIdInsightsRouteImport
+    '/__authenticated/libraries/$libraryId/': {
+      id: '/__authenticated/libraries/$libraryId/'
+      path: '/libraries/$libraryId'
+      fullPath: '/libraries/$libraryId/'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/patronRequests/audits/$auditId/': {
-      id: '/__authenticated/patronRequests/audits/$auditId/'
-      path: '/patronRequests/audits/$auditId'
-      fullPath: '/patronRequests/audits/$auditId/'
-      preLoaderRoute: typeof _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport
+    '/__authenticated/libraries/$libraryId/accounts': {
+      id: '/__authenticated/libraries/$libraryId/accounts'
+      path: '/libraries/$libraryId/accounts'
+      fullPath: '/libraries/$libraryId/accounts'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdAccountsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/locations/': {
-      id: '/__authenticated/libraries/$libraryId/locations/'
-      path: '/libraries/$libraryId/locations'
-      fullPath: '/libraries/$libraryId/locations/'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdLocationsIndexRouteImport
+    '/__authenticated/libraries/$libraryId/branding': {
+      id: '/__authenticated/libraries/$libraryId/branding'
+      path: '/libraries/$libraryId/branding'
+      fullPath: '/libraries/$libraryId/branding'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdBrandingRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/bibs/': {
-      id: '/__authenticated/libraries/$libraryId/bibs/'
-      path: '/libraries/$libraryId/bibs'
-      fullPath: '/libraries/$libraryId/bibs/'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdBibsIndexRouteImport
+    '/__authenticated/libraries/$libraryId/contacts': {
+      id: '/__authenticated/libraries/$libraryId/contacts'
+      path: '/libraries/$libraryId/contacts'
+      fullPath: '/libraries/$libraryId/contacts'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdContactsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/groups/$groupId/supplierRequests/': {
-      id: '/__authenticated/groups/$groupId/supplierRequests/'
-      path: '/groups/$groupId/supplierRequests'
-      fullPath: '/groups/$groupId/supplierRequests/'
-      preLoaderRoute: typeof _authenticatedGroupsGroupIdSupplierRequestsIndexRouteImport
+    '/__authenticated/libraries/$libraryId/insights': {
+      id: '/__authenticated/libraries/$libraryId/insights'
+      path: '/libraries/$libraryId/insights'
+      fullPath: '/libraries/$libraryId/insights'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdInsightsRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/service': {
+      id: '/__authenticated/libraries/$libraryId/service'
+      path: '/libraries/$libraryId/service'
+      fullPath: '/libraries/$libraryId/service'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdServiceRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/settings': {
+      id: '/__authenticated/libraries/$libraryId/settings'
+      path: '/libraries/$libraryId/settings'
+      fullPath: '/libraries/$libraryId/settings'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSettingsRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/mappings/allNumericRange/': {
+      id: '/__authenticated/mappings/allNumericRange/'
+      path: '/mappings/allNumericRange'
+      fullPath: '/mappings/allNumericRange/'
+      preLoaderRoute: typeof _authenticatedMappingsAllNumericRangeIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/mappings/allReferenceValue/': {
+      id: '/__authenticated/mappings/allReferenceValue/'
+      path: '/mappings/allReferenceValue'
+      fullPath: '/mappings/allReferenceValue/'
+      preLoaderRoute: typeof _authenticatedMappingsAllReferenceValueIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/patronRequests/$id/': {
+      id: '/__authenticated/patronRequests/$id/'
+      path: '/patronRequests/$id'
+      fullPath: '/patronRequests/$id/'
+      preLoaderRoute: typeof _authenticatedPatronRequestsIdIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/search/$clusterId/': {
+      id: '/__authenticated/search/$clusterId/'
+      path: '/'
+      fullPath: '/search/$clusterId/'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdIndexRouteImport
+      parentRoute: typeof _authenticatedSearchClusterIdRoute
+    }
+    '/__authenticated/search/$clusterId/cluster': {
+      id: '/__authenticated/search/$clusterId/cluster'
+      path: '/cluster'
+      fullPath: '/search/$clusterId/cluster'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdClusterRouteImport
+      parentRoute: typeof _authenticatedSearchClusterIdRoute
+    }
+    '/__authenticated/search/$clusterId/clusterExplanation': {
+      id: '/__authenticated/search/$clusterId/clusterExplanation'
+      path: '/clusterExplanation'
+      fullPath: '/search/$clusterId/clusterExplanation'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdClusterExplanationRouteImport
+      parentRoute: typeof _authenticatedSearchClusterIdRoute
+    }
+    '/__authenticated/search/$clusterId/identifiers': {
+      id: '/__authenticated/search/$clusterId/identifiers'
+      path: '/identifiers'
+      fullPath: '/search/$clusterId/identifiers'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdIdentifiersRouteImport
+      parentRoute: typeof _authenticatedSearchClusterIdRoute
+    }
+    '/__authenticated/search/$clusterId/items': {
+      id: '/__authenticated/search/$clusterId/items'
+      path: '/items'
+      fullPath: '/search/$clusterId/items'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdItemsRouteImport
+      parentRoute: typeof _authenticatedSearchClusterIdRoute
+    }
+    '/__authenticated/search/$clusterId/requestingHistory': {
+      id: '/__authenticated/search/$clusterId/requestingHistory'
+      path: '/requestingHistory'
+      fullPath: '/search/$clusterId/requestingHistory'
+      preLoaderRoute: typeof _authenticatedSearchClusterIdRequestingHistoryRouteImport
+      parentRoute: typeof _authenticatedSearchClusterIdRoute
+    }
+    '/__authenticated/serviceInfo/alarms/': {
+      id: '/__authenticated/serviceInfo/alarms/'
+      path: '/serviceInfo/alarms'
+      fullPath: '/serviceInfo/alarms/'
+      preLoaderRoute: typeof _authenticatedServiceInfoAlarmsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/auditExplorer/': {
+      id: '/__authenticated/serviceInfo/auditExplorer/'
+      path: '/serviceInfo/auditExplorer'
+      fullPath: '/serviceInfo/auditExplorer/'
+      preLoaderRoute: typeof _authenticatedServiceInfoAuditExplorerIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/catalogMetricsByHostLms/': {
+      id: '/__authenticated/serviceInfo/catalogMetricsByHostLms/'
+      path: '/serviceInfo/catalogMetricsByHostLms'
+      fullPath: '/serviceInfo/catalogMetricsByHostLms/'
+      preLoaderRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId': {
+      id: '/__authenticated/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
+      path: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
+      fullPath: '/serviceInfo/catalogMetricsByHostLms/$hostlmsId'
+      preLoaderRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/dataChangeLog/': {
+      id: '/__authenticated/serviceInfo/dataChangeLog/'
+      path: '/serviceInfo/dataChangeLog'
+      fullPath: '/serviceInfo/dataChangeLog/'
+      preLoaderRoute: typeof _authenticatedServiceInfoDataChangeLogIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId': {
+      id: '/__authenticated/serviceInfo/dataChangeLog/$dataChangeLogId'
+      path: '/serviceInfo/dataChangeLog/$dataChangeLogId'
+      fullPath: '/serviceInfo/dataChangeLog/$dataChangeLogId'
+      preLoaderRoute: typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/dcbNcipOnboarding/': {
+      id: '/__authenticated/serviceInfo/dcbNcipOnboarding/'
+      path: '/serviceInfo/dcbNcipOnboarding'
+      fullPath: '/serviceInfo/dcbNcipOnboarding/'
+      preLoaderRoute: typeof _authenticatedServiceInfoDcbNcipOnboardingIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/requestErrors/': {
+      id: '/__authenticated/serviceInfo/requestErrors/'
+      path: '/serviceInfo/requestErrors'
+      fullPath: '/serviceInfo/requestErrors/'
+      preLoaderRoute: typeof _authenticatedServiceInfoRequestErrorsIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/requestErrors/requests': {
+      id: '/__authenticated/serviceInfo/requestErrors/requests'
+      path: '/serviceInfo/requestErrors/requests'
+      fullPath: '/serviceInfo/requestErrors/requests'
+      preLoaderRoute: typeof _authenticatedServiceInfoRequestErrorsRequestsRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/serviceInfo/serviceStatus/': {
+      id: '/__authenticated/serviceInfo/serviceStatus/'
+      path: '/serviceInfo/serviceStatus'
+      fullPath: '/serviceInfo/serviceStatus/'
+      preLoaderRoute: typeof _authenticatedServiceInfoServiceStatusIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/groups/$groupId/patronRequests/': {
@@ -1720,81 +1712,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedGroupsGroupIdPatronRequestsIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/supplierRequests/all': {
-      id: '/__authenticated/libraries/$libraryId/supplierRequests/all'
-      path: '/libraries/$libraryId/supplierRequests/all'
-      fullPath: '/libraries/$libraryId/supplierRequests/all'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport
+    '/__authenticated/groups/$groupId/supplierRequests/': {
+      id: '/__authenticated/groups/$groupId/supplierRequests/'
+      path: '/groups/$groupId/supplierRequests'
+      fullPath: '/groups/$groupId/supplierRequests/'
+      preLoaderRoute: typeof _authenticatedGroupsGroupIdSupplierRequestsIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/referenceValueMappings/patronType': {
-      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/patronType'
-      path: '/libraries/$libraryId/referenceValueMappings/patronType'
-      fullPath: '/libraries/$libraryId/referenceValueMappings/patronType'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport
+    '/__authenticated/libraries/$libraryId/bibs/': {
+      id: '/__authenticated/libraries/$libraryId/bibs/'
+      path: '/libraries/$libraryId/bibs'
+      fullPath: '/libraries/$libraryId/bibs/'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdBibsIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/referenceValueMappings/location': {
-      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/location'
-      path: '/libraries/$libraryId/referenceValueMappings/location'
-      fullPath: '/libraries/$libraryId/referenceValueMappings/location'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRouteImport
+    '/__authenticated/libraries/$libraryId/locations/': {
+      id: '/__authenticated/libraries/$libraryId/locations/'
+      path: '/libraries/$libraryId/locations'
+      fullPath: '/libraries/$libraryId/locations/'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdLocationsIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/referenceValueMappings/itemType': {
-      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/itemType'
-      path: '/libraries/$libraryId/referenceValueMappings/itemType'
-      fullPath: '/libraries/$libraryId/referenceValueMappings/itemType'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/referenceValueMappings/all': {
-      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/all'
-      path: '/libraries/$libraryId/referenceValueMappings/all'
-      fullPath: '/libraries/$libraryId/referenceValueMappings/all'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/patronRequests/outOfSequence': {
-      id: '/__authenticated/libraries/$libraryId/patronRequests/outOfSequence'
-      path: '/libraries/$libraryId/patronRequests/outOfSequence'
-      fullPath: '/libraries/$libraryId/patronRequests/outOfSequence'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/patronRequests/exception': {
-      id: '/__authenticated/libraries/$libraryId/patronRequests/exception'
-      path: '/libraries/$libraryId/patronRequests/exception'
-      fullPath: '/libraries/$libraryId/patronRequests/exception'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsExceptionRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/patronRequests/completed': {
-      id: '/__authenticated/libraries/$libraryId/patronRequests/completed'
-      path: '/libraries/$libraryId/patronRequests/completed'
-      fullPath: '/libraries/$libraryId/patronRequests/completed'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsCompletedRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/patronRequests/all': {
-      id: '/__authenticated/libraries/$libraryId/patronRequests/all'
-      path: '/libraries/$libraryId/patronRequests/all'
-      fullPath: '/libraries/$libraryId/patronRequests/all'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsAllRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/patronRequests/active': {
-      id: '/__authenticated/libraries/$libraryId/patronRequests/active'
-      path: '/libraries/$libraryId/patronRequests/active'
-      fullPath: '/libraries/$libraryId/patronRequests/active'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsActiveRouteImport
-      parentRoute: typeof _authenticatedRoute
-    }
-    '/__authenticated/libraries/$libraryId/numericRangeMappings/patronType': {
-      id: '/__authenticated/libraries/$libraryId/numericRangeMappings/patronType'
-      path: '/libraries/$libraryId/numericRangeMappings/patronType'
-      fullPath: '/libraries/$libraryId/numericRangeMappings/patronType'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRouteImport
+    '/__authenticated/libraries/$libraryId/numericRangeMappings/all': {
+      id: '/__authenticated/libraries/$libraryId/numericRangeMappings/all'
+      path: '/libraries/$libraryId/numericRangeMappings/all'
+      fullPath: '/libraries/$libraryId/numericRangeMappings/all'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/libraries/$libraryId/numericRangeMappings/itemType': {
@@ -1804,11 +1747,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsItemTypeRouteImport
       parentRoute: typeof _authenticatedRoute
     }
-    '/__authenticated/libraries/$libraryId/numericRangeMappings/all': {
-      id: '/__authenticated/libraries/$libraryId/numericRangeMappings/all'
-      path: '/libraries/$libraryId/numericRangeMappings/all'
-      fullPath: '/libraries/$libraryId/numericRangeMappings/all'
-      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsAllRouteImport
+    '/__authenticated/libraries/$libraryId/numericRangeMappings/patronType': {
+      id: '/__authenticated/libraries/$libraryId/numericRangeMappings/patronType'
+      path: '/libraries/$libraryId/numericRangeMappings/patronType'
+      fullPath: '/libraries/$libraryId/numericRangeMappings/patronType'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdNumericRangeMappingsPatronTypeRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/patronRequests/active': {
+      id: '/__authenticated/libraries/$libraryId/patronRequests/active'
+      path: '/libraries/$libraryId/patronRequests/active'
+      fullPath: '/libraries/$libraryId/patronRequests/active'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsActiveRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/patronRequests/all': {
+      id: '/__authenticated/libraries/$libraryId/patronRequests/all'
+      path: '/libraries/$libraryId/patronRequests/all'
+      fullPath: '/libraries/$libraryId/patronRequests/all'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsAllRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/patronRequests/completed': {
+      id: '/__authenticated/libraries/$libraryId/patronRequests/completed'
+      path: '/libraries/$libraryId/patronRequests/completed'
+      fullPath: '/libraries/$libraryId/patronRequests/completed'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsCompletedRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/patronRequests/exception': {
+      id: '/__authenticated/libraries/$libraryId/patronRequests/exception'
+      path: '/libraries/$libraryId/patronRequests/exception'
+      fullPath: '/libraries/$libraryId/patronRequests/exception'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsExceptionRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/patronRequests/outOfSequence': {
+      id: '/__authenticated/libraries/$libraryId/patronRequests/outOfSequence'
+      path: '/libraries/$libraryId/patronRequests/outOfSequence'
+      fullPath: '/libraries/$libraryId/patronRequests/outOfSequence'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdPatronRequestsOutOfSequenceRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/referenceValueMappings/all': {
+      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/all'
+      path: '/libraries/$libraryId/referenceValueMappings/all'
+      fullPath: '/libraries/$libraryId/referenceValueMappings/all'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/referenceValueMappings/itemType': {
+      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/itemType'
+      path: '/libraries/$libraryId/referenceValueMappings/itemType'
+      fullPath: '/libraries/$libraryId/referenceValueMappings/itemType'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/referenceValueMappings/location': {
+      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/location'
+      path: '/libraries/$libraryId/referenceValueMappings/location'
+      fullPath: '/libraries/$libraryId/referenceValueMappings/location'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/referenceValueMappings/patronType': {
+      id: '/__authenticated/libraries/$libraryId/referenceValueMappings/patronType'
+      path: '/libraries/$libraryId/referenceValueMappings/patronType'
+      fullPath: '/libraries/$libraryId/referenceValueMappings/patronType'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/supplierRequests/all': {
+      id: '/__authenticated/libraries/$libraryId/supplierRequests/all'
+      path: '/libraries/$libraryId/supplierRequests/all'
+      fullPath: '/libraries/$libraryId/supplierRequests/all'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/patronRequests/audits/$auditId/': {
+      id: '/__authenticated/patronRequests/audits/$auditId/'
+      path: '/patronRequests/audits/$auditId'
+      fullPath: '/patronRequests/audits/$auditId/'
+      preLoaderRoute: typeof _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport
       parentRoute: typeof _authenticatedRoute
     }
   }
@@ -1889,6 +1909,7 @@ interface _authenticatedRouteChildren {
   _authenticatedLibrariesLibraryIdInsightsRoute: typeof _authenticatedLibrariesLibraryIdInsightsRoute
   _authenticatedLibrariesLibraryIdServiceRoute: typeof _authenticatedLibrariesLibraryIdServiceRoute
   _authenticatedLibrariesLibraryIdSettingsRoute: typeof _authenticatedLibrariesLibraryIdSettingsRoute
+  _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute: typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   _authenticatedServiceInfoRequestErrorsRequestsRoute: typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   _authenticatedGroupsGroupIdIndexRoute: typeof _authenticatedGroupsGroupIdIndexRoute
@@ -1987,6 +2008,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedLibrariesLibraryIdServiceRoute,
   _authenticatedLibrariesLibraryIdSettingsRoute:
     _authenticatedLibrariesLibraryIdSettingsRoute,
+  _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute:
+    _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute,
   _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute:
     _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute,
   _authenticatedServiceInfoRequestErrorsRequestsRoute:

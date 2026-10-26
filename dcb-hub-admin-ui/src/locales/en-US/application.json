@@ -1,7 +1,9 @@
 {
 	"catalogMetricsByHostLms": {
+		"host_lms_title": "Catalog metrics: {{name}}",
 		"name": "Catalog metrics by Host LMS",
-		"no_results": "No catalog metrics found. Try changing your search terms or filters."
+		"no_results": "No catalog metrics found. Try changing your search terms or filters.",
+		"view": "View catalog metrics"
 	},
 	"consortium": {
 		"brand": {
@@ -28,6 +30,11 @@
 			"role_catalogue": "Catalog: this system supplies the bibliographic records",
 			"koha_harvesting_group_description": "DCB harvests bib records from Koha's OPAC over OAI-PMH. In Koha, set the OAI-PMH system preference to Enable and give OAI-PMH:archiveID a value. Leave the OAI set blank to harvest the whole catalog.",
 			"roles_description": "Which DCB roles this system fulfills, e.g. CATALOGUE, CIRCULATION. Leave blank for the defaults."
+		},
+		"last_ping": {
+			"state": {
+				"unknown": "Failed for an unrecognized reason"
+			}
 		}
 	},
 	"insights": {
@@ -146,7 +153,9 @@
 		}
 	},
 	"patron_request": {
+		"cleanup_confirm_body": "Clean up finalizes a request and deletes the temporary records DCB made for it in each library's system. It cannot be undone.",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalized.",
+		"confirm_returned_body": "Do this once the item is back on the supplying library's shelf: the library has not reported it. The request is then released as if it had. A canceled request finishes as canceled, and a returned loan completes.",
 		"statuses": {
 			"CANCELLED": "Canceled",
 			"FINALISED": "Finalized"

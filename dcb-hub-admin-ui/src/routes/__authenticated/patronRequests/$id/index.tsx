@@ -3,8 +3,13 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import axios from "axios";
+import {
+	createFileRoute,
+	redirect,
+	useRouter,
+	useSearch,
+} from "@tanstack/react-router";
+import type { GridColDef } from "@mui/x-data-grid-premium";
 import dayjs from "dayjs";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -26,7 +31,7 @@ import Error from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import DataGrid from "@components/DataGrid/DataGrid";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
-import Loading from "@components/Loading/Loading";
+import PageLoading from "@components/Loading/PageLoading";
 import { CustomLink } from "@components/CustomLink/CustomLink";
 import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
 import Confirmation from "@components/Confirmation/Confirmation";
@@ -34,12 +39,21 @@ import PageActionsMenu, {
 	Action,
 } from "@components/PageActionsMenu/PageActionsMenu";
 import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import {
+	AUDIT_NAMESPACE,
+	requestAuditView,
+} from "@constants/dataGrid/gridViews";
 import { formatDuration } from "@helpers/formatDuration";
 import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
 import { getILS } from "@helpers/getILS";
 import { findPrimaryContacts } from "@helpers/findPrimaryContacts";
 import { useGraphQLClient } from "@/hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { getPatronRequest } from "@queries/getPatronRequest";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { getLocation } from "@queries/getLocation";
@@ -50,7 +64,14 @@ import {
 	cleanupPatronRequest,
 	isCleanupEligible,
 } from "@helpers/cleanupPatronRequest";
-import { isGuardedCleanupEnabled } from "@helpers/featureFlags";
+import {
+	isConfirmItemReturnedEnabled,
+	isGuardedCleanupEnabled,
+} from "@helpers/featureFlags";
+import {
+	confirmItemReturned,
+	isConfirmReturnEligible,
+} from "@helpers/confirmItemReturned";
 import {
 	actionProgressMessage,
 	SLOW_ACTION_MS,
@@ -69,7 +90,55 @@ import type {
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
+import { errorForLog } from "@helpers/safeErrorLog";
+
+// Stable, so the audit grid's columns are not new on every render
+const AUDIT_COLUMNS: GridColDef[] = [
+	{
+		field: "auditDate",
+		headerName: "Audit date",
+		minWidth: 60,
+		flex: 0.2,
+		editable: false,
+		filterable: true,
+		sortable: true,
+		valueGetter: (value: string, row: { auditDate: string }) => {
+			const auditDate = row.auditDate;
+			return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
+		},
+	},
+	{
+		field: "briefDescription",
+		headerName: "Description",
+		minWidth: 100,
+		flex: 0.4,
+	},
+	{
+		field: "fromStatus",
+		headerName: "fromStatus",
+		minWidth: 50,
+		flex: 0.25,
+	},
+	{
+		field: "toStatus",
+		headerName: "toStatus",
+		minWidth: 50,
+		flex: 0.25,
+	},
+];
+
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
+	validateSearch: (search: Record<string, unknown>) =>
+		validateGridSearch(search, [AUDIT_NAMESPACE]),
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			requestAuditView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/patronRequests/$id", params, ...restore });
+	},
 	component: RouteComponent,
 });
 
@@ -80,6 +149,7 @@ function RouteComponent() {
 	const auth = useAuth();
 	const queryClient = useQueryClient();
 	const gqlClient = useGraphQLClient();
+	const restClient = useDcbRestClient();
 
 	const [updateSuccessAlertVisibility, setUpdateSuccessAlertVisibility] =
 		useState(false);
@@ -92,31 +162,28 @@ function RouteComponent() {
 		status?: string;
 		detail?: string;
 	} | null>(null);
+	const [cleanupConfirmOpen, setCleanupConfirmOpen] = useState(false);
 	const [cleanupOverrideOpen, setCleanupOverrideOpen] = useState(false);
 	const [rollbackConfirmOpen, setRollbackConfirmOpen] = useState(false);
+	const [confirmReturnOpen, setConfirmReturnOpen] = useState(false);
+	const [
+		confirmReturnSuccessAlertVisibility,
+		setConfirmReturnSuccessAlertVisibility,
+	] = useState(false);
+	const [confirmReturnError, setConfirmReturnError] = useState<string | null>(
+		null,
+	);
 	const [rollbackSuccessAlertVisibility, setRollbackSuccessAlertVisibility] =
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
 	const [activeTab, setActiveTab] = useState(0);
 
-	const auditGridId = `audit-log-${id}`;
-	// Shared grid-state hook (as every other grid uses): seeds once from the store,
-	// subscribes with atomic selectors, and returns STABLE model references and
-	// change handlers. The stable `filterModel` reference is what stops MUI from
-	// resetting pagination to page 0 on every render (a changed filterModel ref is
-	// treated as a filter change, which resets the page).
-	const {
-		paginationModel: currentPagination,
-		sortModel: currentSort,
-		filterModel: currentFilter,
-		onPaginationModelChange: handleAuditPaginationChange,
-		onSortModelChange: handleAuditSortChange,
-		onFilterModelChange: handleAuditFilterChange,
-	} = useGridState(auditGridId, {
-		pagination: { page: 0, pageSize: 25 },
-		sort: [{ field: "auditDate", sort: "desc" }],
-	});
+	const audit = useGridView(
+		requestAuditView,
+		AUDIT_COLUMNS,
+		useSearch({ from: "/__authenticated/patronRequests/$id/" }),
+	);
 
 	const {
 		data,
@@ -244,12 +311,7 @@ function RouteComponent() {
 	};
 
 	const updateMutation = useMutation({
-		mutationFn: () =>
-			axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/update`,
-				{},
-				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
-			),
+		mutationFn: () => restClient.post(`/patrons/requests/${id}/update`, {}),
 		// The status before the POST, captured here rather than read in onSuccess: by
 		// then the invalidation has already replaced it.
 		onMutate: () => ({ before: patronRequest?.status }),
@@ -260,7 +322,7 @@ function RouteComponent() {
 			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
-			console.error("Error starting update", error);
+			console.error("Error starting update", errorForLog(error));
 			setErrorAlertVisibility(true);
 		},
 	});
@@ -270,8 +332,7 @@ function RouteComponent() {
 	const cleanupMutation = useMutation({
 		mutationFn: (override: boolean) =>
 			cleanupPatronRequest(
-				cfg.VITE_DCB_API_BASE,
-				auth.user?.access_token,
+				restClient,
 				{ id, status: patronRequest?.status },
 				{ override, refreshFirst: guardedCleanup },
 			),
@@ -303,7 +364,7 @@ function RouteComponent() {
 			setCleanupErrorAlertVisibility(true);
 		},
 		onError: (error) => {
-			console.error("Error starting cleanup", error);
+			console.error("Error starting cleanup", errorForLog(error));
 			setCleanupErrorAlertVisibility(true);
 		},
 	});
@@ -315,12 +376,7 @@ function RouteComponent() {
 	const canRollback = rollbackStatuses.includes(patronRequest?.status);
 
 	const rollbackMutation = useMutation({
-		mutationFn: () =>
-			axios.post(
-				`${cfg.VITE_DCB_API_BASE}/patrons/requests/${id}/rollback`,
-				{},
-				{ headers: { Authorization: `Bearer ${auth.user?.access_token}` } },
-			),
+		mutationFn: () => restClient.post(`/patrons/requests/${id}/rollback`, {}),
 		onMutate: () => ({ before: patronRequest?.status }),
 		onSuccess: async (_data, _variables, context) => {
 			setOutcome({ kind: "unknown" });
@@ -329,8 +385,37 @@ function RouteComponent() {
 			setOutcome(statusChange(context?.before, statusFromCache()));
 		},
 		onError: (error) => {
-			console.error("Error starting rollback", error);
+			console.error("Error starting rollback", errorForLog(error));
 			setRollbackErrorAlertVisibility(true);
+		},
+	});
+
+	const confirmReturnMutation = useMutation({
+		mutationFn: () =>
+			confirmItemReturned(cfg.VITE_DCB_API_BASE, auth.user?.access_token, id),
+		onMutate: () => ({ before: patronRequest?.status }),
+		onSuccess: async (result, _variables, context) => {
+			if (result.kind === "confirmed") {
+				setOutcome({ kind: "unknown" });
+				setConfirmReturnSuccessAlertVisibility(true);
+				await invalidatePatronRequestQueries(queryClient);
+				setOutcome(statusChange(context?.before, statusFromCache()));
+				return;
+			}
+
+			setConfirmReturnError(
+				result.kind === "refused"
+					? t("patron_request.confirm_returned_refused", {
+							detail: result.detail ?? "",
+						})
+					: result.kind === "forbidden"
+						? t("patron_request.confirm_returned_forbidden")
+						: t("patron_request.confirm_returned_unsuccessful"),
+			);
+		},
+		onError: (error) => {
+			console.error("Error confirming the item is back", errorForLog(error));
+			setConfirmReturnError(t("patron_request.confirm_returned_unsuccessful"));
 		},
 	});
 
@@ -344,7 +429,9 @@ function RouteComponent() {
 			? cleanupMutation.submittedAt
 			: rollbackMutation.isPending
 				? rollbackMutation.submittedAt
-				: null;
+				: confirmReturnMutation.isPending
+					? confirmReturnMutation.submittedAt
+					: null;
 
 	const [slowSubmittedAt, setSlowSubmittedAt] = useState<number | null>(null);
 
@@ -371,6 +458,10 @@ function RouteComponent() {
 				running: rollbackMutation.isPending,
 				message: t("patron_request.rollback_in_progress"),
 			},
+			{
+				running: confirmReturnMutation.isPending,
+				message: t("patron_request.confirm_returned_in_progress"),
+			},
 		],
 		runningSubmittedAt !== null && slowSubmittedAt === runningSubmittedAt
 			? t("patron_request.action_slow")
@@ -387,7 +478,7 @@ function RouteComponent() {
 
 	if (patronRequestLoading) {
 		return (
-			<Loading
+			<PageLoading
 				title={t("ui.info.loading.document", {
 					document_type: t("patron_request.title").toLowerCase(),
 				})}
@@ -473,11 +564,23 @@ function RouteComponent() {
 		pageActions.push({
 			key: "cleanup",
 			label: t("patron_request.cleanup"),
-			onClick: () => cleanupMutation.mutate(false),
+			onClick: () => setCleanupConfirmOpen(true),
 			disabled: cleanupMutation.isPending || !canCleanup,
 			tooltip: canCleanup
 				? t("patron_request.cleanup_info")
 				: t("patron_request.cleanup_disabled"),
+		});
+	}
+	const canConfirmReturn = isConfirmReturnEligible(patronRequest?.status);
+	if (isConfirmItemReturnedEnabled() && isConsortiumStaff(roles)) {
+		pageActions.push({
+			key: "confirm-returned",
+			label: t("patron_request.confirm_returned"),
+			onClick: () => setConfirmReturnOpen(true),
+			disabled: confirmReturnMutation.isPending || !canConfirmReturn,
+			tooltip: canConfirmReturn
+				? t("patron_request.confirm_returned_info")
+				: t("patron_request.confirm_returned_disabled"),
 		});
 	}
 	if (isAdmin) {
@@ -761,6 +864,13 @@ function RouteComponent() {
 										? () => setErrorAlertVisibility(false)
 										: () => setCleanupErrorAlertVisibility(false)
 								}
+								reference={
+									updateErrorAlertVisibility
+										? requestReferenceOf(updateMutation.error)
+										: cleanupMutation.data?.kind === "failed"
+											? cleanupMutation.data.reference
+											: requestReferenceOf(cleanupMutation.error)
+								}
 							/>
 							<TimedAlert
 								open={rollbackSuccessAlertVisibility}
@@ -781,6 +891,7 @@ function RouteComponent() {
 								alertText={t("patron_request.rollback_unsuccessful")}
 								key="rollback-error-alert"
 								onCloseFunc={() => setRollbackErrorAlertVisibility(false)}
+								reference={requestReferenceOf(rollbackMutation.error)}
 							/>
 							<TimedAlert
 								open={cleanupRefusal !== null}
@@ -791,6 +902,15 @@ function RouteComponent() {
 								})}
 								key="cleanup-refused-alert"
 								onCloseFunc={() => setCleanupRefusal(null)}
+							/>
+							<Confirmation
+								open={cleanupConfirmOpen}
+								action="cleanup"
+								onClose={() => setCleanupConfirmOpen(false)}
+								onConfirm={() => {
+									setCleanupConfirmOpen(false);
+									cleanupMutation.mutate(false);
+								}}
 							/>
 							<Confirmation
 								open={cleanupOverrideOpen}
@@ -815,6 +935,37 @@ function RouteComponent() {
 								onConfirm={() => {
 									setRollbackConfirmOpen(false);
 									rollbackMutation.mutate();
+								}}
+							/>
+							<TimedAlert
+								open={confirmReturnSuccessAlertVisibility}
+								severityType="success"
+								autoHideDuration={6000}
+								alertText={outcomeText(
+									"patron_request.confirm_returned_successful",
+									"patron_request.confirm_returned_successful_changed",
+									"patron_request.confirm_returned_successful_unchanged",
+								)}
+								key="confirm-returned-success-alert"
+								onCloseFunc={() =>
+									setConfirmReturnSuccessAlertVisibility(false)
+								}
+							/>
+							<TimedAlert
+								open={confirmReturnError !== null}
+								severityType="error"
+								autoHideDuration={10000}
+								alertText={confirmReturnError ?? ""}
+								key="confirm-returned-error-alert"
+								onCloseFunc={() => setConfirmReturnError(null)}
+							/>
+							<Confirmation
+								open={confirmReturnOpen}
+								action="confirmReturned"
+								onClose={() => setConfirmReturnOpen(false)}
+								onConfirm={() => {
+									setConfirmReturnOpen(false);
+									confirmReturnMutation.mutate();
 								}}
 							/>
 						</Grid>
@@ -1946,47 +2097,19 @@ function RouteComponent() {
 					<DataGrid
 						disablePivoting
 						rows={patronRequest?.audit ?? []}
-						columns={[
-							{
-								field: "auditDate",
-								headerName: "Audit date",
-								minWidth: 60,
-								flex: 0.2,
-								editable: false,
-								filterable: true,
-								sortable: true,
-								valueGetter: (value: string, row: { auditDate: string }) => {
-									const auditDate = row.auditDate;
-									return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
-								},
-							},
-							{
-								field: "briefDescription",
-								headerName: "Description",
-								minWidth: 100,
-								flex: 0.4,
-							},
-							{
-								field: "fromStatus",
-								headerName: "fromStatus",
-								minWidth: 50,
-								flex: 0.25,
-							},
-							{
-								field: "toStatus",
-								headerName: "toStatus",
-								minWidth: 50,
-								flex: 0.25,
-							},
-						]}
+						columns={AUDIT_COLUMNS}
+						columnVisibilityModel={audit.columnVisibilityModel}
+						onColumnVisibilityModelChange={audit.onColumnVisibilityModelChange}
+						columnLayout={audit.columnLayout}
+						viewNotice={<GridViewNotice view={audit} />}
 						type="audits"
 						identifier="AuditPatronRequestDetails"
 						// This grid could show click-through details of its own for each audit log entry
 						// sortModel={[{ field: "auditDate", sort: "desc" }]}
 						// operationDataType="Audit"
 						filterMode="client"
-						filterModel={currentFilter}
-						onFilterModelChange={handleAuditFilterChange}
+						filterModel={audit.filterModel}
+						onFilterModelChange={audit.onFilterModelChange}
 						disableAggregation={true}
 						disableHoverInteractions={true}
 						disableRowGrouping={true}
@@ -1995,15 +2118,15 @@ function RouteComponent() {
 						noResultsText={t("ui.data_grid.no_results")}
 						pagination
 						paginationMode="client"
-						paginationModel={currentPagination}
-						onPaginationModelChange={handleAuditPaginationChange}
+						paginationModel={audit.paginationModel}
+						onPaginationModelChange={audit.onPaginationModelChange}
 						pivotingEnabled={false}
 						toolbarVisible
 						searchText={t("ui.data_grid.search_by_audit")}
 						scrollbarVisible={false}
 						sortingMode="client"
-						sortModel={currentSort}
-						onSortModelChange={handleAuditSortChange}
+						sortModel={audit.sortModel}
+						onSortModelChange={audit.onSortModelChange}
 					/>
 				</TabPanel>
 			</TabContext>

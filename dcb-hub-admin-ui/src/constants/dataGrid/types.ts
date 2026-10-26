@@ -72,9 +72,6 @@ export const nonClickableTypes: readonly DataGridType[] = [
 	"libraryUser",
 	// Request tags are edited through dialogs; there is no tag page.
 	"requestTag",
-	// Ingest metrics per source system. Informational, and the row id is a source
-	// system id rather than a Host LMS id, so it addresses no page in this app.
-	"catalogMetricsByHostLms",
 	// Both error-overview grids navigate through per-cell Links - the description to
 	// the drill-down, the request id and audit url to their own pages - so a
 	// whole-row click has nothing left to do.
@@ -98,6 +95,9 @@ export const rowClickRedirects: Partial<
 	audits: (id) => `/patronRequests/audits/${id}`,
 	// A cluster member's id IS its source bib id (see getClusters `members`).
 	clusterMembers: (id) => `/bibs/${id}`,
+	// A row is one Host LMS's ingest counts, and its own page scopes the slow
+	// count to that Host LMS - see importIngestDetails.ts.
+	catalogMetricsByHostLms: (id) => `/serviceInfo/catalogMetricsByHostLms/${id}`,
 	// A library's locations grid lists locations; their detail page is top-level.
 	libraryLocations: (id) => `/locations/${id}`,
 	// A requesting-history entry and a cleanup or rollback outcome are each a row OF

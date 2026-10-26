@@ -22,7 +22,9 @@ type ConfirmationAction =
 	| "uploadReplacement"
 	| "sessionWarning"
 	| "rollback"
-	| "cleanupOverride";
+	| "cleanup"
+	| "cleanupOverride"
+	| "confirmReturned";
 
 interface AuditFormData {
 	reason: string;
@@ -57,7 +59,9 @@ export default function Confirmation({
 	const isUpload = action === "uploadReplacement";
 	const isSessionWarning = action === "sessionWarning";
 	const isRollback = action === "rollback";
+	const isCleanup = action === "cleanup";
 	const isCleanupOverride = action === "cleanupOverride";
+	const isConfirmReturned = action === "confirmReturned";
 	const requiresAuditFields = isEdit || isDelete || isUpload;
 
 	const {
@@ -89,7 +93,9 @@ export default function Confirmation({
 		if (isUnsaved) return t("ui.unsaved_changes.header");
 		if (isUpload) return t("common.upload_title", { entityName: entityName });
 		if (isRollback) return t("patron_request.rollback_confirm_title");
+		if (isCleanup) return t("patron_request.cleanup_confirm_title");
 		if (isCleanupOverride) return t("patron_request.cleanup_override_title");
+		if (isConfirmReturned) return t("patron_request.confirm_returned_title");
 		return t("ui.confirmation.general_title");
 	};
 
@@ -147,6 +153,8 @@ export default function Confirmation({
 						{isDelete && t("ui.data_grid.delete_body", { entity: entityName })}
 						{isUnsaved && t("ui.unsaved_changes.body")}
 						{isEdit && t("ui.confirmation.edit_review")}
+						{isConfirmReturned && t("patron_request.confirm_returned_body")}
+						{isCleanup && t("patron_request.cleanup_confirm_body")}
 					</DialogContentText>
 
 					{/* Rollback carries a non-negotiable caveat: it is only safe when the
@@ -171,7 +179,7 @@ export default function Confirmation({
 						</Alert>
 					)}
 
-					{(isUpload || isSessionWarning || isRollback) &&
+					{(isUpload || isSessionWarning || isRollback || isCleanup) &&
 						customWarningText && <Box sx={{ mb: 2 }}>{customWarningText}</Box>}
 
 					{isEdit && editInformation && (
@@ -247,7 +255,7 @@ export default function Confirmation({
 						color={
 							isDelete || isUnsaved
 								? "error"
-								: isRollback || isCleanupOverride
+								: isRollback || isCleanup || isCleanupOverride
 									? "warning"
 									: "primary"
 						}
@@ -262,7 +270,9 @@ export default function Confirmation({
 						{isSessionWarning && t("loginout.stay_logged_in")}
 						{isUpload && t("common.upload")}
 						{isRollback && t("patron_request.rollback")}
+						{isCleanup && t("patron_request.cleanup_confirm")}
 						{isCleanupOverride && t("patron_request.cleanup_override_confirm")}
+						{isConfirmReturned && t("patron_request.confirm_returned")}
 					</Button>
 				</DialogActions>
 			</form>

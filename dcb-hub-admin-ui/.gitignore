@@ -188,6 +188,8 @@ yarn.lock
 /test-results/
 /playwright-report/
 /playwright/.cache/
+# What the checks leave for the release report: docs/testing.md, "The release report"
+/reports/
 
 # Lighthouse CI reports. The BUDGET (lighthouserc.js) is committed; its output is not.
 /.lighthouseci/

@@ -31,12 +31,16 @@ const ALL_FEATURES: Record<string, string> = {
 	VITE_FEATURE_NCIP_ONBOARDING: "true",
 	VITE_FEATURE_LIBRARY_USER_PROVISIONING: "true",
 	VITE_FEATURE_GUARDED_CLEANUP: "true",
+	VITE_FEATURE_CONFIRM_ITEM_RETURNED: "true",
 	// Was missing: this fixture says "everything on", and a flag left out of it
 	// silently tests the legacy path in every spec that asks for the new one.
 	VITE_FEATURE_LOCAL_HOLDS: "true",
+	VITE_FEATURE_HOST_LMS_PROBES: "true",
 	VITE_FEATURE_SETTINGS_INHERITANCE: "true",
 	VITE_FEATURE_SHELF_BROWSE: "true",
 	VITE_FEATURE_REQUEST_TAGS: "true",
+	VITE_FEATURE_REQUEST_NOTES: "true",
+	VITE_FEATURE_PLACED_BY_STAFF: "true",
 	VITE_FEATURE_SYMPOSIA: "true",
 };
 

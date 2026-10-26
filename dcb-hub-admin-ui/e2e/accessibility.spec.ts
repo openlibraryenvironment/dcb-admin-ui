@@ -16,6 +16,7 @@ import {
 } from "./fixtures/legacy-service-mocks";
 import { mockLatestReleases } from "./fixtures/service-status-mocks";
 import { MOCKS, ROUTES } from "./fixtures/routes";
+import { covers } from "./fixtures/coverage";
 
 for (const scheme of ["light", "dark"] as const) {
 	test.describe(`WCAG 2.2 AA - ${scheme} mode`, () => {
@@ -32,17 +33,25 @@ for (const scheme of ["light", "dark"] as const) {
 		});
 
 		for (const route of ROUTES) {
-			test(`${route.path} has no violations`, async ({ page }) => {
-				await route.setup?.(page);
-				await page.goto(route.path);
-				await route.ready(page);
+			test(
+				`${route.path} has no violations`,
+				covers(
+					`Every check axe can automate passes on ${route.path}, in ${scheme} mode, and the page does not scroll sideways.`,
+					["1.4.10"],
+					{ page: route.path, view: scheme },
+				),
+				async ({ page }) => {
+					await route.setup?.(page);
+					await page.goto(route.path);
+					await route.ready(page);
 
-				// Guards the gate itself: without this a "passing" dark run could just
-				// be a second light run.
-				await expectPaintedScheme(page, scheme);
+					// Guards the gate itself: without this a "passing" dark run could just
+					// be a second light run.
+					await expectPaintedScheme(page, scheme);
 
-				await scanForViolations(page);
-			});
+					await scanForViolations(page);
+				},
+			);
 		}
 	});
 }
@@ -75,19 +84,29 @@ for (const scheme of ["light", "dark"] as const) {
 		test.describe(`WCAG 2.2 AA - consortium ${section.label} form, ${scheme}`, () => {
 			test.use({ colorScheme: scheme });
 
-			test("editing has no violations", async ({ page }) => {
-				await useAllFeatures(page);
-				await seedAuth(page, { roles: ADMIN_ROLES });
-				await mockGraphQL(page, MOCKS);
+			test(
+				"editing has no violations",
+				covers(
+					`Every check axe can automate passes on the consortium ${section.label} form while editing, in ${scheme} mode, and the page does not scroll sideways.`,
+					["1.4.10"],
+					{ page: `consortium ${section.label} form, editing`, view: scheme },
+				),
+				async ({ page }) => {
+					await useAllFeatures(page);
+					await seedAuth(page, { roles: ADMIN_ROLES });
+					await mockGraphQL(page, MOCKS);
 
-				await page.goto(section.path);
-				await page.getByRole("button", { name: "Actions" }).click();
-				await page.getByRole("menuitem", { name: "Edit" }).click();
-				await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+					await page.goto(section.path);
+					await page.getByRole("button", { name: "Actions" }).click();
+					await page.getByRole("menuitem", { name: "Edit" }).click();
+					await expect(
+						page.getByRole("button", { name: "Save" }),
+					).toBeVisible();
 
-				await expectPaintedScheme(page, scheme);
-				await scanForViolations(page);
-			});
+					await expectPaintedScheme(page, scheme);
+					await scanForViolations(page);
+				},
+			);
 		});
 	}
 }
@@ -217,17 +236,25 @@ for (const scheme of ["light", "dark"] as const) {
 		test.describe(`WCAG 2.2 AA - ${surface.label}, ${scheme}`, () => {
 			test.use({ colorScheme: scheme });
 
-			test("has no violations", async ({ page }) => {
-				await useAllFeatures(page);
-				await seedAuth(page, { roles: ADMIN_ROLES });
-				await mockGraphQL(page, MOCKS);
+			test(
+				"has no violations",
+				covers(
+					`Every check axe can automate passes on the ${surface.label} form, in ${scheme} mode, and the page does not scroll sideways.`,
+					["1.4.10"],
+					{ page: surface.label, view: scheme },
+				),
+				async ({ page }) => {
+					await useAllFeatures(page);
+					await seedAuth(page, { roles: ADMIN_ROLES });
+					await mockGraphQL(page, MOCKS);
 
-				await page.goto(surface.path);
-				await surface.open(page);
+					await page.goto(surface.path);
+					await surface.open(page);
 
-				await expectPaintedScheme(page, scheme);
-				await scanForViolations(page);
-			});
+					await expectPaintedScheme(page, scheme);
+					await scanForViolations(page);
+				},
+			);
 		});
 	}
 }
@@ -247,17 +274,25 @@ for (const scheme of ["light", "dark"] as const) {
 	test.describe(`WCAG 2.2 AA - the sign-in page, ${scheme}`, () => {
 		test.use({ colorScheme: scheme });
 
-		test("has no violations", async ({ page }) => {
-			await useAllFeatures(page);
-			await mockGraphQL(page, MOCKS);
+		test(
+			"has no violations",
+			covers(
+				`Every check axe can automate passes on the sign-in page, in ${scheme} mode, and the page does not scroll sideways.`,
+				["1.4.10"],
+				{ page: "/login", view: scheme },
+			),
+			async ({ page }) => {
+				await useAllFeatures(page);
+				await mockGraphQL(page, MOCKS);
 
-			await page.goto("/login");
-			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+				await page.goto("/login");
+				await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-			await expectPaintedScheme(page, scheme);
-			await scanForViolations(page);
-			await scanForLandmarks(page);
-		});
+				await expectPaintedScheme(page, scheme);
+				await scanForViolations(page);
+				await scanForLandmarks(page);
+			},
+		);
 	});
 }
 
@@ -270,25 +305,35 @@ for (const scheme of ["light", "dark"] as const) {
 	test.describe(`WCAG 2.2 AA - service status detail panel, ${scheme}`, () => {
 		test.use({ colorScheme: scheme });
 
-		test("the expanded version row has no violations", async ({ page }) => {
-			await useAllFeatures(page);
-			await seedAuth(page);
-			await mockGraphQL(page, MOCKS);
-			await mockLatestReleases(page);
+		test(
+			"the expanded version row has no violations",
+			covers(
+				`Every check axe can automate passes on service status with a version's details open, in ${scheme} mode, and the page does not scroll sideways.`,
+				["1.4.10"],
+				{ page: "service status, details open", view: scheme },
+			),
+			async ({ page }) => {
+				await useAllFeatures(page);
+				await seedAuth(page);
+				await mockGraphQL(page, MOCKS);
+				await mockLatestReleases(page);
 
-			await page.goto("/serviceInfo/serviceStatus");
-			const service = page.getByRole("row").filter({ hasText: "dcb-service" });
-			await expect(service).toContainText("v9.0.0");
-			await service.getByRole("button", { name: "Expand details" }).click();
-			await expect(page.getByText("Closest release tag")).toBeVisible();
-			// The click leaves the pointer on the toggle, whose tooltip then fades in. Scanned
-			// mid-fade it fails colour-contrast on blended colours; fully shown it is 10.1:1.
-			await page.mouse.move(0, 0);
-			await expect(page.getByRole("tooltip")).toBeHidden();
+				await page.goto("/serviceInfo/serviceStatus");
+				const service = page
+					.getByRole("row")
+					.filter({ hasText: "dcb-service" });
+				await expect(service).toContainText("v9.0.0");
+				await service.getByRole("button", { name: "Expand details" }).click();
+				await expect(page.getByText("Closest release tag")).toBeVisible();
+				// The click leaves the pointer on the toggle, whose tooltip then fades in. Scanned
+				// mid-fade it fails colour-contrast on blended colours; fully shown it is 10.1:1.
+				await page.mouse.move(0, 0);
+				await expect(page.getByRole("tooltip")).toBeHidden();
 
-			await expectPaintedScheme(page, scheme);
-			await scanForViolations(page);
-		});
+				await expectPaintedScheme(page, scheme);
+				await scanForViolations(page);
+			},
+		);
 	});
 }
 
@@ -302,12 +347,20 @@ test.describe("WCAG 2.2 AA - high contrast", () => {
 	});
 
 	for (const route of ROUTES) {
-		test(`${route.path} has no violations`, async ({ page }) => {
-			await route.setup?.(page);
-			await page.goto(route.path);
-			await route.ready(page);
-			await scanForViolations(page);
-		});
+		test(
+			`${route.path} has no violations`,
+			covers(
+				`Every check axe can automate passes on ${route.path}, in high contrast, and the page does not scroll sideways.`,
+				["1.4.10"],
+				{ page: route.path, view: "high contrast" },
+			),
+			async ({ page }) => {
+				await route.setup?.(page);
+				await page.goto(route.path);
+				await route.ready(page);
+				await scanForViolations(page);
+			},
+		);
 	}
 });
 
@@ -355,23 +408,37 @@ test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
 			});
 
 			for (const route of LEGACY_ROUTES) {
-				test(`${route.path} has no violations`, async ({ page }) => {
-					await route.setup?.(page);
-					await page.goto(route.path);
-					await route.ready(page);
-					await expectPaintedScheme(page, scheme);
-					await scanForViolations(page);
-				});
+				test(
+					`${route.path} has no violations`,
+					covers(
+						`Every check axe can automate passes on ${route.path} against dcb-service 8.71.0, in ${scheme} mode, and the page does not scroll sideways.`,
+						["1.4.10"],
+						{ page: `${route.path} on dcb-service 8.71.0`, view: scheme },
+					),
+					async ({ page }) => {
+						await route.setup?.(page);
+						await page.goto(route.path);
+						await route.ready(page);
+						await expectPaintedScheme(page, scheme);
+						await scanForViolations(page);
+					},
+				);
 			}
 
-			test("the setup rail has no violations with a chapter removed", async ({
-				page,
-			}) => {
-				// The renumbered rail, which is the surface this world actually changes.
-				await page.goto("/setup/consortium");
-				await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-				await scanForViolations(page);
-			});
+			test(
+				"the setup rail has no violations with a chapter removed",
+				covers(
+					`Every check axe can automate passes on the setup steps against dcb-service 8.71.0, in ${scheme} mode, and the page does not scroll sideways.`,
+					["1.4.10"],
+					{ page: "setup on dcb-service 8.71.0", view: scheme },
+				),
+				async ({ page }) => {
+					// The renumbered rail, which is the surface this world actually changes.
+					await page.goto("/setup/consortium");
+					await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+					await scanForViolations(page);
+				},
+			);
 		});
 	}
 });
@@ -392,42 +459,54 @@ test.describe("WCAG 2.4.1 - landmarks and the skip link", () => {
 	});
 
 	for (const route of ROUTES) {
-		test(`${route.path} is fully landmarked`, async ({ page }) => {
-			await route.setup?.(page);
-			await page.goto(route.path);
-			await route.ready(page);
-			await scanForLandmarks(page);
-		});
+		test(
+			`${route.path} is fully landmarked`,
+			covers(
+				`${route.path} has a main landmark, keeps its content inside landmarks, and can be skipped to.`,
+				["1.3.1", "2.4.1"],
+			),
+			async ({ page }) => {
+				await route.setup?.(page);
+				await page.goto(route.path);
+				await route.ready(page);
+				await scanForLandmarks(page);
+			},
+		);
 	}
 
 	// The half axe cannot check. `landmark-one-main` proves a main exists; it says nothing
 	// about whether a keyboard user can REACH it, which is the entire point of 2.4.1.
-	test("the skip link is the first tab stop and moves focus into main", async ({
-		page,
-	}) => {
-		await page.goto("/libraries");
-		await expect(page.getByText("Alpha Test Library")).toBeVisible();
+	test(
+		"the skip link is the first tab stop and moves focus into main",
+		covers(
+			"The skip link is the first thing the keyboard reaches, and moves focus into the page's content.",
+			["2.4.1", "2.1.1"],
+		),
+		async ({ page }) => {
+			await page.goto("/libraries");
+			await expect(page.getByText("Alpha Test Library")).toBeVisible();
 
-		// Tab from the top of the document, the way a user arriving from the address bar
-		// does. NOT via a click: clicking sets the sequential focus navigation starting
-		// point to whatever is under the pointer, and at the top-left of this layout that
-		// is the fixed header - so the first Tab would land on the header's second button
-		// and the test would fail for a reason that has nothing to do with the skip link.
-		await page.evaluate(() =>
-			(document.activeElement as HTMLElement | null)?.blur(),
-		);
-		await page.keyboard.press("Tab");
+			// Tab from the top of the document, the way a user arriving from the address bar
+			// does. NOT via a click: clicking sets the sequential focus navigation starting
+			// point to whatever is under the pointer, and at the top-left of this layout that
+			// is the fixed header - so the first Tab would land on the header's second button
+			// and the test would fail for a reason that has nothing to do with the skip link.
+			await page.evaluate(() =>
+				(document.activeElement as HTMLElement | null)?.blur(),
+			);
+			await page.keyboard.press("Tab");
 
-		const skipLink = page.getByRole("link", { name: "Skip to main content" });
-		await expect(skipLink).toBeFocused();
-		// Hidden until focused, visible once it is — a skip link nobody can see while
-		// tabbing is one sighted keyboard users never learn exists.
-		await expect(skipLink).toBeInViewport();
+			const skipLink = page.getByRole("link", { name: "Skip to main content" });
+			await expect(skipLink).toBeFocused();
+			// Hidden until focused, visible once it is — a skip link nobody can see while
+			// tabbing is one sighted keyboard users never learn exists.
+			await expect(skipLink).toBeInViewport();
 
-		await page.keyboard.press("Enter");
+			await page.keyboard.press("Enter");
 
-		// tabIndex={-1} on <main> is what makes this true. Without it the viewport moves
-		// and focus does not, so the next Tab goes straight back into the sidebar.
-		await expect(page.locator("main#main-content")).toBeFocused();
-	});
+			// tabIndex={-1} on <main> is what makes this true. Without it the viewport moves
+			// and focus does not, so the next Tab goes straight back into the sidebar.
+			await expect(page.locator("main#main-content")).toBeFocused();
+		},
+	);
 });

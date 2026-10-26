@@ -48,6 +48,12 @@ const GATES = [
 		cmd: "npx vitest run",
 	},
 	{
+		id: "pipeline",
+		label: "Pipeline config",
+		// Local only: no pipeline job runs these. docs/testing.md, "The pipeline checks are local".
+		cmd: "npm run lint:pipeline",
+	},
+	{
 		id: "supply-chain",
 		label: "Production dependencies",
 		// Production and high-or-above only, matching verify_supply_chain. The full
@@ -64,7 +70,7 @@ const GATES = [
 		// prefix: POSIX inline assignment is a parse error under cmd.exe, so that form
 		// only ever ran on Linux.
 		cmd: "npm run build",
-		env: { VITE_PUBLIC_URL: "/" },
+		env: { VITE_PUBLIC_URL: "/", BUNDLE_BUDGET: "1" },
 		then: { label: "Bundle budget", cmd: "npm run budget" },
 	},
 	{

@@ -13,7 +13,7 @@ import InsightsDashboard from "@components/Insights/InsightsDashboard";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { createRestClient } from "@helpers/createRestClient";
-import { isInsightsEnabled } from "@helpers/featureFlags";
+import { isInsightsPageShown } from "@helpers/featureFlags";
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { groupParamsSchema } from "@schemas/routeParams/groupParams";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
@@ -49,11 +49,11 @@ export const Route = createFileRoute(
 	// The scope is fixed by the group in the path, but the window, the open subject,
 	// the plotted series and the cost assumption are as shareable as anywhere else.
 	validateSearch: insightsSearchSchema,
-	// The tab is hidden while the flag is off, but the URL is still typeable - and the
+	// The tab is hidden where the page is not shown, but the URL is still typeable - and the
 	// page would call statistics endpoints this environment's dcb-service does not
 	// serve yet.
 	beforeLoad: ({ params: { groupId } }) => {
-		if (!isInsightsEnabled()) {
+		if (!isInsightsPageShown("groups")) {
 			throw redirect({ to: "/groups/$groupId", params: { groupId } });
 		}
 	},

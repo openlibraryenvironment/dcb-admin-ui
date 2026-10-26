@@ -17,6 +17,7 @@ import { ExpandMore } from "@mui/icons-material";
 
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import AlarmDetails from "@components/AlarmDetails/AlarmDetails";
 import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
 import { LocationCell } from "@components/LocationCell/LocationCell";
 import ChangesSummary from "@components/ChangesSummary/ChangesSummary";
@@ -95,12 +96,12 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 						</Stack>
 					</Grid>
-					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+					<Grid size={{ xs: 2, sm: 4, md: 12 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
 								{t("alarms.details")}
 							</Typography>
-							<pre>{JSON.stringify(row?.alarmDetails, null, 2)}</pre>
+							<AlarmDetails details={row?.alarmDetails} />
 						</Stack>
 					</Grid>
 				</MasterDetailLayout>
@@ -156,7 +157,11 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								<Typography variant="attributeTitle">
 									{t("search.identifiers")}
 								</Typography>
-								<List sx={{ paddingInlineStart: 0, marginInlineStart: 0 }} dense disablePadding>
+								<List
+									sx={{ paddingInlineStart: 0, marginInlineStart: 0 }}
+									dense
+									disablePadding
+								>
 									{row?.canonicalMetadata?.identifiers?.map(
 										(id: { namespace: string; value: string }) => (
 											<ListItem

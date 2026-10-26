@@ -108,18 +108,15 @@ mean; this section is the part DCB Admin cannot start without.
 
 The application requires the following environment variables to function properly. How you apply them depends on your chosen deployment method (see Section 3).
 
-| Variable                 | Required | Description                                                                                                                                                                                                                                                                        |
-| ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_KEYCLOAK_URL`      | **Yes**  | The URL of the Keycloak server being used for your OpenRS system.                                                                                                                                                                                                                  |
-| `VITE_KEYCLOAK_ID`       | **Yes**  | The name of the Keycloak client                                                                                                                                                                                                                                                    |
-| `VITE_DCB_API_BASE`      | **Yes**  | The URL of the dcb-service instance.                                                                                                                                                                                                                                               |
-| `VITE_DCB_SEARCH_BASE`   | **Yes**  | The URL of the dcb-locate instance.                                                                                                                                                                                                                                                |
-| `VITE_MUI_X_LICENSE_KEY` | **Yes**  | Provided by the Hosting Provider. Unlocks MUI X Premium features. It is OK for this to be exposed in the bundle: it is not OK for this to be publicly broadcast (i.e. committed to a repository). See [MUI X docs](https://mui.com/x/introduction/licensing/#license-key-security) |
-
-                            |
-
-| `VITE_LOCALE` | No | `en-GB` or `en-US`. Defaults to `en-GB`. Read at container start, so a deployment changes it without a rebuild. See "Locale" below. |
-| `VITE_PUBLIC_URL` | No | Standalone base path. Defaults to `/`. Must include leading and trailing slashes (e.g. `/dcb-admin/`). **Build-time only.** The standalone entry uses it for assets, routing, translations and storage. The bootloader entry always routes at `/` and resolves assets from its own bundle URL. |
+| Variable                 | Required | Description                                                                                                                                                                                                                                                                                    |
+| ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_KEYCLOAK_URL`      | **Yes**  | The URL of the Keycloak server being used for your OpenRS system.                                                                                                                                                                                                                              |
+| `VITE_KEYCLOAK_ID`       | **Yes**  | The name of the Keycloak client                                                                                                                                                                                                                                                                |
+| `VITE_DCB_API_BASE`      | **Yes**  | The URL of the dcb-service instance.                                                                                                                                                                                                                                                           |
+| `VITE_DCB_SEARCH_BASE`   | **Yes**  | The URL of the dcb-locate instance.                                                                                                                                                                                                                                                            |
+| `VITE_MUI_X_LICENSE_KEY` | **Yes**  | Provided by the Hosting Provider. Unlocks MUI X Premium features. It is OK for this to be exposed in the bundle: it is not OK for this to be publicly broadcast (i.e. committed to a repository). See [MUI X docs](https://mui.com/x/introduction/licensing/#license-key-security)             |
+| `VITE_LOCALE`            | No       | `en-GB` or `en-US`. Defaults to `en-GB`. Read at container start, so a deployment changes it without a rebuild. See "Locale" below.                                                                                                                                                            |
+| `VITE_PUBLIC_URL`        | No       | Standalone base path. Defaults to `/`. Must include leading and trailing slashes (e.g. `/dcb-admin/`). **Build-time only.** The standalone entry uses it for assets, routing, translations and storage. The bootloader entry always routes at `/` and resolves assets from its own bundle URL. |
 
 ---
 
@@ -172,25 +169,29 @@ the table below is the reference for what the flags mean, not a list of bindings
 Setting them by hand belongs to the other two pathways, where the config is written rather
 than computed.
 
-| Variable                                 | Enable at dcb-service                 | What it turns on                                                                                                                              |
-| ---------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_FEATURE_CONSORTIUM_BRANDING`       | **9.0.0** or later                    | The consortium Branding tab, the setup wizard's Discovery chapter, brand image upload, and the merged brand columns in the consortium queries |
-| `VITE_FEATURE_NCIP_ONBOARDING`           | **9.0.0** or later                    | Service Info → DCB NCIP onboarding (`/api/v1/dcb-profile-ncip2`)                                                                              |
-| `VITE_FEATURE_INSIGHTS`                  | **9.0.0** or later                    | Insights, consortium- and library-level (`/insights`)                                                                                         |
-| `VITE_FEATURE_LIBRARY_USER_PROVISIONING` | **dcb-service main** — no release yet | A library's Accounts tab: inviting, enabling and re-inviting DCB Admin for Libraries users                                                    |
-| `VITE_FEATURE_LOCAL_HOLDS`               | **dcb-service main** — no release yet | The per-agency maximum local holds field on a library's Settings tab                                                                          |
-| `VITE_FEATURE_CONSORTIUM_SUPPORT_URL`    | **no release serves this yet**        | The consortium's patron support link on the consortium form                                                                                   |
-| `VITE_FEATURE_AUDIT_EXPLORER`            | **no release serves this yet**        | Service Info → Audit Explorer                                                                                                                 |
-| `VITE_FEATURE_ANNOUNCEMENTS`             | **no release serves this yet**        | Consortium → Announcements, the notices patrons read in discovery. Also needs `VITE_FEATURE_SYMPOSIA`                                         |
-| `VITE_FEATURE_SETTINGS_INHERITANCE`      | **no release serves this yet**        | Where a functional setting was decided, the bulk set, and the revert to inherited                                                             |
-| `VITE_FEATURE_REQUEST_TAGS`              | **no release serves this yet**        | Consortium → Request tags: the tags libraries put on patron requests - add, rename, retire, and delete one no request carries |
-| `VITE_FEATURE_SHELF_BROWSE`              | **no release serves this yet**        | The classification a library shelves by, which orders discovery's shelf browse. Also needs `VITE_FEATURE_SYMPOSIA`                            |
+| Variable                                 | Enable at dcb-service       | What it turns on                                                                                                                                                                                              |
+| ---------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_FEATURE_CONSORTIUM_BRANDING`       | **9.0.0** or later          | The consortium Branding tab, the setup wizard's Discovery chapter, brand image upload, and the merged brand columns in the consortium queries                                                                 |
+| `VITE_FEATURE_NCIP_ONBOARDING`           | **9.0.0** or later          | Service Info → DCB NCIP onboarding (`/api/v1/dcb-profile-ncip2`)                                                                                                                                              |
+| `VITE_FEATURE_INSIGHTS`                  | **9.0.0** or later          | Insights, consortium- and library-level (`/insights`)                                                                                                                                                         |
+| `VITE_FEATURE_GUARDED_CLEANUP`           | **9.0.0** or later          | Clean up checks the request for updates first, and offers the override when dcb-service refuses it (`?force=`)                                                                                                |
+| `VITE_FEATURE_LIBRARY_USER_PROVISIONING` | **9.1.0** or later          | A library's Accounts tab: inviting, enabling and re-inviting DCB Admin for Libraries users                                                                                                                    |
+| `VITE_FEATURE_LOCAL_HOLDS`               | **9.1.0** or later          | The per-agency maximum local holds field on a library's Settings tab                                                                                                                                          |
+| `VITE_FEATURE_INSIGHTS_TRENDS`           | **9.1.0** or later          | The Insights trend charts (`/insights/trend`)                                                                                                                                                                 |
+| `VITE_FEATURE_CONSORTIUM_SUPPORT_URL`    | **9.2.0** or later          | The consortium's patron support link on the consortium form                                                                                                                                                   |
+| `VITE_FEATURE_ANNOUNCEMENTS`             | **9.2.0** or later          | Consortium → Announcements, the notices patrons read in discovery. Also needs `VITE_FEATURE_SYMPOSIA`                                                                                                         |
+| `VITE_FEATURE_SHELF_BROWSE`              | **9.2.0** or later          | The classification a library shelves by, which orders discovery's shelf browse. Also needs `VITE_FEATURE_SYMPOSIA`                                                                                            |
+| `VITE_FEATURE_CONFIRM_ITEM_RETURNED`     | **9.2.0** or later          | "Confirm item is back" on a request waiting for its item to return to the supplying library                                                                                                                   |
+| `VITE_FEATURE_HOST_LMS_PROBES`           | **9.2.0** or later          | The configuration and patron authentication checks shown after creating or updating a Host LMS, each Host LMS's last connection check on its page and in the list, and catalogue metrics for chosen libraries |
+| `VITE_FEATURE_REQUEST_TAGS`              | **9.2.0** or later          | Consortium → Request tags: add, rename, retire, and delete one no request carries. Each patron request's tags, which consortium staff add and remove                                                          |
+| `VITE_FEATURE_REQUEST_NOTES`             | **9.2.0** or later          | The notes on a patron request: read them, add one, retract one                                                                                                                                                |
+| `VITE_FEATURE_PLACED_BY_STAFF`           | **9.2.0** or later          | Whether staff or the patron placed a patron request, on its page and as a column in the patron requests grid                                                                                                  |
+| `VITE_FEATURE_AUDIT_EXPLORER`            | **no release** — do not set | Service Info → Audit Explorer                                                                                                                                                                                 |
+| `VITE_FEATURE_SETTINGS_INHERITANCE`      | **no release** — do not set | Where a functional setting was decided, the bulk set, and the revert to inherited                                                                                                                             |
 
-Note the last three rows. There is deliberately **no single "we are on v9 now" switch**:
-account provisioning and the local holds limit are on dcb-service `main` but in _no
-release_ — not 8.71.0, not the 9.0.0 tag — and the audit explorer has no backend anywhere.
-One boolean would be a lie about all three, and turning it on at the v9 upgrade would break
-all three.
+There is deliberately **no single "we are on v9 now" switch**: the rows above need three
+different releases, and the last two need one that does not exist yet. One boolean would be
+a lie about most of them.
 
 ### Consortia that run Symposia
 
@@ -226,16 +227,69 @@ flags above, this depends on no dcb-service release.
 
 ### Checking, and what happens if you get it wrong
 
-**Service Info → Feature availability** lists every flag, the dcb-service version it needs,
+**Service Info → Feature availability** lists every flag a dcb-service release serves, the version it needs,
 the version this deployment reports from `/info`, and whether the flag is on. It warns in
 two directions: a feature that is now served but still switched off (turn it on), and a
 flag switched on ahead of the upgrade (turn it off — the feature will fail).
 
-A flag left **off** after the upgrade costs nothing but a hidden feature. A flag switched
-**on** too early is the expensive mistake: the newer GraphQL fields do not degrade
+A flag left **off** after the upgrade hides its feature, **except
+`VITE_FEATURE_CONSORTIUM_BRANDING`**: off against 9.0.0 or later, the consortium queries
+select two columns the server no longer has, and the header, the consortium section and the
+setup wizard fail. Switch it on in the same change as the upgrade. A flag switched
+**on** too early is the other expensive mistake: the newer GraphQL fields do not degrade
 gracefully, because a field the server does not declare is a validation error that fails
 the whole operation. Switched on against 8.71.0, the consortium section, the setup wizard
 and the header all stop working at once.
+
+---
+
+## 2b. Which Insights pages and panels: `VITE_INSIGHTS_PAGES`, `VITE_INSIGHTS_PANELS`
+
+A choice about what this consortium wants to see, not about which dcb-service it runs. Both
+take the same comma-separated list:
+
+| Value                               | Shows                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| unset, or empty                     | everything, as before these existed                                            |
+| `all`                               | everything                                                                     |
+| `all,-partners,-gaps.rareGems`      | everything except the Partners subject and the "Unique collection value" panel |
+| `overview,trends,service.durations` | exactly those: the overview, every Trends panel, and the durations panel       |
+
+Names apply left to right: `all` adds everything, a name adds what it names, and `-name`
+takes it away again. A subject's name stands for all of its panels.
+
+**They narrow the release flags, never widen them.** Nothing shows while
+`VITE_FEATURE_INSIGHTS` is off, and the duration trends also need
+`VITE_FEATURE_INSIGHTS_TRENDS`, whatever these lists say. Gaps still needs one library in
+scope. A subject with none of its panels shown loses its link, and a link to it opens the
+first subject that is shown. Hiding a page hides its tab or sidebar entry and refuses a
+typed link to it.
+
+**A name this app does not have is ignored**, and the browser console says so once. So a
+misspelt name in an `all,-…` list leaves that panel showing, and one in a plain list leaves
+it out. On the hosts served by the Cloudflare Worker (Option A) the worker sets neither
+variable, so every panel shows there until its configuration for that host names one.
+
+| Page                                 | Name         |
+| ------------------------------------ | ------------ |
+| Consortium, Insights, in the sidebar | `consortium` |
+| A group's Insights tab               | `groups`     |
+| A library's Insights tab             | `libraries`  |
+
+| Subject                         | Panels                                                                                                                                              |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `overview`, above every subject | `overview.headline`, `overview.moreFigures`                                                                                                         |
+| `trends`                        | `trends.trendStrip`, `trends.durationTrend`, `trends.statusFlow`                                                                                    |
+| `service`                       | `service.durations`, `service.peerBenchmark`, `service.failures`, `service.supplierReliability`, `service.timeInStatus`, `service.supplierResponse` |
+| `demand`                        | `demand.heatmap`, `demand.dimensions`, `demand.topTitles`, `demand.byPickupLocation`, `demand.byPatronGroup`, `demand.unfillable`                   |
+| `partners`                      | `partners.tradingPartners`, `partners.netFlow`                                                                                                      |
+| `collection`                    | `collection.totals`, `collection.clusterQuality`, `collection.profile`, `collection.formatMix`, `collection.overlap`                                |
+| `gaps`                          | `gaps.unmetLocal`, `gaps.acquisitionOpportunities`, `gaps.consortialLifeline`, `gaps.newAcquisitions`, `gaps.rareGems`                              |
+
+The names are the same in DCB Admin for Libraries, which adds `service.walkUp` and has one
+page, `insights`. `src/helpers/insightsSelection.ts` holds the panels and
+`src/helpers/insightsPages.ts` the pages, and `src/helpers/insightsSelection.test.ts`
+fails when these tables and the code disagree.
 
 ---
 
@@ -498,13 +552,17 @@ Using "staging" as an example environment.
 
 ### Option C: Docker (Self-Hosted / Portable)
 
-**Architecture:** Similar to Cloudflare, this uses a runtime-config approach. The provided Dockerfile builds the app and serves it via an Nginx alpine container (`nginx:stable-alpine`). An entrypoint script uses `envsubst` to dynamically inject the container's environment variables into the app when the container boots.
+**Architecture:** Similar to Cloudflare, this uses a runtime-config approach. The provided Dockerfile builds the app and serves it via an Nginx alpine container (`nginx:1.30.6-alpine3.24`). An entrypoint script uses `envsubst` to dynamically inject the container's environment variables into the app when the container boots.
 
-**Security Note**: The Dockerfile deliberately uses floating minor-version tags (e.g., node:22-alpine, nginx:stable-alpine) rather than pinned patch versions. This ensures that every time the image is rebuilt, it automatically picks up the latest base-OS security patches.
+**Security Note**: The image the container runs on is pinned to an exact release of nginx's stable line, `nginx:1.30.6-alpine3.24`. A rebuild therefore ships the image that was tested, and the container gate's result describes what is deployed. A new release is a deliberate bump, which Renovate proposes under `renovate.json`'s defaults.
+
+It used to be the floating `nginx:stable-alpine`, chosen so that a rebuild picked up base-image patches by itself. The cost was that the image which shipped could differ from the one tested, and a builder's cached copy could stay unpatched for weeks. A local build on 2026-10-22 used a month-old cached `nginx:stable-alpine` that carried three critical nginx advisories, all fixed in 1.30.6.
+
+The build stages still use the floating `node:22-alpine`. They build the bundle and are not part of the image that ships.
 
 **Deployment Steps:**
 
-1. Build the image using `docker build -f docker/production/Dockerfile -t dcb-admin-ui .`.
+1. Pull a published image (below), or build one using `docker build -f docker/production/Dockerfile -t dcb-admin-ui .`.
 2. Run the container, passing in your environment variables via the `-e` flag.
 3. Map the port correctly, keeping in mind the application runs on port `80` inside the container.
 
@@ -520,14 +578,34 @@ docker run -p 8080:80 \
   -e VITE_FEATURE_CONSORTIUM_BRANDING="true" \
   -e VITE_FEATURE_NCIP_ONBOARDING="true" \
   -e VITE_FEATURE_INSIGHTS="true" \
+  -e VITE_FEATURE_GUARDED_CLEANUP="true" \
   dcb-admin-ui
 
 ```
 
-The three feature flags above are the dcb-service **9.0.0** set (see Section 2a). Against
-8.71.0, leave them out. Switching them on later is a changed `-e` and a container restart:
+The four feature flags above are the dcb-service **9.0.0** set (see Section 2a); 9.1.0 adds
+`LIBRARY_USER_PROVISIONING`, `LOCAL_HOLDS` and `INSIGHTS_TRENDS`, and 9.2.0 adds
+`CONSORTIUM_SUPPORT_URL`, plus `ANNOUNCEMENTS` and `SHELF_BROWSE` where the consortium runs a
+discovery front end. Against 8.71.0, leave them all out. Switching them on later is a changed `-e` and a container restart:
 `docker-entrypoint.sh` re-renders `inject_env.json` on every start, so the bundle never has
 to be rebuilt.
+
+#### Images
+
+CI pushes this Dockerfile's image to `harbor.k-int.com/knowledgeintegration/dcb-admin-ui`, the K-Int Harbor registry that symposia-service and ors-discovery-spa publish to:
+
+| Pipeline                           | Tags                                 |                         |
+| ---------------------------------- | ------------------------------------ | ----------------------- |
+| a commit on `main`                 | `main-<short sha>`, `next`           | `publish_image_next`    |
+| a release, on the `release` branch | `<version>` (e.g. `2.3.0`), `latest` | `publish_image_release` |
+
+`main-<sha>` and `<version>` never move; pin one of those. `next` and `latest` move with each push.
+
+A release image reports the version it was released as. The release pipeline runs on the commit _before_ semantic-release's version bump, so `publish_image_release` writes the released version into `package.json` before building, as `build_released_bundle` does for the bundle (see "The version the artefact reports"). A `main` image reports the last release, as the `main` bundle does.
+
+The jobs sign in with `HARBOR_USERNAME` and `HARBOR_PASSWORD`, the protected group variables the other projects in `knowledge-integration/libraries` inherit, and fail before building if either is missing. Protected variables reach only protected branches, so `main` and `release` must both be protected for the jobs to publish.
+
+An image needs no build arguments: the licence key and every other setting are read from the container's environment when it starts (`docker-entrypoint.sh`), so one image serves every deployment.
 
 ## 4. Security Note: PKCE vs. Traditional Client Secrets
 
@@ -637,7 +715,7 @@ borrow that header.
 
 ## Compression
 
-`nginx:stable-alpine` ships gzip commented out in its http block, and the image replaces only
+The nginx alpine image ships gzip commented out in its http block, and the image replaces only
 `conf.d/default.conf`, so the container served everything uncompressed. Measured on one
 build:
 

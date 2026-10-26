@@ -25,6 +25,7 @@ import {
 } from "@mutations/provisionLibraryUser";
 import { isLibraryUserProvisioningEnabled } from "@helpers/featureFlags";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { errorForDisplay } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/accounts",
@@ -46,7 +47,7 @@ export const Route = createFileRoute(
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error
 				title={i18n.t("ui.error.unable_to_load_page")}
-				message={error.message}
+				message={errorForDisplay(error)}
 				action={i18n.t("ui.actions.reload")}
 				onAction={() => location.reload()}
 			/>

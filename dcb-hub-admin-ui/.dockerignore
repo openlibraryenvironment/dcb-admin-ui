@@ -21,6 +21,10 @@ e2e
 e2e-base-path
 e2e-ki-bootstrap
 e2e-container
+# Test configs, which import e2e fixtures excluded above: tsc type-checks them, and the image's
+# `npm run build` then failed on every one
+playwright*.config.ts
 playwright-report
 test-results
+reports
 *.md

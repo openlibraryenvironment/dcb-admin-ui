@@ -1,57 +1,29 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { GridColDef, GridRowModel } from "@mui/x-data-grid-premium";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import { getILS } from "@helpers/getILS";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { welcomeLibrariesView } from "@constants/dataGrid/gridViews";
+import { welcomeLibrariesQuery } from "@/queryOptions/welcomeLibraries";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { updateLibraryMutation } from "@mutations/updateLibrary";
-import { getLibraries } from "@queries/getLibraries";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
-import { defaultWelcomeLibraryColumnVisibility } from "@columns/columnVisibility/defaultWelcomeLibraryColumnVisibility";
-import type { LoadLibrariesQueryVariables } from "@generated/graphql";
 
 export default function OperatingWelcome() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
-	const gridId = "welcomeLibraries";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 200 },
-		sort: [{ field: "fullName", sort: "asc" }],
-		columnVisibility: defaultWelcomeLibraryColumnVisibility,
-	});
-
-	const { data, isLoading, isFetching } = useQuery({
-		queryKey: ["LoadLibraries", paginationModel, sortModel, filterModel],
-		queryFn: () =>
-			gqlClient.request<any, LoadLibrariesQueryVariables>(
-				getLibraries,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					defaultOrder: "fullName",
-					defaultPageSize: 200,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
+	const gridId = welcomeLibrariesView.id;
+	// The home page's only grid: its view is the page's main parameters
+	const search = useSearch({ strict: false });
 
 	const updateMutation = useMutation({
 		mutationFn: async (updatedRow: GridRowModel) => {
@@ -186,12 +158,27 @@ export default function OperatingWelcome() {
 		],
 		[t],
 	);
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(welcomeLibrariesView, viewColumns, search);
+
+	const { data, isLoading, isFetching } = useQuery(
+		welcomeLibrariesQuery(gqlClient, {
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
+	);
 
 	return (
 		<DataGrid
 			identifier={gridId}
 			type="welcomeLibraries"
 			columns={columns}
+			viewNotice={<GridViewNotice view={view} />}
 			// Map TanStack query response to grid props. Adjust 'libraries.content' to match your actual GraphQL shape
 			rows={data?.libraries?.content ?? []}
 			rowCount={data?.libraries?.totalSize ?? 0}
@@ -199,19 +186,20 @@ export default function OperatingWelcome() {
 			// Pagination
 			pagination={true}
 			paginationMode="server"
-			paginationModel={paginationModel}
-			onPaginationModelChange={handlePaginationChange}
+			paginationModel={view.paginationModel}
+			onPaginationModelChange={view.onPaginationModelChange}
 			// Sorting
 			sortingMode="server"
-			sortModel={sortModel}
-			onSortModelChange={handleSortChange}
+			sortModel={view.sortModel}
+			onSortModelChange={view.onSortModelChange}
 			// Filtering
 			filterMode="server"
-			filterModel={filterModel}
-			onFilterModelChange={handleFilterChange}
+			filterModel={view.filterModel}
+			onFilterModelChange={view.onFilterModelChange}
 			// Visibility
-			columnVisibilityModel={columnVisibilityModel}
-			onColumnVisibilityModelChange={handleVisibilityChange}
+			columnVisibilityModel={view.columnVisibilityModel}
+			onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+			columnLayout={view.columnLayout}
 			// Editing
 			processRowUpdate={processRowUpdate}
 			rowModesModel={{}}

@@ -24,6 +24,10 @@ import agencies from "../fixtures-data/agencies.json";
 import dataChangeLog from "../fixtures-data/data-change-log.json";
 import clusterRecord from "../fixtures-data/cluster-record.json";
 import catalogMetrics from "../fixtures-data/catalog-metrics.json";
+import {
+	METRICS_HOST_LMS_ID,
+	mockCatalogMetrics,
+} from "./catalog-metrics-mocks";
 import audit from "../fixtures-data/audit.json";
 import bibDetail from "../fixtures-data/bib-detail.json";
 import { CLUSTER_ID, mockClusterRest } from "./cluster-mocks";
@@ -686,6 +690,16 @@ export const ROUTES: ScannedRoute[] = [
 		},
 		ready: async (page) => {
 			await expect(page.getByText("alpha-lms").first()).toBeVisible();
+		},
+	},
+	{
+		// Two status alerts, a checkpoint block and a Refresh button
+		path: `/serviceInfo/catalogMetricsByHostLms/${METRICS_HOST_LMS_ID}`,
+		setup: (page) => mockCatalogMetrics(page),
+		ready: async (page) => {
+			await expect(page.getByRole("status")).toContainText(
+				"records are waiting to be ingested",
+			);
 		},
 	},
 	{

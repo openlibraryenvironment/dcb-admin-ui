@@ -1,9 +1,14 @@
-import { createFileRoute, useLocation } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	redirect,
+	useLocation,
+	useSearch,
+} from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Typography, Grid } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useMemo } from "react";
-import type { GridSortModel } from "@mui/x-data-grid-premium";
+import { useMemo, useState } from "react";
+import type { GridRowModesModel } from "@mui/x-data-grid-premium";
 
 import Loading from "@components/Loading/Loading";
 import PageContainer from "@layout/PageContainer/PageContainer";
@@ -16,9 +21,16 @@ import { useDynamicPatronRequestColumns } from "@hooks/useDynamicPatronRequestCo
 
 import { allLocationsQuery } from "@/queryOptions/locations";
 import { allLibrariesQuery } from "@/queryOptions/libraries";
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
 import DataGrid from "@components/DataGrid/DataGrid";
-import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { patronRequestsAllView } from "@constants/dataGrid/gridViews";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
 import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport";
 import { queries } from "@constants/patronRequestGridQueries";
 import { composeQuery, drillSearchSchema } from "@helpers/drillSearch";
@@ -28,31 +40,38 @@ import { patronRequestDashboardQuery } from "@/queryOptions/patronRequestDashboa
 
 export const Route = createFileRoute("/__authenticated/patronRequests/all")({
 	// An Insights panel can arrive here with a composed filter and the view to
-	// return to - see helpers/drillSearch.
-	validateSearch: drillSearchSchema,
-	// Default-state prefetch: the loader has no access to the Zustand grid
-	// store (it's not a hook), so it can only prefetch the same defaults the
-	// component falls back to on first render - gridId "patronRequestsAll",
-	// page 0/size 20, sort by dateCreated desc, empty filter - matches the
-	// component's useQuery exactly.
-	loader: ({ context: { queryClient, cfg, auth } }) => {
+	// return to - see helpers/drillSearch. The grid's own view is beside it.
+	validateSearch: (search: Record<string, unknown>) => ({
+		...drillSearchSchema.parse(search),
+		...validateGridSearch(search),
+	}),
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			patronRequestsAllView,
+			search,
+			location.state,
+		);
+		if (restore) throw redirect({ to: "/patronRequests/all", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
 		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
 		if (!auth?.isAuthenticated) return;
-		const gridId = "patronRequestsAll";
-		const currentPagination = { page: 0, pageSize: 20 };
-		const currentSort: GridSortModel = [{ field: "dateCreated", sort: "desc" }];
-		const currentFilter = { items: [] };
-		// Through the same factory as the component, which is the only way the two keys
-		// are guaranteed equal. Hand-built here, they were not: this key had five
-		// elements and the component's had six, so the prefetch was fetched and never
-		// read. The comment above it claimed they matched exactly.
+		// The reader paging or sorting: the grid is already fetching it, and awaiting it here
+		// would hold back the address the grid is waiting on
+		if (cause === "stay") return;
+		const models = defaultQueryModels(
+			patronRequestsAllView,
+			deps,
+			location.state,
+		);
+		if (!models) return;
+		// Through the same factory as the component, which is the only way the two keys are equal
 		return queryClient.ensureQueryData(
 			patronRequestDashboardQuery(createGraphQLClient(cfg, auth), {
-				gridId,
-				baseQuery: queries.all,
-				paginationModel: currentPagination,
-				sortModel: currentSort,
-				filterModel: currentFilter,
+				gridId: patronRequestsAllView.id,
+				baseQuery: composeQuery(queries.all, deps.q),
+				...models,
 			}),
 		);
 	},
@@ -63,7 +82,7 @@ function All() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 
-	const gridId = "patronRequestsAll";
+	const gridId = patronRequestsAllView.id;
 	const location = useLocation();
 	const currentPath = location.pathname;
 
@@ -71,60 +90,10 @@ function All() {
 	// than replacing it, and it feeds the EXPORT as well as the grid - "export the
 	// evidence" is this page's export button, so the two must not disagree about what
 	// the evidence is.
-	const { q, from, fromLabel } = Route.useSearch();
+	const search = useSearch({ from: "/__authenticated/patronRequests/all" });
+	const { q, from, fromLabel } = search;
 	const baseQuery = composeQuery(queries.all, q);
-	const {
-		paginationModel: currentPagination,
-		sortModel: currentSort,
-		filterModel: currentFilter,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange,
-		onSortModelChange,
-		onFilterModelChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "dateCreated", sort: "desc" }],
-		columnVisibility: defaultPatronRequestColumnVisibility,
-	});
-
-	// Rows and all four tab counts in ONE request, which this route always did -
-	// the other four tabs now share the same factory instead of fetching their
-	// counts separately.
-	const {
-		data: dashboard,
-		isLoading: gridLoading,
-		isFetching,
-	} = useQuery(
-		patronRequestDashboardQuery(gqlClient, {
-			gridId,
-			baseQuery,
-			paginationModel: currentPagination,
-			sortModel: currentSort,
-			filterModel: currentFilter,
-		}),
-	);
-
-	// Deriving layout metrics reactively from server output safely
-	const totalSizes = useMemo(
-		() => ({
-			exception: dashboard?.counts.exception ?? 0,
-			outOfSequence: dashboard?.counts.outOfSequence ?? 0,
-			inProgress: dashboard?.counts.inProgress ?? 0,
-			finished: dashboard?.counts.finished ?? 0,
-			// The true total, because this route's rows ARE the "all" bucket. The other
-			// four tabs cannot read it this way and sum the four buckets instead.
-			all: dashboard?.totalSize ?? 0,
-		}),
-		[dashboard],
-	);
-
-	// Pagination, sorting and filtering currently broken
-
-	// Filter Applied State Evaluation (Derived without state effects)
-	const isFilterApplied = currentFilter.items.length > 0;
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	// Cached asynchronous lookups configuration
 	const { data: patronRequestLocations = [] } = useQuery(
@@ -146,6 +115,45 @@ function All() {
 	const allColumns = useMemo(() => {
 		return [...customColumns, ...dynamicPatronRequestColumns];
 	}, [customColumns, dynamicPatronRequestColumns]);
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(allColumns),
+		[allColumns],
+	);
+	const view = useGridView(patronRequestsAllView, viewColumns, search);
+
+	// Rows and all four tab counts in ONE request, which this route always did -
+	// the other four tabs now share the same factory instead of fetching their
+	// counts separately.
+	const {
+		data: dashboard,
+		isLoading: gridLoading,
+		isFetching,
+	} = useQuery(
+		patronRequestDashboardQuery(gqlClient, {
+			gridId,
+			baseQuery,
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
+	);
+
+	// Deriving layout metrics reactively from server output safely
+	const totalSizes = useMemo(
+		() => ({
+			exception: dashboard?.counts.exception ?? 0,
+			outOfSequence: dashboard?.counts.outOfSequence ?? 0,
+			inProgress: dashboard?.counts.inProgress ?? 0,
+			finished: dashboard?.counts.finished ?? 0,
+			// The true total, because this route's rows ARE the "all" bucket. The other
+			// four tabs cannot read it this way and sum the four buckets instead.
+			all: dashboard?.totalSize ?? 0,
+		}),
+		[dashboard],
+	);
+
+	const isFilterApplied = view.appliedFilterModel.items.length > 0;
 
 	if (supplyingLibrariesLoading) {
 		return (
@@ -206,8 +214,9 @@ function All() {
 						autoRowHeight={false}
 						rowSelection
 						columns={allColumns}
-						columnVisibilityModel={columnVisibilityModel}
-						onColumnVisibilityModelChange={handleColumnVisibilityChange}
+						columnVisibilityModel={view.columnVisibilityModel}
+						onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+						columnLayout={view.columnLayout}
 						disableAggregation={true}
 						disableHoverInteractions={false}
 						disablePivoting={true}
@@ -220,7 +229,7 @@ function All() {
 							wizard: true,
 						}}
 						filterMode="server"
-						filterModel={currentFilter}
+						filterModel={view.filterModel}
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="patronRequests" />
 						)}
@@ -228,23 +237,24 @@ function All() {
 						loading={gridLoading || isFetching}
 						listViewEnabled={false}
 						noResultsText={t("patron_requests.no_results")}
-						onFilterModelChange={onFilterModelChange}
-						onPaginationModelChange={onPaginationModelChange}
+						onFilterModelChange={view.onFilterModelChange}
+						onPaginationModelChange={view.onPaginationModelChange}
 						onRowModesModelChange={setRowModesModel}
-						onSortModelChange={onSortModelChange}
+						onSortModelChange={view.onSortModelChange}
 						pagination={true}
 						paginationMode="server"
-						paginationModel={currentPagination}
+						paginationModel={view.paginationModel}
 						pivotingEnabled={false}
 						rowCount={dashboard?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
 						rows={dashboard?.rows ?? []}
 						scrollbarVisible={true}
-						sortModel={currentSort}
+						sortModel={view.sortModel}
 						sortingMode="server"
 						toolbarVisible={true}
 						searchText=""
 						type={"patronRequests"}
+						viewNotice={<GridViewNotice view={view} />}
 					/>
 				</Grid>
 			</Grid>

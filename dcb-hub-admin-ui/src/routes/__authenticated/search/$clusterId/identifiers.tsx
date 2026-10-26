@@ -1,15 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { Grid, Typography, Alert } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import { clusterIdentifiersView } from "@constants/dataGrid/gridViews";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
-import { useGridState } from "@hooks/useGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getClusters } from "@queries/getClusters";
 import type { ClusterRecordsQueryVariables } from "@generated/graphql";
@@ -17,6 +21,20 @@ import type { ClusterRecordsQueryVariables } from "@generated/graphql";
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/identifiers",
 )({
+	validateSearch: validateGridSearch,
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			clusterIdentifiersView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/search/$clusterId/identifiers",
+				params,
+				...restore,
+			});
+	},
 	component: Identifiers,
 });
 
@@ -25,22 +43,11 @@ function Identifiers() {
 	const { clusterId } = Route.useParams();
 	const gqlClient = useGraphQLClient();
 
-	const gridId = `ClusterIdentifiers-${clusterId}`;
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 25 },
-		sort: [{ field: "title", sort: "asc" }],
+	const gridId = clusterIdentifiersView.id;
+	const search = useSearch({
+		from: "/__authenticated/search/$clusterId/identifiers",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["cluster", "full", clusterId],
@@ -126,6 +133,7 @@ function Identifiers() {
 
 		return [...baseColumns, ...namespaceColumns];
 	}, [namespaces, t]);
+	const view = useGridView(clusterIdentifiersView, columns, search);
 
 	if (isLoading)
 		return (
@@ -168,20 +176,22 @@ function Identifiers() {
 					disablePivoting
 					type="Identifiers"
 					columns={columns}
+					viewNotice={<GridViewNotice view={view} />}
 					rows={rows}
 					loading={isLoading}
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"
 					pagination
-					paginationModel={paginationModel}
-					onPaginationModelChange={handlePaginationChange}
-					sortModel={sortModel}
-					onSortModelChange={handleSortChange}
-					filterModel={filterModel}
-					onFilterModelChange={handleFilterChange}
-					columnVisibilityModel={columnVisibilityModel}
-					onColumnVisibilityModelChange={handleColumnVisibilityChange}
+					paginationModel={view.paginationModel}
+					onPaginationModelChange={view.onPaginationModelChange}
+					sortModel={view.sortModel}
+					onSortModelChange={view.onSortModelChange}
+					filterModel={view.filterModel}
+					onFilterModelChange={view.onFilterModelChange}
+					columnVisibilityModel={view.columnVisibilityModel}
+					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+					columnLayout={view.columnLayout}
 					disableAggregation
 					disableRowGrouping
 					disableHoverInteractions={false}

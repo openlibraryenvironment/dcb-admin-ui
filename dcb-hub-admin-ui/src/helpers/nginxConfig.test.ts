@@ -135,7 +135,7 @@ describe("the container's security headers", () => {
 
 describe("the container's compression", () => {
 	it("turns gzip on, because the base image does not", () => {
-		// nginx:stable-alpine ships gzip commented out in its http block and this image
+		// The nginx alpine image ships gzip commented out in its http block and this image
 		// replaces only conf.d/default.conf. Without this the container served 1,576 KB
 		// where Cloudflare and `vite preview` both serve 665 KB - 2.4x the payload, on the
 		// one hosting path the Lighthouse budget never measures.

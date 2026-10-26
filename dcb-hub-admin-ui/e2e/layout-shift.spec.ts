@@ -1,5 +1,6 @@
 import { type Page } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
+import { proves } from "./fixtures/coverage";
 
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -20,7 +21,7 @@ declare global {
 	interface Window {
 		__clsTotal: number;
 		__clsShifts: number;
-		__minFooterTop: number;
+		__gridBarShifts: number;
 	}
 }
 
@@ -29,31 +30,28 @@ async function observeLayout(page: Page) {
 	await page.addInitScript(() => {
 		window.__clsTotal = 0;
 		window.__clsShifts = 0;
-		window.__minFooterTop = Number.POSITIVE_INFINITY;
+		window.__gridBarShifts = 0;
 
 		new PerformanceObserver((list) => {
 			for (const entry of list.getEntries() as (PerformanceEntry & {
 				value: number;
 				hadRecentInput: boolean;
+				sources: { node?: Node | null }[];
 			})[]) {
 				if (entry.hadRecentInput) continue;
 				window.__clsTotal += entry.value;
 				window.__clsShifts += 1;
+				// Under budget is not the same as still: a pagination bar that moves under
+				// the pointer is a mis-click, whatever the page's total.
+				for (const source of entry.sources) {
+					if (
+						source.node instanceof Element &&
+						source.node.classList.contains("MuiDataGrid-footerContainer")
+					)
+						window.__gridBarShifts += 1;
+				}
 			}
 		}).observe({ type: "layout-shift", buffered: true });
-
-		// The highest the footer is ever seen, sampled every frame. A footer that is
-		// never inside the first viewport cannot contribute to CLS at all, whereas the
-		// metric only says it did not happen to this time.
-		const sample = () => {
-			const footer = document.querySelector("footer");
-			if (footer) {
-				const top = footer.getBoundingClientRect().top;
-				if (top < window.__minFooterTop) window.__minFooterTop = top;
-			}
-			requestAnimationFrame(sample);
-		};
-		requestAnimationFrame(sample);
 	});
 }
 
@@ -80,41 +78,36 @@ async function waitForLayoutToSettle(page: Page) {
 }
 
 for (const route of ROUTES) {
-	test(`${route.path} does not shift its layout on a tablet`, async ({
-		page,
-	}) => {
-		await page.setViewportSize(VIEWPORT);
-		await observeLayout(page);
+	test(
+		`${route.path} does not shift its layout on a tablet`,
+		proves(`${route.path} does not move about as it loads, on a tablet.`, [
+			"PERF-02",
+		]),
+		async ({ page }) => {
+			await page.setViewportSize(VIEWPORT);
+			await observeLayout(page);
 
-		await seedAuth(page);
-		await useAllFeatures(page);
-		await mockGraphQL(page, MOCKS);
-		await route.setup?.(page);
-		await page.goto(route.path);
+			await seedAuth(page);
+			await useAllFeatures(page);
+			await mockGraphQL(page, MOCKS);
+			await route.setup?.(page);
+			await page.goto(route.path);
 
-		// The route's own "my data has arrived" marker. A CLS reading taken before the
-		// content lands is a reading of a spinner, which is always zero.
-		await route.ready(page);
-		await waitForLayoutToSettle(page);
+			// The route's own "my data has arrived" marker. A CLS reading taken before the
+			// content lands is a reading of a spinner, which is always zero.
+			await route.ready(page);
+			await waitForLayoutToSettle(page);
 
-		const { cls, minFooterTop, viewportHeight } = await page.evaluate(() => ({
-			cls: Number(window.__clsTotal.toFixed(4)),
-			minFooterTop: window.__minFooterTop,
-			viewportHeight: window.innerHeight,
-		}));
+			const { cls, gridBarShifts } = await page.evaluate(() => ({
+				cls: Number(window.__clsTotal.toFixed(4)),
+				gridBarShifts: window.__gridBarShifts,
+			}));
 
-		expect(
-			cls,
-			`cumulative layout shift at ${VIEWPORT.width}x${VIEWPORT.height}`,
-		).toBeLessThanOrEqual(CLS_BUDGET);
-
-		// Routes that render their own shell (the error and maintenance pages) have no
-		// footer to place; the ones that use StructuralLayout all do.
-		if (Number.isFinite(minFooterTop)) {
 			expect(
-				minFooterTop,
-				"the footer painted inside the first viewport, so any content arriving after it moves it",
-			).toBeGreaterThanOrEqual(viewportHeight);
-		}
-	});
+				cls,
+				`cumulative layout shift at ${VIEWPORT.width}x${VIEWPORT.height}`,
+			).toBeLessThanOrEqual(CLS_BUDGET);
+			expect(gridBarShifts, "a grid's pagination bar moved").toBe(0);
+		},
+	);
 }

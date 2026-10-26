@@ -2,13 +2,17 @@ import {
 	isAuditExplorerEnabled,
 	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
+	isConfirmItemReturnedEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
+	isHostLmsProbesEnabled,
 	isInsightsEnabled,
 	isInsightsTrendsEnabled,
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
 	isNcipOnboardingEnabled,
+	isPlacedByStaffEnabled,
+	isRequestNotesEnabled,
 	isRequestTagsEnabled,
 	isSettingsInheritanceEnabled,
 	isShelfBrowseEnabled,
@@ -38,10 +42,10 @@ export const CONSORTIUM_BRAND_CHROME_FIELDS = [
 ] as const;
 
 /**
- * The consortium's support link, added by a dcb-service migration in no release yet.
+ * The consortium's support link, first released in dcb-service 9.2.0.
  *
  * `websiteUrl` is deliberately NOT here. It has been on Consortium since 6.2.0, so it
- * needs no gate; only the column that arrived after the 9.0.0 tag does. Discovery renders
+ * needs no gate; only the column 9.2.0 added does. Discovery renders
  * the two as separate links because "when do you open" and "your search is broken" are
  * different questions and rarely the same desk.
  */
@@ -54,6 +58,24 @@ export const CONSORTIUM_SUPPORT_FIELDS = ["supportUrl"] as const;
  * serviceCapabilities.test.ts all read the same list.
  */
 export const LOCAL_HOLDS_FIELDS = ["maxLocalHolds"] as const;
+
+/** The result of dcb-service's last connectivity check, kept on the Host LMS. */
+export const HOST_LMS_LAST_PING_FIELDS = ["lastPing"] as const;
+
+/** A patron request's notes, newest first and paged, first released in 9.2.0. */
+export const REQUEST_NOTE_FIELDS = ["notes"] as const;
+
+/** The tags on a patron request, each with who applied it, first released in 9.2.0. */
+export const REQUEST_TAG_FIELDS = ["tags"] as const;
+
+/** Whether staff placed a request: true, false, or null when dcb-service cannot tell. 9.2.0. */
+export const PLACED_BY_STAFF_FIELDS = ["placedByStaff"] as const;
+
+/** The two verification checks that read only what dcb-service holds. */
+export const HOST_LMS_PROBE_FIELDS = [
+	"configurationStatus",
+	"authProfileStatus",
+] as const;
 
 /**
  * The per-library brand, added by the same 9.0.0 migration as the consortium's.
@@ -70,7 +92,7 @@ export const LIBRARY_BRAND_FIELDS = [
 ] as const;
 
 /**
- * Which classification a library shelves by, added by a dcb-service migration in no release yet.
+ * Which classification a library shelves by, first released in dcb-service 9.2.0.
  *
  * One name, two types. Declared here so the selection builder, the variables filter and
  * serviceCapabilities.test.ts all read the same list.
@@ -102,8 +124,8 @@ export const CONSORTIUM_BRAND_LEGACY_FIELDS = [
  *
  * <h2>Why there is no single "v9" flag</h2>
  *
- * Read the `since` column. It holds three different answers - 9.0.0, 9.1.0 and null -
- * and one boolean cannot carry three thresholds. Switched on at the v9 upgrade it would
+ * Read the `since` column. It holds four different answers - 9.0.0, 9.1.0, 9.2.0 and
+ * null - and one boolean cannot carry four thresholds. Switched on at the v9 upgrade it would
  * be a lie about every row above 9.0.0, and each of those fails the whole operation
  * rather than degrading a panel.
  */
@@ -191,15 +213,13 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {},
 	},
 	{
-		// `/insights/trend` is on dcb-service main and in no release. A REST endpoint, not
-		// a schema change, so there is nothing to select or strip - and a SEPARATE row from
-		// `insights`, whose `since` is 9.0.0: a deployment on the release has the surface
-		// and 404s this one path. It is also NOT on the `symposia` branch, which forked
-		// before it merged.
+		// `/insights/trend`, first released in 9.1.0. A REST endpoint, not a schema change,
+		// so there is nothing to select or strip - and a SEPARATE row from `insights`, whose
+		// `since` is 9.0.0: a deployment on 9.0.0 has the surface and 404s this one path.
 		id: "insights_trends",
 		flag: "VITE_FEATURE_INSIGHTS_TRENDS",
 		enabled: isInsightsTrendsEnabled,
-		since: null,
+		since: "9.1.0",
 		fields: {},
 	},
 	{
@@ -209,6 +229,14 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_GUARDED_CLEANUP",
 		enabled: isGuardedCleanupEnabled,
 		since: "9.0.0",
+		fields: {},
+	},
+	{
+		// A REST route, first released in 9.2.0, so nothing to select or strip.
+		id: "confirm_item_returned",
+		flag: "VITE_FEATURE_CONFIRM_ITEM_RETURNED",
+		enabled: isConfirmItemReturnedEnabled,
+		since: "9.2.0",
 		fields: {},
 	},
 	{
@@ -246,29 +274,41 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// In no dcb-service release: the support_url migration is on an unmerged branch.
-		// A SEPARATE row from consortium_branding, whose `since` is 9.0.0 — one flag over
-		// both would be a lie about one of them, and switching it on at the v9 upgrade
-		// would break the consortium form on every deployment running the release.
+		// First released in 9.2.0. A SEPARATE row from consortium_branding, whose `since`
+		// is 9.0.0 — one flag over both would be a lie about one of them, and switching it
+		// on at a 9.0.0 or 9.1.0 upgrade would break the consortium form.
 		id: "consortium_support_url",
 		flag: "VITE_FEATURE_CONSORTIUM_SUPPORT_URL",
 		enabled: isConsortiumSupportUrlEnabled,
-		since: null,
+		since: "9.2.0",
 		fields: {
 			Consortium: CONSORTIUM_SUPPORT_FIELDS,
 			UpdateConsortiumInput: CONSORTIUM_SUPPORT_FIELDS,
 		},
 	},
 	{
-		// V-12. On the dcb-service `symposia` branch and in no release at all - not 8.71.0,
-		// not the 9.0.0 tag, not main. Query and Mutation are listed rather than left empty
-		// because listing them is what makes `since: null` a CHECKED claim: the test asserts
-		// they are in the target schema and in none of the releases we hold, and it fails the
-		// day somebody commits the schema of the release that ships them.
+		id: "host_lms_probes",
+		flag: "VITE_FEATURE_HOST_LMS_PROBES",
+		enabled: isHostLmsProbesEnabled,
+		since: "9.2.0",
+		// First released in 9.2.0. One row for the stored last check, the two probes and the
+		// hostLmsCodes parameter on /hostlmss/importIngestDetails (REST, so nothing below):
+		// they arrive in the same dcb-service release, so two flags could only ever be set
+		// wrongly apart.
+		fields: {
+			CreateHostLmsResult: HOST_LMS_PROBE_FIELDS,
+			UpdateHostLmsResult: HOST_LMS_PROBE_FIELDS,
+			HostLms: HOST_LMS_LAST_PING_FIELDS,
+		},
+	},
+	{
+		// First released in 9.2.0. Query and Mutation are listed rather than left empty
+		// because listing them is what makes `since` a CHECKED claim: the test asserts they
+		// are in 9.2.0 and in no release before it.
 		id: "announcements",
 		flag: "VITE_FEATURE_ANNOUNCEMENTS",
 		enabled: isAnnouncementsEnabled,
-		since: null,
+		since: "9.2.0",
 		fields: {
 			Query: ["announcements"],
 			Mutation: [
@@ -279,14 +319,46 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// N-3 / V-22.6, on the `symposia` branch and no release. A SEPARATE row from
-		// announcements despite arriving on the same branch: they need not merge in the same
-		// release, and one flag over two capabilities is a lie about whichever lands second.
-		//
-		// Query and Mutation are listed rather than left empty because listing them is what
-		// makes `since: null` a CHECKED claim - the test asserts they are in the target
-		// schema and in none of the releases we hold, and it fails the day somebody commits
-		// the schema of the release that ships them.
+		// One row for the consortium's tag list and the tags on a request: they arrive in the
+		// same dcb-service release, and a request tag can only name a tag from the list.
+		id: "request_tags",
+		flag: "VITE_FEATURE_REQUEST_TAGS",
+		enabled: isRequestTagsEnabled,
+		since: "9.2.0",
+		fields: {
+			Query: ["requestTags"],
+			Mutation: [
+				"createRequestTag",
+				"updateRequestTag",
+				"deleteRequestTag",
+				"tagPatronRequest",
+				"untagPatronRequest",
+			],
+			PatronRequest: REQUEST_TAG_FIELDS,
+		},
+	},
+	{
+		id: "request_notes",
+		flag: "VITE_FEATURE_REQUEST_NOTES",
+		enabled: isRequestNotesEnabled,
+		since: "9.2.0",
+		fields: {
+			Mutation: ["addPatronRequestNote", "retractPatronRequestNote"],
+			PatronRequest: REQUEST_NOTE_FIELDS,
+		},
+	},
+	{
+		id: "placed_by_staff",
+		flag: "VITE_FEATURE_PLACED_BY_STAFF",
+		enabled: isPlacedByStaffEnabled,
+		since: "9.2.0",
+		fields: { PatronRequest: PLACED_BY_STAFF_FIELDS },
+	},
+	{
+		// In no release: announcements reached 9.2.0 without it. Query and Mutation are
+		// listed because that makes `since: null` a CHECKED claim - the test asserts they are
+		// in the target schema and in none of the releases we hold, and it fails the day
+		// somebody commits the schema of the release that ships them.
 		id: "settings_inheritance",
 		flag: "VITE_FEATURE_SETTINGS_INHERITANCE",
 		enabled: isSettingsInheritanceEnabled,
@@ -300,34 +372,20 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		},
 	},
 	{
-		// V-22.2, on the `symposia` branch and no release. SEPARATE from
-		// settings_inheritance despite the same branch: they need not merge in the same
-		// release, and one flag over both would be a lie about whichever lands second.
+		// First released in 9.2.0; settings_inheritance, from the same branch, was not.
 		id: "shelf_browse",
 		flag: "VITE_FEATURE_SHELF_BROWSE",
 		enabled: isShelfBrowseEnabled,
-		since: null,
+		since: "9.2.0",
 		fields: {
 			Library: CLASSIFICATION_SCHEME_FIELDS,
 			UpdateLibraryInput: CLASSIFICATION_SCHEME_FIELDS,
 		},
 	},
 	{
-		// On dcb-service `feat/patron-request-notes` and in no release.
-		id: "request_tags",
-		flag: "VITE_FEATURE_REQUEST_TAGS",
-		enabled: isRequestTagsEnabled,
-		since: null,
-		fields: {
-			Query: ["requestTags"],
-			Mutation: ["createRequestTag", "updateRequestTag", "deleteRequestTag"],
-		},
-	},
-	{
-		// `auditIncidence` is on dcb-service `feat/audit-incidence` and no release - not
-		// 8.71.0, not the 9.0.0 tag, not 9.1.0, not main, and not `symposia` either.
-		// schema.graphqls carries it from that branch, so this row is checked the same way
-		// as the one above.
+		// `auditIncidence` is on dcb-service `feat/audit-incidence` and in no release, 9.2.0
+		// included. schema.graphqls carries it from that branch, so this row is checked the
+		// same way as the one above.
 		id: "audit_explorer",
 		flag: "VITE_FEATURE_AUDIT_EXPLORER",
 		enabled: isAuditExplorerEnabled,

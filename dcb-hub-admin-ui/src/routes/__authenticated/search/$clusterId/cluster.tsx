@@ -3,7 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Grid, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { GridColDef, GridRowModesModel } from "@mui/x-data-grid-premium";
+import {
+	GridColDef,
+	GridRowModesModel,
+	type GridPaginationModel,
+} from "@mui/x-data-grid-premium";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
@@ -14,7 +18,6 @@ import Error from "@components/Error/Error";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { getClusters } from "@queries/getClusters";
-import { useGridState } from "@hooks/useGridState";
 import { useState } from "react";
 import type { ClusterRecordsQueryVariables } from "@generated/graphql";
 
@@ -40,13 +43,10 @@ function ClusterDetails() {
 	});
 
 	const cluster = data?.instanceClusters?.content?.[0];
-	const gridId = "clustermembers";
-	// Previously read paginationModel from the store with NO change handler, so the
-	// controlled model was frozen and cluster members past page 1 were unreachable.
-	// useGridState supplies the handler too, matching every other grid.
-	const { paginationModel, onPaginationModelChange } = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 25 },
-	});
+	// No toolbar, so nothing to share: the page lives here. It needs a change handler -
+	// a controlled model without one left members past page 1 unreachable.
+	const [paginationModel, onPaginationModelChange] =
+		useState<GridPaginationModel>({ page: 0, pageSize: 25 });
 
 	const columns: GridColDef[] = [
 		{

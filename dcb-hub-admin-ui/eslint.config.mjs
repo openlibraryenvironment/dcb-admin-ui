@@ -66,7 +66,8 @@ export default [
 			"*.config.ts",
 			// Tool config, the same category as the *.config.* entries above - it just
 			// does not carry the word "config" in its name. CommonJS on purpose
-			// (@lhci/cli requires it), which this ESM/browser ruleset would reject.
+			// (scripts/lighthouse.mjs require()s it), which this ESM/browser ruleset would
+			// reject.
 			"lighthouserc.js",
 		],
 	},
@@ -127,6 +128,7 @@ export default [
 				console: "readonly",
 				Buffer: "readonly",
 				URL: "readonly",
+				fetch: "readonly",
 			},
 		},
 		rules: {
@@ -262,6 +264,14 @@ export default [
 						"Property[key.name=/^(marginLeft|marginRight|paddingLeft|paddingRight|borderLeft|borderRight|ml|mr|pl|pr)$/]",
 					message:
 						"Use the logical property: marginInlineStart/End, paddingInlineStart/End, borderInlineStart/End. A physical one does not flip in a right-to-left locale. docs/right-to-left.md.",
+				},
+				// An AxiosError carries the bearer token in config.headers, and a GraphQL
+				// ClientError the request variables. src/helpers/safeErrorLog.ts
+				{
+					selector:
+						"CallExpression[callee.object.name='console'] > Identifier[name=/^(e|err|error|reason)$/]",
+					message:
+						"Do not log a raw error: an AxiosError carries the bearer token, a GraphQL error the request's variables. Log errorForLog(error) from @helpers/safeErrorLog.",
 				},
 				{
 					selector: "CallExpression[callee.property.name='waitForTimeout']",

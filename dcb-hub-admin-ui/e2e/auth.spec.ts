@@ -15,7 +15,7 @@ test.describe("Authentication gate", () => {
 		page,
 	}) => {
 		await page.goto("/libraries");
-		await expect(page).toHaveURL(/\/login\?redirect=%2Flibraries/);
+		await expect(page).toHaveURL(/\/login\?redirect=\/libraries/);
 	});
 
 	test("seeded auth session lands on the authenticated home page", async ({

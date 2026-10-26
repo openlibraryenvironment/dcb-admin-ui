@@ -31,6 +31,7 @@ import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
 import { isRequestTagsEnabled } from "@helpers/featureFlags";
+import { errorForDisplay } from "@helpers/safeErrorLog";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useIsConsortiumAdmin } from "@hooks/useIsConsortiumAdmin";
 import { deleteRequestTag, updateRequestTag } from "@mutations/requestTags";
@@ -74,7 +75,7 @@ export const Route = createFileRoute("/__authenticated/consortium/requestTags")(
 			<PageContainer hideTitleBox hideBreadcrumbs>
 				<Error
 					title={i18n.t("ui.error.unable_to_load_page")}
-					message={error.message}
+					message={errorForDisplay(error)}
 					action={i18n.t("ui.actions.reload")}
 					onAction={() => location.reload()}
 				/>

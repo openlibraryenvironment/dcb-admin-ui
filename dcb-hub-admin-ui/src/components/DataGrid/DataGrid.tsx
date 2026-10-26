@@ -13,7 +13,13 @@ import {
 	GridRowSelectionModel,
 	useGridApiRef,
 } from "@mui/x-data-grid-premium";
-import { RefObject, useCallback, useMemo, useState } from "react";
+import {
+	RefObject,
+	type ReactNode,
+	useCallback,
+	useMemo,
+	useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { NoResultsOverlay } from "./components/NoResultsOverlay";
 import { useNavigate } from "@tanstack/react-router";
@@ -33,6 +39,7 @@ import {
 import { constrainToServerOperators } from "@filters/serverFilterOperators";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import type { DataGridType } from "@constants/dataGrid/types";
+import { PAGE_SIZE_OPTIONS } from "@constants/pagination";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import Confirmation from "@components/Confirmation/Confirmation";
 import { RollbackResultDialog } from "./components/RollbackResultDialog";
@@ -41,6 +48,10 @@ import { usePatronRequestRollback } from "@hooks/usePatronRequestRollback";
 import { usePatronRequestCleanup } from "@hooks/usePatronRequestCleanup";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
+import { errorForLog } from "@helpers/safeErrorLog";
+import type { ColumnLayout } from "@hooks/useGridView";
+import { useColumnLayout } from "./useColumnLayout";
+import { ColumnMenuMoveItem } from "./components/ColumnMenuMoveItem";
 // Needs reviewing for consortial needs
 // check persistent storage
 // use grid actions as editing is more of a priority
@@ -60,6 +71,7 @@ declare module "@mui/x-data-grid-premium" {
 		wizardEnabled?: boolean;
 		onOpenWizard?: () => void;
 		disableToolbarFilter?: boolean;
+		viewNotice?: ReactNode;
 	}
 }
 const IMMUTABLE_FALLBACK_MODES = {};
@@ -98,6 +110,10 @@ interface CustomDataGridProps extends Omit<
 	 */
 	exportConfig?: GridExportConfig;
 	disableToolbarFilter?: boolean;
+	/** Beside the filter controls: where the view came from (GridViewNotice). */
+	viewNotice?: ReactNode;
+	/** Pinning and order from the grid's URL (useGridView's columnLayout). */
+	columnLayout?: ColumnLayout;
 	/**
 	 * Opts this grid into row selection: checkboxes, the selection column and the
 	 * selection-driven toolbar actions. Off by default, because a checkbox the
@@ -135,7 +151,9 @@ export default function DataGrid({
 	rows,
 	onRowSelectionModelChange,
 	disableToolbarFilter,
+	viewNotice,
 	rowSelection = false,
+	columnLayout,
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
@@ -166,6 +184,8 @@ export default function DataGrid({
 	}); // We do need to give feedback on editing s
 	const internalApiRef = useGridApiRef();
 	const apiRef = parentApiRef || internalApiRef;
+	// This grid is not remounted on a setting, so its layout is matched in place throughout
+	const layout = useColumnLayout(apiRef, columns, columnLayout, "");
 
 	const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>({
 		type: "include",
@@ -314,15 +334,19 @@ export default function DataGrid({
 			</Box>
 			<DataGridPremium
 				{...rest}
-				columns={columns}
+				columns={layout.columns}
+				pinnedColumns={layout.pinnedColumns ?? rest.pinnedColumns}
+				onPinnedColumnsChange={
+					layout.onPinnedColumnsChange ?? rest.onPinnedColumnsChange
+				}
 				rows={stableRows}
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
 				loading={loading}
-				// 100 is the ceiling: the scale constants cap a single UI interaction at
-				// 100 rows, always paged. 200 was above it, and a page size is sticky -
-				// one choice becomes every later request for that grid.
-				pageSizeOptions={[5, 10, 15, 20, 25, 50, 100]}
+				pageSizeOptions={PAGE_SIZE_OPTIONS}
+				// Nothing to page through yet. Shown, the bar moves when the grid resizes to the
+				// rows that land; added with them, it is not a layout shift at all.
+				hideFooter={rest.hideFooter || (loading && stableRows.length === 0)}
 				rowCount={paginationMode === "server" ? resolvedRowCount : undefined}
 				apiRef={apiRef}
 				getRowHeight={autoRowHeight ? () => "auto" : () => null}
@@ -355,9 +379,14 @@ export default function DataGrid({
 					"filterOperator>=": t("ui.data_grid.filters.greater_than_inclusive"),
 					"filterOperator<": t("ui.data_grid.filters.less_than_exclusive"),
 					"filterOperator<=": t("ui.data_grid.filters.less_than_inclusive"),
+					aggregationFunctionLabelSum: t("ui.data_grid.aggregation.sum"),
+					aggregationFunctionLabelAvg: t("ui.data_grid.aggregation.avg"),
+					aggregationFunctionLabelMin: t("ui.data_grid.aggregation.min"),
+					aggregationFunctionLabelMax: t("ui.data_grid.aggregation.max"),
+					aggregationFunctionLabelSize: t("ui.data_grid.aggregation.size"),
 				}}
 				onProcessRowUpdateError={(error: any) => {
-					console.error("Error updating row:", error);
+					console.error("Error updating row:", errorForLog(error));
 
 					// `rowName` is how a caller ASKS for this alert, and the only caller
 					// that does is OperatingWelcome - it owns its own mutation, has no
@@ -399,6 +428,21 @@ export default function DataGrid({
 					toolbar: ExportToolbar,
 				}}
 				slotProps={{
+					// A menu or panel is page content: rendered in the grid's landmark or dialog, not
+					// at the end of <body>, where axe's region rule finds it outside every landmark
+					basePopper: {
+						material: {
+							container: () =>
+								apiRef.current?.rootElementRef?.current?.closest<HTMLElement>(
+									"main, [role='dialog']",
+								) ?? document.body,
+						},
+					},
+					columnMenu: {
+						slots: { columnMenuMoveItem: ColumnMenuMoveItem },
+						// After pinning (15), before filtering (20)
+						slotProps: { columnMenuMoveItem: { displayOrder: 16 } },
+					},
 					toolbar: {
 						showQuickFilter: false,
 						handleExport, // three-scope server export (or legacy onExport)
@@ -410,7 +454,7 @@ export default function DataGrid({
 							? exportProgress.isExporting
 							: isExporting,
 						type: type, // Pass type to determine menu options
-						onCleanup: cleanupAvailable ? cleanup.handleCleanup : undefined, // admin-only bulk cleanup
+						onCleanup: cleanupAvailable ? cleanup.requestCleanup : undefined, // admin-only bulk cleanup
 						onRollback: rollbackAvailable
 							? rollback.requestRollback
 							: undefined, // ADMIN-only bulk rollback for patron request grids
@@ -418,6 +462,7 @@ export default function DataGrid({
 						wizardEnabled: exportConfig?.wizard,
 						onOpenWizard: () => setWizardOpen(true),
 						disableToolbarFilter: disableToolbarFilter,
+						viewNotice,
 					},
 					// The panel is a Popper anchored bottom-end, and MUI re-runs
 					// forceUpdate() on every render of it. So anything that changes the
@@ -538,6 +583,17 @@ export default function DataGrid({
 						customWarningText={rollbackSummary}
 						onClose={rollback.cancelConfirm}
 						onConfirm={rollback.confirmAndRun}
+					/>
+					<Confirmation
+						open={cleanup.confirmOpen}
+						action="cleanup"
+						customWarningText={t("patron_requests.cleanup_summary", {
+							eligible: cleanup.eligibleCount,
+							selected: cleanup.selectedCount,
+							skipped: cleanup.skippedCount,
+						})}
+						onClose={cleanup.cancelConfirm}
+						onConfirm={cleanup.confirmAndRun}
 					/>
 					<Confirmation
 						open={cleanup.overrideConfirmOpen}

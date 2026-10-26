@@ -21,9 +21,17 @@
 		"created": "Alarm raised",
 		"details": "Details",
 		"expires": "Expires",
+		"for_host_lms": "Showing the alarms for Host LMS {{code}}. <showAll>Show all alarms</showAll>",
 		"id": "Alarm UUID",
 		"last_seen": "Last seen",
-		"repeat_count": "Repeat count"
+		"repeat_count": "Repeat count",
+		"detail": {
+			"reason": "What happened",
+			"how_to_fix": "How to fix it",
+			"from": "Before",
+			"to": "After",
+			"none": "No details"
+		}
 	},
 	"app": {
 		"name": "DCB Admin",
@@ -118,17 +126,37 @@
 	"catalogMetricsByHostLms": {
 		"await": "Awaiting ingest",
 		"change_filter": "Try changing your filters or search terms.",
+		"checkpoint": "Harvest checkpoint",
+		"checkpoint_help": "Where the next harvest resumes. Its fields depend on the type of Host LMS.",
 		"checkpoint_id": "Checkpoint UUID",
 		"count": "Bib record count",
+		"counted_at": "Counted at {{time}}",
 		"difference": "Source/bib difference",
 		"failed": "Ingest failed",
 		"harvest_enabled": "Harvest enabled",
 		"harvested": "Harvested",
+		"host_lms_title": "Catalogue metrics: {{name}}",
 		"ingested": "Ingested",
+		"list_timeout": "Counting every Host LMS can take longer than one request is allowed. The count keeps running, so try again in a minute to read it, or choose libraries or a group above to count only those now.",
 		"name": "Catalogue metrics by Host LMS",
+		"no_host_lms": "None of the selected libraries has a Host LMS to count.",
+		"no_checkpoint": "No checkpoint recorded",
 		"no_results": "No catalogue metrics found. Try changing your search terms or filters.",
+		"open_host_lms": "Open the Host LMS record",
+		"processing_complete": "No records are waiting to be ingested.",
+		"processing_failed_one": "{{formatted}} record failed to ingest.",
+		"processing_failed_other": "{{formatted}} records failed to ingest.",
+		"processing_waiting_one": "{{formatted}} record is waiting to be ingested.",
+		"processing_waiting_other": "{{formatted}} records are waiting to be ingested.",
+		"read_errors": "Some details could not be read",
+		"refresh": "Refresh counts",
+		"retry": "Try again",
+		"scoped_count": "Counted when asked, for the selected libraries only. Select a row for one Host LMS.",
+		"shared_count": "Counts for every Host LMS are shared for up to 5 minutes. Select a row for a count taken now.",
 		"source_system": "Source system name",
-		"source_system_id": "Source system UUID"
+		"source_system_id": "Source system UUID",
+		"too_many": "Choose fewer libraries: at most {{max}} Host LMSs can be counted at once, and this selection has {{count}}.",
+		"view": "View catalogue metrics"
 	},
 	"common": {
 		"about": "About",
@@ -306,6 +334,9 @@
 		"onboarding_stats_outstanding_other": "{{count}} still outstanding",
 		"onboarding_stats_ils_caption": "libraries in this consortium.",
 		"onboarding_stats_unknown_ils": "Other or unknown",
+		"onboarding_stats_first_request": "Median days to first request",
+		"onboarding_stats_first_request_caption_one": "From the library being created, across {{count}} library. {{waiting}} not yet used.",
+		"onboarding_stats_first_request_caption_other": "From the library being created, across {{count}} libraries. {{waiting}} not yet used.",
 		"new": {
 			"title": "Create a consortium",
 			"required_title": "No consortium has been set up yet",
@@ -452,7 +483,40 @@
 		"your_version": "Your version",
 		"releases_link": "See the <linkToReleases>releases</linkToReleases> hub for more details and previous versions.",
 		"see_metrics_loggers": "See <metricsLink>/metrics</metricsLink> and <loggersLink>/loggers</loggersLink> for additional information.",
-		"versions": "Versions"
+		"versions": "Versions",
+		"scheduled_work": {
+			"title": "Scheduled work",
+			"enabled": "Scheduled work is switched on: {{value}}",
+			"tracking": "Tracking runs every {{interval}}.",
+			"tracking_last_run_one": "Tracking runs every {{interval}}. Its last run checked {{count}} request in {{seconds}} seconds.",
+			"tracking_last_run_other": "Tracking runs every {{interval}}. Its last run checked {{count}} requests in {{seconds}} seconds.",
+			"harvest": "Harvesting checks for work every {{interval}}.",
+			"nodes_caption": "The DCB instances running now, from dcb-service's service information",
+			"node": "Instance",
+			"runs_scheduled_work": "Runs scheduled work",
+			"started": "Started",
+			"last_heartbeat": "Last heartbeat",
+			"yes": "Yes",
+			"no": "No"
+		},
+		"configuration": {
+			"title": "Configuration",
+			"settings_caption": "Settings reported by dcb-service. A setting left unset shows dcb-service's default",
+			"setting": "Setting",
+			"value": "Value",
+			"search_backend": "Search index",
+			"placement_check_timeout": "Time limit on the checks before a request is placed",
+			"seconds_one": "{{count}} second",
+			"seconds_other": "{{count}} seconds",
+			"staff_client_ids": "Sign-in clients whose requests count as placed by staff",
+			"duplicate_request_check": "Duplicate request check",
+			"brand_asset_store": "Where brand images are stored",
+			"ingest_caption": "Whether DCB ingests records from each Host LMS, as dcb-service reports it",
+			"ingest_source": "Host LMS",
+			"ingest_enabled": "Ingest",
+			"on": "On",
+			"off": "Off"
+		}
 	},
 	"error_overview": {
 		"audit_url": "Audit URL",
@@ -611,6 +675,8 @@
 			"subtitle": "Results of the connection and ingest checks for {{code}}.",
 			"ping": "Connection (ping)",
 			"ingest": "Record ingest",
+			"configuration": "Configuration",
+			"auth_profile": "Patron authentication profiles",
 			"warnings_title": "Configuration warnings",
 			"no_result": "No result was returned for this check.",
 			"empty": "No verification results are available.",
@@ -633,7 +699,6 @@
 			"shared_system": "Shared system",
 			"domain_id": "Domain ID",
 			"fine": "Fine code ID",
-			"folio_tenant": "FOLIO tenant",
 			"ill_location_id": "ILL location ID",
 			"ingest": "Ingest",
 			"item": "Item config",
@@ -666,7 +731,6 @@
 			"shelving_scheme_id": "Shelving scheme ID",
 			"staff_password": "Staff password",
 			"staff_username": "Staff username",
-			"user_base_url": "User base URL",
 			"base_url": "Alma URL",
 			"default_circ_desk": "Default circ desk",
 			"item_policy": "Item policy",
@@ -688,6 +752,7 @@
 		"select_type_first": "Choose the LMS type to see the configuration this system needs.",
 		"ping_warning_title": "OpenRS DCB will connect to this system on creation",
 		"unsupported_title": "This system type cannot be created here yet",
+		"view_alarms": "View this Host LMS's alarms",
 		"unsupported_body": "DCB cannot yet validate {{ils}} configuration when creating a Host LMS, so it would be rejected. Choose another type, or ask your system administrator to add this Host LMS directly.",
 		"unsupported_for_creation": "{{ils}} Host LMS systems cannot be created from this workflow yet.",
 		"config_fields": {
@@ -716,8 +781,6 @@
 			"no_renew_collection_code_description": "The collection code DCB sets on an item to stop it being renewed. Koha's ItemsDeniedRenewal preference must name it.",
 			"virtual_patron_category": "Visiting patron category",
 			"virtual_patron_category_description": "The Koha patron category a visiting patron is created in until patron types are mapped. Koha refuses the patron unless this category exists.",
-			"item_enrichment_concurrency": "Item lookups at once",
-			"item_enrichment_concurrency_description": "How many of one title's items DCB looks up at the same time, from 1 to 16. Each one is a call to this system on every availability check, so raise it only if the server has capacity.",
 			"sierra_api_version": "Sierra REST API version",
 			"sierra_api_version_description": "Choose an older version only for a Sierra that does not serve v6. DCB is tested against v6.",
 			"sierra_api_version_v4": "v4",
@@ -727,10 +790,6 @@
 			"virtual_patron_email_description": "The address this system sends visiting patrons' hold and pickup notices to. Use a mailbox the consortium reads, never a patron's own address: every visiting patron shares it.",
 			"do_not_renew_note": "Do-not-renew note",
 			"do_not_renew_note_description": "The internal note added to an item DCB has stopped being renewed, so this library's staff know why. Write it in the language they work in.",
-			"availability_concurrency": "Availability checks at once",
-			"availability_concurrency_description": "How many titles the background availability job checks against this system at the same time, from 1 to 8. Leave blank to use the setting shared by every system, which is 2 unless changed.",
-			"polling_multiplier": "Poll less often",
-			"polling_multiplier_description": "Check requests that involve this system less often, by this factor, from 1 to 10. 3 means a third as often. Leave blank to poll at the usual pace.",
 			"loan_policy_general": "General loan",
 			"loan_policy_short_loan": "Short loan",
 			"loan_policy_reference_only": "Reference only",
@@ -763,7 +822,7 @@
 			"alma_url_description": "The regional Ex Libris API gateway your Alma instance is served from, e.g. https://api-na.hosted.exlibrisgroup.com. Your region is listed under “Calling Alma APIs”.",
 			"alma_base_url": "Alma institution URL",
 			"alma_base_url_description": "Your institution's own Alma domain, with no path, e.g. https://example.alma.exlibrisgroup.com. This is the host DCB harvests records from, not the API gateway.",
-			"alma_apikey_description": "An Alma API key with read and write permissions for Users, Requests, Bibs, Holdings, Items and Configuration.",
+			"alma_apikey_description": "An Alma API key with read and write access to Users and Bibs, and read-only access to Configuration. Holdings, items and requests are part of Bibs and Users.",
 			"alma_api_docs_link": "See the Ex Libris Alma API documentation.",
 			"alma_item_docs_link": "See the Ex Libris item schema documentation.",
 			"alma_connection_group": "Connecting to Alma",
@@ -782,8 +841,8 @@
 			"alma_request_cancellation_reason_description": "A code from your RequestCancellationReasons code table, sent whenever DCB cancels a request. It is what your staff see in the request's history.",
 			"alma_virtual_item_library_code_description": "The code of the Alma library DCB creates virtual items at. Alma cannot report a patron's home location reliably, so this has to be agreed with your Alma staff.",
 			"alma_virtual_item_location_code_description": "The code of the location within that library where virtual items are created. It must exist: DCB reads it from Alma each time it creates a virtual item.",
-			"alma_default_circ_desk_code_description": "The code of the circulation desk OpenRS DCB checks items out at.",
-			"alma_pickup_circ_desk_description": "The circulation desk used when a patron collects an item, if it differs from the default.",
+			"alma_default_circ_desk_code_description": "The code of the circulation desk OpenRS DCB scans items in at. It must exist in each library DCB acts in.",
+			"alma_pickup_circ_desk_description": "The code of the circulation desk OpenRS DCB checks items out at, to a visiting patron or to one of your patrons collecting at another member. Alma refuses a checkout at a desk that cannot loan items from the item's library.",
 			"alma_item_policy_description": "The Alma item policy applied to the virtual items DCB creates. Codes come from the ItemPolicy code table.",
 			"alma_user_identifier_description": "The Alma user identifier type DCB tags visiting patrons' accounts with. Leave blank to use INST_ID.",
 			"no_renew_item_policy": "No-renew item policy",
@@ -819,10 +878,6 @@
 			"user_identifier": "User identifier",
 			"folio_base_url_description": "The base URL for this FOLIO tenant.",
 			"folio_apikey_description": "An edge API key for the FOLIO tenant, issued by your FOLIO administrator.",
-			"folio_tenant": "FOLIO tenant",
-			"folio_tenant_description": "The tenant identifier. DCB warns when this is missing.",
-			"user_base_url": "User base URL",
-			"user_base_url_description": "Base URL for FOLIO's user endpoints, where these differ from the main gateway.",
 			"record_syntax": "Record syntax",
 			"metadata_prefix": "Metadata prefix",
 			"metadata_prefix_description": "OAI-PMH metadata prefix used for harvesting.",
@@ -941,13 +996,9 @@
 			"comma_separated": "Separate multiple values with commas.",
 			"must_be_object": "This must be a JSON object of key and value pairs.",
 			"roles_description": "Which DCB roles this system fulfils, e.g. CATALOGUE, CIRCULATION. Leave blank for the defaults.",
-			"staff_ui": "Staff interface URL",
-			"staff_ui_description": "Where staff sign in to this system. Used for links out of DCB Admin.",
 			"context_hierarchy_description": "Mapping contexts searched in order, most specific first, e.g. this system's code then its consortium then GLOBAL.",
 			"shelf_location_policy_map": "Shelf location policy map",
 			"shelf_location_policy_map_description": "Maps each Polaris shelf location to a lending policy (REFERENCE, NO_LEND, LOCAL_ONLY). DCB uses defaults when this is left blank.",
-			"use_new_bib_chunk_ingest": "Use new bib chunk ingest",
-			"use_new_bib_chunk_ingest_description": "Harvest bib records using the newer chunked method.",
 			"av_loan_period_code_id": "AV loan period code ID",
 			"av_loan_period_code_id_description": "Loan period applied to audiovisual virtual items, where it differs from the standard one.",
 			"policy_count_one": "{{count}} shelf location mapped",
@@ -979,6 +1030,35 @@
 			"not_attached_body": "DCB Admin cannot point an existing library at a different Host LMS: dcb-service's updateLibrary and updateAgency carry no Host LMS field, and secondHostLms can only be read. The record is created and verified here; making a library use it needs a dcb-service change. Nothing about the library has been altered.",
 			"go_to_record": "Go to the Host LMS",
 			"back_to_list": "Back to all Host LMS"
+		},
+		"last_ping": {
+			"title": "Last connection check",
+			"column": "Last check",
+			"never": "DCB has not checked this Host LMS yet. It checks every Host LMS once a day, and whenever one is saved.",
+			"never_short": "Not checked",
+			"not_recorded": "Not recorded",
+			"never_ok": "Not since DCB started keeping a record",
+			"checked_at": "Checked",
+			"last_ok_at": "Last worked",
+			"version": "System version",
+			"duration": "Response time",
+			"duration_value": "{{ms}} ms",
+			"state": {
+				"ok": "Working",
+				"refused": "Refused DCB's credentials",
+				"misconfigured": "Cannot be used with its configuration",
+				"unreachable": "Could not be reached",
+				"failing": "Answered with an error",
+				"unknown": "Failed for an unrecognised reason"
+			},
+			"advice": {
+				"ok": "DCB reached this system and its credentials were accepted.",
+				"refused": "The system rejected DCB's API key or login. Correct the credentials on the Client config tab and save, which checks again. While the supplier preflight is on, DCB does not choose this library to supply.",
+				"misconfigured": "DCB could not build a connection from this configuration. Correct it on the Client config tab and save, which checks again. While the supplier preflight is on, DCB does not choose this library to supply.",
+				"unreachable": "DCB could not connect: the system may be down, or its address or firewall may have changed. DCB still sends requests here.",
+				"failing": "The system answered, but with an error. Check the system's own status, then save this Host LMS to check again.",
+				"unknown": "Look in the DCB log for this Host LMS around the time shown."
+			}
 		}
 	},
 	"insights": {
@@ -1621,7 +1701,8 @@
 					"barcode_password": "Barcode and password",
 					"barcode_name": "Barcode and name",
 					"unique_id_pin": "Unique ID and PIN",
-					"unique_id_name": "Unique ID and name"
+					"unique_id_name": "Unique ID and name",
+					"saml": "Sign in at the institution"
 				},
 				"saml": "SAML based SSO?",
 				"test_patron_code": "Test patron home library location code",
@@ -1832,6 +1913,7 @@
 			"pickup_status": "Pickup status",
 			"polaris_org": "Polaris org ID",
 			"service_point": "FOLIO service point ID",
+			"koha": "Koha branch code",
 			"sierra": "Sierra location ID",
 			"success": "The new location was successfully created for {{name}}",
 			"title": "Add new location for {{name}}",
@@ -2292,6 +2374,9 @@
 		"cleanup_forbidden": "You are not allowed to clean up this request.",
 		"cleanup_info": "Check this request for updates, then close it and delete its temporary records.",
 		"cleanup_in_progress": "Cleanup in progress",
+		"cleanup_confirm": "Clean up",
+		"cleanup_confirm_body": "Clean up finalises a request and deletes the temporary records DCB made for it in each library's system. It cannot be undone.",
+		"cleanup_confirm_title": "Clean up?",
 		"cleanup_override_confirm": "Clean up anyway",
 		"cleanup_override_title": "Clean up while the item is out?",
 		"cleanup_override_warning": "DCB refused this cleanup because the item is not back at the supplying library (status {{status}}). Cleaning up now deletes the borrowing library’s temporary records, leaving the supplying library nothing to check the item in against. Only continue if you have confirmed where the item is.",
@@ -2305,6 +2390,18 @@
 		"rollback_disabled": "Rollback is only available for requests in an ERROR state.",
 		"rollback_successful": "The rollback has been requested. The patron request has been returned to its previous status.",
 		"rollback_unsuccessful": "The rollback failed, and the patron request remains in an ERROR state. Please try again later.",
+		"confirm_returned": "Confirm item is back",
+		"confirm_returned_title": "Confirm the item is back at the supplying library?",
+		"confirm_returned_body": "Do this once the item is back on the supplying library's shelf: the library has not reported it. The request is then released as if it had. A cancelled request finishes as cancelled, and a returned loan completes.",
+		"confirm_returned_info": "The supplying library has not reported this item back. Confirm it once the item is on its shelf.",
+		"confirm_returned_disabled": "Only a request waiting for its item to return to the supplying library can be confirmed back.",
+		"confirm_returned_in_progress": "Confirming the item is back",
+		"confirm_returned_successful": "The item was confirmed back at the supplying library.",
+		"confirm_returned_successful_changed": "The item was confirmed back. The status is now {{status}}.",
+		"confirm_returned_successful_unchanged": "The item was confirmed back, but the status is still {{status}}.",
+		"confirm_returned_refused": "The item was not confirmed back. {{detail}}",
+		"confirm_returned_forbidden": "Only the supplying library or consortium staff can confirm this item is back.",
+		"confirm_returned_unsuccessful": "Confirming the item is back failed, and the request is unchanged. Its audit log says why.",
 		"cluster_record_uuid": "Cluster record UUID",
 		"completed_requests": "{{completed}} completed requests",
 		"count": "Patron requests: {{count}}",
@@ -2431,6 +2528,7 @@
 		"cleanup_in_progress": "Cleanup in progress",
 		"cleanup_override_action": "Clean up anyway ({{count}})",
 		"cleanup_refused_count": "Refused while the item is out:",
+		"cleanup_summary": "{{eligible}} of {{selected}} selected request(s) can be cleaned up. The remaining {{skipped}} will be skipped.",
 		"rollback_in_progress": "Rollback in progress",
 		"rollback_complete": "Rollback complete",
 		"rollback_none_eligible": "None of the selected requests are in an ERROR state, so nothing was rolled back.",
@@ -2540,7 +2638,9 @@
 					"no_brackets": "Please remove any brackets from the barcode.",
 					"request": {
 						"duplicate": "A request already exists for this patron at this library within the time window of 900 seconds.",
-						"generic": "Error: {{code}}. More info: {{description}}"
+						"generic": "Error: {{code}}. More info: {{description}}",
+						"supplier_cannot_supply": "The library that holds this copy can't supply it because of a problem with its DCB setup. {{description}} Choose another copy, or ask that library's DCB administrator to correct it.",
+						"timed_out": "DCB could not finish checking this request in time, because a library system was slow to respond. Nothing was requested. Try again in a few minutes; if it keeps happening, check that library's Host LMS."
 					},
 					"validation_failure": "We were unable to validate this patron. Please correct the barcode and/or affiliated institution, and try again.",
 					"validate_first": "You must validate a patron before attempting to make a staff request on their behalf."
@@ -2715,6 +2815,19 @@
 			"session_warning": "Your session is about to expire"
 		},
 		"data_grid": {
+			"column_menu": {
+				"move_left": "Move left",
+				"move_right": "Move right"
+			},
+			"saved_view": {
+				"restored": "Showing your last view",
+				"reset": "Reset to default",
+				"not_in_link": "Some filters are not included in a copied link",
+				"copy_link": "Copy link to this view",
+				"link_copied": "Link to this view copied",
+				"link_copied_private": "Link copied. It leaves out patron barcode and requester note filters, and search text",
+				"link_failed": "The link could not be copied. Copy the address from your browser's address bar instead"
+			},
 			"actions": "Actions",
 			"cancel": "Cancel",
 			"close": "Close",
@@ -2836,7 +2949,14 @@
 			"results_announcement_one": "{{count}} result",
 			"results_announcement_other": "{{count}} results",
 			"results_loading": "Loading results",
-			"search_by_audit": "Search by audit"
+			"search_by_audit": "Search by audit",
+			"aggregation": {
+				"sum": "Total",
+				"avg": "Average",
+				"min": "Lowest",
+				"max": "Highest",
+				"size": "Count"
+			}
 		},
 		"error": {
 			"401": {
@@ -2923,6 +3043,7 @@
 				"lat": "Enter the latitude: a number between -90 and 90, with no more than five numbers after the decimal point.",
 				"long": "Enter the longitude: a number between -180 and 180, with no more than five numbers after the decimal point.",
 				"local_id_folio": "FOLIO service point ID must be a valid UUID.",
+				"local_id_koha": "Koha branch code is required and must be at most 10 characters",
 				"local_id_polaris": "Polaris org ID must be a non-negative integer",
 				"local_id_sierra": "Sierra location ID must be a non-negative integer"
 			},
@@ -2945,6 +3066,11 @@
 		},
 		"common": {
 			"status": "Status"
+		},
+		"support_reference": {
+			"label": "Reference for support:",
+			"copy": "Copy the reference",
+			"copied": "Copied"
 		}
 	},
 	"welcome": {
@@ -3085,9 +3211,9 @@
 			"subtitle_one": "Your consortium exists and has 1 library.",
 			"subtitle_other": "Your consortium exists and has {{count}} libraries.",
 			"revisit": "Go to this step",
-			"revisit_named": "Go to the {{label}} step",
+			"revisit_named": "Go to this step: {{label}}",
 			"change": "Change this",
-			"change_named": "Change the {{label}} step",
+			"change_named": "Change this: {{label}}",
 			"revisit_hint": "Anything here can be changed - open any step to go back to it.",
 			"outstanding": "You passed over: {{steps}}. Each one is still there when you want it.",
 			"next_steps": "Adding a library is the start of configuring it. The Onboarding page shows what each library still needs - its mappings, its pickup locations, and whether its records have been ingested.",
@@ -3174,7 +3300,6 @@
 		"subtitle": "DCB Admin runs against more than one dcb-service release. These features are switched on per environment once its dcb-service is new enough. This deployment reports version {{version}}.",
 		"version_unknown": "unknown",
 		"needs_version": "dcb-service {{version}} or later",
-		"needs_unreleased": "Not in any dcb-service release yet",
 		"flag_on": "on",
 		"flag_off": "off",
 		"column": {
@@ -3191,12 +3316,16 @@
 			"insights": "Insights",
 			"insights_trends": "Insights duration trends",
 			"guarded_cleanup": "Guarded clean up",
+			"confirm_item_returned": "Confirm item is back",
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
+			"host_lms_probes": "Host LMS checks, the last connection check and ingest counts for chosen libraries",
 			"settings_inheritance": "Settings inheritance",
 			"shelf_browse": "Shelf browse",
-			"request_tags": "Request tags"
+			"request_tags": "Request tags",
+			"request_notes": "Request notes",
+			"placed_by_staff": "Placed by staff or patron"
 		},
 		"status": {
 			"ready": "On, and served by this dcb-service",

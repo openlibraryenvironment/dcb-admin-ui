@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { requestErrorSummary } from "@helpers/safeErrorLog";
+import { GraphQLError } from "graphql";
+import { ClientError } from "graphql-request";
+import {
+	errorForDisplay,
+	errorForLog,
+	requestErrorSummary,
+} from "@helpers/safeErrorLog";
 
 /**
  * The patron barcode must not survive into the console - W-5.
@@ -74,5 +80,66 @@ describe("requestErrorSummary", () => {
 	it("survives something that is not an error object at all", () => {
 		expect(requestErrorSummary(undefined)).toBe("request failed (no detail)");
 		expect(requestErrorSummary("boom")).toBe("request failed (no detail)");
+	});
+});
+
+describe("errorForLog", () => {
+	it("keeps a request's token, body and variables out of the console", () => {
+		const axiosLike = {
+			name: "AxiosError",
+			message: "Request failed with status code 500",
+			config: {
+				method: "post",
+				url: "/patrons/requests/abc/transition/cleanup",
+				headers: { Authorization: "Bearer a.real.token" },
+			},
+			response: { status: 500, statusText: "Server Error" },
+		};
+		const logged = errorForLog(axiosLike);
+		expect(logged).toBe(
+			"POST /patrons/requests/abc/transition/cleanup -> 500 Server Error",
+		);
+		expect(logged).not.toContain("Bearer");
+
+		const clientError = Object.assign(new Error("GraphQL Error {variables}"), {
+			response: { status: 200, errors: [] },
+			request: { query: "query X", variables: { barcode: "29551000123456" } },
+		});
+		expect(errorForLog(clientError)).not.toContain("29551000123456");
+	});
+
+	it("keeps a crash's stack", () => {
+		const crash = new TypeError("cannot read properties of undefined");
+		expect(errorForLog(crash)).toContain("cannot read properties of undefined");
+		expect(errorForLog(crash)).toContain("TypeError");
+	});
+
+	it("names anything else that was thrown", () => {
+		expect(errorForLog("plain")).toBe("plain");
+	});
+});
+
+describe("errorForDisplay", () => {
+	it("keeps a GraphQL request's variables off the page", () => {
+		const clientError = new ClientError(
+			{
+				status: 200,
+				headers: new Headers(),
+				body: "",
+				errors: [new GraphQLError("Patron not found")],
+			},
+			{ query: "query X", variables: { barcode: "29551000123456" } },
+		);
+		expect(clientError.message).toContain("29551000123456");
+		expect(errorForDisplay(clientError)).not.toContain("29551000123456");
+	});
+
+	it("shows any other error's message, without its stack", () => {
+		const crash = new TypeError("cannot read properties of undefined");
+		expect(errorForDisplay(crash)).toBe("cannot read properties of undefined");
+	});
+
+	it("names anything else that was thrown", () => {
+		expect(errorForDisplay("plain")).toBe("plain");
 	});
 });

@@ -9,14 +9,14 @@ import Loading from "@components/Loading/Loading";
 import InsightsDashboard from "@components/Insights/InsightsDashboard";
 import ScopeSelector from "@components/Insights/ScopeSelector";
 import {
-	scopeCodes,
+	scopeLibraryCode,
 	scopeId,
 	scopeOptionsFrom,
 	selectedScope,
 } from "@helpers/insightsScope";
 import { createRestClient } from "@helpers/createRestClient";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { isInsightsEnabled } from "@helpers/featureFlags";
+import { isInsightsPageShown } from "@helpers/featureFlags";
 import { rangeToParams, intervalForRange } from "@helpers/insightsRange";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -39,11 +39,11 @@ import {
 
 export const Route = createFileRoute("/__authenticated/consortium/insights")({
 	validateSearch: insightsSearchSchema,
-	// The nav entry is hidden while the flag is off, but the URL is still
+	// The nav entry is hidden where the page is not shown, but the URL is still
 	// typeable - and the page would call statistics endpoints that this
 	// environment's dcb-service does not serve yet.
 	beforeLoad: () => {
-		if (!isInsightsEnabled()) {
+		if (!isInsightsPageShown("consortium")) {
 			throw redirect({ to: "/consortium" });
 		}
 	},
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/__authenticated/consortium/insights")({
 				);
 				// ensureQueryData returns the raw response - a `select` is a view for
 				// components only - so the options are derived here.
-				libraryCode = scopeCodes(
+				libraryCode = scopeLibraryCode(
 					selectedScope(scopeOptionsFrom(libraries), scope),
 				);
 			} catch {
@@ -114,7 +114,7 @@ function ConsortiumInsightsPage() {
 		() => selectedScope(options, view.scope),
 		[options, view.scope],
 	);
-	const libraryCode = useMemo(() => scopeCodes(selected), [selected]);
+	const libraryCode = useMemo(() => scopeLibraryCode(selected), [selected]);
 
 	// A link that names a library has no question to ask until the codes are known, so the
 	// dashboard is not mounted until then. A failed list counts as resolved - the figures

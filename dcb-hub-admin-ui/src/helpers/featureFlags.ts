@@ -1,3 +1,9 @@
+import {
+	selectPages,
+	type InsightsPage,
+	type Selection,
+} from "@helpers/insightsPages";
+
 /**
  * Runtime feature flags.
  *
@@ -45,6 +51,13 @@ export const isGuardedCleanupEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_GUARDED_CLEANUP");
 
 /**
+ * Confirming a request's item is back at the supplying library — a dcb-service route first
+ * released in 9.2.0 (POST .../transition/confirm-returned). Older servers answer 404.
+ */
+export const isConfirmItemReturnedEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_CONFIRM_ITEM_RETURNED");
+
+/**
  * Insights depends on the /insights endpoints, first released in dcb-service 9.0.0.
  * Enable with VITE_FEATURE_INSIGHTS=true once the environment's dcb-service is new
  * enough; an older one answers 404 to all of them.
@@ -73,9 +86,8 @@ export const isConsortiumBrandingEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_CONSORTIUM_BRANDING");
 
 /**
- * Patron announcements — V-12. On no dcb-service release: the store, the scoped read and
- * the three mutations are on the `symposia` branch only, and asking a deployment without
- * them for `announcements` is a validation error that fails the whole operation. So this
+ * Patron announcements, first released in dcb-service 9.2.0. Asking an older deployment
+ * for `announcements` is a validation error that fails the whole operation, so this
  * changes the DOCUMENT, not only what renders.
  *
  * ANDed with Symposia, which is what displays them.
@@ -84,13 +96,8 @@ export const isAnnouncementsEnabled = (): boolean =>
 	isSymposiaEnabled() && readFlag("VITE_FEATURE_ANNOUNCEMENTS");
 
 /**
- * The consortium's support link — dcb-service AFTER 9.0.0, V-11.1.
- *
- * `consortium.support_url` is on NO dcb-service branch this workspace can see, main
- * included: checked 2026-09-29 against main at bcfe8254e, where `supportUrl` appears in
- * no .java and no .graphqls. Setting this flag there fails LoadConsortium whole.
- * `schema.graphqls` here declares it, which is why the documents still validate - that
- * file deliberately carries unmerged fields.
+ * The consortium's support link, first released in dcb-service 9.2.0. Setting this flag
+ * against an older one fails LoadConsortium whole.
  *
  * `websiteUrl` beside it is ungated: Consortium has carried it since 6.2.0.
  */
@@ -149,9 +156,17 @@ export const isLocalHoldsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_LOCAL_HOLDS");
 
 /**
- * Percentile trends — `/insights/trend`, in NO release, not 8.71.0 and not the 9.0.0
- * tag. Merged on main: InsightsController at bcfe8254e serves it, checked 2026-09-29.
- * So a 9.0.0 deployment has the Insights surface and 404s this one endpoint.
+ * The configuration and auth profile checks on creating or updating a Host LMS, and the
+ * last connectivity check kept on each Host LMS: first released in dcb-service 9.2.0.
+ * These gate the mutation and query DOCUMENTS: selecting them against an older dcb-service
+ * fails the whole operation.
+ */
+export const isHostLmsProbesEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_HOST_LMS_PROBES");
+
+/**
+ * Percentile trends — `/insights/trend`, first released in dcb-service 9.1.0. So a 9.0.0
+ * deployment has the Insights surface and 404s this one endpoint.
  *
  * Unlike the branding flags this gates a RENDER, not a document: the three rate trends
  * beside it come from `/insights/timeseries`, which every Insights deployment has.
@@ -169,8 +184,8 @@ export const isSettingsInheritanceEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_SETTINGS_INHERITANCE");
 
 /**
- * Shelf browse: `Library.classificationScheme` and its input field, on no dcb-service release
- * yet. Gates the DOCUMENT and the mutation VARIABLES of LoadLibraryBasics and UpdateLibrary,
+ * Shelf browse: `Library.classificationScheme` and its input field, first released in
+ * dcb-service 9.2.0. Gates the DOCUMENT and the mutation VARIABLES of LoadLibraryBasics and UpdateLibrary,
  * since an undeclared field fails the whole operation. Separate from
  * VITE_FEATURE_SETTINGS_INHERITANCE: the two need not ship in the same release.
  *
@@ -180,9 +195,59 @@ export const isShelfBrowseEnabled = (): boolean =>
 	isSymposiaEnabled() && readFlag("VITE_FEATURE_SHELF_BROWSE");
 
 /**
- * The consortium's request tag list: `requestTags` and the create, update and delete
- * mutations, on no dcb-service release yet. Gates the route that sends them, since an
- * undeclared field fails the whole operation.
+ * The consortium's request tag list (`requestTags` and its create, update and delete) and
+ * the tags on a patron request (`tags`, `tagPatronRequest`, `untagPatronRequest`): first
+ * released in dcb-service 9.2.0. Gates the DOCUMENTS: selecting them against an older
+ * dcb-service fails the whole operation.
  */
 export const isRequestTagsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_REQUEST_TAGS");
+
+/**
+ * The notes on a patron request (`notes`, `addPatronRequestNote`,
+ * `retractPatronRequestNote`): first released in dcb-service 9.2.0. Gates the documents.
+ */
+export const isRequestNotesEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_REQUEST_NOTES");
+
+/**
+ * Whether staff or the patron placed a request (`PatronRequest.placedByStaff`): first
+ * released in dcb-service 9.2.0. Gates the documents.
+ */
+export const isPlacedByStaffEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_PLACED_BY_STAFF");
+
+/** A setting that is not on or off, read from where readFlag reads. */
+const readSetting = (name: string): string | undefined => {
+	const injected =
+		typeof window !== "undefined" ? window.__APP_ENV__?.[name] : undefined;
+	const value = injected ?? import.meta.env[name];
+	return typeof value === "string" ? value : undefined;
+};
+
+/** Parsed once per value, and a name it does not know reported once: docs/deployment.md, 2b. */
+export const readSelection = <Name extends string>(
+	name: string,
+	parse: (raw: string | undefined) => Selection<Name>,
+	warnUnknown: () => void,
+) => {
+	let last: { raw: string | undefined; shown: ReadonlySet<Name> } | undefined;
+	return (): ReadonlySet<Name> => {
+		const raw = readSetting(name);
+		if (!last || last.raw !== raw) {
+			const { shown, unknown } = parse(raw);
+			if (unknown.length > 0) warnUnknown();
+			last = { raw, shown };
+		}
+		return last.shown;
+	};
+};
+
+const insightsPages = readSelection("VITE_INSIGHTS_PAGES", selectPages, () =>
+	console.warn(
+		"VITE_INSIGHTS_PAGES names a page this app does not have: docs/deployment.md, 2b",
+	),
+);
+/** An Insights page this deployment shows: VITE_INSIGHTS_PAGES, within VITE_FEATURE_INSIGHTS. */
+export const isInsightsPageShown = (page: InsightsPage): boolean =>
+	isInsightsEnabled() && insightsPages().has(page);

@@ -26,6 +26,7 @@ import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Confirmation from "@components/Confirmation/Confirmation";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import Loading from "@components/Loading/Loading";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -190,6 +191,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 		severity: "success" | "error";
 		text: string | null;
 		title: string | null;
+		reference?: string | null;
 	}>({
 		open: false,
 		severity: "success",
@@ -451,10 +453,11 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 			});
 			setEditMode(false);
 			setChangedFields({});
-		} catch {
+		} catch (error) {
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t("ui.error.update_failed"),
 				title: t("ui.error.title"),
 			});
@@ -1142,6 +1145,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				alertText={alert.text}
 				alertTitle={alert.title}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

@@ -59,7 +59,8 @@ export default defineConfig({
 		 * relative to the root, where there is no docker/ at all.
 		 */
 		command: [
-			"docker build -f docker/production/Dockerfile -t dcb-admin:container-gate .",
+			// To stderr, which Playwright shows: the build prints its errors on stdout, which it drops
+			"docker build -f docker/production/Dockerfile -t dcb-admin:container-gate . 1>&2",
 			// A FIXED NAME, and `npm run e2e:container` removes it BEFORE playwright
 			// runs. Playwright's teardown kills the `docker run` client but has been
 			// observed leaving the container up, and a leftover one holds the port.

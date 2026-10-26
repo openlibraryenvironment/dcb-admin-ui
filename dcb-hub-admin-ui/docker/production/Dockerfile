@@ -12,7 +12,9 @@ RUN npm run build
 # Static SPA, served by nginx - not a Node server. Runtime config
 # (inject_env.json) is rendered from container env vars at startup by
 # docker-entrypoint.sh, keeping one build deployable to any environment.
-FROM nginx:stable-alpine AS runner
+# An exact release of nginx's stable line, so a rebuild ships the image that was tested:
+# docs/deployment.md, Option C
+FROM nginx:1.30.6-alpine3.24 AS runner
 
 # envsubst (gettext) - not guaranteed present in every nginx base image
 # variant; installed explicitly rather than assumed, since

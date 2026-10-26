@@ -34,6 +34,7 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
+		"allowImportingTsExtensions": true,
 		"jsx": "react-jsx"
 	},
 	// EVERY e2e directory, not just e2e/. It was none of them, so `tsc --noEmit` passed
@@ -43,7 +44,9 @@
 	//
 	// The other three were still missing, so the base-path, bootloader and container
 	// suites were unchecked for the same reason by the same omission - a new spec in any
-	// of them type-checked clean because nothing read it.
+	// of them type-checked clean because nothing read it. The configs were the same: vite
+	// ignores an option it does not have, so `server.historyApiFallback` sat in
+	// vite.config.mts doing nothing.
 	"include": [
 		"src",
 		"src/vite-env.d.ts",
@@ -51,6 +54,11 @@
 		"e2e",
 		"e2e-base-path",
 		"e2e-ki-bootstrap",
-		"e2e-container"
+		"e2e-container",
+		"vite.config.mts",
+		"vitest.setup.ts",
+		"vitest.pipeline.config.mts",
+		"pipeline-checks",
+		"playwright*.config.ts"
 	]
 }

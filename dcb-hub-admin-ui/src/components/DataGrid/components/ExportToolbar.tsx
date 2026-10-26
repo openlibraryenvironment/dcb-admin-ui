@@ -45,6 +45,8 @@ interface ExportToolbarProps {
 	wizardEnabled?: boolean;
 	onOpenWizard?: () => void;
 	disableToolbarFilter?: boolean;
+	/** Where the grid's view came from: GridViewNotice. */
+	viewNotice?: ReactNode;
 }
 
 /**
@@ -123,6 +125,7 @@ export default function ExportToolbar({
 	wizardEnabled,
 	onOpenWizard,
 	disableToolbarFilter,
+	viewNotice,
 }: ExportToolbarProps) {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
@@ -201,6 +204,7 @@ export default function ExportToolbar({
 					/>
 				</Tooltip>
 			) : null}
+			{viewNotice}
 			{handleExport ? (
 				<GridToolbarExportContainer>
 					<ListSubheader>{t("ui.data_grid.export.format_group")}</ListSubheader>

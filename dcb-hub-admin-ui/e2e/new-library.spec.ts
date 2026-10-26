@@ -126,6 +126,49 @@ test.describe("New Library wizard", () => {
 		);
 	});
 
+	test("shows the configuration and authentication profile checks the server ran", async ({
+		page,
+	}) => {
+		// The fields are selected only behind VITE_FEATURE_HOST_LMS_PROBES; unseeded, it reads
+		// whatever .env baked in. The seed applies from the next load.
+		await useAllFeatures(page);
+		await page.reload();
+		await expect(page.getByText("Alpha Test Library")).toBeVisible();
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: {
+				createHostLms: {
+					hostLms: { code: "testcode" },
+					pingStatus: "Status: OK",
+					ingestStatus: "Success: Retrieved chunk with 3 records.",
+					configurationStatus: "Missing: item.fine-code-id",
+					authProfileStatus: "Not checked: no agency uses this Host LMS yet",
+					warnings: [],
+				},
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+
+		const dialog = wizard(page);
+		await dialog.getByLabel(/host lms code/i).fill("testcode");
+		await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+		await dialog.getByLabel(/lms type/i).click();
+		await page.getByRole("option", { name: "Sierra" }).click();
+		const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+		await configField(/base url/i).fill("https://sierra.example.org");
+		await configField(/sierra api key/i).fill("test-key");
+		await configField(/sierra api secret/i).fill("test-secret");
+		await configField(/default agency code/i).fill("TESTAGENCY");
+		await configField(/page size/i).fill("100");
+		await dialog.getByRole("button", { name: /next/i }).click();
+
+		await expect(dialog.getByText("Missing: item.fine-code-id")).toBeVisible();
+		await expect(
+			dialog.getByText("Not checked: no agency uses this Host LMS yet"),
+		).toBeVisible();
+	});
+
 	test("leaves the service details to the library's own pages", async ({
 		page,
 	}) => {

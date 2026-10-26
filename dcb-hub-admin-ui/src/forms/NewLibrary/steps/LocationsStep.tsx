@@ -160,7 +160,7 @@ export default function LocationsStep({
 					hostLmsCode={hostLmsCode}
 					agencyCode={agencyCode}
 					libraryName={libraryName}
-					type="Pickup"
+					type="PICKUP"
 					ils={getILS(lmsClientClass) || ""}
 					onCreated={() => setAddedCount((prev) => (prev ?? 0) + 1)}
 				/>

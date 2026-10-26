@@ -1,52 +1,59 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import { requestErrorRequestsView } from "@constants/dataGrid/gridViews";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
 import Link from "@components/Link/Link";
 import ErrorComponent from "@components/Error/Error";
 
-import { useGridState } from "@hooks/useGridState";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { withRowIndexIds } from "@helpers/dataGrid/withRowIndexIds";
 
 export const Route = createFileRoute(
 	"/__authenticated/serviceInfo/requestErrors/requests",
 )({
-	component: Requests,
-	validateSearch: (search: Record<string, unknown>) => {
-		return {
-			namedSql: search.namedSql as string,
-			description: search.description as string,
-		};
+	validateSearch: (search: Record<string, unknown>) => ({
+		// The error category this page lists, chosen on the overview
+		namedSql:
+			typeof search.namedSql === "string"
+				? search.namedSql.slice(0, 200)
+				: undefined,
+		description:
+			typeof search.description === "string"
+				? search.description.slice(0, 500)
+				: undefined,
+		...validateGridSearch(search),
+	}),
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			requestErrorRequestsView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/serviceInfo/requestErrors/requests", ...restore });
 	},
+	component: Requests,
 });
 
 function Requests() {
 	const { t } = useTranslation();
 	const client = useDcbRestClient();
-	const { namedSql, description } = Route.useSearch();
 
-	const gridId = "errorOverviewPatronRequests";
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		sort: [{ field: "Date", sort: "desc" }],
+	const gridId = requestErrorRequestsView.id;
+	const search = useSearch({
+		from: "/__authenticated/serviceInfo/requestErrors/requests",
 	});
+	const { namedSql, description } = search;
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const {
 		data: records,
@@ -120,6 +127,7 @@ function Requests() {
 		],
 		[t],
 	);
+	const view = useGridView(requestErrorRequestsView, columns, search);
 
 	// `description` is a search param, so a hand-typed or truncated URL reaches this
 	// route without one - and PageContainer then rendered no h1 and set the document
@@ -152,20 +160,22 @@ function Requests() {
 				identifier={gridId}
 				type={"errorOverviewPatronRequests"}
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={withRowIndexIds(records?.hits)}
 				loading={isLoading}
 				paginationMode="client"
 				sortingMode="client"
 				filterMode="client"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}

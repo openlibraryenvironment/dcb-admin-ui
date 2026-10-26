@@ -20,6 +20,7 @@ import {
 } from "@helpers/consortiumSetup";
 import { adminOrConsortiumAdmin } from "@constants/roles";
 import i18n from "@/i18n";
+import { errorForDisplay } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute("/__authenticated/setup/$step")({
 	// The step is a path segment, so a hand-typed or stale bookmarked URL can carry
@@ -47,7 +48,7 @@ export const Route = createFileRoute("/__authenticated/setup/$step")({
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error
 				title={i18n.t("ui.error.unable_to_load_page")}
-				message={error.message}
+				message={errorForDisplay(error)}
 				action={i18n.t("ui.actions.reload")}
 				onAction={() => location.reload()}
 			/>

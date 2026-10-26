@@ -31,7 +31,10 @@ import {
 	type LibraryMappingsState,
 	type MappingCategoryId,
 } from "@helpers/librarySetup";
-import { GridRowModesModel } from "@mui/x-data-grid-premium";
+import {
+	GridRowModesModel,
+	type GridPaginationModel,
+} from "@mui/x-data-grid-premium";
 
 import { getLibraries } from "@queries/getLibraries";
 import { getMappings } from "@queries/getMappings";
@@ -39,15 +42,20 @@ import { getLocations } from "@queries/getLocations";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
 import { getBibs } from "@queries/getBibs";
+import { getLibraryCreations } from "@queries/getLibraryCreations";
+import { earliest } from "@helpers/timeToFirstRequest";
 import type {
 	LoadBibsQueryVariables,
 	LoadLibrariesQueryVariables,
+	LoadLibraryCreationsQuery,
+	LoadLibraryCreationsQueryVariables,
 	LoadLocationsQueryVariables,
 	LoadMappingsQueryVariables,
 	LoadNumericRangeMappingsQueryVariables,
 	LoadPatronRequestsQueryVariables,
 } from "@generated/graphql";
-import { useGridState } from "@hooks/useGridState";
+import { errorForLog } from "@helpers/safeErrorLog";
+import { VIEWPORT_BELOW_HEADER } from "@constants/layout";
 
 export const Route = createFileRoute("/__authenticated/consortium/onboarding")({
 	component: Onboarding,
@@ -164,14 +172,16 @@ const mappingsTooltip = (t: TFunction, mappings: LibraryMappingsState) => (
 	</Box>
 );
 
+// The change-log INSERT row for each library, which is when it was created
+const LIBRARY_CREATIONS_QUERY = 'entityType:"library" AND actionInfo:"INSERT"';
+
 function Onboarding() {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-	const { paginationModel, onPaginationModelChange } = useGridState(
-		"onboardingLibraries",
-		{ pagination: { page: 0, pageSize: 20 } },
-	);
+	// No toolbar, so nothing to share: the page lives here, not in the URL
+	const [paginationModel, onPaginationModelChange] =
+		useState<GridPaginationModel>({ page: 0, pageSize: 20 });
 	// Fetch libraries and then batch-fetch the individual totalSize counts for each
 	const { data: librariesWithCounts, isLoading } = useQuery({
 		queryKey: ["LoadLibrariesForOnboardingWithCounts"],
@@ -188,7 +198,21 @@ function Onboarding() {
 			);
 
 			const libs = libRes?.libraries?.content ?? [];
-			// Eight count queries per library, bounded rather than all at once -
+
+			const creations = await gqlClient.request<
+				LoadLibraryCreationsQuery,
+				LoadLibraryCreationsQueryVariables
+			>(getLibraryCreations, {
+				query: LIBRARY_CREATIONS_QUERY,
+				pagesize: 500,
+			});
+			const createdAtByLibrary = new Map(
+				(creations?.dataChangeLog?.content ?? []).map((entry) => [
+					entry?.entityId,
+					entry?.timestampLogged,
+				]),
+			);
+			// Ten queries per library, bounded rather than all at once -
 			// see mapWithConcurrency. Six is roughly a browser's per-host
 			// connection limit, so this is the point past which extra parallelism
 			// only buys queueing.
@@ -211,6 +235,8 @@ function Onboarding() {
 						bibCount: 0,
 						lastBorrowingRequestAt: null,
 						lastSupplyingRequestAt: null,
+						createdAt: createdAtByLibrary.get(lib?.id) ?? null,
+						firstRequestAt: null,
 						numericRangeMappingCount: requiresNumeric ? 0 : null,
 					};
 				}
@@ -224,6 +250,8 @@ function Onboarding() {
 						borrowingRes,
 						supplyingRes,
 						bibRes,
+						firstBorrowingRes,
+						firstSupplyingRes,
 					] = await Promise.all([
 						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`,
@@ -282,6 +310,27 @@ function Onboarding() {
 							pageno: 0,
 							pagesize: 1,
 						}),
+						// The oldest request each way: setup is done when the library first takes part
+						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+							getPatronRequests,
+							{
+								query: `patronHostlmsCode: "${hostLmsCode}"`,
+								order: "dateCreated",
+								orderBy: "ASC",
+								pageno: 0,
+								pagesize: 1,
+							},
+						),
+						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
+							getPatronRequests,
+							{
+								query: `supplyingAgencyCode: "${agencyCode}"`,
+								order: "dateCreated",
+								orderBy: "ASC",
+								pageno: 0,
+								pagesize: 1,
+							},
+						),
 					]);
 
 					let numericRangePromise = null;
@@ -319,19 +368,28 @@ function Onboarding() {
 						lastSupplyingRequestAt:
 							supplyingRes?.patronRequests?.content?.[0]?.dateCreated ?? null,
 						bibCount: bibRes?.sourceBibs?.totalSize ?? 0,
+						createdAt: createdAtByLibrary.get(lib?.id) ?? null,
+						firstRequestAt: earliest(
+							firstBorrowingRes?.patronRequests?.content?.[0]?.dateCreated,
+							firstSupplyingRes?.patronRequests?.content?.[0]?.dateCreated,
+						),
 						numericRangeMappingCount: requiresNumeric
 							? (numericRes?.numericRangeMappings?.totalSize ?? 0)
 							: null,
 					};
 				} catch (e) {
-					console.error("Failed fetching counts for", lib.fullName, e);
+					console.error(
+						"Failed fetching counts for",
+						lib.fullName,
+						errorForLog(e),
+					);
 					return lib;
 				}
 			});
 
 			return enriched;
 		},
-		// Counting eight things per library is expensive enough that remounting
+		// Counting ten things per library is expensive enough that remounting
 		// the page should not redo it; the wizard invalidates "libraries*" keys
 		// when anything actually changes.
 		staleTime: 1000 * 60 * 2,
@@ -803,7 +861,12 @@ function Onboarding() {
 					<ConsortiumTabs current="onboarding" />
 				</Grid>
 
-				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
+				<Grid
+					size={{ xs: 4, sm: 8, md: 12 }}
+					// Held after loading too: the page's height arrives with a fan-out over every
+					// library and lands either side of the fold, so the footer stays below it.
+					sx={{ minHeight: VIEWPORT_BELOW_HEADER }}
+				>
 					<Typography variant="h2" sx={{ mb: 2 }}>
 						{t("consortium.onboarding")}
 					</Typography>

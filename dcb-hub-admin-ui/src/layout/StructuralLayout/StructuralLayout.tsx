@@ -7,7 +7,7 @@ import Sidebar from "../Sidebar/Sidebar";
 import Footer from "../Footer/Footer";
 import LinkedFooter from "../LinkedFooter/LinkedFooter";
 import { useSidebarStore } from "@hooks/useSidebarStore";
-import { HEADER_HEIGHT, PAGE_ROW_MIN_HEIGHT } from "@constants/layout";
+import { HEADER_HEIGHT } from "@constants/layout";
 
 export default function StructuralLayout({
 	children,
@@ -36,6 +36,8 @@ export default function StructuralLayout({
 				height: "100%",
 				width: "100%",
 				flexDirection: "column",
+				// On the shell, so a short page's footer sits at the foot of the viewport rather
+				// than a viewport below it. docs/performance-budget.md, "Layout shift on every route".
 				minHeight: "100vh",
 				backgroundColor: "primary.pageBackground",
 				pt: HEADER_HEIGHT,
@@ -88,8 +90,6 @@ export default function StructuralLayout({
 					width: "100%",
 					alignSelf: "center",
 					flex: "1 0 auto",
-					// Not on the shell around this - see PAGE_ROW_MIN_HEIGHT.
-					minHeight: PAGE_ROW_MIN_HEIGHT,
 					backgroundColor: "primary.pageContentBackground",
 				}}
 			>

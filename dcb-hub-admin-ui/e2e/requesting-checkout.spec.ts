@@ -1,5 +1,6 @@
 import { type Page } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
+import { proves } from "./fixtures/coverage";
 
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -137,27 +138,32 @@ test.describe("expedited checkout", () => {
 	 * The test below records what the picker does without that claim, which is what a
 	 * consortium administrator sees.
 	 */
-	test("a failed lookup writes no patron barcode to the console", async ({
-		page,
-	}) => {
-		await captureConsole(page);
-		await mockPatronLookup(page, "error");
-		await open(page);
-		await fillPatronStep(page);
-		await page.getByRole("button", { name: "Validate" }).click();
+	test(
+		"a failed lookup writes no patron barcode to the console",
+		proves(
+			"A failed patron lookup writes no patron barcode to the browser's console.",
+			["PRIV-01"],
+		),
+		async ({ page }) => {
+			await captureConsole(page);
+			await mockPatronLookup(page, "error");
+			await open(page);
+			await fillPatronStep(page);
+			await page.getByRole("button", { name: "Validate" }).click();
 
-		// It still tells the user, so this is not passing because nothing happened.
-		await expect(
-			page.getByText(/We were unable to validate this patron/),
-		).toBeVisible();
+			// It still tells the user, so this is not passing because nothing happened.
+			await expect(
+				page.getByText(/We were unable to validate this patron/),
+			).toBeVisible();
 
-		const lines = await logged(page);
-		expect(
-			lines.some((line) => line.includes("Patron lookup failed")),
-			"nothing was logged, so this test cannot prove the redaction",
-		).toBe(true);
-		expectNoIdentifier(lines);
-	});
+			const lines = await logged(page);
+			expect(
+				lines.some((line) => line.includes("Patron lookup failed")),
+				"nothing was logged, so this test cannot prove the redaction",
+			).toBe(true);
+			expectNoIdentifier(lines);
+		},
+	);
 
 	test("without a staff agency on the token, the item cannot be chosen", async ({
 		page,
@@ -228,19 +234,24 @@ test.describe("quick walk-up", () => {
 		).toBeVisible();
 	});
 
-	test("a failed lookup writes no patron barcode to the console", async ({
-		page,
-	}) => {
-		await captureConsole(page);
-		await mockPatronLookup(page, "error");
-		await open(page);
-		await fillPatronStep(page);
-		await page.getByRole("button", { name: "Validate" }).click();
+	test(
+		"a failed lookup writes no patron barcode to the console",
+		proves(
+			"A failed patron lookup writes no patron barcode to the browser's console.",
+			["PRIV-01"],
+		),
+		async ({ page }) => {
+			await captureConsole(page);
+			await mockPatronLookup(page, "error");
+			await open(page);
+			await fillPatronStep(page);
+			await page.getByRole("button", { name: "Validate" }).click();
 
-		await expect(
-			page.getByText(/We were unable to validate this patron/),
-		).toBeVisible();
+			await expect(
+				page.getByText(/We were unable to validate this patron/),
+			).toBeVisible();
 
-		expectNoIdentifier(await logged(page));
-	});
+			expectNoIdentifier(await logged(page));
+		},
+	);
 });

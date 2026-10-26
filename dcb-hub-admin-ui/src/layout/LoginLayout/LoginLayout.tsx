@@ -4,7 +4,7 @@ import { Box, Paper, Stack } from "@mui/material";
 import Footer from "@layout/Footer/Footer";
 import Header from "@layout/Header/Header";
 import LinkedFooter from "@layout/LinkedFooter/LinkedFooter";
-import { HEADER_HEIGHT, PAGE_ROW_MIN_HEIGHT } from "@constants/layout";
+import { HEADER_HEIGHT } from "@constants/layout";
 
 interface LoginLayoutProps {
 	children?: ReactNode;
@@ -25,6 +25,8 @@ export default function LoginLayout({
 					sx={{
 						display: "flex",
 						flexDirection: "column",
+						// On the shell, so a short page's footer sits at the foot of the viewport.
+						// docs/performance-budget.md, "Layout shift on every route".
 						minHeight: "100vh",
 						width: "100%",
 					}}
@@ -51,11 +53,6 @@ export default function LoginLayout({
 							display: "flex",
 							flexDirection: "column",
 							width: "100%",
-							// On the main region, not the Box around it - see
-							// PAGE_ROW_MIN_HEIGHT. Constraining the shell gave this
-							// region `viewport - footer`, so the footer painted at 752px
-							// of a 1024px viewport on /login, /logout and /maintenance.
-							minHeight: PAGE_ROW_MIN_HEIGHT,
 							outline: "none",
 						}}
 					>

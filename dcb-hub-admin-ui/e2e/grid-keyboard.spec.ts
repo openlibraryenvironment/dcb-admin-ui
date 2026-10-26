@@ -58,8 +58,10 @@ test("the row link is reachable by tabbing, not just focusable", async ({
 
 	// Start from the grid itself and tab forward. A link that is in the document
 	// but not in the tab order is no use to the user this exists for; 40 presses
-	// is generous for a toolbar plus a header row.
-	await page.getByRole("grid").click();
+	// is generous for a toolbar plus a header row. Focused, not clicked: a click on
+	// the grid's centre lands on a row and opens that library, so the presses
+	// walked the library's own page instead.
+	await page.getByRole("columnheader").first().focus();
 	let reached = false;
 	for (let press = 0; press < 40 && !reached; press += 1) {
 		await page.keyboard.press("Tab");

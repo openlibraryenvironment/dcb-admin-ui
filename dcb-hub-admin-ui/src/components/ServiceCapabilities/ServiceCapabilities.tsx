@@ -47,7 +47,11 @@ export default function ServiceCapabilities() {
 	const { t } = useTranslation();
 	const { version } = useDCBServiceInfo();
 
-	const rows = SERVICE_CAPABILITIES.map((capability) => ({
+	// A capability in no release is not shown: staff are never told about a feature no
+	// dcb-service has. The registry keeps it for the conformance tests.
+	const rows = SERVICE_CAPABILITIES.filter(
+		(capability) => capability.since !== null,
+	).map((capability) => ({
 		capability,
 		status: capabilityStatus(capability, version),
 	}));
@@ -114,11 +118,9 @@ export default function ServiceCapabilities() {
 									{t(`service_capabilities.feature.${capability.id}`)}
 								</TableCell>
 								<TableCell>
-									{capability.since
-										? t("service_capabilities.needs_version", {
-												version: capability.since,
-											})
-										: t("service_capabilities.needs_unreleased")}
+									{t("service_capabilities.needs_version", {
+										version: capability.since,
+									})}
 								</TableCell>
 								<TableCell>
 									{/* The variable name, verbatim - it is what an operator types. */}

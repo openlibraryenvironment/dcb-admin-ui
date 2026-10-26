@@ -1,6 +1,4 @@
 import { RefObject, useState } from "react";
-import { useAuth } from "react-oidc-context";
-import { useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	GridApiPremium,
@@ -12,6 +10,7 @@ import {
 } from "@helpers/cleanupPatronRequest";
 import { isGuardedCleanupEnabled } from "@helpers/featureFlags";
 import { invalidatePatronRequestQueries } from "@helpers/invalidatePatronRequestQueries";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
 
 interface UsePatronRequestCleanupProps {
 	apiRef: RefObject<GridApiPremium | null>;
@@ -42,7 +41,7 @@ const INITIAL_STATE: CleanupState = {
 
 /**
  * Bulk clean up for the patron request grids. Standardised with usePatronRequestRollback:
- * same shape, same self-resolved auth and API base, same patron-request cache invalidation.
+ * same shape, same self-resolved REST client, same patron-request cache invalidation.
  *
  * Where dcb-service guards cleanup (9.0.0 and later) every request is checked for updates
  * first and the server decides; whatever it refuses is collected so it can be overridden in
@@ -53,14 +52,17 @@ export const usePatronRequestCleanup = ({
 	apiRef,
 	onSuccess,
 }: UsePatronRequestCleanupProps) => {
-	const auth = useAuth();
-	const { cfg } = useRouter().options.context as { cfg: any };
-	const dcbApiBase = cfg?.VITE_DCB_API_BASE;
+	const restClient = useDcbRestClient();
 	const queryClient = useQueryClient();
 	const guarded = isGuardedCleanupEnabled();
 
 	const [cleanupState, setCleanupState] = useState<CleanupState>(INITIAL_STATE);
 	const [overrideConfirmOpen, setOverrideConfirmOpen] = useState(false);
+	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [pending, setPending] = useState<{ eligible: any[]; skipped: any[] }>({
+		eligible: [],
+		skipped: [],
+	});
 
 	const runCleanup = async (
 		rows: any[],
@@ -92,12 +94,10 @@ export const usePatronRequestCleanup = ({
 
 			await Promise.all(
 				batch.map(async (row) => {
-					const outcome = await cleanupPatronRequest(
-						dcbApiBase,
-						auth.user?.access_token,
-						row,
-						{ override, refreshFirst: guarded },
-					);
+					const outcome = await cleanupPatronRequest(restClient, row, {
+						override,
+						refreshFirst: guarded,
+					});
 
 					if (outcome.kind === "cleaned") {
 						batchSuccess.push(row);
@@ -132,10 +132,10 @@ export const usePatronRequestCleanup = ({
 		}
 	};
 
-	const handleCleanup = async () => {
-		if (apiRef == null) {
-			return;
-		}
+	// Asks first, having worked out what is eligible, so the dialog can say exactly what
+	// will and will not be cleaned up
+	const requestCleanup = () => {
+		if (apiRef == null) return;
 
 		const selectedRows = Array.from(
 			gridRowSelectionIdsSelector(apiRef).values(),
@@ -154,7 +154,15 @@ export const usePatronRequestCleanup = ({
 			}
 		});
 
-		await runCleanup(eligible, false, skipped);
+		setPending({ eligible, skipped });
+		setConfirmOpen(true);
+	};
+
+	const cancelConfirm = () => setConfirmOpen(false);
+
+	const confirmAndRun = async () => {
+		setConfirmOpen(false);
+		await runCleanup(pending.eligible, false, pending.skipped);
 	};
 
 	const requestOverride = () => setOverrideConfirmOpen(true);
@@ -179,7 +187,13 @@ export const usePatronRequestCleanup = ({
 
 	return {
 		cleanupState,
-		handleCleanup,
+		confirmOpen,
+		eligibleCount: pending.eligible.length,
+		skippedCount: pending.skipped.length,
+		selectedCount: pending.eligible.length + pending.skipped.length,
+		requestCleanup,
+		cancelConfirm,
+		confirmAndRun,
 		handleCloseCleanup,
 		overrideAvailable: guarded && cleanupState.refusedRows.length > 0,
 		refusedCount: cleanupState.refusedRows.length,

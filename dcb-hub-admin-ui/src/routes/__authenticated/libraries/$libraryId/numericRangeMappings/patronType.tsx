@@ -1,9 +1,19 @@
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
+import { useMemo } from "react";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	rememberedViewsRedirect,
+	scopedView,
+} from "@helpers/viewState/viewRoute";
+import {
+	numericRangePatronTypeMappingViews,
+	SECOND_HOST_LMS_NAMESPACE,
+} from "@constants/dataGrid/gridViews";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -24,12 +34,45 @@ import { numericRangeMappingColumnsNoCategoryFilter } from "@columns/numericRang
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/numericRangeMappings/patronType",
 )({
+	validateSearch: (search: Record<string, unknown>) =>
+		validateGridSearch(search, [SECOND_HOST_LMS_NAMESPACE]),
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewsRedirect(
+			[
+				scopedView(
+					numericRangePatronTypeMappingViews.hostLms,
+					params.libraryId,
+				),
+				scopedView(
+					numericRangePatronTypeMappingViews.secondHostLms,
+					params.libraryId,
+				),
+			],
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/libraries/$libraryId/numericRangeMappings/patronType",
+				params,
+				...restore,
+			});
+	},
 	component: AllNumericMappings,
 });
 
 function AllNumericMappings() {
 	const { t } = useTranslation();
 	const { libraryId } = Route.useParams();
+	const hostLmsView = useMemo(
+		() => scopedView(numericRangePatronTypeMappingViews.hostLms, libraryId),
+		[libraryId],
+	);
+	const secondHostLmsView = useMemo(
+		() =>
+			scopedView(numericRangePatronTypeMappingViews.secondHostLms, libraryId),
+		[libraryId],
+	);
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
 	const auth = useAuth();
@@ -110,14 +153,13 @@ function AllNumericMappings() {
 					</Typography>
 
 					<MappingsGrid
-						gridId={`numMappingsPatronTypePrimary-${libraryId}`}
+						view={hostLmsView}
 						hostLmsCode={library.agency?.hostLms?.code}
 						baseQuery={numericRangePatronTypePrimaryQuery}
 						isAnAdmin={isAnAdmin}
 						columns={numericRangeMappingColumnsNoCategoryFilter}
 						getQuery={getNumericRangeMappings}
 						dataKey="numericRangeMappings"
-						hiddenColumns={{ domain: false, lastImported: false }}
 					/>
 
 					{library.secondHostLms && (
@@ -135,14 +177,13 @@ function AllNumericMappings() {
 								})}
 							</Typography>
 							<MappingsGrid
-								gridId={`numMappingsPatronTypeSecondary-${libraryId}`}
+								view={secondHostLmsView}
 								hostLmsCode={library.secondHostLms.code}
 								baseQuery={numericRangePatronTypeSecondaryQuery}
 								isAnAdmin={isAnAdmin}
 								columns={numericRangeMappingColumnsNoCategoryFilter}
 								getQuery={getNumericRangeMappings}
 								dataKey="numericRangeMappings"
-								hiddenColumns={{ domain: false, lastImported: false }}
 							/>
 						</>
 					)}

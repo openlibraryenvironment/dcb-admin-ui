@@ -20,8 +20,10 @@ import i18n from "@/i18n";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { createLibraryGroup } from "@mutations/createLibraryGroup";
 import type { CreateLibraryGroupMutationVariables } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 interface FormData {
 	name: string;
@@ -63,6 +65,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 		open: boolean;
 		severity: "success" | "error";
 		text: string | null;
+		reference?: string | null;
 	}>({
 		open: false,
 		severity: "success",
@@ -119,10 +122,11 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 			}
 		},
 		onError: (error) => {
-			console.error("Error creating new group:", error);
+			console.error("Error creating new group:", errorForLog(error));
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t("groups.new_group_error"),
 			});
 		},
@@ -259,6 +263,7 @@ export default function NewGroup({ show, onClose }: NewGroupType) {
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				autoHideDuration={6000}
 				alertText={alert.text}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

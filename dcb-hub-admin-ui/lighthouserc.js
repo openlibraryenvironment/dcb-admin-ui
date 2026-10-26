@@ -23,25 +23,12 @@ process.env.CHROME_PATH = process.env.CHROME_PATH || chromium.executablePath();
 module.exports = {
 	ci: {
 		collect: {
-			// BUILDS FIRST, deliberately, and on a port of its own.
-			//
-			// `npm run e2e:ki-bootstrap` rebuilds dist with `--base=/dcb-admin/` and
-			// previews it on 4174. Serving that artefact from the root makes every script
-			// tag a 404, so nothing executes, nothing paints, and Lighthouse fails the
-			// whole run with `NO_FCP` - a message that reads as "your application does
-			// not render" and sent this investigation down a blind alley for two runs.
-			// Building here makes the budget independent of whatever last touched dist.
-			//
-			// 4193, not 4175. The workspace allocates ports as 41<gate><repo> and 4175 is
-			// symposia-ui's e2e port; with Playwright's reuseExistingServer on whenever CI
-			// is unset, a preview that repo left running would be measured here instead of
-			// this application. That failure reports a number rather than an error, which
-			// is the hard kind to notice. --strictPort because without it vite does not
-			// fail on a taken port, it increments to the next free one - a neighbour's.
-			startServerCommand:
-				"npm run build && node scripts/preview-for-lighthouse.mjs",
+			// Builds first, because dist may hold the base-path suites' /dcb-admin/ build, which
+			// the preview refuses. USE_EXISTING_BUILD: verify_lighthouse has just built this tree.
+			// Port 4193: docs/testing.md, "Preview ports".
+			startServerCommand: `${process.env.USE_EXISTING_BUILD ? "" : "npm run build && "}node scripts/preview-for-lighthouse.mjs`,
 			// Match the PORT, not "Local:" — vite writes an ANSI reset between "Local"
-			// and its colon, so a /Local:/ pattern never matches and lhci silently waits
+			// and its colon, so a /Local:/ pattern never matches and the runner silently waits
 			// out the full readiness timeout on every run.
 			startServerReadyPattern: "4193",
 			startServerReadyTimeout: 180000,
@@ -63,6 +50,15 @@ module.exports = {
 				// performance 0.65 -> 0.93. total-byte-weight did not move by a byte,
 				// which is exactly why it is the assertion that holds the line.
 				preset: "desktop",
+
+				// The four the release report explains. Lighthouse 13 added agentic-browsing,
+				// which nothing here asserts and the report would show unexplained.
+				onlyCategories: [
+					"performance",
+					"accessibility",
+					"best-practices",
+					"seo",
+				],
 
 				// Chrome throttles timers and suspends rendering in a window that is not
 				// in the foreground, and a run that loses focus can die with `NO_FCP`.
@@ -102,27 +98,20 @@ module.exports = {
 			assertMatrix: [
 				{
 					matchingUrlPattern: ".*/login$",
-					// Per entry, not shared: lhci refuses aggregationMethod alongside
-					// assertMatrix, and the reason it is "median" is the same for both
-					// pages - see the note above.
+					// Per entry. scripts/lighthouse.mjs aggregates by median and refuses any
+					// other method; the reason it is "median" is the same for both pages -
+					// see the note above.
 					aggregationMethod: "median",
 					assertions: {
-						// THE SHARP EDGE: 750,000 B, against 653,582 B measured on a clean build
-						// of this branch (2026-08-30, median of three). A cold run reports that
-						// figure to the byte every time; see the aggregation note above for why
-						// the median and not the minimum. This is the assertion that actually
-						// holds the line, because bytes do not vary with the runner's CPU the way
-						// every score-based threshold does.
+						// THE SHARP EDGE: 550,617 B measured on a clean build (2026-10-22, median
+						// of three), plus ~15% headroom - the ratio symposia-ui uses. Bytes hold
+						// the line because a cold run reports them to the byte, where every score
+						// below swings with the runner's CPU.
 						//
-						// The ~14.8% of headroom is deliberate and is the same ratio symposia-ui
-						// uses: enough to absorb ordinary feature work, tight enough to trip on a
-						// heavyweight dependency.
-						//
-						// NEVER re-baseline this to make a build pass. A budget re-derived to sit
-						// just above whatever today's bundle happens to be is a budget that
-						// ratchets, and three of those in a row is how a bundle doubles.
-						// Exceeding it means cutting weight or bringing a written argument.
-						"total-byte-weight": ["error", { maxNumericValue: 750000 }],
+						// NEVER re-baseline this to make a build pass: exceeding it means cutting
+						// weight or bringing a written argument. Why it was last LOWERED is in
+						// docs/performance-budget.md.
+						"total-byte-weight": ["error", { maxNumericValue: 635000 }],
 
 						// 0.002 today. The frontend doctrine names CLS explicitly - skeletons
 						// must match the dimensions of what replaces them - and it is the one
@@ -164,23 +153,15 @@ module.exports = {
 						// says anything.
 						"categories:performance": ["warn", { minScore: 0.85 }],
 
-						// 1,567ms on desktop. It was ~6.83s under the phone emulation this file used
-						// to run, and most of that difference was the 4x CPU multiplier rather than
-						// anything about the application.
+						// 1,567ms on desktop, against ~6.83s under the phone emulation this file
+						// used to run; most of that difference was the 4x CPU multiplier.
 						//
-						// The underlying cost is real and unchanged: nothing paints until ~659 KB
-						// across 122 requests has been fetched, parsed and executed, because the
-						// sign-in page boots the whole application - `routeTree.gen.ts` statically
-						// imports all 81 route definitions and those pull `schemas`, `axios`,
-						// `dayjs` and the bundled locale catalogue with them. Script evaluation is
-						// ~800ms unthrottled. A desktop staff console absorbs that; a phone would
-						// not, which is what the old number was really saying.
-						//
-						// Still a warning, because the cause is the payload and the payload has a
-						// hard gate above. Tightened from 8,000ms to 3,000ms: on desktop the old
-						// threshold was 5x the measured figure and could never have fired.
-						// Chunk-shaping was tried and does NOT fix it; see the note in
-						// vite.config.mts and WELCOME_EXPERIENCE_PLAN.md §8 for what would.
+						// The cost underneath is real: nothing paints until ~551 KB across 98
+						// requests has been fetched and executed, because `routeTree.gen.ts`
+						// statically imports every route definition. A warning, because the cause
+						// is the payload and the payload has a hard gate above; 3,000ms because
+						// 8,000ms was 5x the measured figure and could never fire. What would move
+						// it: "The eager route graph" in docs/performance-budget.md.
 						"largest-contentful-paint": ["warn", { maxNumericValue: 3000 }],
 
 						// SEO is deliberately NOT asserted. This is an authenticated staff
@@ -193,15 +174,16 @@ module.exports = {
 					matchingUrlPattern: ".*/consortium/insights$",
 					aggregationMethod: "median",
 					assertions: {
-						// 874,647 B measured on a clean build (2026-09-11, median of three,
-						// identical to the byte across all three). That is 225 KB more than
+						// 792,296 B measured on a clean build (2026-10-22, median of three,
+						// identical to the byte across all three). That is 242 KB more than
 						// the sign-in page: the route's own chunk, x-charts-pro and the
-						// pickers. The same ~14.8% headroom the sign-in budget uses.
+						// pickers. The same ~15% headroom the sign-in budget uses; lowered
+						// from 1,000,000 with it.
 						//
 						// NEVER re-baseline this to make a build pass - the note above the
 						// sign-in figure applies here and applies harder, because this is
 						// the page most likely to grow a dependency.
-						"total-byte-weight": ["error", { maxNumericValue: 1000000 }],
+						"total-byte-weight": ["error", { maxNumericValue: 910000 }],
 
 						// 0.0013 today, against a page of twenty panels that each swap a
 						// skeleton for content. That is the skeletons matching their

@@ -33,7 +33,10 @@ import {
 	missingRequiredClientConfig,
 	bibSuppressionDefault,
 } from "@helpers/hostLmsClientConfig";
-import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
+import {
+	type HostLmsVerificationResult,
+	verificationFrom,
+} from "@helpers/hostLmsVerification";
 import {
 	libraryOptionsQuery,
 	type LibraryAutocompleteOption,
@@ -132,7 +135,7 @@ function NewHostLms() {
 	const { mutateAsync: create, isPending } = useMutation({
 		mutationFn: (input: CreateHostLmsInput) =>
 			gqlClient.request<CreateHostLmsMutation, CreateHostLmsMutationVariables>(
-				createHostLmsMutation,
+				createHostLmsMutation(),
 				{ input },
 			),
 	});
@@ -189,11 +192,7 @@ function NewHostLms() {
 			setCreated({
 				id: payload.hostLms.id,
 				code: payload.hostLms.code ?? formData.code.trim(),
-				verification: {
-					pingStatus: payload?.pingStatus,
-					ingestStatus: payload?.ingestStatus,
-					warnings: payload?.warnings ?? [],
-				},
+				verification: verificationFrom(payload),
 			});
 		} catch (error: any) {
 			// Named, not swallowed: the validator returns a 400 listing exactly which

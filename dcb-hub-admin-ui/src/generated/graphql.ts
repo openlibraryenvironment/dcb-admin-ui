@@ -1787,6 +1787,17 @@ export type LoadLibraryCountQueryVariables = Exact<{
 
 export type LoadLibraryCountQuery = { libraries: { totalSize: number | null } };
 
+export type LoadLibraryCreationsQueryVariables = Exact<{
+	query: string;
+	pagesize: number;
+}>;
+
+export type LoadLibraryCreationsQuery = {
+	dataChangeLog: {
+		content: Array<{ entityId: string; timestampLogged: string } | null> | null;
+	};
+};
+
 export type LoadLibraryDirectoryQueryVariables = Exact<{
 	pageno: number;
 	pagesize: number;

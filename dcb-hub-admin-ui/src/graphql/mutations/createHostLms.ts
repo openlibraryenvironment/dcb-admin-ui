@@ -1,6 +1,7 @@
 import { gql } from "graphql-request";
+import { hostLmsProbesSelection } from "@fragments/hostLmsProbes";
 
-export const createHostLmsMutation = gql`
+export const createHostLmsMutation = () => gql`
 	mutation CreateHostLms($input: CreateHostLmsInput!) {
 		createHostLms(input: $input) {
 			hostLms {
@@ -11,6 +12,7 @@ export const createHostLmsMutation = gql`
 			}
 			pingStatus
 			ingestStatus
+			${hostLmsProbesSelection()}
 			warnings
 		}
 	}

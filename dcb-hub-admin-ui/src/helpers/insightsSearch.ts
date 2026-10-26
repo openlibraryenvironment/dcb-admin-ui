@@ -1,6 +1,20 @@
 import { z } from "@schemas/zod";
 
-import { SUBJECTS } from "@helpers/insightsSubjects";
+/**
+ * The six subjects, in reading order: what is happening, how well it went, what was asked
+ * for, who with, what we hold, what we are missing. Here rather than in insightsSubjects,
+ * because route options load this eagerly and that module reads the panel flags.
+ */
+export const SUBJECTS = [
+	"trends",
+	"service",
+	"demand",
+	"partners",
+	"collection",
+	"gaps",
+] as const;
+
+export type Subject = (typeof SUBJECTS)[number];
 
 /**
  * The whole Insights view, in the URL.
@@ -80,6 +94,16 @@ export const insightsSearchSchema = z.object({
 });
 
 export type InsightsSearch = z.infer<typeof insightsSearchSchema>;
+
+/**
+ * The view as the address writes it: a list of values is one comma-separated parameter, as
+ * everywhere in the URL grammar (docs/url-view-state.md), not the key repeated per value.
+ */
+export const insightsSearchToUrl = (search: InsightsSearch) => ({
+	...search,
+	scope: search.scope?.join(","),
+	series: search.series?.join(","),
+});
 
 /** The view a bare `/insights` shows, so callers never have to spell the defaults out. */
 export function resolveSearch(search: InsightsSearch) {

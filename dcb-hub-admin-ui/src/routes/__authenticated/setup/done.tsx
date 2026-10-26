@@ -27,6 +27,7 @@ import { useConsortiumSetup } from "@hooks/useConsortiumSetup";
 import { useSetupStore } from "@hooks/useSetupStore";
 import { adminOrConsortiumAdmin } from "@constants/roles";
 import i18n from "@/i18n";
+import { errorForDisplay } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute("/__authenticated/setup/done")({
 	beforeLoad: ({ context: { auth } }) => {
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/__authenticated/setup/done")({
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error
 				title={i18n.t("ui.error.unable_to_load_page")}
-				message={error.message}
+				message={errorForDisplay(error)}
 				action={i18n.t("ui.actions.reload")}
 				onAction={() => location.reload()}
 			/>
@@ -150,7 +151,8 @@ function SetupDonePage() {
 										// Six links all reading "Go to this step" are six
 										// identical entries in a screen reader's link list. The
 										// visible text stays short; the accessible name says
-										// which chapter (WCAG 2.4.4).
+										// which chapter (WCAG 2.4.4), after the visible words, so
+										// saying what is on screen still activates it (2.5.3).
 										aria-label={t(
 											step.complete
 												? "setup.done.change_named"

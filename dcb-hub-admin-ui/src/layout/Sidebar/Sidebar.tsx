@@ -28,7 +28,7 @@ import {
 } from "@mui/icons-material";
 
 import Link from "@components/Link/Link";
-import { isInsightsEnabled } from "@helpers/featureFlags";
+import { isInsightsPageShown } from "@helpers/featureFlags";
 import { HEADER_HEIGHT } from "@constants/layout";
 
 const drawerWidth = 240;
@@ -104,13 +104,13 @@ export default function Sidebar({
 	const { t } = useTranslation();
 	const location = useLocation();
 
-	// Insights is gated on a dcb-service release that is not out yet. Filtered at
+	// Insights is gated on a dcb-service release and VITE_INSIGHTS_PAGES. Filtered at
 	// render rather than removed from `routes`, because the icon lookup and the
 	// selection logic below are index-based - and since Insights is the last
 	// entry, dropping it shifts nothing.
 	const visibleRoutes = useMemo(
 		() =>
-			isInsightsEnabled()
+			isInsightsPageShown("consortium")
 				? routes
 				: routes.filter((route) => route.path !== "/consortium/insights"),
 		[],

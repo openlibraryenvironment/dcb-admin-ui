@@ -24,11 +24,13 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { defaultCreationReason } from "@helpers/auditDefaults";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
+import { requestReferenceOf } from "@helpers/requestReference";
 import { addFunctionalSettingMutation } from "@mutations/addFunctionalSetting";
 import type {
 	AddFunctionalSettingMutationVariables,
 	FunctionalSettingType,
 } from "@generated/graphql";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 // Typed against the schema enum rather than left as a bare string[], so that a value
 // added, removed or renamed in schema.graphqls fails the build here instead of being
@@ -76,6 +78,7 @@ export default function NewFunctionalSetting({
 		open: boolean;
 		severity: "success" | "error";
 		text: string | null;
+		reference?: string | null;
 	}>({
 		open: false,
 		severity: "success",
@@ -157,10 +160,14 @@ export default function NewFunctionalSetting({
 			}
 		},
 		onError: (error) => {
-			console.error("Error creating new functional setting:", error);
+			console.error(
+				"Error creating new functional setting:",
+				errorForLog(error),
+			);
 			setAlert({
 				open: true,
 				severity: "error",
+				reference: requestReferenceOf(error),
 				text: t("consortium.new_functional_setting.error", {
 					consortium: consortiumDisplayName,
 				}),
@@ -318,6 +325,7 @@ export default function NewFunctionalSetting({
 			<TimedAlert
 				open={alert.open}
 				severityType={alert.severity}
+				reference={alert.reference}
 				autoHideDuration={6000}
 				alertText={alert.text}
 				onCloseFunc={() => setAlert({ ...alert, open: false })}

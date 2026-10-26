@@ -12,7 +12,7 @@ import InsightsDashboard from "@components/Insights/InsightsDashboard";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { createRestClient } from "@helpers/createRestClient";
-import { isInsightsEnabled } from "@helpers/featureFlags";
+import { isInsightsPageShown } from "@helpers/featureFlags";
 import {
 	fetchLibrary,
 	libraryQuery,
@@ -44,11 +44,11 @@ export const Route = createFileRoute(
 	// Scope is fixed here - the library is in the path - but the window, the plotted
 	// series and the cost assumption are as shareable as anywhere else.
 	validateSearch: insightsSearchSchema,
-	// The tab is hidden while the flag is off, but the URL is still typeable -
+	// The tab is hidden where the page is not shown, but the URL is still typeable -
 	// and the page would call statistics endpoints that this environment's
 	// dcb-service does not serve yet.
 	beforeLoad: ({ params: { libraryId } }) => {
-		if (!isInsightsEnabled()) {
+		if (!isInsightsPageShown("libraries")) {
 			throw redirect({
 				to: "/libraries/$libraryId",
 				params: { libraryId },
