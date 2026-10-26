@@ -28,7 +28,7 @@
 	},
 	"PERF-01": {
 		"category": "Performance",
-		"requirement": "What every page downloads before it can be used stays within a fixed budget.",
+		"requirement": "What every page downloads before it can be used stays within 5% of a fixed budget, and anything over the budget itself is reported.",
 		"checks": ["verify_lighthouse"]
 	},
 	"PERF-02": {

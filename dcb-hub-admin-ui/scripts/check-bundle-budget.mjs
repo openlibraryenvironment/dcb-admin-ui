@@ -1,9 +1,11 @@
-// Gzipped bundle budgets over dist/, run after a BUNDLE_BUDGET=1 build. What every page
-// loads first FAILS when over; the total is reported. docs/performance-budget.md says what
-// each check is for and why the total is not one.
+// Gzipped bundle budgets over dist/, run after a BUNDLE_BUDGET=1 build. Every finding is
+// reported; only a first load more than blockAbovePercent over its budget fails.
+// docs/performance-budget.md says what each check is for and why the total is not one.
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { join } from "node:path";
+
+import { firstLoadVerdict } from "./budget-verdict.ts";
 
 const DIST = "dist";
 const MANIFEST = join(DIST, ".vite", "manifest.json");
@@ -68,13 +70,25 @@ const measured = readdirSync(join(DIST, "assets"))
 const total = measured.reduce((sum, chunk) => sum + chunk.gz, 0);
 
 const problems = [];
+const blocking = [];
 
-if (firstLoad > BUDGET.firstLoad.budget) {
+const verdict = firstLoadVerdict(
+	firstLoad,
+	BUDGET.firstLoad.budget,
+	BUDGET.firstLoad.blockAbovePercent,
+);
+if (verdict.blocks) {
+	blocking.push(
+		`What every page loads first is ${firstLoad} bytes gzipped, more than ` +
+			`${BUDGET.firstLoad.blockAbovePercent}% over its budget of ${BUDGET.firstLoad.budget} ` +
+			`(limit ${verdict.limit}, +${verdict.over}). Move the new weight into the route that ` +
+			`needs it, or bring an argument: do not raise the number to make this pass.`,
+	);
+} else if (verdict.over > 0) {
 	problems.push(
 		`What every page loads first is ${firstLoad} bytes gzipped, over its budget of ` +
-			`${BUDGET.firstLoad.budget} (+${firstLoad - BUDGET.firstLoad.budget}). Move the ` +
-			`new weight into the route that needs it, or bring an argument: do not raise the ` +
-			`number to make this pass.`,
+			`${BUDGET.firstLoad.budget} (+${verdict.over}). The build fails above ${verdict.limit}. ` +
+			`Move the new weight into the route that needs it, or bring an argument.`,
 	);
 }
 
@@ -163,8 +177,12 @@ for (const chunk of measured.filter(
 line("everything emitted", total, "for information; not a budget");
 
 if (problems.length > 0) {
-	console.error(`\nBundle budget: ${problems.length} problem(s)\n`);
-	for (const problem of problems) console.error(`  - ${problem}`);
+	console.warn(`\nBundle budget: ${problems.length} warning(s), reported and not failing\n`);
+	for (const problem of problems) console.warn(`  - ${problem}`);
+}
+if (blocking.length > 0) {
+	console.error(`\nBundle budget: failed\n`);
+	for (const problem of blocking) console.error(`  - ${problem}`);
 	process.exit(1);
 }
-console.log("\nBundle budget: green.");
+if (problems.length === 0) console.log("\nBundle budget: green.");

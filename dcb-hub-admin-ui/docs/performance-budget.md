@@ -61,7 +61,9 @@ adds agentic browsing, which nothing here asserts.
 ## The bundle budget measures what every page loads, and the chunks around it
 
 `bundle-budget.json`, checked by `scripts/check-bundle-budget.mjs` after a
-`BUNDLE_BUDGET=1` build, which writes the Vite manifest the check reads. Two things fail it:
+`BUNDLE_BUDGET=1` build, which writes the Vite manifest the check reads. It checks two
+things, reports every finding, and fails the build on one (see "Advisory, with one hard
+limit" below):
 
 - **What every page loads first**: the entry, the app shell it boots (`main.tsx` imports
   `application.tsx`), and everything they import statically. That is what a user pays on
@@ -105,7 +107,24 @@ the artefact sat outside every gate in the repository until this budget existed:
 Outside the first load, the budget names every chunk above 15,000 bytes, so new weight
 arrives with a number beside it rather than silently. A chunk over its number, an
 unbudgeted chunk above the threshold, a budgeted chunk that is no longer built, or one
-that has moved into the first load all fail the gate.
+that has moved into the first load are all reported as warnings.
+
+### Advisory, with one hard limit
+
+From 2026-10-26 the budget reports and does not block, with one exception: the build
+fails when the first load is more than `firstLoad.blockAbovePercent` (5%) over its
+budget. At 361,076 that limit is 379,129 bytes gzipped. Anything over the budget but
+under the limit prints a warning with the size, the overrun and the limit, and the gate
+passes. A chunk over its own number, and every bookkeeping finding, is a warning only.
+
+Decided by the tech lead on 2026-10-26, after three measured raises in four days
+(2026-10-23 and two on 2026-10-26). Five per cent of the first load is about 18 KB
+gzipped. That is above a feature's flag reader or route definition, and above the whole
+2026-10-26 dependency upgrade (+15,164), which would have passed with a warning. The rule is `firstLoadVerdict` in `scripts/budget-verdict.ts`, tested by
+`src/helpers/budgetVerdict.test.ts`.
+
+The raises below still apply. A warning is the prompt to measure the cost and record it
+here, so the number keeps meaning "what every page should load".
 
 ### When the bundler regroups chunks
 
@@ -157,6 +176,23 @@ recovered 562. What remained is the page check the sidebar makes on every page:
 
 Both keep the headroom they had: 173 and 213. Measure on a fresh checkout. A working
 copy holding CRLF files builds a few hundred bytes heavier than CI does.
+
+On 2026-10-26 three dcb-service 9.2.0 request features (the request tag list, notes on
+a request, and who placed it) put the first load 448 over. None of it could move:
+
+- The Request tags page's route definition (+334). This application loads every
+  route's definition, loader and pending skeleton eagerly. Changing that is a
+  code-splitting decision for every route, not one for this feature.
+- The three capability rows and their flag readers (+221). Every document that
+  selects a 9.2.0 field and the Feature availability panel consult them.
+- The request page's work (+161 net). This is mostly the patron request grid fragment
+  reading its flag, because the grids' dashboard query loads on the home page.
+
+| Measure (gzipped, LF, no `.env`) |  Before |   After | Raised by | Budget            |
+| -------------------------------- | ------: | ------: | --------: | ----------------- |
+| First load                       | 360,092 | 360,808 |      +716 | 360,360 → 361,076 |
+
+It keeps the headroom it had: 268.
 
 ### When an upgrade costs every page
 
