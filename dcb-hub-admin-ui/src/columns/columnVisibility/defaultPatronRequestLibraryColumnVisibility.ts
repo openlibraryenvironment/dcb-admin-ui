@@ -17,6 +17,7 @@ export const defaultPatronRequestLibraryColumnVisibility: GridColumnVisibilityMo
 		pickupRequestId: false,
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
+		placedByStaff: false,
 		itemBarcode: false,
 		localItemStatus: false,
 		rawLocalItemStatus: false,

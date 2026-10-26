@@ -16,6 +16,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import {
 	Accordion,
+	Box,
 	AccordionDetails,
 	AccordionSummary,
 	CircularProgress,
@@ -67,7 +68,13 @@ import {
 import {
 	isConfirmItemReturnedEnabled,
 	isGuardedCleanupEnabled,
+	isPlacedByStaffEnabled,
+	isRequestNotesEnabled,
+	isRequestTagsEnabled,
 } from "@helpers/featureFlags";
+import { placedBy } from "@helpers/placedBy";
+import PatronRequestNotes from "@components/PatronRequestNotes/PatronRequestNotes";
+import PatronRequestTags from "@components/PatronRequestTags/PatronRequestTags";
 import {
 	confirmItemReturned,
 	isConfirmReturnEligible,
@@ -193,7 +200,7 @@ function RouteComponent() {
 		queryKey: ["patronRequest", id],
 		queryFn: async () =>
 			gqlClient.request<any, LoadPatronRequestQueryVariables>(
-				getPatronRequest,
+				getPatronRequest(),
 				{ query: `id:${id}` },
 			),
 		enabled: !!id,
@@ -620,6 +627,9 @@ function RouteComponent() {
 					<Tab label={t("patron_request.borrowing")} value={3} />
 					<Tab label={t("patron_request.pickup")} value={4} />
 					<Tab label={t("audit_log.title")} value={5} />
+					{isRequestNotesEnabled() && (
+						<Tab label={t("patron_request.notes.title")} value={6} />
+					)}
 				</TabList>
 
 				<TabPanel value={0}>
@@ -1186,7 +1196,26 @@ function RouteComponent() {
 								/>
 							</Stack>
 						</Grid>
+						{isPlacedByStaffEnabled() && (
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<Stack direction={"column"}>
+									<Typography variant="attributeTitle">
+										{t("patron_request.placed_by.title")}
+									</Typography>
+									<RenderAttribute
+										attribute={t(
+											`patron_request.placed_by.${placedBy(patronRequest?.placedByStaff)}`,
+										)}
+									/>
+								</Stack>
+							</Grid>
+						)}
 					</Grid>
+					{isRequestTagsEnabled() && (
+						<Box sx={{ mt: 4 }}>
+							<PatronRequestTags patronRequestId={id} />
+						</Box>
+					)}
 				</TabPanel>
 
 				<TabPanel value={1}>
@@ -2129,6 +2158,12 @@ function RouteComponent() {
 						onSortModelChange={audit.onSortModelChange}
 					/>
 				</TabPanel>
+
+				{isRequestNotesEnabled() && (
+					<TabPanel value={6}>
+						<PatronRequestNotes patronRequestId={id} />
+					</TabPanel>
+				)}
 			</TabContext>
 		</PageContainer>
 	);

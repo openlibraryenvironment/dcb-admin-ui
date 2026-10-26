@@ -141,7 +141,7 @@ function GroupSupplierRequests() {
 		queryFn: async () => {
 			const baseQuery = `(${groupVariables})`;
 			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
+				getPatronRequests(),
 				buildServerGridQueryVars({
 					filterModel: view.appliedFilterModel,
 					sortModel: view.sortModel,
@@ -252,7 +252,7 @@ function GroupSupplierRequests() {
 							)}
 							rowSelection
 							exportConfig={{
-								query: getPatronRequestsForExport,
+								query: getPatronRequestsForExport(),
 								coreType: "patronRequests",
 								baseQuery: `(${groupVariables})`,
 								quickFilterFields: ["status", "description"],

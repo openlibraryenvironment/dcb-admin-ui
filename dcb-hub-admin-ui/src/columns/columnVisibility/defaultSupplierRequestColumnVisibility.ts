@@ -19,6 +19,7 @@ export const defaultSupplierRequestColumnVisibility: GridColumnVisibilityModel =
 		pickupRequestId: false,
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
+		placedByStaff: false,
 		description: false,
 		requesterNote: false,
 		pollCountForCurrentStatus: false,

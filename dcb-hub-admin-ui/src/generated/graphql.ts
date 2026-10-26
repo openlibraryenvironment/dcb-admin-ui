@@ -704,6 +704,41 @@ export type RevertFunctionalSettingToInheritedMutation = {
 	};
 };
 
+export type AddPatronRequestNoteMutationVariables = Exact<{
+	patronRequestId: string | number;
+	body: string;
+}>;
+
+export type AddPatronRequestNoteMutation = {
+	addPatronRequestNote: { id: string | null };
+};
+
+export type RetractPatronRequestNoteMutationVariables = Exact<{
+	id: string | number;
+}>;
+
+export type RetractPatronRequestNoteMutation = {
+	retractPatronRequestNote: { id: string | null; retracted: boolean | null };
+};
+
+export type TagPatronRequestMutationVariables = Exact<{
+	patronRequestId: string | number;
+	tagCode: string;
+}>;
+
+export type TagPatronRequestMutation = {
+	tagPatronRequest: Array<{ code: string | null } | null>;
+};
+
+export type UntagPatronRequestMutationVariables = Exact<{
+	patronRequestId: string | number;
+	tagCode: string;
+}>;
+
+export type UntagPatronRequestMutation = {
+	untagPatronRequest: Array<{ code: string | null } | null>;
+};
+
 export type ProvisionLibraryUserMutationVariables = Exact<{
 	input: ProvisionLibraryUserInput;
 }>;
@@ -2365,6 +2400,51 @@ export type LoadPatronRequestsByIdQuery = {
 			dateCreated: string | null;
 			activeWorkflow: string | null;
 			requesterNote: string | null;
+		} | null> | null;
+	} | null;
+};
+
+export type LoadPatronRequestNotesQueryVariables = Exact<{
+	query: string;
+	pageno?: number | null | undefined;
+	pagesize?: number | null | undefined;
+}>;
+
+export type LoadPatronRequestNotesQuery = {
+	patronRequests: {
+		content: Array<{
+			id: string;
+			notes: {
+				totalSize: number | null;
+				content: Array<{
+					id: string | null;
+					authorKind: string | null;
+					agencyCode: string | null;
+					libraryName: string | null;
+					body: string | null;
+					dateCreated: string | null;
+					retracted: boolean | null;
+					retractedBy: string | null;
+				} | null> | null;
+			} | null;
+		} | null> | null;
+	} | null;
+};
+
+export type LoadPatronRequestTagsQueryVariables = Exact<{
+	query: string;
+}>;
+
+export type LoadPatronRequestTagsQuery = {
+	patronRequests: {
+		content: Array<{
+			id: string;
+			tags: Array<{
+				code: string | null;
+				label: string | null;
+				agencyCodes: Array<string | null> | null;
+				consortium: boolean | null;
+			} | null> | null;
 		} | null> | null;
 	} | null;
 };

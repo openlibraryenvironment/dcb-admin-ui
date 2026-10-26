@@ -215,7 +215,7 @@ function OutOfSequence() {
 						disablePivoting={true}
 						disableRowGrouping={true}
 						exportConfig={{
-							query: getPatronRequestsForExport,
+							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
 							baseQuery: queries.outOfSequence,
 							quickFilterFields: ["status", "description"],

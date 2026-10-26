@@ -228,7 +228,7 @@ function Exception() {
 						disablePivoting={true}
 						disableRowGrouping={true}
 						exportConfig={{
-							query: getPatronRequestsForExport,
+							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
 							baseQuery,
 							quickFilterFields: ["status", "description"],

@@ -107,7 +107,7 @@ function RequestingHistory() {
 		queryFn: async () => {
 			const baseQuery = `(bibClusterId:${clusterId})`;
 			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
+				getPatronRequests(),
 				buildServerGridQueryVars({
 					filterModel: view.appliedFilterModel,
 					sortModel: view.sortModel,
@@ -183,7 +183,7 @@ function RequestingHistory() {
 					)}
 					rowSelection
 					exportConfig={{
-						query: getPatronRequestsForExport,
+						query: getPatronRequestsForExport(),
 						coreType: "patronRequests",
 						baseQuery: `(bibClusterId:${clusterId})`,
 						quickFilterFields: ["status", "description"],

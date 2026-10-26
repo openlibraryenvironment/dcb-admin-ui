@@ -282,7 +282,7 @@ function Onboarding() {
 							pagesize: 1,
 						}),
 						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests,
+							getPatronRequests(),
 							{
 								query: `patronHostlmsCode: "${hostLmsCode}"`,
 								order: "dateCreated",
@@ -292,7 +292,7 @@ function Onboarding() {
 							},
 						),
 						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests,
+							getPatronRequests(),
 							{
 								query: `supplyingAgencyCode: "${agencyCode}"`,
 								order: "dateCreated",
@@ -312,7 +312,7 @@ function Onboarding() {
 						}),
 						// The oldest request each way: setup is done when the library first takes part
 						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests,
+							getPatronRequests(),
 							{
 								query: `patronHostlmsCode: "${hostLmsCode}"`,
 								order: "dateCreated",
@@ -322,7 +322,7 @@ function Onboarding() {
 							},
 						),
 						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests,
+							getPatronRequests(),
 							{
 								query: `supplyingAgencyCode: "${agencyCode}"`,
 								order: "dateCreated",

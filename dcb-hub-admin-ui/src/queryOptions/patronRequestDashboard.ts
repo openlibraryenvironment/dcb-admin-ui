@@ -63,7 +63,7 @@ export const patronRequestDashboardQuery = (
 				defaultPageSize: 20,
 			});
 			return gqlClient.request<any, GetPatronRequestDashboardQueryVariables>(
-				getPatronRequestDashboard,
+				getPatronRequestDashboard(),
 				{
 					allQuery: gridVars.query,
 					activeQuery: queries.inProgress,

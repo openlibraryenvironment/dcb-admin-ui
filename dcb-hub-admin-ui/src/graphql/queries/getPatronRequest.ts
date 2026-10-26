@@ -1,6 +1,9 @@
 import { gql } from "graphql-request";
 
-export const getPatronRequest = gql`
+import { capabilitySelection } from "@helpers/capabilityFields";
+
+// A function: placedByStaff is selected only while its flag is on
+export const getPatronRequest = (): string => gql`
 	query LoadPatronRequest($query: String!) {
 		patronRequests(query: $query) {
 			content {
@@ -25,6 +28,7 @@ export const getPatronRequest = gql`
 				localItemStatus
 				localItemType
 				isExpeditedCheckout
+				${capabilitySelection("placed_by_staff", "PatronRequest")}
 				localBibId
 				rawLocalItemStatus
 				rawLocalRequestStatus

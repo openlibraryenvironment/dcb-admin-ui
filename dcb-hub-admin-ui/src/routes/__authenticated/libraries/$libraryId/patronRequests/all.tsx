@@ -125,7 +125,7 @@ function PatronRequestsAll() {
 		queryFn: async () => {
 			const baseQuery = `patronHostlmsCode: "${code}"`;
 			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
+				getPatronRequests(),
 				buildServerGridQueryVars({
 					filterModel: view.appliedFilterModel,
 					sortModel: view.sortModel,
@@ -232,7 +232,7 @@ function PatronRequestsAll() {
 						)}
 						rowSelection
 						exportConfig={{
-							query: getPatronRequestsForExport,
+							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
 							baseQuery: `patronHostlmsCode: "${code}"`,
 							quickFilterFields: ["status", "description"],

@@ -125,7 +125,7 @@ function PatronRequestsCompleted() {
 		queryFn: async () => {
 			const baseQuery = `patronHostlmsCode: "${code}" AND (status: "NO_ITEMS_SELECTABLE_AT_ANY_AGENCY" OR status: "CANCELLED" OR status: "FINALISED" OR status:"COMPLETED" OR status:"HANDED_OFF_AS_LOCAL")`;
 			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
+				getPatronRequests(),
 				buildServerGridQueryVars({
 					filterModel: view.appliedFilterModel,
 					sortModel: view.sortModel,
@@ -232,7 +232,7 @@ function PatronRequestsCompleted() {
 						)}
 						rowSelection
 						exportConfig={{
-							query: getPatronRequestsForExport,
+							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
 							baseQuery: `patronHostlmsCode: "${code}"`,
 							quickFilterFields: ["status", "description"],

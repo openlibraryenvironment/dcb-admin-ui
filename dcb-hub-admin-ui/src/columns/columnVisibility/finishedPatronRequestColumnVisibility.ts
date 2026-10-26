@@ -12,6 +12,7 @@ export const finishedPatronRequestColumnVisibility: GridColumnVisibilityModel =
 		pickupRequestId: false,
 		pickupRequestStatus: false,
 		isExpeditedCheckout: false,
+		placedByStaff: false,
 		itemBarcode: false,
 		localItemStatus: false,
 		rawLocalItemStatus: false,

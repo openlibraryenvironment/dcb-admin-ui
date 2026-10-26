@@ -8,6 +8,8 @@ import { standardFilters } from "@filters/standardFilters";
 import { formatDuration } from "@helpers/formatDuration";
 import { PatronRequest } from "@models/PatronRequest";
 import { GridColDef } from "@mui/x-data-grid-premium";
+import type { TFunction } from "i18next";
+import { placedBy } from "@helpers/placedBy";
 import dayjs from "dayjs";
 
 const getPatronRequestColumns = (
@@ -361,6 +363,21 @@ const getPatronRequestColumns = (
 	];
 	return columns;
 };
+
+/**
+ * Added by useDynamicPatronRequestColumns while VITE_FEATURE_PLACED_BY_STAFF is on: the
+ * column lists below are built at module load, before the flags are read.
+ */
+export const placedByStaffColumn = (t: TFunction): GridColDef => ({
+	field: "placedByStaff",
+	headerName: t("patron_request.placed_by.title"),
+	flex: 0.4,
+	// Not offered until dcb-service is shown to filter and sort on it
+	filterable: false,
+	sortable: false,
+	valueGetter: (value: boolean | null | undefined) =>
+		t(`patron_request.placed_by.${placedBy(value)}`),
+});
 
 // Used in most scenarios
 export const standardPatronRequestColumns: GridColDef[] =

@@ -211,7 +211,7 @@ function Completed() {
 						disablePivoting={true}
 						disableRowGrouping={true}
 						exportConfig={{
-							query: getPatronRequestsForExport,
+							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
 							baseQuery: queries.finished,
 							quickFilterFields: ["status", "description"],

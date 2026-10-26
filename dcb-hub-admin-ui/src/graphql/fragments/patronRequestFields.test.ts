@@ -8,9 +8,9 @@ import { getPatronRequestsForExport } from "@queries/getPatronRequestsForExport"
 
 // The exact strings graphql-request posts, fragment interpolation and all.
 const documents = {
-	LoadPatronRequests: getPatronRequests,
-	GetPatronRequestDashboard: getPatronRequestDashboard,
-	LoadPatronRequestsForExport: getPatronRequestsForExport,
+	LoadPatronRequests: getPatronRequests(),
+	GetPatronRequestDashboard: getPatronRequestDashboard(),
+	LoadPatronRequestsForExport: getPatronRequestsForExport(),
 };
 
 const schema = buildSchema(
@@ -55,7 +55,7 @@ describe("patron request grid documents", () => {
 	});
 
 	it("covers the fields the previously drifting columns read", () => {
-		expect(rowFields(getPatronRequests)).toEqual(
+		expect(rowFields(getPatronRequests())).toEqual(
 			expect.arrayContaining([
 				"isExpeditedCheckout",
 				"localItemType",
