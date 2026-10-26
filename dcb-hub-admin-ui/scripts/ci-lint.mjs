@@ -18,7 +18,7 @@ const project = encodeURIComponent(
 if (!token) {
 	console.error(
 		"GITLAB_CI_LINT_TOKEN is not set, so the pipeline config cannot be checked.\n" +
-			"In CI it is a masked project variable; locally, use a token of your own.\n" +
+			"Use a personal access token of your own.\n" +
 			'docs/testing.md, "The pipeline config lint", says which token and why.',
 	);
 	process.exit(1);

@@ -156,7 +156,8 @@ nightly_flake_verdict:
       fi
 
 # Every check's result in plain language, for people who do not read code: docs/testing.md,
-# "The release report". `when: always`, so a failed pipeline is explained too.
+# "The release report". Release, which attaches it, and a pipeline run on demand: both run every
+# check below. `when: always`, so a failed pipeline is explained too.
 report:
   stage: report
   interruptible: true
@@ -165,23 +166,16 @@ report:
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
-    - when: always
-  # Optional: each joins only some pipelines. A push with no merge request runs the quick two
+    - if: $CI_COMMIT_BRANCH == "release" || $ON_DEMAND_REPORT == "true"
+      when: always
   needs:
-    - job: verify_quality
-    - job: verify_secrets
-    - job: verify_supply_chain
-      optional: true
-    - job: verify_e2e
-      optional: true
-    - job: verify_lighthouse
-      optional: true
-    - job: verify_base_path
-      optional: true
-    - job: verify_container
-      optional: true
-    - job: verify_ci_config
-      optional: true
+    - verify_quality
+    - verify_secrets
+    - verify_supply_chain
+    - verify_e2e
+    - verify_lighthouse
+    - verify_base_path
+    - verify_container
   variables:
     # The whole history and its tags, for what changed since the last release
     GIT_DEPTH: "0"
@@ -538,34 +532,6 @@ verify_secrets:
       - gitleaks.sarif
       - dcb-hub-admin-ui/reports/
     expire_in: 1 month
-
-# GitLab's own lint of this file, and a simulated push to main and to release: a merge
-# request pipeline never creates either. docs/testing.md, "The pipeline config lint".
-verify_ci_config:
-  extends: .records_status
-  stage: verify
-  interruptible: true
-  timeout: 5m
-  cache: []
-  # `changes` is always true in a scheduled pipeline, hence the first rule
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-      when: never
-    - if: $ON_DEMAND_REPORT == "true"
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == "main"
-      changes:
-        paths:
-          - .gitlab-ci.yml
-          - dcb-hub-admin-ui/scripts/ci-lint.mjs
-  script:
-    # Node's own fetch, so no install
-    - cd dcb-hub-admin-ui
-    - node scripts/ci-lint.mjs
-  artifacts:
-    when: always
-    paths:
-      - dcb-hub-admin-ui/reports/
-    expire_in: 1 week
 
 release:
   stage: release

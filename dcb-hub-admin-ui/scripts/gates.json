@@ -33,10 +33,5 @@
 		"title": "No secrets in the code",
 		"checks": "Scans the code and its whole history for passwords, keys and tokens.",
 		"matters": "The code is published, and a secret committed once stays readable until it is changed."
-	},
-	"verify_ci_config": {
-		"title": "The pipeline's own settings",
-		"checks": "Asks GitLab to check this pipeline's settings, and to work out the pipeline a change to the main and release branches would run. Runs when those settings change.",
-		"matters": "A mistake that would only show on release day is caught when it is made."
 	}
 }

@@ -156,7 +156,7 @@ service started with its defaults fails with "device or resource busy" and its d
 
 The runner needs to reach:
 
-- gitlab.com, for the API calls in `verify_ci_config` and `report`;
+- gitlab.com, for the API calls in `report`;
 - the npm registry;
 - Docker Hub, `mcr.microsoft.com` and `registry.gitlab.com` for job images, and Docker Hub
   for the image's base;
@@ -174,20 +174,19 @@ joins through the rule sets at the top of `.gitlab-ci.yml`:
 - `app` is `gate`, except that a merge request has to change something the app is built
   or tested from.
 
-| Pipeline                                          | Runs                                                                                                                   |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| A typical merge request, changing `src/`          | `verify_quality`, `verify_secrets`, `verify_supply_chain`, `verify_e2e`, `verify_lighthouse`, `verify_base_path`       |
-| A merge request changing only docs or Markdown    | `verify_quality`, `verify_secrets`, `verify_supply_chain`                                                              |
-| ...that also changes the image's files            | adds `verify_container`                                                                                                |
-| ...that also changes `.gitlab-ci.yml`             | adds `verify_ci_config`                                                                                                |
-| A push to a branch with no merge request          | `verify_quality`, `verify_secrets`                                                                                     |
-| `main`                                            | the merge request's checks, then `build`, the `:next` image and the dev deploys                                        |
-| `release`                                         | every check including `verify_container`, then the release, the versioned bundle, the image and the production deploys |
-| The nightly schedule                              | `verify_supply_chain` and `nightly_flake_hunt`, below                                                                  |
-| Run by hand with `ON_DEMAND_REPORT` set to `true` | every check, including `verify_container` and `verify_ci_config`, then the release report. Nothing ships               |
+| Pipeline                                          | Runs                                                                                                                                       |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| A typical merge request, changing `src/`          | `verify_quality`, `verify_secrets`, `verify_supply_chain`, `verify_e2e`, `verify_lighthouse`, `verify_base_path`                           |
+| A merge request changing only docs or Markdown    | `verify_quality`, `verify_secrets`, `verify_supply_chain`                                                                                  |
+| ...that also changes the image's files            | adds `verify_container`                                                                                                                    |
+| A push to a branch with no merge request          | `verify_quality`, `verify_secrets`                                                                                                         |
+| `main`                                            | the merge request's checks, then `build`, the `:next` image and the dev deploys                                                            |
+| `release`                                         | every check including `verify_container`, then the release report, the release, the versioned bundle, the image and the production deploys |
+| The nightly schedule                              | `verify_supply_chain` and `nightly_flake_hunt`, below                                                                                      |
+| Run by hand with `ON_DEMAND_REPORT` set to `true` | every check, including `verify_container`, then the release report. Nothing ships                                                          |
 
 Nothing that ships runs unless every check before it passed, and nothing ships from a
-scheduled pipeline.
+scheduled pipeline. The release report runs only on `release` and on demand, below.
 
 `src/helpers/ciChangePaths.test.ts` keeps the `app` path list whole. Every tracked file is
 either on it or on a short list of files that cannot change what a browser gate tests:
@@ -207,9 +206,8 @@ A scheduled pipeline on `main` runs two jobs and nothing else:
   fails the pipeline when it found failures.
 
 Nothing ships from a schedule, and the release report does not run. Every job that deploys
-or publishes says `$CI_PIPELINE_SOURCE != "schedule"`. The config lint and the container
-gate exclude schedules too, because GitLab treats `changes` as true in a pipeline no push
-created.
+or publishes says `$CI_PIPELINE_SOURCE != "schedule"`. The container gate excludes
+schedules too, because GitLab treats `changes` as true in a pipeline no push created.
 
 **The schedule itself is set in GitLab, not in this file:** CI/CD > Schedules, target
 branch `main`, once a night. A failed scheduled pipeline emails the schedule's owner, so
@@ -309,8 +307,8 @@ other time, for a bid, a customer or a PO review, run a pipeline by hand:
 4. When the pipeline finishes, the `report` job's **Release report** artifact is the page.
    It expires after a month like any artifact, so press **Keep** on the job to keep it.
 
-Such a run includes every check, including the container gate and the config lint, and
-nothing that builds a release, publishes an image or deploys.
+Such a run includes every check, including the container gate, and nothing that builds a
+release, publishes an image or deploys.
 `src/helpers/onDemandReport.test.ts` fails if a job that ships does not exclude it. On a
 tag the report names the version. A tag made before this change carries the older pipeline
 file, so it cannot be reported on this way.
@@ -428,44 +426,48 @@ that `expose_as` only appears on a job that also keeps `artifacts:paths` - GitLa
 it otherwise, for a different reason with a different message. It reads the raw text rather
 than parsing, so it needs no YAML dependency.
 
-**It is not a substitute for a real lint,** which is the next section. This test runs on
-every pipeline and needs no token; the lint runs only when the config changes.
+**It is not a substitute for a real lint,** which is the next section.
 
 ### The pipeline config lint
 
-`verify_ci_config` sends `.gitlab-ci.yml` to GitLab's lint endpoint
-(`POST /projects/:id/ci/lint`) and asks it to simulate the pipeline a push to `main`, and a
-push to `release`, would create. It prints the jobs each would run, stage by stage, and
-fails if either is invalid. It runs only when `.gitlab-ci.yml` or `scripts/ci-lint.mjs`
-changes.
+A merge request pipeline proves the config for a merge request and nothing else. GitLab
+checks `needs`, `dependencies` and stages only for the jobs a pipeline contains, so a
+mistake in a job that exists only on `release` is first seen on release day, when the
+pipeline that should cut the release fails to be created.
 
-The simulation is the point. A merge request pipeline proves the config for a merge
-request and nothing else. GitLab checks `needs`, `dependencies` and stages only for the
-jobs a pipeline contains, so a mistake in a job that exists only on `release` is first seen
-on release day, when the pipeline that should cut the release fails to be created.
+`src/helpers/pipelineSimulation.test.ts` works out, from each job's own `rules`, the
+pipeline GitLab would create for a push to `main`, a push to `release`, a merge request, a
+push to a branch with no merge request, the nightly schedule and a run on demand. It fails if
+a job in any of them needs or depends on a job that pipeline may not contain, or on a job in
+a later stage, or sits in a stage `stages` does not declare. It needs no token, so it runs in
+`verify_quality` on every pipeline.
 
-Locally:
+What it does not do:
+
+- **It evaluates only the rule syntax this file uses:** `$VAR`, `==`, `!=`, `=~`, `!~`,
+  `&&` and `||`. Anything else, such as parentheses, fails the test rather than being
+  guessed at.
+- **It cannot know `changes`.** A job behind one may or may not be in a push or merge request
+  pipeline, so a job that needs it must mark the need `optional`.
+- **It is not GitLab's validator.** It does not check keywords, values or limits.
+
+GitLab's own lint is a local command. Run it before merging a change to `.gitlab-ci.yml`:
 
 ```bash
 GITLAB_CI_LINT_TOKEN=<a personal access token> npm run ci:lint
 ```
 
-**The token is a decision, recorded here.** `CI_JOB_TOKEN` cannot call this endpoint: it is
-not in GitLab's list of endpoints a job token may use. So the job reads
-`GITLAB_CI_LINT_TOKEN`, a project variable holding a project access token.
+`scripts/ci-lint.mjs` sends the file to GitLab's lint endpoint
+(`POST /projects/:id/ci/lint`), simulating a push to `main` and to `release`. It prints the
+jobs each would run, stage by stage, and fails if either is invalid. The token is your own,
+with scope `read_api`, or `api` if GitLab refuses that: GitLab's docs do not say which the
+endpoint needs.
 
-- **Scope `read_api` if GitLab accepts it, otherwise `api`.** GitLab's docs do not say
-  which scope the endpoint needs, and it is a POST that changes nothing.
-- **The lowest role that works.** The docs do not state one either. Try Reporter, then
-  Developer. Nothing in this job writes, so anything higher is unused authority.
-- **Masked, and not protected.** A merge request pipeline from an unprotected branch never
-  receives a protected variable, and the merge request is where this check is wanted. The
-  cost is that any job on any branch can read it, which means anyone who can push a
-  branch. Those people already hold Developer access to this project.
-- **It expires.** Project access tokens last at most a year. When it lapses the job fails
-  and says GitLab refused the token: rotate it, do not disable the job.
-- **No token, no pass.** Unset, the job fails and says what is missing. A lint that passes
-  because it could not run is the false green the rest of this document is about.
+**Why it is not a pipeline job.** `CI_JOB_TOKEN` cannot call the endpoint, so a job needs a
+project access token held as a CI/CD variable. That variable has to be unprotected to reach
+a merge request pipeline, which exposes it to every branch's jobs, and it lapses within a
+year. It ran as `verify_ci_config` until 2026-10-26, and failed whenever it ran on a merge
+request because the variable never reached it.
 
 ### The container gate
 
