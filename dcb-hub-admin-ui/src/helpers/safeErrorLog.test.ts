@@ -122,7 +122,12 @@ describe("errorForLog", () => {
 describe("errorForDisplay", () => {
 	it("keeps a GraphQL request's variables off the page", () => {
 		const clientError = new ClientError(
-			{ status: 200, errors: [new GraphQLError("Patron not found")] },
+			{
+				status: 200,
+				headers: new Headers(),
+				body: "",
+				errors: [new GraphQLError("Patron not found")],
+			},
 			{ query: "query X", variables: { barcode: "29551000123456" } },
 		);
 		expect(clientError.message).toContain("29551000123456");
