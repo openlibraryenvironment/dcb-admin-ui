@@ -553,6 +553,13 @@ starts. Their JUnit files are in `reports/`, which Playwright never empties.
 Locally, `npm run gates` still runs each suite with its own build: without the flag, every
 config builds first.
 
+**Why the e2e build is not shared, unlike in `dcb-admin-for-libraries`.** There one
+`verify_build` serves both e2e and Lighthouse, because its builds are identical. Here
+they are not: `playwright.config.ts` builds with test-only settings (the fake Keycloak
+identity, and `VITE_I18N_REPORT_MISSING`, which arms the missing-translation collector).
+The budget and Lighthouse must measure the bundle that ships, without them. Sharing the
+build would need those settings read at runtime instead.
+
 ### Why `npm run gates` is sequential, and checks the ports first
 
 **Every Playwright config's `webServer` builds, and all four builds write the same
