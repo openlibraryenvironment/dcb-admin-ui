@@ -11,7 +11,7 @@ import { resolve } from "path";
  * a valid pipeline".
  */
 const ciConfig = readFileSync(
-	resolve(__dirname, "../../../.gitlab-ci.yml"),
+	resolve(__dirname, "../../.gitlab-ci.yml"),
 	"utf8",
 );
 

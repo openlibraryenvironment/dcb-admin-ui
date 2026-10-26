@@ -17,7 +17,7 @@ class Reference {
 type Config = Record<string, unknown>;
 
 const config = parse(
-	readFileSync(resolve(__dirname, "../../../.gitlab-ci.yml"), "utf8"),
+	readFileSync(resolve(__dirname, "../../.gitlab-ci.yml"), "utf8"),
 	{
 		customTags: [
 			{

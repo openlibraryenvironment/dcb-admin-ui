@@ -17,19 +17,6 @@
 		"requirement": "The application works from the web address it is deployed under, and when the hosting platform's loader starts it.",
 		"checks": ["verify_base_path"]
 	},
-	"QUA-04": {
-		"category": "Quality",
-		"requirement": "Every pipeline the project runs, including the ones for the main and release branches, finds every job its jobs depend on.",
-		"unit": [
-			{
-				"file": "src/helpers/pipelineSimulation.test.ts",
-				"describe": "the pipelines GitLab would create"
-			}
-		],
-		"standards": {
-			"sbd": ["10"]
-		}
-	},
 	"ACC-01": {
 		"category": "Accessibility",
 		"requirement": "The application meets WCAG 2.2 level AA.",

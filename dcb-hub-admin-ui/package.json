@@ -17,6 +17,7 @@
 		"build:vite": "vite build",
 		"budget": "node scripts/check-bundle-budget.mjs",
 		"ci:lint": "node scripts/ci-lint.mjs",
+		"lint:pipeline": "vitest run --config vitest.pipeline.config.mts",
 		"report": "node scripts/release-report.ts",
 		"gates": "node scripts/check-all-gates.mjs",
 		"e2e": "playwright test",

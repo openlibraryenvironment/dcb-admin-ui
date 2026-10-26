@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const repoRoot = resolve(__dirname, "../../..");
+const repoRoot = resolve(__dirname, "../..");
 
 /**
  * Files that cannot change what the browser gates test, so a merge request touching only
@@ -13,6 +13,8 @@ const NOT_APP = [
 	"**/*.md",
 	"dcb-hub-admin-ui/docs/**/*",
 	"dcb-hub-admin-ui/.husky/**/*",
+	// Checks of .gitlab-ci.yml itself, run locally: docs/testing.md, "The pipeline checks are local"
+	"dcb-hub-admin-ui/pipeline-checks/**/*",
 	"antora/**/*",
 	"LICENSE",
 	"renovate.json",

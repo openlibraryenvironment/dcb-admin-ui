@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const ci = readFileSync(resolve(__dirname, "../../../.gitlab-ci.yml"), "utf8");
+const ci = readFileSync(resolve(__dirname, "../../.gitlab-ci.yml"), "utf8");
 
 /** Each top-level job and its text, up to the next top-level key. */
 const jobs = [

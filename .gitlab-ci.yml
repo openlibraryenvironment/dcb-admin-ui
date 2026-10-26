@@ -80,7 +80,7 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE != "schedule" && $CI_COMMIT_BRANCH =~ /^(main|release)$/
   # The gate, but a merge request that changes nothing the app is built or tested from
-  # skips it. src/helpers/ciChangePaths.test.ts keeps this list whole.
+  # skips it. pipeline-checks/ciChangePaths.test.ts, run locally, keeps this list whole.
   app:
     - if: $ON_DEMAND_REPORT == "true"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"

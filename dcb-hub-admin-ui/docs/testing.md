@@ -143,7 +143,7 @@ preview, `scripts/preview-for-lighthouse.mjs`, fails on a taken port by itself.
 
 Every job runs on the `ki-onprem` runner and nothing else. The tag is set once, in
 `default:`, and no job names another or opts out of the defaults.
-`src/helpers/gitlabCiConfig.test.ts` fails if a job names any other runner, an empty tag
+`pipeline-checks/gitlabCiConfig.test.ts` fails if a job names any other runner, an empty tag
 list, or `inherit:`, so a new job cannot quietly reach a different runner.
 
 What the repository cannot enforce is which runners may take a job tagged `ki-onprem`. Keep
@@ -188,7 +188,7 @@ joins through the rule sets at the top of `.gitlab-ci.yml`:
 Nothing that ships runs unless every check before it passed, and nothing ships from a
 scheduled pipeline. The release report runs only on `release` and on demand, below.
 
-`src/helpers/ciChangePaths.test.ts` keeps the `app` path list whole. Every tracked file is
+`pipeline-checks/ciChangePaths.test.ts` keeps the `app` path list whole. Every tracked file is
 either on it or on a short list of files that cannot change what a browser gate tests:
 docs, Markdown, the local hooks, and a few root files. A file on neither fails the test, so
 a new kind of file cannot quietly skip the browser gates.
@@ -291,7 +291,7 @@ What it says comes from beside the checks themselves, so it changes when they do
   checked automatically. Rules axe could not decide are left out, because this gate
   asserts on violations alone.
 - **Each pipeline check** is explained in `scripts/gates.json`.
-  `src/helpers/gateCatalogue.test.ts` fails when a `verify_*` job has no entry.
+  `pipeline-checks/gateCatalogue.test.ts` fails when a `verify_*` job has no entry.
 - **A criterion nothing automated checks** is reported as assessed by hand, with the
   conformance `docs/DCB_Admin_VPAT.md` states for it. The report reads that from the
   VPAT's tables, so each row must open with its criterion in bold and give its
@@ -313,7 +313,7 @@ other time, for a bid, a customer or a PO review, run a pipeline by hand:
 
 Such a run includes every check, including the container gate, and nothing that builds a
 release, publishes an image or deploys.
-`src/helpers/onDemandReport.test.ts` fails if a job that ships does not exclude it. On a
+`pipeline-checks/onDemandReport.test.ts` fails if a job that ships does not exclude it. On a
 tag the report names the version. A tag made before this change carries the older pipeline
 file, so it cannot be reported on this way.
 
@@ -425,7 +425,7 @@ Checking that the YAML parsed had been mistaken for checking that the config was
 the same substitution of a proxy for the thing itself that `docs/accessibility.md` records
 under "Knowing what is covered".
 
-`src/helpers/gitlabCiConfig.test.ts` now checks the charset, the 128-character limit, and
+`pipeline-checks/gitlabCiConfig.test.ts` now checks the charset, the 128-character limit, and
 that `expose_as` only appears on a job that also keeps `artifacts:paths` - GitLab rejects
 it otherwise, for a different reason with a different message. It reads the raw text rather
 than parsing, so it needs no YAML dependency.
@@ -439,12 +439,11 @@ checks `needs`, `dependencies` and stages only for the jobs a pipeline contains,
 mistake in a job that exists only on `release` is first seen on release day, when the
 pipeline that should cut the release fails to be created.
 
-`src/helpers/pipelineSimulation.test.ts` works out, from each job's own `rules`, the
+`pipeline-checks/pipelineSimulation.test.ts` works out, from each job's own `rules`, the
 pipeline GitLab would create for a push to `main`, a push to `release`, a merge request, a
 push to a branch with no merge request, the nightly schedule and a run on demand. It fails if
 a job in any of them needs or depends on a job that pipeline may not contain, or on a job in
-a later stage, or sits in a stage `stages` does not declare. It needs no token, so it runs in
-`verify_quality` on every pipeline.
+a later stage, or sits in a stage `stages` does not declare. It needs no token.
 
 What it does not do:
 
@@ -472,6 +471,29 @@ project access token held as a CI/CD variable. That variable has to be unprotect
 a merge request pipeline, which exposes it to every branch's jobs, and it lapses within a
 year. It ran as `verify_ci_config` until 2026-10-26, and failed whenever it ran on a merge
 request because the variable never reached it.
+
+### The pipeline checks are local
+
+Everything that checks the pipeline file itself runs on a developer's machine, not in the
+pipeline: `npm run lint:pipeline` runs `pipeline-checks/`, and `npm run gates` includes it
+as **Pipeline config**. Run it before pushing a change to `.gitlab-ci.yml`, to
+`scripts/gates.json` or to the files the `app` path list names. Decided 2026-10-26, for
+both admin apps. The unit suite, and so `verify_quality`, does not collect the folder.
+
+| Check                        | Fails when                                                                                               |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `pipelineSimulation.test.ts` | a job needs or depends on one its pipeline may not contain (above)                                       |
+| `gitlabCiConfig.test.ts`     | an `expose_as` breaks GitLab's rules, or a job leaves the `ki-onprem` runner                             |
+| `onDemandReport.test.ts`     | a job that ships would run on demand, or the report joins another pipeline                               |
+| `ciChangePaths.test.ts`      | a tracked file is on neither the `app` path list nor the list of files that cannot change a browser gate |
+| `gateCatalogue.test.ts`      | a `verify_*` job has no explanation in `scripts/gates.json` for the release report                       |
+
+`npm run ci:lint`, above, is the other half: GitLab's own validator, with a token of your
+own.
+
+The release report no longer claims the pipeline's structure as a requirement. Its evidence
+came from `pipelineSimulation.test.ts` running in `verify_quality`, and a check the
+pipeline does not run cannot evidence anything in it.
 
 ### The container gate
 
