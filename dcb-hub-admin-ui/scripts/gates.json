@@ -1,0 +1,37 @@
+{
+	"verify_quality": {
+		"title": "Code checks and unit tests",
+		"checks": "The code compiles, follows the project's coding rules with no warnings, and passes its unit tests. These include the colour contrast of every pair of colours in every theme and brand.",
+		"matters": "Catches mistakes before anyone uses the application."
+	},
+	"verify_e2e": {
+		"title": "Browser tests, including accessibility",
+		"checks": "Uses the application in a real browser the way consortium staff do, with the service it talks to simulated. Includes the automated accessibility checks on every page in light mode, dark mode, high contrast and at phone width, checks that nothing on a page moves as it loads, and checks that the security policy the application ships with blocks nothing it needs.",
+		"matters": "Shows the work staff depend on still works, and still works for people using assistive technology."
+	},
+	"verify_lighthouse": {
+		"title": "Speed and download size",
+		"checks": "Measures what every page downloads before it can be used, against a fixed budget, and runs Google Lighthouse on the sign-in page and the Insights dashboard.",
+		"matters": "Keeps the application quick to open, including on a slow connection."
+	},
+	"verify_base_path": {
+		"title": "Served from its real address, and by the hosting loader",
+		"checks": "Runs browser tests with the application served from the web address it is deployed under, and checks it starts correctly when the hosting platform's loader starts it.",
+		"matters": "A build that works in testing but breaks once hosted is caught before release."
+	},
+	"verify_container": {
+		"title": "The container image",
+		"checks": "Builds the container image the application is deployed in, and checks in a browser that it compresses what it sends, sends its security headers on every address, and caches files for the right length of time. Runs when the image's files or the build settings change, before every release, and on demand.",
+		"matters": "Tests what is actually deployed, not only a test server."
+	},
+	"verify_supply_chain": {
+		"title": "Known vulnerabilities and licences in what we depend on",
+		"checks": "Checks every library the application ships with against the published list of known security problems, and fails on any of high severity or worse. Also fails on a library under a licence we have not approved.",
+		"matters": "A known flaw in a library is a flaw in the application, and a library's licence binds whoever ships it."
+	},
+	"verify_secrets": {
+		"title": "No secrets in the code",
+		"checks": "Scans the code and its whole history for passwords, keys and tokens.",
+		"matters": "The code is published, and a secret committed once stays readable until it is changed."
+	}
+}

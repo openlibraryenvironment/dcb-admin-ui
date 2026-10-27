@@ -3,9 +3,11 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
 	createFileRoute,
+	redirect,
 	useNavigate,
 	useRouter,
 	Link,
+	useSearch,
 } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { z } from "@schemas/zod";
@@ -20,7 +22,11 @@ import ErrorComponent from "@components/Error/Error";
 import { SearchQueryBuilder } from "@components/SearchQueryBuilder/SearchQueryBuilder";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
+import { searchResultsView } from "@constants/dataGrid/gridViews";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { useSearchStore } from "@hooks/useSearchStore";
 import {
@@ -33,7 +39,18 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/__authenticated/search/")({
-	validateSearch: searchSchema,
+	validateSearch: (search: Record<string, unknown>) => ({
+		...searchSchema.parse(search),
+		...validateGridSearch(search),
+	}),
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			searchResultsView,
+			search,
+			location.state,
+		);
+		if (restore) throw redirect({ to: "/search", ...restore });
+	},
 	component: SearchPage,
 });
 
@@ -49,9 +66,9 @@ function SearchPage() {
 
 	// The URL (`q`) is the single source of truth for the *executed* search:
 	// shareable, bookmarkable, and the sole trigger for data fetching.
-	const { q } = Route.useSearch();
+	const { q } = useSearch({ from: "/__authenticated/search/" });
 
-	const gridId = "sharedIndexSearch";
+	const gridId = searchResultsView.id;
 
 	// The SearchQueryBuilder owns the editable *draft* criteria (the advanced
 	// filter surface). We only need to push parsed criteria back into it on URL
@@ -59,12 +76,59 @@ function SearchPage() {
 	// to `criteria` here would re-render (and repaint the grid) on every keystroke.
 	const setCriteria = useSearchStore((s) => s.setCriteria);
 
-	// Pagination is the only grid state this page owns; the query builder replaces
-	// column filtering and the search API has no sort. useGridState gives us the
-	// shared atomic-selector persistence used by every other grid.
-	const { paginationModel, onPaginationModelChange } = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 25 },
-	});
+	const columns: GridColDef[] = useMemo(
+		() => [
+			{
+				field: "title",
+				headerName: t("ui.data_grid.title"),
+				minWidth: 300,
+				flex: 0.7,
+				filterable: false,
+			},
+			{
+				field: "id",
+				headerName: t("search.cluster_id"),
+				minWidth: 100,
+				filterable: false,
+				flex: 0.5,
+				renderCell: (params) => (
+					<Link to={`/search/${params.row.id}/cluster`}>{params.row.id}</Link>
+				),
+			},
+			{
+				field: "items",
+				headerName: t("search.items"),
+				minWidth: 100,
+				filterable: false,
+				flex: 0.3,
+				renderCell: (params) => (
+					<Link to={`/search/${params.row.id}/items`}>
+						{t("ui.data_grid.view_items")}
+					</Link>
+				),
+			},
+			{
+				field: "identifiers",
+				headerName: t("search.identifiers"),
+				minWidth: 100,
+				filterable: false,
+				flex: 0.3,
+				renderCell: (params) => (
+					<Link to={`/search/${params.row.id}/identifiers`}>
+						{t("search.identifiers")}
+					</Link>
+				),
+			},
+		],
+		[t],
+	);
+
+	// The page and the columns are the grid's view: the query builder replaces column
+	// filtering, and the search API has no sort
+	const search = useSearch({ from: "/__authenticated/search/" });
+	const view = useGridView(searchResultsView, columns, search);
+	const paginationModel = view.paginationModel;
+	const onPaginationModelChange = view.onPaginationModelChange;
 
 	// Quick walk-up can be launched straight from search results: staff already
 	// have the item barcode in hand, so no cluster context is required here.
@@ -139,60 +203,23 @@ function SearchPage() {
 	// makes the search shareable/bookmarkable and drives the fetch.
 	const handleBuilderSearch = useCallback(() => {
 		const newQuery = buildQueryFromCriteria(useSearchStore.getState().criteria);
-		onPaginationModelChange({ page: 0, pageSize: paginationModel.pageSize });
-		if (newQuery !== q) {
-			// Explicit public path: navigating off Route.id (the internal
-			// "/__authenticated/search/") lands on the NotFound page.
-			navigate({ to: "/search", search: { q: newQuery }, replace: true });
+		if (newQuery === q) {
+			onPaginationModelChange({ page: 0, pageSize: paginationModel.pageSize });
+			return;
 		}
+		// Explicit public path: navigating off Route.id (the internal
+		// "/__authenticated/search/") lands on the NotFound page. The view's columns
+		// stay; a new search starts on its first page.
+		navigate({
+			to: "/search",
+			search: (previous: Record<string, unknown>) => ({
+				...previous,
+				q: newQuery,
+				page: undefined,
+			}),
+			replace: true,
+		});
 	}, [q, navigate, onPaginationModelChange, paginationModel.pageSize]);
-
-	const columns: GridColDef[] = useMemo(
-		() => [
-			{
-				field: "title",
-				headerName: t("ui.data_grid.title"),
-				minWidth: 300,
-				flex: 0.7,
-				filterable: false,
-			},
-			{
-				field: "id",
-				headerName: t("search.cluster_id"),
-				minWidth: 100,
-				filterable: false,
-				flex: 0.5,
-				renderCell: (params) => (
-					<Link to={`/search/${params.row.id}/cluster`}>{params.row.id}</Link>
-				),
-			},
-			{
-				field: "items",
-				headerName: t("search.items"),
-				minWidth: 100,
-				filterable: false,
-				flex: 0.3,
-				renderCell: (params) => (
-					<Link to={`/search/${params.row.id}/items`}>
-						{t("ui.data_grid.view_items")}
-					</Link>
-				),
-			},
-			{
-				field: "identifiers",
-				headerName: t("search.identifiers"),
-				minWidth: 100,
-				filterable: false,
-				flex: 0.3,
-				renderCell: (params) => (
-					<Link to={`/search/${params.row.id}/identifiers`}>
-						{t("search.identifiers")}
-					</Link>
-				),
-			},
-		],
-		[t],
-	);
 
 	// --- Render ---
 	if (!searchBase) {
@@ -251,8 +278,12 @@ function SearchPage() {
 					loading={isLoading || isFetching}
 					paginationMode="server"
 					pagination
-					paginationModel={paginationModel}
-					onPaginationModelChange={onPaginationModelChange}
+					paginationModel={view.paginationModel}
+					onPaginationModelChange={view.onPaginationModelChange}
+					columnVisibilityModel={view.columnVisibilityModel}
+					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+					columnLayout={view.columnLayout}
+					viewNotice={<GridViewNotice view={view} />}
 					// The SearchQueryBuilder is the sole (advanced) filter surface, no need for MUI filter model
 					disableColumnFilter
 					disableColumnSorting

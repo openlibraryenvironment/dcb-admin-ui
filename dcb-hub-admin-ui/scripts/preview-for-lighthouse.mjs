@@ -126,8 +126,9 @@ const bootScript = (authenticated) =>
 		"</script>",
 	].join("\n");
 
-// Read per request, never cached. A server started before the build lhci runs would
-// otherwise serve the previous build's index.html, whose chunk hashes no longer exist -
+// Read per request, never cached. A server started before the build `npm run lighthouse`
+// makes would otherwise serve the previous build's index.html, whose chunk hashes no
+// longer exist -
 // and a module that 404s into the SPA fallback arrives as text/html, which Chrome refuses
 // and Lighthouse reports as NO_FCP: "the page did not paint any content".
 const shell = (authenticated) =>

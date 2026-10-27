@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import dayjs from "dayjs";
 import {
@@ -13,7 +13,9 @@ import {
 	useTheme,
 } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import type { LoadLocationsQueryVariables } from "@generated/graphql";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -24,13 +26,19 @@ import Error from "@components/Error/Error";
 import Import from "@components/Import/Import";
 import NewLocation from "@forms/NewLocation/NewLocation";
 
-import { useGridState } from "@hooks/useGridState";
-import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
+import { useGridView } from "@hooks/useGridView";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	rememberedViewRedirect,
+	scopedView,
+} from "@helpers/viewState/viewRoute";
+import { libraryLocationsView } from "@constants/dataGrid/gridViews";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import useCode from "@hooks/useCode";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
 import { getILS } from "@helpers/getILS";
@@ -39,11 +47,24 @@ import { libraryQuery } from "@/queryOptions/library";
 import { getLocations } from "@queries/getLocations";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
-import type { LoadLocationsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/locations/",
 )({
+	validateSearch: validateGridSearch,
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			scopedView(libraryLocationsView, params.libraryId),
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/libraries/$libraryId/locations",
+				params,
+				...restore,
+			});
+	},
 	component: LibraryLocations,
 });
 
@@ -64,30 +85,16 @@ function LibraryLocations() {
 	// so the extra term was unreachable and the two flags had become the same answer.
 	const isMinLibraryAdmin = isAnAdmin;
 
-	const gridId = `libraryLocations-${libraryId}`;
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE },
-		sort: [{ field: "lastImported", sort: "desc" }],
-		columnVisibility: {
-			id: false,
-			lastImported: false,
-			agencyCode: false,
-			localId: false,
-			isEnabledForPickupAnywhere: false,
-		},
+	const gridView = useMemo(
+		() => scopedView(libraryLocationsView, libraryId),
+		[libraryId],
+	);
+	const gridId = gridView.id;
+	const search = useSearch({
+		from: "/__authenticated/libraries/$libraryId/locations/",
 	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+
 	// The grid edits and deletes locations; the page action deletes the library.
 	const locationMutation = useEntityMutation("location");
 	const libraryMutation = useEntityMutation("library");
@@ -110,35 +117,6 @@ function LibraryLocations() {
 	const presetQueryVariables = library?.secondHostLms
 		? `hostSystem: ${library?.agency?.hostLms?.id} OR hostSystem: ${library?.secondHostLms?.id}`
 		: `hostSystem: ${library?.agency?.hostLms?.id}`;
-
-	const {
-		data: gridData,
-		isLoading: isGridLoading,
-		isFetching,
-	} = useQuery({
-		queryKey: [
-			gridId,
-			presetQueryVariables,
-			paginationModel,
-			sortModel,
-			filterModel,
-		],
-		queryFn: async () => {
-			return gqlClient.request<any, LoadLocationsQueryVariables>(
-				getLocations,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					baseQuery: presetQueryVariables,
-					defaultOrder: "lastImported",
-					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
-				}),
-			);
-		},
-		enabled: !!library?.agency?.hostLms?.id,
-		placeholderData: (previousData) => previousData,
-	});
 
 	const closeImport = () => {
 		setImport(false);
@@ -264,6 +242,41 @@ function LibraryLocations() {
 			locationMutation,
 		],
 	);
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(gridView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading: isGridLoading,
+		isFetching,
+	} = useQuery({
+		queryKey: [
+			gridId,
+			presetQueryVariables,
+			view.paginationModel,
+			view.sortModel,
+			view.appliedFilterModel,
+		],
+		queryFn: async () => {
+			return gqlClient.request<any, LoadLocationsQueryVariables>(
+				getLocations,
+				buildServerGridQueryVars({
+					filterModel: view.appliedFilterModel,
+					sortModel: view.sortModel,
+					paginationModel: view.paginationModel,
+					baseQuery: presetQueryVariables,
+					defaultOrder: "lastImported",
+					defaultPageSize: libraryLocationsView.defaultPageSize,
+				}),
+			);
+		},
+		enabled: !!library?.agency?.hostLms?.id,
+		placeholderData: (previousData) => previousData,
+	});
 
 	if (isLibraryLoading)
 		return (
@@ -357,21 +370,23 @@ function LibraryLocations() {
 						identifier={gridId}
 						type="libraryLocations"
 						columns={columns}
+						viewNotice={<GridViewNotice view={view} />}
 						rows={gridData?.locations?.content ?? []}
 						rowCount={gridData?.locations?.totalSize ?? 0}
 						loading={isGridLoading || isFetching}
 						paginationMode="server"
 						pagination
-						paginationModel={paginationModel}
-						onPaginationModelChange={handlePaginationChange}
+						paginationModel={view.paginationModel}
+						onPaginationModelChange={view.onPaginationModelChange}
 						sortingMode="server"
-						sortModel={sortModel}
-						onSortModelChange={handleSortChange}
+						sortModel={view.sortModel}
+						onSortModelChange={view.onSortModelChange}
 						filterMode="server"
-						filterModel={filterModel}
-						onFilterModelChange={handleFilterChange}
-						columnVisibilityModel={columnVisibilityModel}
-						onColumnVisibilityModelChange={handleColumnVisibilityChange}
+						filterModel={view.filterModel}
+						onFilterModelChange={view.onFilterModelChange}
+						columnVisibilityModel={view.columnVisibilityModel}
+						onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+						columnLayout={view.columnLayout}
 						rowSelection
 						exportConfig={{
 							query: getLocations,

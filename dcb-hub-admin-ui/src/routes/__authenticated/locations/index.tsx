@@ -1,11 +1,22 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
+import { type GridRowModesModel, GridColDef } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { locationsView } from "@constants/dataGrid/gridViews";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import { locationsQuery } from "@/queryOptions/gridQueries";
 
 import { Button, Stack, Tooltip } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -13,20 +24,37 @@ import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutat
 import NewLocation from "@forms/NewLocation/NewLocation";
 import Import from "@components/Import/Import";
 
-import { useGridState } from "@hooks/useGridState";
-import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import useCode from "@hooks/useCode";
 
 import { getLocations } from "@queries/getLocations";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 import { getDefaultLocationColumns } from "@columns/locationColumns";
-import type { LoadLocationsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute("/__authenticated/locations/")({
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			locationsView,
+			search,
+			location.state,
+		);
+		if (restore) throw redirect({ to: "/locations", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
+		if (!auth?.isAuthenticated) return;
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(locationsView, deps, location.state);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			locationsQuery(createGraphQLClient(cfg, auth), models),
+		);
+	},
 	component: LocationsRouteComponent,
 });
 
@@ -44,32 +72,11 @@ function LocationsRouteComponent() {
 	// cannot reach this application at all.
 	const isMinLibraryAdmin = isAnAdmin;
 
-	const gridId = "locations";
+	const gridId = locationsView.id;
+	const search = useSearch({ from: "/__authenticated/locations/" });
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const locationMutation = useEntityMutation("location");
-
-	const {
-		paginationModel,
-		sortModel,
-		filterModel,
-		columnVisibilityModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-		onSortModelChange: handleSortChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE },
-		sort: [{ field: "lastImported", sort: "desc" }],
-		columnVisibility: {
-			id: false,
-			lastImported: false,
-			localId: false,
-			isEnabledForPickupAnywhere: false,
-			agencyCode: false,
-		},
-	});
 
 	const [newLocation, setNewLocation] = useState({
 		show: false,
@@ -79,27 +86,6 @@ function LocationsRouteComponent() {
 		ils: "",
 	});
 	const [showImport, setImport] = useState(false);
-
-	const {
-		data: gridData,
-		isLoading: gridLoading,
-		isFetching,
-		refetch,
-	} = useQuery({
-		queryKey: ["locations", gridId, paginationModel, sortModel, filterModel],
-		queryFn: () =>
-			gqlClient.request<any, LoadLocationsQueryVariables>(
-				getLocations,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					defaultOrder: "lastImported",
-					defaultPageSize: MAX_DEFAULT_PAGE_SIZE,
-				}),
-			),
-		placeholderData: (previousData) => previousData,
-	});
 
 	const closeImport = () => {
 		setImport(false);
@@ -112,8 +98,6 @@ function LocationsRouteComponent() {
 		updateCode("");
 		setImport(true);
 	};
-
-	const shouldShowLoading = gridLoading || (isFetching && !!gridData);
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -140,6 +124,28 @@ function LocationsRouteComponent() {
 			locationMutation,
 		],
 	);
+
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(locationsView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading: gridLoading,
+		isFetching,
+		refetch,
+	} = useQuery(
+		locationsQuery(gqlClient, {
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
+	);
+
+	const shouldShowLoading = gridLoading || (isFetching && !!gridData);
 
 	return (
 		<PageContainer title={t("nav.locations")}>
@@ -180,21 +186,23 @@ function LocationsRouteComponent() {
 				identifier={gridId}
 				type="locations"
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={gridData?.locations?.content ?? []}
 				rowCount={gridData?.locations?.totalSize ?? 0}
 				loading={shouldShowLoading}
 				paginationMode="server"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
 				sortingMode="server"
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
 				filterMode="server"
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}

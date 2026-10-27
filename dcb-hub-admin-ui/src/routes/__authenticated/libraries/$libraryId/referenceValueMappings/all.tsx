@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Typography, Button, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	rememberedViewsRedirect,
+	scopedView,
+} from "@helpers/viewState/viewRoute";
+import {
+	referenceValueAllMappingViews,
+	SECOND_HOST_LMS_NAMESPACE,
+} from "@constants/dataGrid/gridViews";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -26,12 +35,41 @@ import MappingsGrid from "@components/MappingsGrid/MappingsGrid";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/referenceValueMappings/all",
 )({
+	validateSearch: (search: Record<string, unknown>) =>
+		validateGridSearch(search, [SECOND_HOST_LMS_NAMESPACE]),
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewsRedirect(
+			[
+				scopedView(referenceValueAllMappingViews.hostLms, params.libraryId),
+				scopedView(
+					referenceValueAllMappingViews.secondHostLms,
+					params.libraryId,
+				),
+			],
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/libraries/$libraryId/referenceValueMappings/all",
+				params,
+				...restore,
+			});
+	},
 	component: AllMappings,
 });
 
 function AllMappings() {
 	const { t } = useTranslation();
 	const { libraryId } = Route.useParams();
+	const hostLmsView = useMemo(
+		() => scopedView(referenceValueAllMappingViews.hostLms, libraryId),
+		[libraryId],
+	);
+	const secondHostLmsView = useMemo(
+		() => scopedView(referenceValueAllMappingViews.secondHostLms, libraryId),
+		[libraryId],
+	);
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
 	const auth = useAuth();
@@ -133,18 +171,13 @@ function AllMappings() {
 						</Button>
 					)}
 					<MappingsGrid
-						gridId={`allMappingsPrimary-${libraryId}`}
+						view={hostLmsView}
 						hostLmsCode={library.agency?.hostLms?.code}
 						baseQuery={allPrimaryQuery}
 						isAnAdmin={isAnAdmin}
 						columns={referenceValueMappingColumnsNoCategoryFilter}
 						getQuery={getMappings}
 						dataKey="referenceValueMappings"
-						hiddenColumns={{
-							fromCategory: false,
-							lastImported: false,
-							toCategory: false,
-						}}
 					/>
 
 					{/* Secondary Host LMS Grid (If exists) */}
@@ -178,18 +211,13 @@ function AllMappings() {
 								</Button>
 							)}
 							<MappingsGrid
-								gridId={`allMappingsLibrary-${libraryId}`}
+								view={secondHostLmsView}
 								hostLmsCode={library?.agency?.hostLms?.code}
 								baseQuery={allSecondaryQuery}
 								isAnAdmin={isAnAdmin}
 								columns={referenceValueMappingColumnsNoCategoryFilter}
 								getQuery={getMappings}
 								dataKey="referenceValueMappings"
-								hiddenColumns={{
-									fromCategory: false,
-									lastImported: false,
-									toCategory: false,
-								}}
 							/>
 						</>
 					)}

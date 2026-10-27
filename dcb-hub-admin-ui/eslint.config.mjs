@@ -66,7 +66,8 @@ export default [
 			"*.config.ts",
 			// Tool config, the same category as the *.config.* entries above - it just
 			// does not carry the word "config" in its name. CommonJS on purpose
-			// (@lhci/cli requires it), which this ESM/browser ruleset would reject.
+			// (scripts/lighthouse.mjs require()s it), which this ESM/browser ruleset would
+			// reject.
 			"lighthouserc.js",
 		],
 	},
@@ -127,6 +128,7 @@ export default [
 				console: "readonly",
 				Buffer: "readonly",
 				URL: "readonly",
+				fetch: "readonly",
 			},
 		},
 		rules: {

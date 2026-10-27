@@ -1,10 +1,24 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Button, Tooltip, Stack } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { useGridView } from "@hooks/useGridView";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { numericRangeMappingsView } from "@constants/dataGrid/gridViews";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
+import {
+	numericRangeMappingsQuery,
+	NUMERIC_RANGE_MAPPINGS_BASE_QUERY,
+} from "@/queryOptions/gridQueries";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import DataGrid from "@components/DataGrid/DataGrid";
@@ -12,19 +26,42 @@ import { MAPPING_IMPORT_COLUMNS } from "@constants/mappingImportContract";
 import Import from "@components/Import/Import";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
-import { useMappingGridState } from "@/hooks/useMappingGridState";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { standardNumRangeMappingColumns } from "@columns/numericRangeMappingColumns";
-import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
-import type { LoadNumericRangeMappingsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/mappings/allNumericRange/",
 )({
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			numericRangeMappingsView,
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/mappings/allNumericRange", ...restore });
+	},
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
+		// Skip prefetching for unauthenticated visitors - see hostlmss/index.tsx.
+		if (!auth?.isAuthenticated) return;
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(
+			numericRangeMappingsView,
+			deps,
+			location.state,
+		);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			numericRangeMappingsQuery(createGraphQLClient(cfg, auth), models),
+		);
+	},
 	component: NumericRangeMappingsRoute,
 });
 
@@ -38,46 +75,15 @@ function NumericRangeMappingsRoute() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const gridId = "numericRangeMappings";
+	const gridId = numericRangeMappingsView.id;
 
-	const {
-		paginationModel,
-		handlePaginationChange,
-		filterModel,
-		handleFilterChange,
-		sortModel,
-		handleSortChange,
-		columnVisibilityModel,
-		handleColumnVisibilityChange,
-		rowModesModel,
-		setRowModesModel,
-		showImport,
-		setImport,
-	} = useMappingGridState(gridId, { lastImported: false });
+	const search = useSearch({
+		from: "/__authenticated/mappings/allNumericRange/",
+	});
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	const [showImport, setImport] = useState(false);
 
 	const mappingMutation = useEntityMutation("numericRangeMapping");
-
-	const {
-		data: gridData,
-		isLoading: gridLoading,
-		isFetching,
-	} = useQuery({
-		queryKey: [gridId, paginationModel, sortModel, filterModel],
-		queryFn: async () => {
-			return gqlClient.request<any, LoadNumericRangeMappingsQueryVariables>(
-				getNumericRangeMappings,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel,
-					paginationModel,
-					baseQuery: "(domain: * AND NOT deleted:true)",
-					defaultOrder: "lastImported",
-					defaultPageSize: 20,
-				}),
-			);
-		},
-		placeholderData: (previousData) => previousData,
-	});
 
 	const actionsColumn: GridColDef[] = useMemo(
 		() => [
@@ -99,6 +105,25 @@ function NumericRangeMappingsRoute() {
 	const columns = useMemo(
 		() => [...standardNumRangeMappingColumns, ...actionsColumn],
 		[actionsColumn],
+	);
+
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(numericRangeMappingsView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading: gridLoading,
+		isFetching,
+	} = useQuery(
+		numericRangeMappingsQuery(gqlClient, {
+			paginationModel: view.paginationModel,
+			sortModel: view.sortModel,
+			filterModel: view.appliedFilterModel,
+		}),
 	);
 
 	return (
@@ -124,21 +149,23 @@ function NumericRangeMappingsRoute() {
 				identifier={gridId}
 				type={"numericRangeMappings"}
 				columns={columns}
+				viewNotice={<GridViewNotice view={view} />}
 				rows={gridData?.numericRangeMappings?.content ?? []}
 				rowCount={gridData?.numericRangeMappings?.totalSize ?? 0}
 				loading={gridLoading || (isFetching && !!gridData)}
 				paginationMode="server"
 				pagination
-				paginationModel={paginationModel}
-				onPaginationModelChange={handlePaginationChange}
+				paginationModel={view.paginationModel}
+				onPaginationModelChange={view.onPaginationModelChange}
 				sortingMode="server"
-				sortModel={sortModel}
-				onSortModelChange={handleSortChange}
+				sortModel={view.sortModel}
+				onSortModelChange={view.onSortModelChange}
 				filterMode="server"
-				filterModel={filterModel}
-				onFilterModelChange={handleFilterChange}
-				columnVisibilityModel={columnVisibilityModel}
-				onColumnVisibilityModelChange={handleColumnVisibilityChange}
+				filterModel={view.filterModel}
+				onFilterModelChange={view.onFilterModelChange}
+				columnVisibilityModel={view.columnVisibilityModel}
+				onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+				columnLayout={view.columnLayout}
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
@@ -148,7 +175,7 @@ function NumericRangeMappingsRoute() {
 					query: getNumericRangeMappings,
 					coreType: "numericRangeMappings",
 					roundTrip: MAPPING_IMPORT_COLUMNS.numericRangeMappings,
-					baseQuery: "(domain: * AND NOT deleted:true)",
+					baseQuery: NUMERIC_RANGE_MAPPINGS_BASE_QUERY,
 					wizard: true,
 				}}
 				disableAggregation

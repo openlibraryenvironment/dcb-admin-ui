@@ -1,0 +1,124 @@
+{
+	"QUA-01": {
+		"category": "Quality",
+		"requirement": "The code compiles, follows the project's coding rules with no warnings, and passes its unit tests.",
+		"checks": ["verify_quality"],
+		"standards": {
+			"sbd": ["10"]
+		}
+	},
+	"QUA-02": {
+		"category": "Quality",
+		"requirement": "The work consortium staff do in the application works in a real browser, with the service it talks to simulated.",
+		"checks": ["verify_e2e"]
+	},
+	"QUA-03": {
+		"category": "Quality",
+		"requirement": "The application works from the web address it is deployed under, and when the hosting platform's loader starts it.",
+		"checks": ["verify_base_path"]
+	},
+	"ACC-01": {
+		"category": "Accessibility",
+		"requirement": "The application meets WCAG 2.2 level AA.",
+		"checks": ["verify_e2e"],
+		"accessibility": "wcag22aa",
+		"standards": {
+			"en301549": ["9"]
+		}
+	},
+	"PERF-01": {
+		"category": "Performance",
+		"requirement": "What every page downloads before it can be used stays within a fixed budget.",
+		"checks": ["verify_lighthouse"]
+	},
+	"PERF-02": {
+		"category": "Performance",
+		"requirement": "Pages do not move about as they load.",
+		"checks": ["verify_lighthouse"],
+		"e2e": true
+	},
+	"SEC-01": {
+		"category": "Security",
+		"requirement": "No password, key or token is committed to the code or anywhere in its history.",
+		"checks": ["verify_secrets"],
+		"standards": {
+			"sbd": ["9", "10"]
+		}
+	},
+	"SEC-02": {
+		"category": "Security",
+		"requirement": "No library the application ships with has a known security flaw of high severity or worse.",
+		"checks": ["verify_supply_chain"],
+		"standards": {
+			"sbd": ["2", "9"]
+		}
+	},
+	"SEC-03": {
+		"category": "Security",
+		"requirement": "The application runs under a strict Content Security Policy, and the policy blocks nothing the application needs.",
+		"checks": ["verify_e2e", "verify_container"],
+		"e2e": true,
+		"standards": {
+			"sbd": ["7", "8"]
+		}
+	},
+	"SEC-04": {
+		"category": "Security",
+		"requirement": "The deployed container image sends its security headers from every address it serves.",
+		"checks": ["verify_container"],
+		"unit": [
+			{
+				"file": "src/helpers/nginxConfig.test.ts",
+				"describe": "the container's security headers"
+			}
+		],
+		"standards": {
+			"sbd": ["8"]
+		}
+	},
+	"SEC-05": {
+		"category": "Security",
+		"requirement": "Every library the application ships with is under a licence we have approved for it.",
+		"checks": ["verify_supply_chain"],
+		"standards": {
+			"sbd": ["2"]
+		}
+	},
+	"PRIV-01": {
+		"category": "Privacy",
+		"requirement": "A patron's barcode, a request's token and what the service sent back are never written to the browser's console.",
+		"e2e": true,
+		"unit": [
+			{
+				"file": "src/helpers/safeErrorLog.test.ts",
+				"describe": "requestErrorSummary"
+			},
+			{
+				"file": "src/helpers/safeErrorLog.test.ts",
+				"describe": "errorForLog"
+			}
+		],
+		"standards": {
+			"sbd": ["8"]
+		}
+	},
+	"PRIV-02": {
+		"category": "Privacy",
+		"requirement": "No patron barcode is kept in the browser's local storage, session storage or cookies.",
+		"e2e": true,
+		"standards": {
+			"sbd": ["8"]
+		}
+	},
+	"OPS-01": {
+		"category": "Operations",
+		"requirement": "The deployed container image compresses what it sends and caches each file for the right length of time.",
+		"checks": ["verify_container"],
+		"unit": [
+			{
+				"file": "src/helpers/nginxConfig.test.ts",
+				"describe": "the container's compression"
+			}
+		]
+	}
+}

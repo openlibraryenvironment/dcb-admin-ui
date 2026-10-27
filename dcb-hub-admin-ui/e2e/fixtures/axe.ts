@@ -1,8 +1,11 @@
 import { expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import type { AxeResults, Result } from "axe-core";
+import type { AxeRuleOutcome } from "../../scripts/report-facts";
+import { test } from "./test";
 
 /**
- * One axe scan, used by every accessibility gate — W-1.
+ * One axe scan, used by every accessibility gate.
  *
  * WCAG 2.2 AA is the floor, so the tag list is the full A + AA ladder and the assertion is
  * ZERO violations. Failures are reported as rule id, impact and the node it was found on,
@@ -144,6 +147,7 @@ export async function scanForViolations(page: Page) {
 		.withTags(WCAG_TAGS)
 		.exclude("[data-e2e-licence-watermark]")
 		.analyze();
+	await attachRuleOutcomes(results);
 
 	expect(
 		results.violations.map((violation) => ({
@@ -175,6 +179,7 @@ export async function scanForLandmarks(page: Page) {
 		.withRules(LANDMARK_RULES)
 		.exclude("[data-e2e-licence-watermark]")
 		.analyze();
+	await attachRuleOutcomes(results);
 
 	expect(
 		results.violations.map((violation) => ({
@@ -206,4 +211,36 @@ export async function expectPaintedScheme(
 
 	if (scheme === "dark") expect(luminance).toBeLessThan(0.5);
 	else expect(luminance).toBeGreaterThan(0.5);
+}
+
+/** The WCAG success criteria an axe rule tests, from its tags: "wcag1410" is 1.4.10. */
+export function criteriaOf(result: Pick<Result, "tags">): string[] {
+	return result.tags.flatMap((tag) => {
+		const match = /^wcag(\d)(\d)(\d+)$/.exec(tag);
+		return match ? [`${match[1]}.${match[2]}.${match[3]}`] : [];
+	});
+}
+
+/**
+ * Every rule's outcome, for the release report. Before the assertion, so a failing scan is
+ * reported too. Rules axe could not decide are left out: this gate asserts on violations
+ * alone, so an undecided rule is evidence of nothing either way.
+ */
+export async function attachRuleOutcomes(
+	results: Pick<AxeResults, "passes" | "violations">,
+): Promise<void> {
+	const outcome = (rules: Result[], label: AxeRuleOutcome["outcome"]) =>
+		rules.map((rule) => ({
+			id: rule.id,
+			help: rule.help,
+			outcome: label,
+			criteria: criteriaOf(rule),
+		}));
+	await test.info().attach("axe", {
+		body: JSON.stringify([
+			...outcome(results.passes, "passed"),
+			...outcome(results.violations, "failed"),
+		]),
+		contentType: "application/json",
+	});
 }

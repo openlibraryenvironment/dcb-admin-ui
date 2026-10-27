@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Box, Paper, Skeleton, Stack, Typography } from "@mui/material";
 
 import { getILS } from "@helpers/getILS";
+import { timeToFirstRequest } from "@helpers/timeToFirstRequest";
 
 /**
  * The headline counts for a consortium: how many libraries, and on which ILS.
@@ -87,6 +88,7 @@ export default function OnboardingStats({
 			total: libraries.length,
 			complete,
 			outstanding: libraries.length - complete,
+			firstRequest: timeToFirstRequest(libraries),
 			// Only ILSs that are actually present: a permanent "Koha: 0" tile is
 			// noise on a consortium that has never had one.
 			ils: ILS_ORDER.filter((name) => byIls.has(name)).map((name) => ({
@@ -140,6 +142,19 @@ export default function OnboardingStats({
 								count: stats.outstanding,
 							})}
 						/>
+						{stats.firstRequest.medianDays !== null && (
+							<StatTile
+								value={stats.firstRequest.medianDays}
+								label={t("consortium.onboarding_stats_first_request")}
+								caption={t(
+									"consortium.onboarding_stats_first_request_caption",
+									{
+										count: stats.firstRequest.measured,
+										waiting: stats.firstRequest.waiting,
+									},
+								)}
+							/>
+						)}
 						{stats.ils.map((entry) => (
 							<StatTile
 								key={entry.name}

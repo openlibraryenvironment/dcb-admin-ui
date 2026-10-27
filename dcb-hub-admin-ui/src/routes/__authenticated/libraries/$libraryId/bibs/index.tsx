@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import dayjs from "dayjs";
 import { Grid, Typography, useTheme } from "@mui/material";
@@ -15,7 +15,7 @@ import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutat
 import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
-import { useGridState } from "@hooks/useGridState";
+import { useGridView } from "@hooks/useGridView";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useCustomColumns } from "@hooks/useCustomColumns";
@@ -26,12 +26,29 @@ import { getBibs } from "@queries/getBibs";
 import { standardFilters } from "@filters/standardFilters";
 import { equalsOnly } from "@filters/equalsOnly";
 import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
-import { libraryBibColumnVisibility } from "@columns/columnVisibility/libraryBibColumnVisibility";
+import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	rememberedViewRedirect,
+	scopedView,
+} from "@helpers/viewState/viewRoute";
+import { libraryBibsView } from "@constants/dataGrid/gridViews";
 import type { LoadBibsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/bibs/",
 )({
+	validateSearch: validateGridSearch,
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewRedirect(
+			scopedView(libraryBibsView, params.libraryId),
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({ to: "/libraries/$libraryId/bibs", params, ...restore });
+	},
 	component: LibraryBibs,
 });
 
@@ -60,22 +77,15 @@ function LibraryBibs() {
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const libraryMutation = useEntityMutation("library");
-	// Scope the persisted grid state (pagination / filter / column visibility) to
-	// THIS library. With a static id the sessionStorage-backed store leaked a
-	// page number or filter from one library into the next, so a library with
-	// records rendered empty until the user cleared storage. See useDataGridStore.
-	const gridId = `libraryBibs-${libraryId}`;
-
-	const {
-		paginationModel,
-		filterModel,
-		columnVisibilityModel,
-		onPaginationModelChange: handlePaginationChange,
-		onFilterModelChange: handleFilterChange,
-		onColumnVisibilityModelChange: handleColumnVisibilityChange,
-	} = useGridState(gridId, {
-		pagination: { page: 0, pageSize: 20 },
-		columnVisibility: libraryBibColumnVisibility,
+	// THIS library's view: with one id for every library, a page or filter carried
+	// from one library into the next, and a library with records rendered empty
+	const gridView = useMemo(
+		() => scopedView(libraryBibsView, libraryId),
+		[libraryId],
+	);
+	const gridId = gridView.id;
+	const search = useSearch({
+		from: "/__authenticated/libraries/$libraryId/bibs/",
 	});
 
 	const {
@@ -97,29 +107,6 @@ function LibraryBibs() {
 	const presetQueryVariables = hostLmsIds
 		.map((id) => `sourceSystemId: ${id}`)
 		.join(" OR ");
-
-	const {
-		data: gridData,
-		isLoading: isGridLoading,
-		isFetching,
-	} = useQuery({
-		queryKey: [gridId, presetQueryVariables, paginationModel, filterModel],
-		queryFn: async () => {
-			return gqlClient.request<any, LoadBibsQueryVariables>(
-				getBibs,
-				buildServerGridQueryVars({
-					filterModel,
-					sortModel: BIB_SORT_MODEL,
-					paginationModel,
-					baseQuery: presetQueryVariables,
-					defaultOrder: "sourceRecordId",
-					defaultPageSize: 20,
-				}),
-			);
-		},
-		enabled: hostLmsIds.length > 0,
-		placeholderData: (previousData) => previousData,
-	});
 
 	const columns: GridColDef[] = useMemo(
 		() => [
@@ -190,6 +177,40 @@ function LibraryBibs() {
 		],
 		[customColumns, t],
 	);
+	// What the filter panel offers, which DataGrid narrows to what the server can answer
+	const viewColumns = useMemo(
+		() => constrainToServerOperators(columns),
+		[columns],
+	);
+	const view = useGridView(gridView, viewColumns, search);
+
+	const {
+		data: gridData,
+		isLoading: isGridLoading,
+		isFetching,
+	} = useQuery({
+		queryKey: [
+			gridId,
+			presetQueryVariables,
+			view.paginationModel,
+			view.appliedFilterModel,
+		],
+		queryFn: async () => {
+			return gqlClient.request<any, LoadBibsQueryVariables>(
+				getBibs,
+				buildServerGridQueryVars({
+					filterModel: view.appliedFilterModel,
+					sortModel: BIB_SORT_MODEL,
+					paginationModel: view.paginationModel,
+					baseQuery: presetQueryVariables,
+					defaultOrder: "sourceRecordId",
+					defaultPageSize: 20,
+				}),
+			);
+		},
+		enabled: hostLmsIds.length > 0,
+		placeholderData: (previousData) => previousData,
+	});
 
 	if (isLibraryLoading)
 		return (
@@ -248,21 +269,23 @@ function LibraryBibs() {
 						identifier={gridId}
 						type="bibs"
 						columns={columns}
+						viewNotice={<GridViewNotice view={view} />}
 						rows={gridData?.sourceBibs?.content ?? []}
 						rowCount={gridData?.sourceBibs?.totalSize ?? 0}
 						loading={isGridLoading || isFetching}
 						paginationMode="server"
 						pagination
-						paginationModel={paginationModel}
-						onPaginationModelChange={handlePaginationChange}
+						paginationModel={view.paginationModel}
+						onPaginationModelChange={view.onPaginationModelChange}
 						sortingMode="server"
 						sortModel={BIB_SORT_MODEL} // Stable ref: see note by BIB_SORT_MODEL
 						onSortModelChange={NO_OP} // Disabled intentionally
 						filterMode="server"
-						filterModel={filterModel}
-						onFilterModelChange={handleFilterChange}
-						columnVisibilityModel={columnVisibilityModel}
-						onColumnVisibilityModelChange={handleColumnVisibilityChange}
+						filterModel={view.filterModel}
+						onFilterModelChange={view.onFilterModelChange}
+						columnVisibilityModel={view.columnVisibilityModel}
+						onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
+						columnLayout={view.columnLayout}
 						exportConfig={{
 							query: getBibs,
 							coreType: "sourceBibs",

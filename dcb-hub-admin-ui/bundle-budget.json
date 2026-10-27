@@ -1,17 +1,17 @@
 {
 	"_why": "Gzipped budgets checked by scripts/check-bundle-budget.mjs after a BUNDLE_BUDGET=1 build. What FAILS: what every page loads first (the entry, the app shell it boots and their static imports), and each named chunk outside it. The total of everything emitted is printed and is not a budget: it grew with every feature, including routes nobody had opened, and in its two weeks as a gate it never caught anything the first load or a chunk number did not. Numbers are what they measured when set, plus 2% rounded up. Never raise one to make a build pass: docs/performance-budget.md.",
 	"firstLoad": {
-		"budget": 344800,
-		"_note": "Lowered from 450,600 on 2026-10-22, re-derived from 337995 measured, plus 2%: vite 8.1.3 -> 8.3.5 (rolldown 1.1.4 -> 1.2.15) took the same first load from 441,692 across 140 files to 337995 across 73, and slack that size would admit a new dependency unnoticed. main measured 431,749 on rolldown 1.1.4 the same day; the difference was the support reference sent with every request and shown with every failure, the Host LMS checks, and each route's preload list naming the chunks those added. The translation catalogue is unbounded and not counted here."
+		"budget": 360360,
+		"_note": "Raised from 345,196 to 360,360 on 2026-10-26 by the measured net cost of one dependency upgrade, not re-derived: 344,978 -> 360,142 gzipped (+15,164). React 19.3.1 is +8,832 of it on its own (react-dom's production client 94,758 -> 110,528 gzipped, for View Transitions and Fragment refs), zod 4.4.3 -> 4.6.6 +7,029 (its core grew; the security fix for GHSA-mrhx-c7xc-m3w5 needs 4.6.6, and the route schemas keep zod on every page), MUI 9.5.0 and MUI X 9.16.0 +650, and the patch and tooling releases -1,444. Netted, so the saving is not left as slack, and the 218 of headroom the budget had is kept. Measured on a fresh LF checkout without .env, as CI builds. docs/performance-budget.md, When an upgrade costs every page. Raised from 344,800 to 345,196 on 2026-10-23 by the measured cost of one feature, not re-derived: VITE_INSIGHTS_PAGES, which the sidebar, the tabs and the route guards read on every page, grew the first load from 344,627 to 345,023 gzipped (+396: featureFlags.js +431, other chunks -35). The panel vocabulary that came with it (562) was moved off the first load instead. Measured on an LF checkout, as CI builds, so the 173 of headroom the budget had before is kept. docs/performance-budget.md, When a feature costs every page. Lowered from 450,600 on 2026-10-22, re-derived from 337995 measured, plus 2%: vite 8.1.3 -> 8.3.5 (rolldown 1.1.4 -> 1.2.15) took the same first load from 441,692 across 140 files to 337995 across 73, and slack that size would admit a new dependency unnoticed. main measured 431,749 on rolldown 1.1.4 the same day; the difference was the support reference sent with every request and shown with every failure, the Host LMS checks, and each route's preload list naming the chunks those added. The translation catalogue is unbounded and not counted here."
 	},
 	"nameChunksAboveBytes": 15000,
 	"chunks": {
 		"exceljs.min.js": 281900,
-		"DataGrid.js": 218100,
+		"DataGrid.js": 221688,
 		"BarChartPro.js": 110000,
-		"DateLocalization.js": 68400,
+		"DateLocalization.js": 69164,
 		"lib.js": 35400,
-		"useInsightsView.js": 29100,
+		"useInsightsView.js": 29901,
 		"rasterizeHTML.js": 27400
 	},
 	"unbounded": {
@@ -19,8 +19,10 @@
 	},
 	"_notes": {
 		"exceljs.min.js": "MUI X Premium's Excel export, a direct dependency of @mui/x-data-grid-premium, and 17% of everything this application ships. It was dead weight until the export menu began offering Excel (docs/mappings-export.md); it leaves entirely on DataGridPro, which is worth measuring against what Premium features the grids actually use. Both sibling repos record the same chunk and the same question.",
-		"DataGrid.js": "The Premium grid itself, on fifty mount sites.",
+		"DataGrid.js": "The Premium grid itself, on fifty mount sites. Raised from 218100 to 221688 on 2026-10-26 by the measured cost of MUI X 9.15.0 -> 9.16.0, not re-derived: 216121 -> 219709 (+3588). 9.16 fixes a memory leak on row updates, the grid popovers' ARIA roles and keyboard focus after a click on empty row space; MUI X moves in lockstep with dcb-admin-for-libraries. Only routes that mount a grid load it, so the 1979 of headroom it had is kept.",
+		"DateLocalization.js": "The date pickers' localisation. Raised from 68400 to 69164 on 2026-10-26 by the measured cost of MUI 9.4.0 -> 9.5.0 (+343) and MUI X 9.15.0 -> 9.16.0 (+421) together: 68353 -> 69117 (+764), not re-derived, so the 47 of headroom it had is kept.",
 		"BarChartPro.js": "x-charts-pro, reached only from Insights. Raised from 107500 to 110000 on 2026-10-08, re-derived from 107753 measured: +253 gzipped, 0.24%, for MUI X 9.13.0 -> 9.15.0. Two minor releases of a dependency this repository does not control and cannot bump alone - MUI X is pinned in lockstep with dcb-admin-for-libraries - so this is upstream drift rather than anything the application added. The previous number was measured+2% and two minors ate it. Still a candidate for React.lazy on the chart panels, which would move the chunk off the Insights critical path rather than shrink it.",
+		"useInsightsView.js": "Raised from 29100 to 29901 on 2026-10-23 by the measured cost of VITE_INSIGHTS_PANELS, not re-derived: the panel vocabulary and its parser, moved here off the first load, and the dashboard reading it took the chunk from 28887 to 29688 (+801). Only Insights pages load it, so the 213 of headroom it had is kept rather than spent.",
 		"rasterizeHTML.js": "Pulled in by the grid's print export. Not obviously load-bearing - worth checking whether print is reachable at all."
 	}
 }

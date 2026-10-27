@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { errorForLog, requestErrorSummary } from "@helpers/safeErrorLog";
+import { GraphQLError } from "graphql";
+import { ClientError } from "graphql-request";
+import {
+	errorForDisplay,
+	errorForLog,
+	requestErrorSummary,
+} from "@helpers/safeErrorLog";
 
 /**
  * The patron barcode must not survive into the console - W-5.
@@ -110,5 +116,30 @@ describe("errorForLog", () => {
 
 	it("names anything else that was thrown", () => {
 		expect(errorForLog("plain")).toBe("plain");
+	});
+});
+
+describe("errorForDisplay", () => {
+	it("keeps a GraphQL request's variables off the page", () => {
+		const clientError = new ClientError(
+			{
+				status: 200,
+				headers: new Headers(),
+				body: "",
+				errors: [new GraphQLError("Patron not found")],
+			},
+			{ query: "query X", variables: { barcode: "29551000123456" } },
+		);
+		expect(clientError.message).toContain("29551000123456");
+		expect(errorForDisplay(clientError)).not.toContain("29551000123456");
+	});
+
+	it("shows any other error's message, without its stack", () => {
+		const crash = new TypeError("cannot read properties of undefined");
+		expect(errorForDisplay(crash)).toBe("cannot read properties of undefined");
+	});
+
+	it("names anything else that was thrown", () => {
+		expect(errorForDisplay("plain")).toBe("plain");
 	});
 });

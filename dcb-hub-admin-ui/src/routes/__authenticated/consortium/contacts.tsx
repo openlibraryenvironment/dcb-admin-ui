@@ -4,7 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Button, Stack } from "@mui/material";
-import { GridColDef } from "@mui/x-data-grid-premium";
+import {
+	GridColDef,
+	type GridPaginationModel,
+	type GridRowModesModel,
+} from "@mui/x-data-grid-premium";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import ConsortiumTabs from "@components/ConsortiumTabs/ConsortiumTabs";
@@ -14,7 +18,6 @@ import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutat
 import NewContact from "@forms/NewContact/NewContact";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { useGridState } from "@hooks/useGridState";
 import { useEntityMutation } from "@hooks/useEntityMutation";
 import { getConsortiumContacts } from "@queries/getConsortiumContacts";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
@@ -37,17 +40,11 @@ function Contacts() {
 	const [showNewContact, setShowNewContact] = useState(false);
 	const contactMutation = useEntityMutation("consortiumContact");
 
-	// The last grid in the app still holding row modes in a bare useState. That is why
-	// its paginationModel was an inline literal with no change handler: page 2 was
-	// unreachable, so a consortium with more than twenty contacts could not see them.
-	const {
-		paginationModel,
-		rowModesModel,
-		setRowModesModel,
-		onPaginationModelChange: handlePaginationChange,
-	} = useGridState("consortiumContacts", {
-		pagination: { page: 0, pageSize: 20 },
-	});
+	// No toolbar, so nothing to share: the page lives here, not in the URL. It needs a
+	// change handler - an inline paginationModel without one left page 2 unreachable.
+	const [paginationModel, handlePaginationChange] =
+		useState<GridPaginationModel>({ page: 0, pageSize: 20 });
+	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
 	const { data, isLoading, isFetching } = useQuery({
 		queryKey: ["LoadConsortiumContacts"],

@@ -334,6 +334,9 @@
 		"onboarding_stats_outstanding_other": "{{count}} still outstanding",
 		"onboarding_stats_ils_caption": "libraries in this consortium.",
 		"onboarding_stats_unknown_ils": "Other or unknown",
+		"onboarding_stats_first_request": "Median days to first request",
+		"onboarding_stats_first_request_caption_one": "From the library being created, across {{count}} library. {{waiting}} not yet used.",
+		"onboarding_stats_first_request_caption_other": "From the library being created, across {{count}} libraries. {{waiting}} not yet used.",
 		"new": {
 			"title": "Create a consortium",
 			"required_title": "No consortium has been set up yet",
@@ -779,7 +782,7 @@
 			"alma_url_description": "The regional Ex Libris API gateway your Alma instance is served from, e.g. https://api-na.hosted.exlibrisgroup.com. Your region is listed under “Calling Alma APIs”.",
 			"alma_base_url": "Alma institution URL",
 			"alma_base_url_description": "Your institution's own Alma domain, with no path, e.g. https://example.alma.exlibrisgroup.com. This is the host DCB harvests records from, not the API gateway.",
-			"alma_apikey_description": "An Alma API key with read and write permissions for Users, Requests, Bibs, Holdings, Items and Configuration.",
+			"alma_apikey_description": "An Alma API key with read and write access to Users and Bibs, and read-only access to Configuration. Holdings, items and requests are part of Bibs and Users.",
 			"alma_api_docs_link": "See the Ex Libris Alma API documentation.",
 			"alma_item_docs_link": "See the Ex Libris item schema documentation.",
 			"alma_connection_group": "Connecting to Alma",
@@ -798,8 +801,8 @@
 			"alma_request_cancellation_reason_description": "A code from your RequestCancellationReasons code table, sent whenever DCB cancels a request. It is what your staff see in the request's history.",
 			"alma_virtual_item_library_code_description": "The code of the Alma library DCB creates virtual items at. Alma cannot report a patron's home location reliably, so this has to be agreed with your Alma staff.",
 			"alma_virtual_item_location_code_description": "The code of the location within that library where virtual items are created. It must exist: DCB reads it from Alma each time it creates a virtual item.",
-			"alma_default_circ_desk_code_description": "The code of the circulation desk OpenRS DCB checks items out at.",
-			"alma_pickup_circ_desk_description": "The circulation desk used when a patron collects an item, if it differs from the default.",
+			"alma_default_circ_desk_code_description": "The code of the circulation desk OpenRS DCB scans items in at. It must exist in each library DCB acts in.",
+			"alma_pickup_circ_desk_description": "The code of the circulation desk OpenRS DCB checks items out at, to a visiting patron or to one of your patrons collecting at another member. Alma refuses a checkout at a desk that cannot loan items from the item's library.",
 			"alma_item_policy_description": "The Alma item policy applied to the virtual items DCB creates. Codes come from the ItemPolicy code table.",
 			"alma_user_identifier_description": "The Alma user identifier type DCB tags visiting patrons' accounts with. Leave blank to use INST_ID.",
 			"no_renew_item_policy": "No-renew item policy",
@@ -2771,6 +2774,19 @@
 			"session_warning": "Your session is about to expire"
 		},
 		"data_grid": {
+			"column_menu": {
+				"move_left": "Move left",
+				"move_right": "Move right"
+			},
+			"saved_view": {
+				"restored": "Showing your last view",
+				"reset": "Reset to default",
+				"not_in_link": "Some filters are not included in a copied link",
+				"copy_link": "Copy link to this view",
+				"link_copied": "Link to this view copied",
+				"link_copied_private": "Link copied. It leaves out patron barcode and requester note filters, and search text",
+				"link_failed": "The link could not be copied. Copy the address from your browser's address bar instead"
+			},
 			"actions": "Actions",
 			"cancel": "Cancel",
 			"close": "Close",
@@ -2892,7 +2908,14 @@
 			"results_announcement_one": "{{count}} result",
 			"results_announcement_other": "{{count}} results",
 			"results_loading": "Loading results",
-			"search_by_audit": "Search by audit"
+			"search_by_audit": "Search by audit",
+			"aggregation": {
+				"sum": "Total",
+				"avg": "Average",
+				"min": "Lowest",
+				"max": "Highest",
+				"size": "Count"
+			}
 		},
 		"error": {
 			"401": {
@@ -3147,9 +3170,9 @@
 			"subtitle_one": "Your consortium exists and has 1 library.",
 			"subtitle_other": "Your consortium exists and has {{count}} libraries.",
 			"revisit": "Go to this step",
-			"revisit_named": "Go to the {{label}} step",
+			"revisit_named": "Go to this step: {{label}}",
 			"change": "Change this",
-			"change_named": "Change the {{label}} step",
+			"change_named": "Change this: {{label}}",
 			"revisit_hint": "Anything here can be changed - open any step to go back to it.",
 			"outstanding": "You passed over: {{steps}}. Each one is still there when you want it.",
 			"next_steps": "Adding a library is the start of configuring it. The Onboarding page shows what each library still needs - its mappings, its pickup locations, and whether its records have been ingested.",

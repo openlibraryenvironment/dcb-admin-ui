@@ -24,10 +24,16 @@ const repoFile = (relative: string) =>
 	readFileSync(path.resolve(process.cwd(), relative), "utf8");
 
 const declaredFlags = (): string[] => {
-	const source = repoFile("src/helpers/featureFlags.ts");
-	const names = [...source.matchAll(/readFlag\(\s*"([A-Z0-9_]+)"\s*\)/g)].map(
-		(m) => m[1],
-	);
+	// insightsPanelFlags.ts reads VITE_INSIGHTS_PANELS, outside the first load
+	const source = [
+		"src/helpers/featureFlags.ts",
+		"src/helpers/insightsPanelFlags.ts",
+	]
+		.map(repoFile)
+		.join("\n");
+	const names = [
+		...source.matchAll(/read(?:Flag|Setting|Selection)\(\s*"([A-Z0-9_]+)"/g),
+	].map((m) => m[1]);
 
 	// Guard the guard: a refactor that renames readFlag would otherwise make this
 	// whole suite vacuously pass.

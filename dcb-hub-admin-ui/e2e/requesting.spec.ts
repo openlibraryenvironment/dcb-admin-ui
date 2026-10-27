@@ -1,5 +1,6 @@
 import { type Page } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
+import { proves } from "./fixtures/coverage";
 
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
@@ -187,70 +188,125 @@ test("a supplier that cannot supply shows its own message with the remedy", asyn
  * account can be in.
  */
 
-test("a failed lookup writes no patron barcode to the console", async ({
-	page,
-}) => {
-	/*
-	 * Captured IN THE PAGE, by wrapping console.error before the bundle loads.
-	 *
-	 * Two things defeat the obvious approaches. `message.text()` renders an object
-	 * argument as `JSHandle@error`, so a text assertion passes while the barcode sits
-	 * inside it - which is the exact shape of this defect. And `arg.jsonValue()` on an
-	 * Error returns nothing useful, because Error's own properties are not enumerable;
-	 * resolving it is also asynchronous, so the assertion can run first. Verified both:
-	 * each version passed against a deliberately leaking console.error.
-	 *
-	 * Serializing in the page sees what was actually passed. axios defines
-	 * AxiosError.prototype.toJSON, and the `config` it returns carries `data` - the
-	 * request body, which is where patronPrinciple lives.
-	 */
-	await page.addInitScript(() => {
-		(window as unknown as { __logged: string[] }).__logged = [];
-		const original = console.error;
-		console.error = (...args: unknown[]) => {
-			for (const arg of args) {
-				let rendered: string;
-				try {
-					rendered =
-						typeof arg === "string"
-							? arg
-							: (JSON.stringify(arg) ?? String(arg));
-				} catch {
-					rendered = String(arg);
+test(
+	"a failed lookup writes no patron barcode to the console",
+	proves(
+		"A failed patron lookup writes no patron barcode to the browser's console.",
+		["PRIV-01"],
+	),
+	async ({ page }) => {
+		/*
+		 * Captured in the page, by wrapping console.error before the bundle loads.
+		 * `message.text()` renders an Error as `JSHandle@error` and `jsonValue()` drops its
+		 * non-enumerable properties: both passed against a deliberately leaking console.error.
+		 * AxiosError's toJSON returns `config.data`, the request body holding patronPrinciple.
+		 */
+		await page.addInitScript(() => {
+			(window as unknown as { __logged: string[] }).__logged = [];
+			const original = console.error;
+			console.error = (...args: unknown[]) => {
+				for (const arg of args) {
+					let rendered: string;
+					try {
+						rendered =
+							typeof arg === "string"
+								? arg
+								: (JSON.stringify(arg) ?? String(arg));
+					} catch {
+						rendered = String(arg);
+					}
+					(window as unknown as { __logged: string[] }).__logged.push(rendered);
 				}
-				(window as unknown as { __logged: string[] }).__logged.push(rendered);
-			}
-			original(...args);
-		};
-	});
+				original(...args);
+			};
+		});
 
-	await arrive(page);
-	await mockPatronLookup(page, "error");
-	await openRequestingModal(page);
-	await continueToStaffRequest(page);
-	await fillPatronStep(page);
-	await page.getByRole("button", { name: "Validate" }).click();
+		await arrive(page);
+		await mockPatronLookup(page, "error");
+		await openRequestingModal(page);
+		await continueToStaffRequest(page);
+		await fillPatronStep(page);
+		await page.getByRole("button", { name: "Validate" }).click();
 
-	// The form must still tell the user, so this is not passing because nothing happened.
-	await expect(
-		page.getByText(/We were unable to validate this patron/),
-	).toBeVisible();
+		// The form must still tell the user, so this is not passing because nothing happened.
+		await expect(
+			page.getByText(/We were unable to validate this patron/),
+		).toBeVisible();
 
-	const logged = await page.evaluate(
-		() => (window as unknown as { __logged: string[] }).__logged,
-	);
+		const logged = await page.evaluate(
+			() => (window as unknown as { __logged: string[] }).__logged,
+		);
 
-	// It logged SOMETHING diagnosable first, so the assertion below is not vacuous.
-	expect(
-		logged.some((line) => line.includes("Patron lookup failed")),
-		"nothing was logged, so this test cannot prove the redaction",
-	).toBe(true);
+		// It logged SOMETHING diagnosable first, so the assertion below is not vacuous.
+		expect(
+			logged.some((line) => line.includes("Patron lookup failed")),
+			"nothing was logged, so this test cannot prove the redaction",
+		).toBe(true);
 
-	const leaked = logged.filter(
-		(line) =>
-			line.includes(PATRON_BARCODE) ||
-			line.includes("patronPrinciple") ||
-			line.includes("Bearer "),
-	);
-	expect(leaked, "the console carried an identifier or a token").toEqual([]);
-});
+		const leaked = logged.filter(
+			(line) =>
+				line.includes(PATRON_BARCODE) ||
+				line.includes("patronPrinciple") ||
+				line.includes("Bearer "),
+		);
+		expect(leaked, "the console carried an identifier or a token").toEqual([]);
+	},
+);
+
+test(
+	"a validated patron leaves no barcode in browser storage, and what is stored is listed",
+	proves(
+		"After a patron is validated, no patron barcode is kept in the browser's local storage, session storage or cookies.",
+		["PRIV-02"],
+	),
+	async ({ page }) => {
+		await arrive(page);
+		await mockPatronLookup(page, "valid");
+		await openRequestingModal(page);
+		await continueToStaffRequest(page);
+		await fillPatronStep(page);
+		await page.getByRole("button", { name: "Validate" }).click();
+		await expect(
+			page.getByText(
+				`The patron ${PATRON_BARCODE} has been successfully validated for Alpha Test Library.`,
+			),
+		).toBeVisible();
+
+		const stored = await page.evaluate(() => {
+			const read = (storage: Storage) =>
+				Array.from({ length: storage.length }, (_, index) => {
+					const key = storage.key(index) ?? "";
+					return { key, value: storage.getItem(key) ?? "" };
+				});
+			return { local: read(localStorage), session: read(sessionStorage) };
+		});
+		const cookies = await page.context().cookies();
+
+		// Names only reach the report: the values hold a session, which nothing should publish.
+		// The fixture's own markers are left out: the application never writes them
+		const named = (entries: { key: string }[]) =>
+			entries
+				.map(({ key }) => key)
+				.filter((key) => !key.startsWith("__e2e"))
+				.sort();
+		await test.info().attach("storage", {
+			body: JSON.stringify({
+				local: named(stored.local),
+				session: named(stored.session),
+				cookies: cookies.map(({ name }) => name).sort(),
+			}),
+			contentType: "application/json",
+		});
+
+		// Something was stored, so the assertion below is not passing over an empty browser
+		expect(stored.local.length + stored.session.length).toBeGreaterThan(0);
+		const holding = [
+			...stored.local,
+			...stored.session,
+			...cookies.map(({ name, value }) => ({ key: name, value })),
+		]
+			.filter(({ key, value }) => `${key}${value}`.includes(PATRON_BARCODE))
+			.map(({ key }) => key);
+		expect(holding, "browser storage kept the patron barcode").toEqual([]);
+	},
+);

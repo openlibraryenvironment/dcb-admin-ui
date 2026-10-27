@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { Stack, Typography } from "@mui/material";
@@ -9,54 +9,54 @@ import OperatingWelcome from "@components/OperatingWelcome/OperatingWelcome";
 import ConsortiumSetupBanner from "@components/Setup/ConsortiumSetupBanner";
 import Error from "@components/Error/Error";
 import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
-import { getLibraries } from "@queries/getLibraries";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	defaultQueryModels,
+	rememberedViewRedirect,
+} from "@helpers/viewState/viewRoute";
+import { welcomeLibrariesView } from "@constants/dataGrid/gridViews";
+import { welcomeLibrariesQuery } from "@/queryOptions/welcomeLibraries";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import i18n from "@/i18n";
-import { MAX_DEFAULT_PAGE_SIZE } from "@constants/pagination";
-import type { LoadLibrariesQueryVariables } from "@generated/graphql";
-
-// Default-state prefetch: mirrors OperatingWelcome's own useGridState defaults
-// (MAX_DEFAULT_PAGE_SIZE, sort fullName ASC, no filter) AND its literal "LoadLibraries"
-// query key, so the cache entry lines up on a fresh render and the welcome
-// grid paints with its rows/count already populated instead of flashing.
-const DEFAULT_PAGINATION_MODEL = { page: 0, pageSize: MAX_DEFAULT_PAGE_SIZE };
-const DEFAULT_SORT_MODEL = [{ field: "fullName", sort: "asc" }];
-const DEFAULT_FILTER_MODEL = { items: [] };
+import { errorForDisplay } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute("/__authenticated/")({
-	// 1. THE LOADER: Pre-fetch the welcome grid's first page before render.
-	loader: ({ context: { queryClient, cfg, auth } }) => {
+	// The welcome grid's view, which is this page's main parameters
+	validateSearch: validateGridSearch,
+	loaderDeps: ({ search }) => search,
+	beforeLoad: ({ search, location }) => {
+		const restore = rememberedViewRedirect(
+			welcomeLibrariesView,
+			search,
+			location.state,
+		);
+		if (restore) throw redirect({ to: "/", ...restore });
+	},
+	// Pre-fetch the welcome grid's first page before render
+	loader: ({ context: { queryClient, cfg, auth }, deps, location, cause }) => {
 		// Skip prefetching for unauthenticated visitors - the request would
 		// fail (no token) and its failure would trigger the global network/401
 		// handler in main.tsx before __authenticated.tsx's own auth-gate
 		// redirect to /login ever runs.
 		if (!auth?.isAuthenticated) return;
-		return queryClient.ensureQueryData({
-			queryKey: [
-				"LoadLibraries",
-				DEFAULT_PAGINATION_MODEL,
-				DEFAULT_SORT_MODEL,
-				DEFAULT_FILTER_MODEL,
-			],
-			queryFn: () =>
-				createGraphQLClient(cfg, auth).request<
-					any,
-					LoadLibrariesQueryVariables
-				>(getLibraries, {
-					query: "",
-					pageno: DEFAULT_PAGINATION_MODEL.page,
-					pagesize: DEFAULT_PAGINATION_MODEL.pageSize,
-					order: DEFAULT_SORT_MODEL[0].field,
-					orderBy: "ASC",
-				}),
-		});
+		// The reader paging or sorting: the grid is already fetching it
+		if (cause === "stay") return;
+		const models = defaultQueryModels(
+			welcomeLibrariesView,
+			deps,
+			location.state,
+		);
+		if (!models) return;
+		return queryClient.ensureQueryData(
+			welcomeLibrariesQuery(createGraphQLClient(cfg, auth), models),
+		);
 	},
 
 	errorComponent: ({ error }) => (
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error
 				title={i18n.t("ui.error.unable_to_load_page")}
-				message={error.message}
+				message={errorForDisplay(error)}
 				action={i18n.t("ui.actions.reload")}
 				onAction={() => location.reload()}
 			/>

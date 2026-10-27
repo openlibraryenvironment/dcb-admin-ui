@@ -1,10 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Grid, Typography, Button, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
+import { validateGridSearch } from "@helpers/viewState/gridSearch";
+import {
+	rememberedViewsRedirect,
+	scopedView,
+} from "@helpers/viewState/viewRoute";
+import {
+	referenceValuePatronTypeMappingViews,
+	SECOND_HOST_LMS_NAMESPACE,
+} from "@constants/dataGrid/gridViews";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -28,12 +37,45 @@ import type {} from "@generated/graphql";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/referenceValueMappings/patronType",
 )({
+	validateSearch: (search: Record<string, unknown>) =>
+		validateGridSearch(search, [SECOND_HOST_LMS_NAMESPACE]),
+	beforeLoad: ({ search, location, params }) => {
+		const restore = rememberedViewsRedirect(
+			[
+				scopedView(
+					referenceValuePatronTypeMappingViews.hostLms,
+					params.libraryId,
+				),
+				scopedView(
+					referenceValuePatronTypeMappingViews.secondHostLms,
+					params.libraryId,
+				),
+			],
+			search,
+			location.state,
+		);
+		if (restore)
+			throw redirect({
+				to: "/libraries/$libraryId/referenceValueMappings/patronType",
+				params,
+				...restore,
+			});
+	},
 	component: PatronTypeMappings,
 });
 
 function PatronTypeMappings() {
 	const { t } = useTranslation();
 	const { libraryId } = Route.useParams();
+	const hostLmsView = useMemo(
+		() => scopedView(referenceValuePatronTypeMappingViews.hostLms, libraryId),
+		[libraryId],
+	);
+	const secondHostLmsView = useMemo(
+		() =>
+			scopedView(referenceValuePatronTypeMappingViews.secondHostLms, libraryId),
+		[libraryId],
+	);
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
 	const auth = useAuth();
@@ -135,18 +177,13 @@ function PatronTypeMappings() {
 						</Button>
 					)}
 					<MappingsGrid
-						gridId={`refMappingsPatronTypePrimary-${libraryId}`}
+						view={hostLmsView}
 						hostLmsCode={library?.agency?.hostLms?.code}
 						baseQuery={patronTypePrimaryQuery}
 						isAnAdmin={isAnAdmin}
 						columns={referenceValueMappingColumnsNoCategoryFilter}
 						getQuery={getMappings}
 						dataKey="referenceValueMappings"
-						hiddenColumns={{
-							fromCategory: false,
-							lastImported: false,
-							toCategory: false,
-						}}
 					/>
 					{/* Secondary Host LMS Grid (If exists) */}
 					{library.secondHostLms && (
@@ -179,18 +216,13 @@ function PatronTypeMappings() {
 								</Button>
 							)}
 							<MappingsGrid
-								gridId={`refMappingsPatronTypeSecondary-${libraryId}`}
+								view={secondHostLmsView}
 								hostLmsCode={library.secondHostLms.code}
 								baseQuery={patronTypeSecondaryQuery}
 								isAnAdmin={isAnAdmin}
 								columns={referenceValueMappingColumnsNoCategoryFilter}
 								getQuery={getMappings}
 								dataKey="referenceValueMappings"
-								hiddenColumns={{
-									fromCategory: false,
-									lastImported: false,
-									toCategory: false,
-								}}
 							/>
 						</>
 					)}

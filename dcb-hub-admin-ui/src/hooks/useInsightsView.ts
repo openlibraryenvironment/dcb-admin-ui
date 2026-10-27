@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 
 import {
 	InsightsSearch,
+	insightsSearchToUrl,
 	MAX_PLOT_SERIES,
 	RangePreset,
 	resolveSearch,
@@ -23,7 +24,8 @@ export function useInsightsView(search: InsightsSearch, to: string) {
 		(next: Partial<InsightsSearch>) => {
 			void navigate({
 				to,
-				search: (current: InsightsSearch) => ({ ...current, ...next }),
+				search: (current: InsightsSearch) =>
+					insightsSearchToUrl({ ...current, ...next }),
 				replace: true,
 			});
 		},

@@ -1,4 +1,4 @@
-import { describe, expect, it, afterEach, vi } from "vitest";
+import { describe, expect, it, afterEach, beforeAll, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { buildSchema, parse, validate } from "graphql";
@@ -167,6 +167,18 @@ afterEach(() => {
 
 describe("documents validate against the dcb-service they target", () => {
 	const files = Object.keys(modules).sort();
+	const loaded = new Map<string, Record<string, unknown>>();
+
+	// Imported once, before any test: an import inside a test took 6.2s on a loaded CI
+	// runner and failed the 5s test timeout. Builders read their flags when called, so
+	// each pass still sees its own flags.
+	beforeAll(async () => {
+		vi.stubGlobal("window", { __APP_ENV__: ALL_FLAGS_ON });
+		for (const file of files) {
+			loaded.set(file, (await modules[file]()) as Record<string, unknown>);
+		}
+		vi.unstubAllGlobals();
+	}, 120_000);
 
 	// Guard the guard. A refactor that moves src/graphql/ or renames the folders would
 	// otherwise leave a suite that passes because it tests nothing at all.
@@ -176,12 +188,10 @@ describe("documents validate against the dcb-service they target", () => {
 
 	it.each(files)(
 		"%s is valid against the target schema (all flags on)",
-		async (file) => {
+		(file) => {
 			vi.stubGlobal("window", { __APP_ENV__: ALL_FLAGS_ON });
 
-			const documents = documentsFrom(
-				(await modules[file]()) as Record<string, unknown>,
-			);
+			const documents = documentsFrom(loaded.get(file) ?? {});
 			expect(documents.length).toBeGreaterThan(0);
 			documents.forEach((document) =>
 				assertValid(document, CURRENT, `${file} against schema.graphqls`),
@@ -191,15 +201,13 @@ describe("documents validate against the dcb-service they target", () => {
 
 	it.each(files.filter((file) => !FLAG_ONLY[shortName(file)]))(
 		"%s is valid against dcb-service 8.71.0 (all flags off)",
-		async (file) => {
+		(file) => {
 			// No window at all: envsubst renders an unset flag as the empty string and a
 			// bundle built without one leaves it undefined. readFlag reads both as false,
 			// which is the state of an environment that has never heard of the flag.
 			vi.stubGlobal("window", undefined);
 
-			const documents = documentsFrom(
-				(await modules[file]()) as Record<string, unknown>,
-			);
+			const documents = documentsFrom(loaded.get(file) ?? {});
 			expect(documents.length).toBeGreaterThan(0);
 			documents.forEach((document) =>
 				assertValid(
@@ -219,12 +227,10 @@ describe("documents validate against the dcb-service they target", () => {
 			}),
 		)(
 			`%s is valid against dcb-service ${version} (the release's flags)`,
-			async (file) => {
+			(file) => {
 				vi.stubGlobal("window", { __APP_ENV__: flags });
 
-				const documents = documentsFrom(
-					(await modules[file]()) as Record<string, unknown>,
-				);
+				const documents = documentsFrom(loaded.get(file) ?? {});
 				expect(documents.length).toBeGreaterThan(0);
 				documents.forEach((document) =>
 					assertValid(

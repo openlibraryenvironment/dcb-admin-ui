@@ -34,6 +34,7 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
+		"allowImportingTsExtensions": true,
 		"jsx": "react-jsx"
 	},
 	// EVERY e2e directory, not just e2e/. It was none of them, so `tsc --noEmit` passed
@@ -56,6 +57,8 @@
 		"e2e-container",
 		"vite.config.mts",
 		"vitest.setup.ts",
+		"vitest.pipeline.config.mts",
+		"pipeline-checks",
 		"playwright*.config.ts"
 	]
 }
