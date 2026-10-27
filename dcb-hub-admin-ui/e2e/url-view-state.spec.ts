@@ -479,7 +479,33 @@ const headerNames = async (page: Page) =>
 		.map((text) => text.trim())
 		.filter(Boolean);
 
+const firstHeaderFields = async (page: Page) =>
+	(
+		await page
+			.locator('[role="columnheader"]')
+			.evaluateAll((cells) =>
+				cells.map((cell) => cell.getAttribute("data-field")),
+			)
+	).slice(0, 2);
+
 test.describe("A grid's columns in its URL", () => {
+	test("the expander and the selection checkbox stay first, opened and with an order in the link", async ({
+		page,
+	}) => {
+		const own = ["__detail_panel_toggle__", "__check__"];
+		await openable(page);
+		await page.goto("/patronRequests/all");
+		await gridShown(page);
+		await expect.poll(() => firstHeaderFields(page)).toEqual(own);
+
+		const menu = await openColumnMenu(page, (await headerNames(page))[2]);
+		await menu.getByRole("menuitem", { name: "Move left" }).click();
+		await expect.poll(() => search(page)).toMatch(/^\?order=/);
+		await page.reload();
+		await gridShown(page);
+		await expect.poll(() => firstHeaderFields(page)).toEqual(own);
+	});
+
 	test("a pinned column is pinned in the link, and pinned where it is opened", async ({
 		page,
 		browser,
