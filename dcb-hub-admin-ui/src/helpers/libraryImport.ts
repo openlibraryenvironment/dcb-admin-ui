@@ -1,3 +1,4 @@
+import { isValidLinkUrl } from "@constants/discoveryBranding";
 import {
 	LIBRARY_IMPORT_COLUMNS,
 	LIBRARY_IMPORT_MAX_ROWS,
@@ -49,6 +50,7 @@ export interface ImportProblemMessages {
 	latitudeRange: string;
 	longitudeRange: string;
 	emailInvalid: (column: string) => string;
+	linkInvalid: (column: string) => string;
 }
 
 /**
@@ -241,6 +243,10 @@ function evaluateRows(
 
 		if (!isBlank(values.contact1Email) && !EMAIL.test(values.contact1Email)) {
 			problems.push(messages.emailInvalid("contact1Email"));
+		}
+
+		if (!isValidLinkUrl(values.patronWebsite)) {
+			problems.push(messages.linkInvalid("patronWebsite"));
 		}
 
 		const hostLmsCode = values.hostLmsCode?.trim();

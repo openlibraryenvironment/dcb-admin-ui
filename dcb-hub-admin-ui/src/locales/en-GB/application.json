@@ -3315,7 +3315,8 @@
 				"duplicate": "The agency code {{code}} appears more than once in this file.",
 				"latitude_range": "Latitude must be between -90 and 90.",
 				"longitude_range": "Longitude must be between -180 and 180.",
-				"email": "{{column}} is not a valid email address."
+				"email": "{{column}} is not a valid email address.",
+				"link": "{{column}} is not a full web address. Start it with https:// or http://."
 			},
 			"columns": {
 				"agencyCode": "The unique code for this library, used everywhere in DCB. Cannot be changed later.",

@@ -204,6 +204,7 @@ export default function LibraryImport({
 				latitudeRange: t("setup.import.problem.latitude_range"),
 				longitudeRange: t("setup.import.problem.longitude_range"),
 				emailInvalid: (column) => t("setup.import.problem.email", { column }),
+				linkInvalid: (column) => t("setup.import.problem.link", { column }),
 			},
 		});
 

@@ -18,6 +18,7 @@ const messages: EvaluateOptions["messages"] = {
 	latitudeRange: "latitudeRange",
 	longitudeRange: "longitudeRange",
 	emailInvalid: (column) => `email:${column}`,
+	linkInvalid: (column) => `link:${column}`,
 };
 
 const options = (
@@ -159,6 +160,15 @@ describe("parseLibraryImport", () => {
 		);
 
 		expect(rows[0].problems).toContain("latitudeRange");
+	});
+
+	it("rejects a patron website dcb-service would refuse", () => {
+		const { rows } = parseLibraryImport(
+			`${HEADERS},patronWebsite\n${row()},www.alpha.example.org`,
+			options(),
+		);
+
+		expect(rows[0].problems).toContain("link:patronWebsite");
 	});
 
 	it("rejects a coordinate that is not a number at all", () => {

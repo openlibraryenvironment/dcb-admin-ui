@@ -1,3 +1,4 @@
+import { isValidLinkUrl } from "@constants/discoveryBranding";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
@@ -104,7 +105,17 @@ function Service() {
 	 */
 	const validationSchema = Yup.object().shape({
 		discoverySystem: Yup.string().trim().max(200),
-		patronWebsite: Yup.string().trim().max(200),
+		// A link saved before dcb-service checked links is kept as it is, so only a changed one is held to the check
+		patronWebsite: Yup.string()
+			.trim()
+			.max(200)
+			.test(
+				"absolute-http-url",
+				t("consortium.link_url_invalid"),
+				(value) =>
+					(value ?? "") === (library?.patronWebsite ?? "") ||
+					isValidLinkUrl(value),
+			),
 	});
 
 	const {

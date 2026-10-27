@@ -156,6 +156,22 @@ describe("newLibrarySchema", () => {
 		});
 	});
 
+	describe("patron website", () => {
+		it("rejects a link dcb-service would refuse", () => {
+			expect(
+				errorsFor({ ...validLibrary(), patronWebsite: "www.example.org" }),
+			).toHaveProperty("patronWebsite");
+		});
+
+		it("accepts a full web address or none", () => {
+			for (const patronWebsite of ["https://example.org/visit", ""]) {
+				expect(
+					errorsFor({ ...validLibrary(), patronWebsite }),
+				).not.toHaveProperty("patronWebsite");
+			}
+		});
+	});
+
 	describe("client config", () => {
 		it("is not checked when attaching to an existing Host LMS", () => {
 			const result = newLibrarySchema.safeParse({

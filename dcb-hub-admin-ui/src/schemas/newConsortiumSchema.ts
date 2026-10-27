@@ -1,5 +1,6 @@
 import i18n from "@/i18n";
 import { z } from "@schemas/zod";
+import { isValidLinkUrl } from "@constants/discoveryBranding";
 
 /**
  * A consortium cannot exist without a library group of type "Consortium" -
@@ -51,7 +52,14 @@ export const newConsortiumSchema = z.object({
 		.regex(/^\d{4}-\d{2}-\d{2}$/, {
 			error: () => i18n.t("consortium.date_of_launch_format"),
 		}),
-	websiteUrl: z.string().trim().max(200).optional(),
+	websiteUrl: z
+		.string()
+		.trim()
+		.max(200)
+		.optional()
+		.refine(isValidLinkUrl, {
+			error: () => i18n.t("consortium.link_url_invalid"),
+		}),
 	catalogueSearchUrl: z.string().trim().max(200).optional(),
 	description: z.string().trim().max(400).optional(),
 	reason: z

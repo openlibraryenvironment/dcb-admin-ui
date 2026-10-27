@@ -1,5 +1,6 @@
 import i18n from "@/i18n";
 import { z } from "@schemas/zod";
+import { isValidLinkUrl } from "@constants/discoveryBranding";
 import {
 	buildClientConfig,
 	getHostLmsProfile,
@@ -195,7 +196,12 @@ export const newLibrarySchema = z
 			)
 			.optional(),
 		supportHours: z.string().optional(),
-		patronWebsite: z.string().optional(),
+		patronWebsite: z
+			.string()
+			.optional()
+			.refine(isValidLinkUrl, {
+				error: () => i18n.t("consortium.link_url_invalid"),
+			}),
 		// Checked against the chosen ILS below; blank resolves to its default
 		authProfile: z.string(),
 		hostLmsConfiguration: z.string().optional(),
