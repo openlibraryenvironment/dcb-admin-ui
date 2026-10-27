@@ -194,6 +194,29 @@ export const isSettingsInheritanceEnabled = (): boolean =>
 export const isShelfBrowseEnabled = (): boolean =>
 	isSymposiaEnabled() && readFlag("VITE_FEATURE_SHELF_BROWSE");
 
+/**
+ * The consortium's request tag list (`requestTags` and its create, update and delete) and
+ * the tags on a patron request (`tags`, `tagPatronRequest`, `untagPatronRequest`): first
+ * released in dcb-service 9.2.0. Gates the DOCUMENTS: selecting them against an older
+ * dcb-service fails the whole operation.
+ */
+export const isRequestTagsEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_REQUEST_TAGS");
+
+/**
+ * The notes on a patron request (`notes`, `addPatronRequestNote`,
+ * `retractPatronRequestNote`): first released in dcb-service 9.2.0. Gates the documents.
+ */
+export const isRequestNotesEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_REQUEST_NOTES");
+
+/**
+ * Whether staff or the patron placed a request (`PatronRequest.placedByStaff`): first
+ * released in dcb-service 9.2.0. Gates the documents.
+ */
+export const isPlacedByStaffEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_PLACED_BY_STAFF");
+
 /** A setting that is not on or off, read from where readFlag reads. */
 const readSetting = (name: string): string | undefined => {
 	const injected =

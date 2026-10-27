@@ -11,6 +11,9 @@ import {
 	isLibraryUserProvisioningEnabled,
 	isLocalHoldsEnabled,
 	isNcipOnboardingEnabled,
+	isPlacedByStaffEnabled,
+	isRequestNotesEnabled,
+	isRequestTagsEnabled,
 	isSettingsInheritanceEnabled,
 	isShelfBrowseEnabled,
 } from "@helpers/featureFlags";
@@ -58,6 +61,15 @@ export const LOCAL_HOLDS_FIELDS = ["maxLocalHolds"] as const;
 
 /** The result of dcb-service's last connectivity check, kept on the Host LMS. */
 export const HOST_LMS_LAST_PING_FIELDS = ["lastPing"] as const;
+
+/** A patron request's notes, newest first and paged, first released in 9.2.0. */
+export const REQUEST_NOTE_FIELDS = ["notes"] as const;
+
+/** The tags on a patron request, each with who applied it, first released in 9.2.0. */
+export const REQUEST_TAG_FIELDS = ["tags"] as const;
+
+/** Whether staff placed a request: true, false, or null when dcb-service cannot tell. 9.2.0. */
+export const PLACED_BY_STAFF_FIELDS = ["placedByStaff"] as const;
 
 /** The two verification checks that read only what dcb-service holds. */
 export const HOST_LMS_PROBE_FIELDS = [
@@ -305,6 +317,42 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 				"deleteAnnouncement",
 			],
 		},
+	},
+	{
+		// One row for the consortium's tag list and the tags on a request: they arrive in the
+		// same dcb-service release, and a request tag can only name a tag from the list.
+		id: "request_tags",
+		flag: "VITE_FEATURE_REQUEST_TAGS",
+		enabled: isRequestTagsEnabled,
+		since: "9.2.0",
+		fields: {
+			Query: ["requestTags"],
+			Mutation: [
+				"createRequestTag",
+				"updateRequestTag",
+				"deleteRequestTag",
+				"tagPatronRequest",
+				"untagPatronRequest",
+			],
+			PatronRequest: REQUEST_TAG_FIELDS,
+		},
+	},
+	{
+		id: "request_notes",
+		flag: "VITE_FEATURE_REQUEST_NOTES",
+		enabled: isRequestNotesEnabled,
+		since: "9.2.0",
+		fields: {
+			Mutation: ["addPatronRequestNote", "retractPatronRequestNote"],
+			PatronRequest: REQUEST_NOTE_FIELDS,
+		},
+	},
+	{
+		id: "placed_by_staff",
+		flag: "VITE_FEATURE_PLACED_BY_STAFF",
+		enabled: isPlacedByStaffEnabled,
+		since: "9.2.0",
+		fields: { PatronRequest: PLACED_BY_STAFF_FIELDS },
 	},
 	{
 		// In no release: announcements reached 9.2.0 without it. Query and Mutation are

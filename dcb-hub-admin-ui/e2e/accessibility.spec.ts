@@ -386,6 +386,8 @@ test.describe("WCAG 2.2 AA - dcb-service 8.71.0", () => {
 		(route) =>
 			!route.path.includes("/accounts") &&
 			!route.path.includes("/announcements") &&
+			// No release serves the tag list, so its beforeLoad redirects to /consortium here.
+			!route.path.includes("/requestTags") &&
 			// Its beforeLoad redirects to /serviceInfo while isAuditExplorerEnabled() is
 			// false, and this world seeds no flags - so there is no page here to scan.
 			!route.path.includes("/auditExplorer") &&

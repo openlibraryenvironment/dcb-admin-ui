@@ -5,8 +5,8 @@
 import { gql } from "graphql-request";
 import { patronRequestFields } from "@fragments/patronRequestFields";
 
-export const getPatronRequestsForExport = gql`
-	${patronRequestFields}
+export const getPatronRequestsForExport = (): string => gql`
+	${patronRequestFields()}
 	query LoadPatronRequestsForExport(
 		$pageno: Int!
 		$pagesize: Int!

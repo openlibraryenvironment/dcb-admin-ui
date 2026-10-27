@@ -124,7 +124,7 @@ function SupplierRequestsAll() {
 		queryFn: async () => {
 			const baseQuery = `supplyingAgencyCode: "${code}"`;
 			return gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-				getPatronRequests,
+				getPatronRequests(),
 				buildServerGridQueryVars({
 					filterModel: view.appliedFilterModel,
 					sortModel: view.sortModel,
@@ -223,7 +223,7 @@ function SupplierRequestsAll() {
 						)}
 						rowSelection
 						exportConfig={{
-							query: getPatronRequestsForExport,
+							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
 							baseQuery: `supplyingAgencyCode: "${code}"`,
 							quickFilterFields: ["status", "description"],

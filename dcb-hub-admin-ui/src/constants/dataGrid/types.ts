@@ -36,6 +36,7 @@ export const DATA_GRID_TYPES = [
 	"referenceValueMappings",
 	"refusedCleanupRequests",
 	"requestErrors",
+	"requestTag",
 	"searchInstances",
 	"skippedCleanupRequests",
 	"successCleanupRequests",
@@ -69,6 +70,8 @@ export const nonClickableTypes: readonly DataGridType[] = [
 	"consortiumDetails",
 	// Library accounts are created and edited through dialogs; there is no user page.
 	"libraryUser",
+	// Request tags are edited through dialogs; there is no tag page.
+	"requestTag",
 	// Both error-overview grids navigate through per-cell Links - the description to
 	// the drill-down, the request id and audit url to their own pages - so a
 	// whole-row click has nothing left to do.

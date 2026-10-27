@@ -77,6 +77,24 @@ const CASES: DegradedCase[] = [
 		content: (page) => page.getByRole("button", { name: "Actions" }),
 	},
 	{
+		name: "a patron request survives its tags lookup",
+		path: `/patronRequests/${TRACKED_REQUEST.id}`,
+		mocks: {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadPatronRequest: {
+				patronRequests: { totalSize: 1, content: [TRACKED_REQUEST] },
+			},
+			GetAuditsByPatronRequest: { audits: empty },
+			LoadLocation: { locations: empty },
+			LoadPatronIdentities: { patronIdentities: empty },
+			LoadLibraryBasics: { libraries: empty },
+			LoadAgency: { agencies: empty },
+			LoadRequestTags: { requestTags: [] },
+		},
+		auxiliary: "LoadPatronRequestTags",
+		content: (page) => page.getByRole("button", { name: "Actions" }),
+	},
+	{
 		name: "the accounts grid survives its provisioning capability probe",
 		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/accounts",
 		mocks: {

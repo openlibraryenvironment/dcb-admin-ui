@@ -224,6 +224,13 @@ export type ProvisionableRole = "LIBRARY_ADMIN" | "LIBRARY_READ_ONLY";
 export type RenewalStatus =
 	"ALLOWED" | "DISALLOWED" | "UNKNOWN" | "UNSUPPORTED";
 
+export type RequestTagInput = {
+	active?: boolean | null | undefined;
+	code: string;
+	description?: string | null | undefined;
+	label: string;
+};
+
 export type ResendLibraryUserInviteInput = {
 	id: string | number;
 };
@@ -697,6 +704,41 @@ export type RevertFunctionalSettingToInheritedMutation = {
 	};
 };
 
+export type AddPatronRequestNoteMutationVariables = Exact<{
+	patronRequestId: string | number;
+	body: string;
+}>;
+
+export type AddPatronRequestNoteMutation = {
+	addPatronRequestNote: { id: string | null };
+};
+
+export type RetractPatronRequestNoteMutationVariables = Exact<{
+	id: string | number;
+}>;
+
+export type RetractPatronRequestNoteMutation = {
+	retractPatronRequestNote: { id: string | null; retracted: boolean | null };
+};
+
+export type TagPatronRequestMutationVariables = Exact<{
+	patronRequestId: string | number;
+	tagCode: string;
+}>;
+
+export type TagPatronRequestMutation = {
+	tagPatronRequest: Array<{ code: string | null } | null>;
+};
+
+export type UntagPatronRequestMutationVariables = Exact<{
+	patronRequestId: string | number;
+	tagCode: string;
+}>;
+
+export type UntagPatronRequestMutation = {
+	untagPatronRequest: Array<{ code: string | null } | null>;
+};
+
 export type ProvisionLibraryUserMutationVariables = Exact<{
 	input: ProvisionLibraryUserInput;
 }>;
@@ -724,6 +766,40 @@ export type ResendLibraryUserInviteMutationVariables = Exact<{
 
 export type ResendLibraryUserInviteMutation = {
 	resendLibraryUserInvite: { id: string; status: LibraryUserStatus };
+};
+
+export type CreateRequestTagMutationVariables = Exact<{
+	input: RequestTagInput;
+}>;
+
+export type CreateRequestTagMutation = {
+	createRequestTag: {
+		code: string | null;
+		label: string | null;
+		description: string | null;
+		active: boolean | null;
+	};
+};
+
+export type UpdateRequestTagMutationVariables = Exact<{
+	input: RequestTagInput;
+}>;
+
+export type UpdateRequestTagMutation = {
+	updateRequestTag: {
+		code: string | null;
+		label: string | null;
+		description: string | null;
+		active: boolean | null;
+	};
+};
+
+export type DeleteRequestTagMutationVariables = Exact<{
+	code: string;
+}>;
+
+export type DeleteRequestTagMutation = {
+	deleteRequestTag: { success: boolean; message: string | null };
 };
 
 export type UpdateAgencyMutationVariables = Exact<{
@@ -2328,6 +2404,51 @@ export type LoadPatronRequestsByIdQuery = {
 	} | null;
 };
 
+export type LoadPatronRequestNotesQueryVariables = Exact<{
+	query: string;
+	pageno?: number | null | undefined;
+	pagesize?: number | null | undefined;
+}>;
+
+export type LoadPatronRequestNotesQuery = {
+	patronRequests: {
+		content: Array<{
+			id: string;
+			notes: {
+				totalSize: number | null;
+				content: Array<{
+					id: string | null;
+					authorKind: string | null;
+					agencyCode: string | null;
+					libraryName: string | null;
+					body: string | null;
+					dateCreated: string | null;
+					retracted: boolean | null;
+					retractedBy: string | null;
+				} | null> | null;
+			} | null;
+		} | null> | null;
+	} | null;
+};
+
+export type LoadPatronRequestTagsQueryVariables = Exact<{
+	query: string;
+}>;
+
+export type LoadPatronRequestTagsQuery = {
+	patronRequests: {
+		content: Array<{
+			id: string;
+			tags: Array<{
+				code: string | null;
+				label: string | null;
+				agencyCodes: Array<string | null> | null;
+				consortium: boolean | null;
+			} | null> | null;
+		} | null> | null;
+	} | null;
+};
+
 export type LoadPatronRequestTotalsQueryVariables = Exact<{
 	pageno: number;
 	pagesize: number;
@@ -2500,6 +2621,17 @@ export type LoadPatronRequestsForExportQuery = {
 		} | null> | null;
 		pageable: { number: number | null; offset: number | null } | null;
 	} | null;
+};
+
+export type LoadRequestTagsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type LoadRequestTagsQuery = {
+	requestTags: Array<{
+		code: string | null;
+		label: string | null;
+		description: string | null;
+		active: boolean | null;
+	} | null> | null;
 };
 
 export type LoadResolvedFunctionalSettingsQueryVariables = Exact<{

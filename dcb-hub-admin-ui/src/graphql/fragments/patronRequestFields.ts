@@ -1,5 +1,7 @@
 import { gql } from "graphql-request";
 
+import { capabilitySelection } from "@helpers/capabilityFields";
+
 /**
  * The single source of truth for the fields every patron request GRID needs -
  * the columns in getPatronRequestColumns, their valueGetters, and the row
@@ -17,8 +19,11 @@ import { gql } from "graphql-request";
  *
  * Detail-view-only fields (e.g. nextScheduledPoll) do not belong here - they are
  * fetched by getPatronRequest for the single-request route.
+ *
+ * A function, as are the three queries: placedByStaff is selected only while its flag is
+ * on, and the flags are read after the modules load.
  */
-export const patronRequestFields = gql`
+export const patronRequestFields = (): string => gql`
 	fragment PatronRequestFields on PatronRequest {
 		id
 		dateCreated
@@ -43,6 +48,7 @@ export const patronRequestFields = gql`
 		pickupRequestStatus
 		pickupItemId
 		isExpeditedCheckout
+		${capabilitySelection("placed_by_staff", "PatronRequest")}
 		rawLocalRequestStatus
 		rawLocalItemStatus
 		localRequestId

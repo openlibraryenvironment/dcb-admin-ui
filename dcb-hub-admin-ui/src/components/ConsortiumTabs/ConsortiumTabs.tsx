@@ -5,6 +5,7 @@ import { TabLink } from "@components/TabLink/TabLink";
 import {
 	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
+	isRequestTagsEnabled,
 } from "@helpers/featureFlags";
 
 /**
@@ -50,6 +51,11 @@ const TABS: ReadonlyArray<ConsortiumTab> = [
 		labelKey: "nav.consortium.announcements",
 		enabled: isAnnouncementsEnabled,
 	},
+	{
+		path: "/consortium/requestTags",
+		labelKey: "nav.consortium.requestTags",
+		enabled: isRequestTagsEnabled,
+	},
 	// Setup stays reachable after it is finished: it is also how appearance, discovery
 	// branding and functional settings are revisited, and a flow that vanishes the moment
 	// it succeeds is a flow nobody can correct.
@@ -72,6 +78,7 @@ export type ConsortiumTabId =
 	| "contacts"
 	| "branding"
 	| "announcements"
+	| "requestTags"
 	| "setup";
 
 const PATH_BY_ID: Record<ConsortiumTabId, string> = {
@@ -82,6 +89,7 @@ const PATH_BY_ID: Record<ConsortiumTabId, string> = {
 	contacts: "/consortium/contacts",
 	branding: "/consortium/branding",
 	announcements: "/consortium/announcements",
+	requestTags: "/consortium/requestTags",
 	setup: "/setup",
 };
 

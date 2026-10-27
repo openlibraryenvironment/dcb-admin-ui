@@ -56,6 +56,8 @@ export interface PatronRequest {
 	pickupBibId: string;
 	pickupItemBarcode: string;
 	isExpeditedCheckout: boolean;
+	/** Selected only while VITE_FEATURE_PLACED_BY_STAFF is on */
+	placedByStaff?: boolean | null;
 	localHoldingId: string;
 	pickupHoldingId: string;
 	renewalStatus: RenewalStatus;

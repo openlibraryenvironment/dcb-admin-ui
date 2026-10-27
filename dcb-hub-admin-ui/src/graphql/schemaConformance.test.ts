@@ -75,6 +75,13 @@ const FLAG_ONLY: Record<string, string> = {
 	"queries/getAuditIncidence.ts": "VITE_FEATURE_AUDIT_EXPLORER",
 	"queries/getLibraryUsers.ts": "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
 	"mutations/provisionLibraryUser.ts": "VITE_FEATURE_LIBRARY_USER_PROVISIONING",
+	// In 9.2.0 and no release before it, so the 9.2.0 pass covers them and the older ones must not.
+	"queries/getRequestTags.ts": "VITE_FEATURE_REQUEST_TAGS",
+	"mutations/requestTags.ts": "VITE_FEATURE_REQUEST_TAGS",
+	"queries/getPatronRequestTags.ts": "VITE_FEATURE_REQUEST_TAGS",
+	"mutations/patronRequestTags.ts": "VITE_FEATURE_REQUEST_TAGS",
+	"queries/getPatronRequestNotes.ts": "VITE_FEATURE_REQUEST_NOTES",
+	"mutations/patronRequestNotes.ts": "VITE_FEATURE_REQUEST_NOTES",
 };
 
 /**

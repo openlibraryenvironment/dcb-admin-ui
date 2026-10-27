@@ -1,8 +1,8 @@
 import { gql } from "graphql-request";
 import { patronRequestFields } from "@fragments/patronRequestFields";
 
-export const getPatronRequestDashboard = gql`
-	${patronRequestFields}
+export const getPatronRequestDashboard = (): string => gql`
+	${patronRequestFields()}
 	query GetPatronRequestDashboard(
 		$allQuery: String
 		$activeQuery: String

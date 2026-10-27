@@ -6,8 +6,10 @@ import { Library } from "@models/Library";
 import { PatronRequest } from "@models/PatronRequest";
 import {
 	patronRequestColumnsNoStatusFilter,
+	placedByStaffColumn,
 	standardPatronRequestColumns,
 } from "@columns/getPatronRequestColumns";
+import { isPlacedByStaffEnabled } from "@helpers/featureFlags";
 import { isOnly } from "@filters/isOnly";
 import { getDcbWorkflowOptions } from "@constants/workflows/DCBWorkflows";
 import { PICKUP_LIBRARY_DELIMITER } from "@helpers/dataGrid/buildFilterQuery";
@@ -94,7 +96,10 @@ export const useDynamicPatronRequestColumns = ({
 			: standardPatronRequestColumns;
 
 	const columns = useMemo(() => {
-		return baseColumns.map((col) => {
+		const withFlagged = isPlacedByStaffEnabled()
+			? [...baseColumns, placedByStaffColumn(t)]
+			: baseColumns;
+		return withFlagged.map((col) => {
 			if (col.field === "pickupLocationCode") {
 				return {
 					...col,
