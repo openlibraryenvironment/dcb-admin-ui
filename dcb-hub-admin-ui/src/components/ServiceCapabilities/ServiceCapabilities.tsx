@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import {
 	Alert,
+	Box,
 	Table,
 	TableBody,
 	TableCell,
@@ -11,11 +12,12 @@ import {
 } from "@mui/material";
 
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
+import type { CapabilityStatus } from "@constants/serviceCapabilities";
 import {
-	SERVICE_CAPABILITIES,
-	capabilityStatus,
-	type CapabilityStatus,
-} from "@constants/serviceCapabilities";
+	FEATURE_AVAILABILITY,
+	availabilityStatus,
+	type AvailabilityEntry,
+} from "@constants/featureAvailability";
 
 /**
  * Which DCB Admin features this deployment's dcb-service can serve, and whether they
@@ -43,17 +45,24 @@ import {
 /** The states worth interrupting somebody about. */
 const MISMATCHED: ReadonlyArray<CapabilityStatus> = ["premature", "available"];
 
-export default function ServiceCapabilities() {
-	const { t } = useTranslation();
-	const { version } = useDCBServiceInfo();
+/** What to set to clear the mismatch: the flags that are on when too early, off when due. */
+const settingsFor = (entry: AvailabilityEntry, status: CapabilityStatus) => {
+	const premature = status === "premature";
+	return entry.capabilities
+		.filter((capability) => capability.enabled() === premature)
+		.map((capability) => `${capability.flag}=${premature ? "false" : "true"}`);
+};
 
-	// A capability in no release is not shown: staff are never told about a feature no
-	// dcb-service has. The registry keeps it for the conformance tests.
-	const rows = SERVICE_CAPABILITIES.filter(
-		(capability) => capability.since !== null,
-	).map((capability) => ({
-		capability,
-		status: capabilityStatus(capability, version),
+export default function ServiceCapabilities() {
+	const { t, i18n } = useTranslation();
+	const { version } = useDCBServiceInfo();
+	const list = new Intl.ListFormat(i18n.resolvedLanguage, {
+		type: "conjunction",
+	});
+
+	const rows = FEATURE_AVAILABILITY.map((entry) => ({
+		entry,
+		status: availabilityStatus(entry, version),
 	}));
 
 	const mismatches = rows.filter((row) => MISMATCHED.includes(row.status));
@@ -81,8 +90,8 @@ export default function ServiceCapabilities() {
 					{mismatches
 						.map((row) =>
 							t(`service_capabilities.alert.${row.status}`, {
-								feature: t(`service_capabilities.feature.${row.capability.id}`),
-								flag: row.capability.flag,
+								feature: t(`service_capabilities.feature.${row.entry.id}`),
+								settings: list.format(settingsFor(row.entry, row.status)),
 							}),
 						)
 						.join(" ")}
@@ -112,23 +121,27 @@ export default function ServiceCapabilities() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{rows.map(({ capability, status }) => (
-							<TableRow key={capability.id}>
+						{rows.map(({ entry, status }) => (
+							<TableRow key={entry.id}>
 								<TableCell component="th" scope="row">
-									{t(`service_capabilities.feature.${capability.id}`)}
+									{t(`service_capabilities.feature.${entry.id}`)}
 								</TableCell>
 								<TableCell>
 									{t("service_capabilities.needs_version", {
-										version: capability.since,
+										version: entry.since,
 									})}
 								</TableCell>
 								<TableCell>
-									{/* The variable name, verbatim - it is what an operator types. */}
-									<code>{capability.flag}</code>
-									{": "}
-									{capability.enabled()
-										? t("service_capabilities.flag_on")
-										: t("service_capabilities.flag_off")}
+									{entry.capabilities.map((capability) => (
+										<Box key={capability.flag}>
+											{/* The variable name, verbatim - it is what an operator types. */}
+											<code>{capability.flag}</code>
+											{": "}
+											{capability.enabled()
+												? t("service_capabilities.flag_on")
+												: t("service_capabilities.flag_off")}
+										</Box>
+									))}
 								</TableCell>
 								<TableCell>
 									{t(`service_capabilities.status.${status}`)}

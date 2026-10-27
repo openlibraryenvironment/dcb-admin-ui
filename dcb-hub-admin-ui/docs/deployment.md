@@ -227,10 +227,18 @@ flags above, this depends on no dcb-service release.
 
 ### Checking, and what happens if you get it wrong
 
-**Service Info → Feature availability** lists every flag a dcb-service release serves, the version it needs,
-the version this deployment reports from `/info`, and whether the flag is on. It warns in
+**Service Info → Feature availability** lists the features staff are told about, the version each
+needs, the version this deployment reports from `/info`, and whether its flags are on. It warns in
 two directions: a feature that is now served but still switched off (turn it on), and a
 flag switched on ahead of the upgrade (turn it off — the feature will fail).
+
+Insights is one entry for `VITE_FEATURE_INSIGHTS` and `VITE_FEATURE_INSIGHTS_TRENDS`, shown as
+needing 9.2.0: its endpoints are served from 9.1.0, but the most requested titles are out of order
+before 9.2.0. It is on when both flags are. Confirm item is back, placed by staff or patron, library
+account provisioning and shelf browse are not listed, and neither is a capability no release serves
+yet. Their flags work as described above, but **nothing warns when one of them is switched on too
+early**, so check it against the table above. The list is
+`src/constants/featureAvailability.ts`.
 
 A flag left **off** after the upgrade hides its feature, **except
 `VITE_FEATURE_CONSORTIUM_BRANDING`**: off against 9.0.0 or later, the consortium queries

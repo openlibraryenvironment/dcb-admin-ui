@@ -3393,8 +3393,8 @@
 			"unknown": "Cannot tell - the dcb-service version could not be read"
 		},
 		"alert": {
-			"available": "{{feature}} is now served by this dcb-service. Set {{flag}}=true to switch it on.",
-			"premature": "{{feature}} is switched on, but this dcb-service does not serve it. Set {{flag}}=false until the service is upgraded."
+			"available": "{{feature}} is now served by this dcb-service. Set {{settings}} to switch it on.",
+			"premature": "{{feature}} is switched on, but this dcb-service does not serve it. Set {{settings}} until the service is upgraded."
 		}
 	},
 	"settings_inheritance": {
