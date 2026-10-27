@@ -1,9 +1,10 @@
-import type { Page } from "@playwright/test";
+import type { Page, Route } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
-import { seedAuth } from "./fixtures/auth";
+import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import { MOCKS } from "./fixtures/routes";
+import { E2E_KEYCLOAK_URL, fakeKeycloakSignIn } from "./fixtures/keycloak";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
 import locations from "./fixtures-data/locations.json";
@@ -33,10 +34,9 @@ const dashboard = {
 	finishedRequests: { totalSize: 0 },
 };
 
-/** Mocks the page, and records every grid request it makes. */
-const openable = async (page: Page) => {
+/** Mocks the page's data, and records every grid request it makes. */
+const mockView = async (page: Page) => {
 	const asked: DashboardVariables[] = [];
-	await seedAuth(page);
 	await mockGraphQL(page, {
 		LoadConsortium: consortiumBasics,
 		LoadConsortiumHeader: consortiumBasics,
@@ -50,6 +50,12 @@ const openable = async (page: Page) => {
 		},
 	});
 	return asked;
+};
+
+/** Signed in, with the page's data mocked. */
+const openable = async (page: Page) => {
+	await seedAuth(page);
+	return mockView(page);
 };
 
 const lastAsked = async (asked: DashboardVariables[]) => {
@@ -557,5 +563,75 @@ test.describe("A grid's columns in its URL", () => {
 		await page.reload();
 		await gridShown(page);
 		await expect.poll(() => headerNames(page)).toEqual(after);
+	});
+});
+
+test.describe("A view's link through sign-in", () => {
+	const VIEW =
+		"/patronRequests/all?filters=description:contains:Alpha&sort=dateCreated:asc&page=2";
+
+	/** A path and its params, in any order: the router may write them in its own. */
+	const addressOf = (href: string) => {
+		const url = new URL(href, "http://app.invalid");
+		return [url.pathname, [...url.searchParams].sort()];
+	};
+	const redirectParam = (page: Page) =>
+		new URL(page.url()).searchParams.get("redirect") ?? "";
+
+	const backOnTheView = async (page: Page, asked: DashboardVariables[]) => {
+		await expect.poll(() => addressOf(page.url())).toEqual(addressOf(VIEW));
+		await gridShown(page);
+		await expect
+			.poll(async () => {
+				const sent = await lastAsked(asked);
+				return [
+					sent.allQuery.includes("description:*Alpha*"),
+					sent.orderBy,
+					sent.pageno,
+				];
+			})
+			.toEqual([true, "ASC", 1]);
+	};
+
+	test("a bookmark opened signed out comes back to its view after sign-in", async ({
+		page,
+	}) => {
+		const asked = await mockView(page);
+		await fakeKeycloakSignIn(page, ADMIN_ROLES);
+
+		await page.goto(VIEW);
+		await expect(page).toHaveURL(/\/login\?redirect=/);
+		expect(addressOf(redirectParam(page))).toEqual(addressOf(VIEW));
+
+		await page.getByRole("button", { name: "Login", exact: true }).click();
+		await backOnTheView(page, asked);
+	});
+
+	test("a view whose session ended comes back to it after signing in again", async ({
+		page,
+	}) => {
+		const asked = await openable(page);
+		const refuse = (route: Route) =>
+			route.fulfill({
+				status: 401,
+				json: { errors: [{ message: "Unauthorized" }] },
+			});
+		await page.route("**/graphql", refuse);
+		// The silent renewal fails at once rather than at the resolver's pace: session-expiry.spec.ts
+		const keycloak = `${new URL(E2E_KEYCLOAK_URL).origin}/**`;
+		const unreachable = (route: Route) => route.abort();
+		await page.route(keycloak, unreachable);
+
+		await page.goto(VIEW);
+		await expect(page).toHaveURL(/\/logout\?reason=session_expired/, {
+			timeout: 15_000,
+		});
+		expect(addressOf(redirectParam(page))).toEqual(addressOf(VIEW));
+
+		await page.unroute("**/graphql", refuse);
+		await page.unroute(keycloak, unreachable);
+		await fakeKeycloakSignIn(page, ADMIN_ROLES);
+		await page.getByRole("button", { name: "Login", exact: true }).click();
+		await backOnTheView(page, asked);
 	});
 });

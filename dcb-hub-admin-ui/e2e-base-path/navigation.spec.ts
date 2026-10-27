@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { ADMIN_ROLES, seedAuth } from "../e2e/fixtures/auth";
 import { mockGraphQL } from "../e2e/fixtures/graphql-mocks";
 import { useAllFeatures } from "../e2e/fixtures/flags";
+import { fakeKeycloakSignIn } from "../e2e/fixtures/keycloak";
 import consortiumBasics from "../e2e/fixtures-data/consortium-basics.json";
 import consortium from "../e2e/fixtures-data/consortium.json";
 import libraries from "../e2e/fixtures-data/libraries.json";
@@ -302,5 +303,32 @@ test.describe("co-hosting under a shared origin", () => {
 			.toBeGreaterThan(0);
 
 		expect(requested).toEqual([`${BASE}/inject_env.json`]);
+	});
+});
+
+test.describe("signing in under a deployment base path", () => {
+	test("a bookmarked view comes back to the same view, under the base once", async ({
+		page,
+	}) => {
+		await useAllFeatures(page);
+		await mockGraphQL(page, MOCKS);
+		await fakeKeycloakSignIn(page, ADMIN_ROLES);
+		const view = "/patronRequests/all?sort=dateCreated:asc&page=2";
+
+		await page.goto(`${BASE}${view}`);
+		await expect(page).toHaveURL(/\/dcb-admin\/login\?redirect=/);
+		expect(new URL(page.url()).searchParams.get("redirect")).toBe(view);
+
+		await page.getByRole("button", { name: "Login", exact: true }).click();
+		await expect
+			.poll(() => {
+				const url = new URL(page.url());
+				return [
+					url.pathname,
+					url.searchParams.get("sort"),
+					url.searchParams.get("page"),
+				];
+			})
+			.toEqual(["/dcb-admin/patronRequests/all", "dateCreated:asc", "2"]);
 	});
 });

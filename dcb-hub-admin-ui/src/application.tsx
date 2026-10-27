@@ -23,6 +23,7 @@ import {
 	getAppBase,
 	postLoginRedirectKey,
 	toInternalPath,
+	toRouteHref,
 	toRoutePath,
 } from "@helpers/appBase";
 import { errorForLog } from "@helpers/safeErrorLog";
@@ -108,7 +109,7 @@ let userManager!: UserManager;
  * carries a trailing slash), and deleting it behind the UserManager's back left
  * the in-memory react-oidc-context state still reporting isAuthenticated: true.
  */
-const endSession = async (routePath: string) => {
+const endSession = async (returnTo: string) => {
 	queryClient.clear();
 	await userManager.removeUser().catch(() => undefined);
 	clearAppStorage();
@@ -120,8 +121,8 @@ const endSession = async (routePath: string) => {
 	// hard load is also what the other logout paths get for free by bouncing
 	// through Keycloak.
 	const search = new URLSearchParams({ reason: "session_expired" });
-	if (routePath) {
-		search.set("redirect", routePath);
+	if (returnTo) {
+		search.set("redirect", returnTo);
 	}
 	window.location.assign(appUrl(`logout?${search.toString()}`));
 };
@@ -172,7 +173,7 @@ const handleServiceErrors = (error: any) => {
 		// which is what threw users out mid-session.
 		void recoverSession().then((renewed) => {
 			if (!renewed) {
-				void endSession(routePath);
+				void endSession(toRouteHref());
 				return;
 			}
 			// Deferred a tick on purpose. A query's queryFn is a closure over the
@@ -336,7 +337,7 @@ export async function mountDcbAdmin(
 				sessionStorage.removeItem(postLoginRedirectKey());
 			}
 			if (safeRedirect) {
-				router.navigate({ to: safeRedirect, replace: true });
+				router.navigate({ href: safeRedirect, replace: true });
 			}
 		},
 	};

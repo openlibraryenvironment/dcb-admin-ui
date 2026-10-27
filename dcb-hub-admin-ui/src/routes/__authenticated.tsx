@@ -42,9 +42,10 @@ function AuthenticatedLayout() {
 	// While a redirect-to-/login navigation is pending, TanStack Router's
 	// useLocation() reflects the *target* pathname ("/login") rather than
 	// the page that was actually requested, even though this layout is
-	// still mounted. Capture the originally-requested path once, before any
-	// redirect starts, so the ?redirect= target doesn't get corrupted.
-	const originalPathnameRef = useRef(location.pathname);
+	// still mounted. Capture the originally-requested address once, before any
+	// redirect starts, so the ?redirect= target doesn't get corrupted. The href,
+	// not the pathname: a grid's view is its search, and a bookmark is that view.
+	const originalHrefRef = useRef(location.href);
 
 	const { reset: resetIdleTimer } = useIdleTimer({
 		timeout: 1000 * 60 * 30, // 30 minutes total - matches the figure the logout page quotes
@@ -154,7 +155,7 @@ function AuthenticatedLayout() {
 		if (shouldRedirectToLogin) {
 			navigate({
 				to: "/login",
-				search: { redirect: originalPathnameRef.current },
+				search: { redirect: originalHrefRef.current },
 				replace: true,
 			});
 		}
