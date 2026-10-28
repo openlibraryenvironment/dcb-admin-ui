@@ -14,6 +14,7 @@ import { isAnnouncementsEnabled } from "@helpers/featureFlags";
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { Group } from "@models/Group";
 import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
+import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import type { LoadGroupQueryVariables } from "@generated/graphql";
 
 /**
@@ -35,6 +36,18 @@ export const Route = createFileRoute(
 		if (!roles.includes("ADMIN") && !roles.includes("CONSORTIUM_ADMIN")) {
 			throw redirect({ to: "/unauthorised" });
 		}
+	},
+	// The same cache entry as the group's own page, so moving between its tabs fetches once
+	loader: ({ context: { queryClient, cfg, auth }, params: { groupId } }) => {
+		if (!auth?.isAuthenticated) return;
+		return queryClient.ensureQueryData({
+			queryKey: ["group", groupId],
+			queryFn: () =>
+				createGraphQLClient(cfg, auth).request<any, LoadGroupQueryVariables>(
+					getLibraryGroupById,
+					{ query: `id:${groupId}` },
+				),
+		});
 	},
 	component: GroupAnnouncements,
 });
@@ -72,8 +85,15 @@ function GroupAnnouncements() {
 
 	if (isLoading) {
 		return (
-			<PageContainer hideBreadcrumbs>
-				<Loading title={t("groups.groups_one")} subtitle={t("ui.info.wait")} />
+			// The loaded page's chrome under a generic title: withholding the title box and
+			// breadcrumbs until the group arrived moved everything below them down 77px
+			<PageContainer title={t("groups.groups_one")}>
+				<Loading
+					title={t("ui.info.loading.document", {
+						document_type: t("groups.groups_one"),
+					})}
+					subtitle={t("ui.info.wait")}
+				/>
 			</PageContainer>
 		);
 	}
