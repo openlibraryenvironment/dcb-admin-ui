@@ -8,7 +8,6 @@ import {
 	Alert,
 	Box,
 	Button,
-	Chip,
 	List,
 	ListItem,
 	MenuItem,
@@ -30,19 +29,18 @@ import {
 	patronRequestTagsQuery,
 } from "@/queryOptions/patronRequestNotesAndTags";
 import { requestTagsQuery } from "@/queryOptions/requestTags";
+import { TagChip } from "@components/TagChip/TagChip";
+import {
+	appliedTags,
+	REQUEST_TAGS_SECTION_ID,
+	type AppliedTag,
+} from "@helpers/requestTags";
 import type {
 	TagPatronRequestMutation,
 	TagPatronRequestMutationVariables,
 	UntagPatronRequestMutation,
 	UntagPatronRequestMutationVariables,
 } from "@generated/graphql";
-
-interface AppliedTag {
-	code: string;
-	label: string;
-	consortium: boolean;
-	agencyCodes: string[];
-}
 
 interface AddTagFormData {
 	tagCode: string;
@@ -71,22 +69,7 @@ export default function PatronRequestTags({
 		...nonCriticalQuery,
 	});
 
-	const applied: AppliedTag[] = (
-		tags.data?.patronRequests?.content?.[0]?.tags ?? []
-	).flatMap((tag) =>
-		tag?.code
-			? [
-					{
-						code: tag.code,
-						label: tag.label ?? tag.code,
-						consortium: tag.consortium === true,
-						agencyCodes: (tag.agencyCodes ?? []).flatMap((code) =>
-							code ? [code] : [],
-						),
-					},
-				]
-			: [],
-	);
+	const applied = appliedTags(tags.data?.patronRequests?.content?.[0]?.tags);
 	const appliedByConsortium = new Set(
 		applied.filter((tag) => tag.consortium).map((tag) => tag.code),
 	);
@@ -160,7 +143,12 @@ export default function PatronRequestTags({
 
 	return (
 		<Stack spacing={2}>
-			<Typography variant="accordionSummary" component="h2">
+			<Typography
+				variant="accordionSummary"
+				component="h2"
+				id={REQUEST_TAGS_SECTION_ID}
+				tabIndex={-1}
+			>
 				{t("patron_request.tags.title")}
 			</Typography>
 			<Typography variant="body2">
@@ -187,7 +175,7 @@ export default function PatronRequestTags({
 								spacing={1}
 								sx={{ alignItems: "center", flexWrap: "wrap" }}
 							>
-								<Chip label={tag.label} />
+								<TagChip tag={tag} />
 								<Typography variant="body2">
 									{t("patron_request.tags.applied_by", {
 										who: appliedBy(tag),

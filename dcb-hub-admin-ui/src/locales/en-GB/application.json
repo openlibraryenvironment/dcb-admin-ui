@@ -2624,6 +2624,8 @@
 			"remove": "Remove",
 			"remove_named": "Remove the consortium's tag {{label}}",
 			"none": "No tags on this request.",
+			"manage": "Manage tags",
+			"add_first": "Add a tag",
 			"applied_by": "Applied by {{who}}",
 			"consortium": "the consortium",
 			"all_applied": "Every active tag is already on this request.",

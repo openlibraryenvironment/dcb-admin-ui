@@ -76,6 +76,7 @@ import {
 import { placedBy } from "@helpers/placedBy";
 import PatronRequestNotes from "@components/PatronRequestNotes/PatronRequestNotes";
 import PatronRequestTags from "@components/PatronRequestTags/PatronRequestTags";
+import PatronRequestTagSummary from "@components/PatronRequestTags/PatronRequestTagSummary";
 import {
 	confirmItemReturned,
 	isConfirmReturnEligible,
@@ -644,6 +645,11 @@ function RouteComponent() {
 								{t("patron_request.general")}
 							</Typography>
 						</Grid>
+						{isRequestTagsEnabled() && (
+							<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
+								<PatronRequestTagSummary patronRequestId={id} />
+							</Grid>
+						)}
 						{patronLibrary?.fullName ? (
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 								<Stack direction={"column"}>
