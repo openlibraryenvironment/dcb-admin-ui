@@ -2591,6 +2591,10 @@
 		},
 		"notes": {
 			"title": "Notes",
+			"title_count": "Notes ({{count}})",
+			"link_zero": "No notes",
+			"link_one": "{{count}} note",
+			"link_other": "{{count}} notes",
 			"explanation": "Notes are shared with the libraries involved in this request. A note cannot be edited: retract it and add a new one. A retracted note stays on the request, marked as retracted.",
 			"body": "Note",
 			"body_help": "{{count}} of {{max}} characters",
@@ -2624,6 +2628,7 @@
 			"remove": "Remove",
 			"remove_named": "Remove the consortium's tag {{label}}",
 			"none": "No tags on this request.",
+			"none_short": "None",
 			"manage": "Manage tags",
 			"add_first": "Add a tag",
 			"applied_by": "Applied by {{who}}",

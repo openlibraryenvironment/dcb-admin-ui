@@ -477,3 +477,27 @@ test.describe("Finding a request's tags and notes", () => {
 		await expect(page.getByRole("heading", { name: "Tags" })).toBeFocused();
 	});
 });
+test("the Notes tab counts them, and its address opens on them", async ({
+	page,
+}) => {
+	await mockRequestService(page, [], {
+		notes: [libraryNote(1), libraryNote(2)],
+	});
+	await openRequest(page);
+	await page.getByRole("tab", { name: "Notes (2)" }).click();
+	await expect
+		.poll(() => new URL(page.url()).searchParams.get("tab"))
+		.toBe("notes");
+
+	await page.reload();
+	await expect(page.getByRole("tab", { name: "Notes (2)" })).toHaveAttribute(
+		"aria-selected",
+		"true",
+	);
+	await expect(page.getByText("Library note 2")).toBeVisible();
+
+	await page.getByRole("tab", { name: "General" }).click();
+	await expect
+		.poll(() => new URL(page.url()).searchParams.get("tab"))
+		.toBeNull();
+});

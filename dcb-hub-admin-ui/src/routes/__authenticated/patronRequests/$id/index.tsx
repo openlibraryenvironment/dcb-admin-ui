@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import {
 	createFileRoute,
 	redirect,
+	useNavigate,
 	useRouter,
 	useSearch,
 } from "@tanstack/react-router";
@@ -100,6 +106,23 @@ import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
 import { errorForLog } from "@helpers/safeErrorLog";
+import { z } from "@schemas/zod";
+import { patronRequestNotesQuery } from "@/queryOptions/patronRequestNotesAndTags";
+
+// In the address, by name, so a link can open a request on its notes
+const REQUEST_TABS = [
+	"general",
+	"bib",
+	"supplying",
+	"borrowing",
+	"pickup",
+	"audit",
+	"notes",
+] as const;
+type RequestTab = (typeof REQUEST_TABS)[number];
+const requestTabSchema = z.object({
+	tab: z.enum(REQUEST_TABS).optional().catch(undefined),
+});
 
 // Stable, so the audit grid's columns are not new on every render
 const AUDIT_COLUMNS: GridColDef[] = [
@@ -137,8 +160,10 @@ const AUDIT_COLUMNS: GridColDef[] = [
 ];
 
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
-	validateSearch: (search: Record<string, unknown>) =>
-		validateGridSearch(search, [AUDIT_NAMESPACE]),
+	validateSearch: (search: Record<string, unknown>) => ({
+		...validateGridSearch(search, [AUDIT_NAMESPACE]),
+		...requestTabSchema.parse(search),
+	}),
 	beforeLoad: ({ search, location, params }) => {
 		const restore = rememberedViewRedirect(
 			requestAuditView,
@@ -186,7 +211,26 @@ function RouteComponent() {
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
-	const [activeTab, setActiveTab] = useState(0);
+	const navigate = useNavigate({ from: "/patronRequests/$id/" });
+	const requestedTab = useSearch({
+		from: "/__authenticated/patronRequests/$id/",
+		select: (search) => search.tab,
+	});
+	// A shared link to notes on a deployment without them opens on General
+	const tabName: RequestTab =
+		requestedTab === "notes" && !isRequestNotesEnabled()
+			? "general"
+			: (requestedTab ?? "general");
+	const activeTab = REQUEST_TABS.indexOf(tabName);
+
+	// The first page the Notes tab reads, so its count costs no request of its own once it opens
+	const notes = useInfiniteQuery({
+		...patronRequestNotesQuery(gqlClient, id),
+		...nonCriticalQuery,
+		enabled: isRequestNotesEnabled(),
+	});
+	const noteCount =
+		notes.data?.pages[0]?.patronRequests?.content?.[0]?.notes?.totalSize ?? 0;
 
 	const audit = useGridView(
 		requestAuditView,
@@ -482,7 +526,14 @@ function RouteComponent() {
 		: "";
 
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-		setActiveTab(newValue);
+		const next = REQUEST_TABS[newValue];
+		navigate({
+			search: (previous: Record<string, unknown>) => ({
+				...previous,
+				tab: next === "general" ? undefined : next,
+			}),
+			replace: true,
+		});
 	};
 
 	if (patronRequestLoading) {
@@ -630,7 +681,14 @@ function RouteComponent() {
 					<Tab label={t("patron_request.pickup")} value={4} />
 					<Tab label={t("audit_log.title")} value={5} />
 					{isRequestNotesEnabled() && (
-						<Tab label={t("patron_request.notes.title")} value={6} />
+						<Tab
+							label={
+								noteCount > 0
+									? t("patron_request.notes.title_count", { count: noteCount })
+									: t("patron_request.notes.title")
+							}
+							value={6}
+						/>
 					)}
 				</TabList>
 

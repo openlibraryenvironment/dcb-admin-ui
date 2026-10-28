@@ -29,6 +29,11 @@ import {
 import { formatDuration } from "@helpers/formatDuration";
 import { showItemDiagnostics } from "@helpers/itemDiagnostics";
 import MasterDetailLayout from "./MasterDetailLayout";
+import RequestTagsAndNotes from "./components/RequestTagsAndNotes/RequestTagsAndNotes";
+import {
+	isRequestNotesEnabled,
+	isRequestTagsEnabled,
+} from "@helpers/featureFlags";
 
 type MasterDetailType = {
 	row: any;
@@ -400,6 +405,11 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 		case "patronRequests":
 			return (
 				<MasterDetailLayout width={width}>
+					{(isRequestTagsEnabled() || isRequestNotesEnabled()) && row?.id ? (
+						<Grid size={12}>
+							<RequestTagsAndNotes patronRequestId={row.id} />
+						</Grid>
+					) : null}
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 						<Stack direction="column">
 							<Typography variant="attributeTitle">
