@@ -96,7 +96,8 @@ async function expectNoHorizontalScroll(page: Page) {
 }
 
 /**
- * Wait for an entering MUI dialog to reach full opacity before scanning it. Mid-fade, axe
+ * Wait for an entering MUI dialog or popover to reach full opacity before scanning it.
+ * A popover grows in, and its Paper fades with it, so it needs the same wait. Mid-fade, axe
  * composites the Paper against the backdrop (~#e4e4e4) and reports secondary text at 4.19:1
  * instead of the settled 5.74:1 — an intermittent contrast failure naming a colour pair that
  * is nowhere in the theme. `toBeVisible` is true from the first frame, so it does not help.
@@ -117,7 +118,7 @@ export async function waitForDialogToSettle(page: Page) {
 		.poll(async () =>
 			page.evaluate(() => {
 				const papers = Array.from(
-					document.querySelectorAll(".MuiDialog-paper"),
+					document.querySelectorAll(".MuiDialog-paper, .MuiPopover-paper"),
 				);
 				if (papers.length === 0) return null;
 

@@ -53,6 +53,7 @@ import { Route as _authenticatedSetupIndexRouteImport } from './routes/__authent
 import { Route as _authenticatedSetupStepRouteImport } from './routes/__authenticated/setup/$step'
 import { Route as _authenticatedSetupDoneRouteImport } from './routes/__authenticated/setup/done'
 import { Route as _authenticatedGroupsGroupIdIndexRouteImport } from './routes/__authenticated/groups/$groupId/index'
+import { Route as _authenticatedGroupsGroupIdAnnouncementsRouteImport } from './routes/__authenticated/groups/$groupId/announcements'
 import { Route as _authenticatedGroupsGroupIdInsightsRouteImport } from './routes/__authenticated/groups/$groupId/insights'
 import { Route as _authenticatedGroupsGroupIdSettingsRouteImport } from './routes/__authenticated/groups/$groupId/settings'
 import { Route as _authenticatedLibrariesLibraryIdIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/index'
@@ -348,6 +349,12 @@ const _authenticatedGroupsGroupIdIndexRoute =
   _authenticatedGroupsGroupIdIndexRouteImport.update({
     id: '/groups/$groupId/',
     path: '/groups/$groupId/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedGroupsGroupIdAnnouncementsRoute =
+  _authenticatedGroupsGroupIdAnnouncementsRouteImport.update({
+    id: '/groups/$groupId/announcements',
+    path: '/groups/$groupId/announcements',
     getParentRoute: () => _authenticatedRoute,
   } as any)
 const _authenticatedGroupsGroupIdInsightsRoute =
@@ -682,6 +689,7 @@ export interface FileRoutesByFullPath {
   '/serviceInfo/': typeof _authenticatedServiceInfoIndexRoute
   '/settings/': typeof _authenticatedSettingsIndexRoute
   '/setup/': typeof _authenticatedSetupIndexRoute
+  '/groups/$groupId/announcements': typeof _authenticatedGroupsGroupIdAnnouncementsRoute
   '/groups/$groupId/insights': typeof _authenticatedGroupsGroupIdInsightsRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
@@ -772,6 +780,7 @@ export interface FileRoutesByTo {
   '/serviceInfo': typeof _authenticatedServiceInfoIndexRoute
   '/settings': typeof _authenticatedSettingsIndexRoute
   '/setup': typeof _authenticatedSetupIndexRoute
+  '/groups/$groupId/announcements': typeof _authenticatedGroupsGroupIdAnnouncementsRoute
   '/groups/$groupId/insights': typeof _authenticatedGroupsGroupIdInsightsRoute
   '/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
@@ -865,6 +874,7 @@ export interface FileRoutesById {
   '/__authenticated/serviceInfo/': typeof _authenticatedServiceInfoIndexRoute
   '/__authenticated/settings/': typeof _authenticatedSettingsIndexRoute
   '/__authenticated/setup/': typeof _authenticatedSetupIndexRoute
+  '/__authenticated/groups/$groupId/announcements': typeof _authenticatedGroupsGroupIdAnnouncementsRoute
   '/__authenticated/groups/$groupId/insights': typeof _authenticatedGroupsGroupIdInsightsRoute
   '/__authenticated/groups/$groupId/settings': typeof _authenticatedGroupsGroupIdSettingsRoute
   '/__authenticated/libraries/$libraryId/accounts': typeof _authenticatedLibrariesLibraryIdAccountsRoute
@@ -958,6 +968,7 @@ export interface FileRouteTypes {
     | '/serviceInfo/'
     | '/settings/'
     | '/setup/'
+    | '/groups/$groupId/announcements'
     | '/groups/$groupId/insights'
     | '/groups/$groupId/settings'
     | '/libraries/$libraryId/accounts'
@@ -1048,6 +1059,7 @@ export interface FileRouteTypes {
     | '/serviceInfo'
     | '/settings'
     | '/setup'
+    | '/groups/$groupId/announcements'
     | '/groups/$groupId/insights'
     | '/groups/$groupId/settings'
     | '/libraries/$libraryId/accounts'
@@ -1140,6 +1152,7 @@ export interface FileRouteTypes {
     | '/__authenticated/serviceInfo/'
     | '/__authenticated/settings/'
     | '/__authenticated/setup/'
+    | '/__authenticated/groups/$groupId/announcements'
     | '/__authenticated/groups/$groupId/insights'
     | '/__authenticated/groups/$groupId/settings'
     | '/__authenticated/libraries/$libraryId/accounts'
@@ -1507,6 +1520,13 @@ declare module '@tanstack/react-router' {
       path: '/groups/$groupId'
       fullPath: '/groups/$groupId/'
       preLoaderRoute: typeof _authenticatedGroupsGroupIdIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/groups/$groupId/announcements': {
+      id: '/__authenticated/groups/$groupId/announcements'
+      path: '/groups/$groupId/announcements'
+      fullPath: '/groups/$groupId/announcements'
+      preLoaderRoute: typeof _authenticatedGroupsGroupIdAnnouncementsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
     '/__authenticated/groups/$groupId/insights': {
@@ -1901,6 +1921,7 @@ interface _authenticatedRouteChildren {
   _authenticatedServiceInfoIndexRoute: typeof _authenticatedServiceInfoIndexRoute
   _authenticatedSettingsIndexRoute: typeof _authenticatedSettingsIndexRoute
   _authenticatedSetupIndexRoute: typeof _authenticatedSetupIndexRoute
+  _authenticatedGroupsGroupIdAnnouncementsRoute: typeof _authenticatedGroupsGroupIdAnnouncementsRoute
   _authenticatedGroupsGroupIdInsightsRoute: typeof _authenticatedGroupsGroupIdInsightsRoute
   _authenticatedGroupsGroupIdSettingsRoute: typeof _authenticatedGroupsGroupIdSettingsRoute
   _authenticatedLibrariesLibraryIdAccountsRoute: typeof _authenticatedLibrariesLibraryIdAccountsRoute
@@ -1992,6 +2013,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
   _authenticatedServiceInfoIndexRoute: _authenticatedServiceInfoIndexRoute,
   _authenticatedSettingsIndexRoute: _authenticatedSettingsIndexRoute,
   _authenticatedSetupIndexRoute: _authenticatedSetupIndexRoute,
+  _authenticatedGroupsGroupIdAnnouncementsRoute:
+    _authenticatedGroupsGroupIdAnnouncementsRoute,
   _authenticatedGroupsGroupIdInsightsRoute:
     _authenticatedGroupsGroupIdInsightsRoute,
   _authenticatedGroupsGroupIdSettingsRoute:

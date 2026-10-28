@@ -58,6 +58,13 @@ export interface PatronRequest {
 	isExpeditedCheckout: boolean;
 	/** Selected only while VITE_FEATURE_PLACED_BY_STAFF is on */
 	placedByStaff?: boolean | null;
+	/** Selected only while VITE_FEATURE_REQUEST_TAG_AND_NOTE_SEARCH is on, for the Tags column */
+	tags?: Array<{
+		code?: string | null;
+		label?: string | null;
+		agencyCodes?: Array<string | null> | null;
+		consortium?: boolean | null;
+	} | null> | null;
 	localHoldingId: string;
 	pickupHoldingId: string;
 	renewalStatus: RenewalStatus;

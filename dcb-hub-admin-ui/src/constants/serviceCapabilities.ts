@@ -14,6 +14,7 @@ import {
 	isPlacedByStaffEnabled,
 	isRequestNotesEnabled,
 	isRequestTagsEnabled,
+	isRequestTagAndNoteSearchEnabled,
 	isSettingsInheritanceEnabled,
 	isShelfBrowseEnabled,
 } from "@helpers/featureFlags";
@@ -346,6 +347,15 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 			Mutation: ["addPatronRequestNote", "retractPatronRequestNote"],
 			PatronRequest: REQUEST_NOTE_FIELDS,
 		},
+	},
+	{
+		// No new field: tags are request_tags'. What is new is dcb-service answering
+		// tagCode: and noteText: in a request query, and fetching a page's tags in a batch.
+		id: "request_tag_and_note_search",
+		flag: "VITE_FEATURE_REQUEST_TAG_AND_NOTE_SEARCH",
+		enabled: isRequestTagAndNoteSearchEnabled,
+		since: null,
+		fields: {},
 	},
 	{
 		id: "placed_by_staff",

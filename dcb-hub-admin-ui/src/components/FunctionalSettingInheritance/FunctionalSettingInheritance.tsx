@@ -59,6 +59,9 @@ export interface FunctionalSettingInheritanceProps {
 type ResolvedSetting =
 	LoadResolvedFunctionalSettingsQuery["resolvedFunctionalSettings"][number];
 
+/** dcb-service refuses a longer reason, and a library's name can run to 200 characters. */
+const REASON_MAX_LENGTH = 100;
+
 export default function FunctionalSettingInheritance({
 	scopeType,
 	scopeId,
@@ -136,7 +139,9 @@ export default function FunctionalSettingInheritance({
 					// on one scope and the audit row already carries who, what and when; the
 					// BULK action asks for a reason, because "which twelve libraries and why"
 					// is the question nobody can answer afterwards without one.
-					reason: t("settings_inheritance.reason_single", { scope: scopeName }),
+					reason: t("settings_inheritance.reason_single", {
+						scope: scopeName,
+					}).slice(0, REASON_MAX_LENGTH),
 					changeCategory: "Functional setting",
 				},
 			}),
@@ -161,7 +166,9 @@ export default function FunctionalSettingInheritance({
 					scopeType,
 					scopeIds: [scopeId],
 					name: name as never,
-					reason: t("settings_inheritance.reason_revert", { scope: scopeName }),
+					reason: t("settings_inheritance.reason_revert", {
+						scope: scopeName,
+					}).slice(0, REASON_MAX_LENGTH),
 					changeCategory: "Functional setting",
 				},
 			}),

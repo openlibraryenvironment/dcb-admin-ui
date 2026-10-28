@@ -566,7 +566,13 @@
 		},
 		"supply_count": "{{count}} libraries enabled for supplying.",
 		"name_max": "Group name must be at most 32 characters",
-		"code_max": "Group code must be at most 5 characters"
+		"code_max": "Group code must be at most 5 characters",
+		"announcements": {
+			"scope_help": "For news that affects the libraries in this group: a van delay, a regional closure, a change to how items reach them. Patrons of every library in the group see it. One notice shows at a time.",
+			"publish": "Publish to this group",
+			"confirm_title": "Publish to every patron of this group's libraries?",
+			"confirm_body": "This will show to patrons of the {{libraries}} libraries in {{group}} as soon as you publish."
+		}
 	},
 	"header": {
 		"language_switcher_title": "Language",
@@ -635,6 +641,60 @@
 			"reduced": "Reduce animations"
 		},
 		"reset": "Reset appearance to defaults"
+	},
+	"help": {
+		"trigger": "About {{label}}",
+		"title_value": "{{label}}: {{value}}",
+		"part": {
+			"values": "What it means",
+			"waiting": "If it stays here"
+		},
+		"patron_request_status": {
+			"about": "OpenRS DCB moves a request through these statuses by placing holds in each library's host LMS and reading back their local request and item statuses. 'Previous status' and 'Next expected status' show where it came from and where it should go next. 'Time in status' and the 'Audit log' tab show how long it has been here and what was last attempted.",
+			"values": {
+				"SUBMITTED_TO_DCB": "OpenRS DCB has accepted the request. Next it verifies the patron against their home library's host LMS.",
+				"PATRON_VERIFIED": "The patron's home library has confirmed the patron record. OpenRS DCB is now resolving the request: choosing a supplying library and item from live availability.",
+				"RESOLVED": "OpenRS DCB has selected a supplying library and item. Next it places a hold in the supplier's host LMS, against a virtual patron that stands in for the borrower there.",
+				"NOT_SUPPLIED_CURRENT_SUPPLIER": "The supplier's hold was cancelled, or has gone missing, in its host LMS. If the consortium has 'Re-resolution' turned on and the patron did not choose a particular item, OpenRS DCB resolves the request again, excluding this supplier. Otherwise, or if no other library can supply, the request moves to 'No items selectable at any agency'.",
+				"NO_ITEMS_SELECTABLE_AT_ANY_AGENCY": "Resolution found no item that any library could supply, so the request will not be filled. OpenRS DCB cancels any holds it placed, then finalises the request.",
+				"REQUEST_PLACED_AT_SUPPLYING_AGENCY": "A hold has been placed in the supplying library's host LMS. OpenRS DCB is waiting for that system to report the hold confirmed.",
+				"CONFIRMED": "The supplier's host LMS has confirmed the hold. Next, OpenRS DCB places a hold at the patron's library against a virtual item, or, if the patron's library and the supplier share a host LMS, hands the request off as local.",
+				"HANDED_OFF_AS_LOCAL": "The patron's library and the supplier share a host LMS, so that system's own hold workflow fills the request. OpenRS DCB takes no further action.",
+				"REQUEST_PLACED_AT_BORROWING_AGENCY": "A hold has been placed in the patron's library's host LMS. OpenRS DCB is now waiting for the supplier to put the item in transit.",
+				"REQUEST_PLACED_AT_PICKUP_AGENCY": "The patron is collecting from a third library, so OpenRS DCB has also placed a hold at the pickup library, against a virtual patron. It is now waiting for the supplier to put the item in transit.",
+				"PICKUP_TRANSIT": "The supplier's host LMS has told OpenRS DCB that the item, or its hold, is in transit. The item is on its way to the pickup library.",
+				"RECEIVED_AT_PICKUP": "The pickup library's host LMS has told OpenRS DCB that it has received the item. Next, it will go on the hold shelf for the patron.",
+				"READY_FOR_PICKUP": "The pickup library's host LMS has told OpenRS DCB that the item is on the hold shelf, waiting for the patron to collect it.",
+				"LOANED": "The item has now been checked out to the patron. OpenRS DCB mirrors the loan to the virtual patron at the supplier, handles renewals, and watches for the return.",
+				"RETURN_TRANSIT": "The patron's library has told OpenRS DCB that the item is on its way back to the supplying library.",
+				"AWAITING_RETURN_TO_SUPPLIER": "The patron's hold was cancelled after the item had left the supplying library. OpenRS DCB keeps its records and keeps tracking the item until it is back, then cancels and finalises the request.",
+				"CANCELLED": "The request was cancelled before the item left the supplier, or the item has since gone back. OpenRS DCB has cancelled its holds, and finalises the request next.",
+				"COMPLETED": "Nothing more is needed from the libraries: the supplier's host LMS reports the item back, or the request was ended with 'Force clean up'. OpenRS DCB finalises it next.",
+				"FINALISED": "OpenRS DCB has deleted the virtual records it created in each library's host LMS. The request is closed.",
+				"ERROR": "A step failed and the workflow has stopped. Please check 'Error message' on the 'General' tab and the audit log to see which step failed and why.",
+				"ARCHIVED": "The request is closed and kept for reporting. OpenRS DCB no longer tracks it."
+			},
+			"waiting": {
+				"SUBMITTED_TO_DCB": "OpenRS DCB verifies the patron straight away, and a failure moves the request to 'Error'. A request that stays here was interrupted; the audit log shows the last attempt.",
+				"PATRON_VERIFIED": "Resolution runs straight away. Finding nothing at this stage will move the request to 'No items selectable at any agency', and a failure moves it to 'Error', so a request that stays here was interrupted; the audit log shows the last attempt.",
+				"RESOLVED": "OpenRS DCB places the supplier hold straight away, and a failure at this point moves the request to 'Error'. A request that stays here was interrupted; the audit log shows the last attempt.",
+				"NOT_SUPPLIED_CURRENT_SUPPLIER": "OpenRS DCB acts on this straight away. A request that stays here was interrupted; the audit log shows the last attempt.",
+				"NO_ITEMS_SELECTABLE_AT_ANY_AGENCY": "In this status, the finalisation process runs straight away. A request that stays here has not finalised; the audit log shows the last attempt.",
+				"REQUEST_PLACED_AT_SUPPLYING_AGENCY": "The supplier has not yet confirmed the hold. Compare 'Local request status' on the 'Supplying' tab: OpenRS DCB moves on when it reads the hold as confirmed or in transit, and to 'Not supplied by current supplier' if the hold is cancelled or missing.",
+				"CONFIRMED": "OpenRS DCB places the borrowing hold straight away, and a failure moves the request to 'Error'. A request that stays here was interrupted; the audit log shows the last attempt.",
+				"REQUEST_PLACED_AT_BORROWING_AGENCY": "The supplier has not yet sent the item. OpenRS DCB moves on when the supplier's host LMS reports the item or hold in transit ('Local item status' and 'Local request status' on the 'Supplying' tab), or when the patron's library reports the item received.",
+				"REQUEST_PLACED_AT_PICKUP_AGENCY": "The supplier has not yet sent the item. OpenRS DCB moves on when the supplier's host LMS reports the item or hold in transit (the 'Supplying' tab), or when the pickup library reports the item received ('Pickup item status' on the 'Pickup' tab).",
+				"PICKUP_TRANSIT": "The item is still on its way to the pickup library. OpenRS DCB moves on when the receiving library's host LMS reports the item received or on the hold shelf: 'Virtual item status' on the 'Borrowing' tab, or 'Pickup item status' on the 'Pickup' tab.",
+				"RECEIVED_AT_PICKUP": "The item has arrived but is not yet on the hold shelf. OpenRS DCB moves on when the receiving library's host LMS reports it on the hold shelf.",
+				"READY_FOR_PICKUP": "The item has not yet been checked out to the patron. OpenRS DCB moves on when the item is checked out. If the patron's hold is cancelled first, the request moves to 'Awaiting return to supplier'.",
+				"LOANED": "The item is still with the patron. OpenRS DCB moves on when the patron's library reports the item checked in; for a walk-up loan, when the supplier's host LMS reports it available. A hold placed on the item at the supplier changes 'Renewal status' to 'DISALLOWED'.",
+				"RETURN_TRANSIT": "This is the courier again. OpenRS DCB moves on when the supplier's host LMS reports the item received or available: 'Local item status' on the 'Supplying' tab. If the item is back but that system does not say so, use 'Confirm item is back' if the Actions menu offers it.",
+				"AWAITING_RETURN_TO_SUPPLIER": "The item has not reached the supplier. OpenRS DCB moves on when the supplier's host LMS reports it received or available. If the item is back but that system does not say so, use 'Confirm item is back' if the Actions menu offers it.",
+				"CANCELLED": "Finalising runs straight away. A request that stays here has not finalised; the audit log shows the last attempt.",
+				"COMPLETED": "Finalising runs straight away. A request that stays here has not finalised; the audit log shows the last attempt.",
+				"ERROR": "A request in 'Error' does not retry. Once the cause is fixed, an administrator can use 'Roll back' in the Actions menu to return it to its previous status, or 'Force clean up' to end it."
+			}
+		}
 	},
 	"hostlms": {
 		"alert_text": "Failed to fetch HostLMS, will retry. If this error persists, please refresh the page.",
@@ -2097,7 +2157,8 @@
 			"profile": "Profile",
 			"patronRequests": "Patron requests",
 			"settings": "Settings",
-			"supplierRequests": "Supplier requests"
+			"supplierRequests": "Supplier requests",
+			"announcements": "Announcements"
 		},
 		"home": "Home",
 		"hostlmss": "Host LMSs",
@@ -2530,6 +2591,11 @@
 		},
 		"notes": {
 			"title": "Notes",
+			"title_count": "Notes ({{count}})",
+			"link_zero": "No notes",
+			"link_one": "{{count}} note",
+			"link_other": "{{count}} notes",
+			"search": "Note text",
 			"explanation": "Notes are shared with the libraries involved in this request. A note cannot be edited: retract it and add a new one. A retracted note stays on the request, marked as retracted.",
 			"body": "Note",
 			"body_help": "{{count}} of {{max}} characters",
@@ -2563,6 +2629,9 @@
 			"remove": "Remove",
 			"remove_named": "Remove the consortium's tag {{label}}",
 			"none": "No tags on this request.",
+			"none_short": "None",
+			"manage": "Manage tags",
+			"add_first": "Add a tag",
 			"applied_by": "Applied by {{who}}",
 			"consortium": "the consortium",
 			"all_applied": "Every active tag is already on this request.",
@@ -3315,7 +3384,8 @@
 				"duplicate": "The agency code {{code}} appears more than once in this file.",
 				"latitude_range": "Latitude must be between -90 and 90.",
 				"longitude_range": "Longitude must be between -180 and 180.",
-				"email": "{{column}} is not a valid email address."
+				"email": "{{column}} is not a valid email address.",
+				"link": "{{column}} is not a full web address. Start it with https:// or http://."
 			},
 			"columns": {
 				"agencyCode": "The unique code for this library, used everywhere in DCB. Cannot be changed later.",
@@ -3375,6 +3445,7 @@
 			"shelf_browse": "Shelf browse",
 			"request_tags": "Request tags",
 			"request_notes": "Request notes",
+			"request_tag_and_note_search": "Search by tag and note, and a Tags column",
 			"placed_by_staff": "Placed by staff or patron"
 		},
 		"status": {
@@ -3385,8 +3456,8 @@
 			"unknown": "Cannot tell - the dcb-service version could not be read"
 		},
 		"alert": {
-			"available": "{{feature}} is now served by this dcb-service. Set {{flag}}=true to switch it on.",
-			"premature": "{{feature}} is switched on, but this dcb-service does not serve it. Set {{flag}}=false until the service is upgraded."
+			"available": "{{feature}} is now served by this dcb-service. Set {{settings}} to switch it on.",
+			"premature": "{{feature}} is switched on, but this dcb-service does not serve it. Set {{settings}} until the service is upgraded."
 		}
 	},
 	"settings_inheritance": {

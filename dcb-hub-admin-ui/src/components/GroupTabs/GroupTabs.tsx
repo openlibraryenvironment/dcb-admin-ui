@@ -3,7 +3,11 @@ import { Tabs } from "@mui/material";
 
 import { TabLink } from "@components/TabLink/TabLink";
 
-import { isInsightsPageShown } from "@helpers/featureFlags";
+import {
+	isAnnouncementsEnabled,
+	isInsightsPageShown,
+} from "@helpers/featureFlags";
+import { useIsConsortiumAdmin } from "@hooks/useIsConsortiumAdmin";
 import { TABS } from "@constants/groupTabs";
 
 interface GroupTabsProps {
@@ -14,6 +18,7 @@ interface GroupTabsProps {
 
 export default function GroupTabs({ groupId, value }: GroupTabsProps) {
 	const { t } = useTranslation();
+	const isConsortiumAdmin = useIsConsortiumAdmin();
 
 	const pathFor = (path: string) => `/groups/${groupId}${path}`;
 
@@ -22,7 +27,10 @@ export default function GroupTabs({ groupId, value }: GroupTabsProps) {
 	// page's `value` because those index the UNFILTERED array - hidden only decides what
 	// renders.
 	const visibleTabs = TABS.filter(
-		(tab) => tab.path !== "/insights" || isInsightsPageShown("groups"),
+		(tab) =>
+			(tab.path !== "/insights" || isInsightsPageShown("groups")) &&
+			(tab.path !== "/announcements" ||
+				(isAnnouncementsEnabled() && isConsortiumAdmin)),
 	);
 
 	return (

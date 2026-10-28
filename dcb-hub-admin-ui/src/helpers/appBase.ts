@@ -84,6 +84,12 @@ export const toRoutePath = (
 		: pathname;
 };
 
+/** The router path with its search and hash: the address to come back to after signing in. */
+export const toRouteHref = (
+	location: Pick<Location, "pathname" | "search" | "hash"> = window.location,
+): string =>
+	`${toRoutePath(location.pathname)}${location.search}${location.hash}`;
+
 /**
  * Narrows an attacker-controllable "come back here afterwards" value to a path
  * inside this app, or to nothing.

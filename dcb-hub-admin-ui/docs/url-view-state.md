@@ -129,6 +129,22 @@ Which grids remember:
 - **No URL at all:** grids without a toolbar, which have nothing to share but their page: consortium
   contacts, a cluster's members and the onboarding list.
 
+## Through sign-in
+
+A link opened while signed out comes back to its view once the reader signs in. The whole address,
+search and hash included, is carried as `/login?redirect=` and kept in session storage across the
+identity provider's round trip. A page whose session ends on a refused request goes to
+`/logout?redirect=` the same way, and signing in again from there returns to it.
+
+Two things do not come back:
+
+- **Private filters.** They live in the tab's history entry, and signing in is a new page load.
+- **The page after the 30-minute idle sign-out.** That sign-out goes through the identity provider's
+  logout, and the address is not sent there, so signing in again opens the home page.
+
+`e2e/url-view-state.spec.ts`, "A view's link through sign-in", signs in against a stand-in identity
+provider for both routes.
+
 ## Adding a grid
 
 - Define the grid's `GridViewSpec` in `src/constants/dataGrid/gridViews.ts`: its id, default sort,

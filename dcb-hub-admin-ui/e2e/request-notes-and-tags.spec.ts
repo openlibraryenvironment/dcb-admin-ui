@@ -454,3 +454,52 @@ test.describe("A deployment older than dcb-service 9.2.0", () => {
 		expect(documents).not.toContain("LoadRequestTags");
 	});
 });
+
+test.describe("Finding a request's tags and notes", () => {
+	test.beforeEach(async ({ page }) => {
+		await useAllFeatures(page);
+	});
+
+	test("its tags head the General tab, in their colours, and lead to where they are managed", async ({
+		page,
+	}) => {
+		await mockRequestService(page, []);
+		await openRequest(page);
+
+		const summary = page.getByRole("list", { name: "Tags" });
+		await expect(summary.getByText("Damaged")).toBeVisible();
+		// A starter tag's colour comes from the theme's error palette until dcb-service stores one
+		await expect(
+			summary.locator(".MuiChip-colorError", { hasText: "Damaged" }),
+		).toBeVisible();
+
+		await page.getByRole("button", { name: "Manage tags" }).click();
+		await expect(page.getByRole("heading", { name: "Tags" })).toBeFocused();
+	});
+
+	test("the Notes tab counts them, and its address opens on them", async ({
+		page,
+	}) => {
+		await mockRequestService(page, [], {
+			notes: [libraryNote(1), libraryNote(2)],
+		});
+		await openRequest(page);
+
+		await page.getByRole("tab", { name: "Notes (2)" }).click();
+		await expect
+			.poll(() => new URL(page.url()).searchParams.get("tab"))
+			.toBe("notes");
+
+		await page.reload();
+		await expect(page.getByRole("tab", { name: "Notes (2)" })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
+		await expect(page.getByText("Library note 2")).toBeVisible();
+
+		await page.getByRole("tab", { name: "General" }).click();
+		await expect
+			.poll(() => new URL(page.url()).searchParams.get("tab"))
+			.toBeNull();
+	});
+});

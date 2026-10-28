@@ -547,6 +547,15 @@ export const ROUTES: ScannedRoute[] = [
 		},
 	},
 	{
+		// The consortium page's compose form, scoped to the group
+		path: "/groups/99999999-1111-5111-9111-111111111111/announcements",
+		ready: async (page) => {
+			await expect(
+				page.getByRole("textbox", { name: "Headline" }),
+			).toBeVisible();
+		},
+	},
+	{
 		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/contacts",
 		ready: async (page) => {
 			await expect(

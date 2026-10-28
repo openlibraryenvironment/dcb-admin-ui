@@ -1,6 +1,17 @@
 import { gql } from "graphql-request";
 
 import { capabilitySelection } from "@helpers/capabilityFields";
+import {
+	isRequestTagAndNoteSearchEnabled,
+	isRequestTagsEnabled,
+} from "@helpers/featureFlags";
+
+// The Tags column's. Not a capabilitySelection: tags is an object, and the column needs a
+// dcb-service that batches it, which request_tags alone does not promise.
+const tagsSelection = (): string =>
+	isRequestTagAndNoteSearchEnabled() && isRequestTagsEnabled()
+		? "tags { code label }"
+		: "";
 
 /**
  * The single source of truth for the fields every patron request GRID needs -
@@ -49,6 +60,7 @@ export const patronRequestFields = (): string => gql`
 		pickupItemId
 		isExpeditedCheckout
 		${capabilitySelection("placed_by_staff", "PatronRequest")}
+		${tagsSelection()}
 		rawLocalRequestStatus
 		rawLocalItemStatus
 		localRequestId

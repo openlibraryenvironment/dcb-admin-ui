@@ -180,3 +180,24 @@ describe("buildFilterQuery: pickup library (virtual field)", () => {
 		);
 	});
 });
+
+// dcb-service's tag and note search fields: the shapes its branch was built to accept
+describe("buildFilterQuery: tag and note search", () => {
+	it("sends a tag as a bare code, and several as an OR group", () => {
+		expect(buildFilterQuery("tagCode", "is", "DAMAGED")).toBe(
+			"tagCode:DAMAGED",
+		);
+		expect(
+			buildFilterQuery("tagCode", "isAnyOf", ["DAMAGED", "SLOW_TO_SHIP"]),
+		).toBe("(tagCode:DAMAGED OR tagCode:SLOW_TO_SHIP)");
+		expect(buildFilterQuery("tagCode", "not", "DAMAGED")).toBe(
+			"*:* AND NOT (tagCode:DAMAGED)",
+		);
+	});
+
+	it("sends note text as a quoted phrase, never as a wildcard term", () => {
+		expect(
+			buildFilterQuery("noteText", "containsPhrase", 'said "water damage": ok'),
+		).toBe('noteText:"said \\"water damage\\": ok"');
+	});
+});

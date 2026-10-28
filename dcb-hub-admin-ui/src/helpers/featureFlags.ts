@@ -217,6 +217,15 @@ export const isRequestNotesEnabled = (): boolean =>
 export const isPlacedByStaffEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_PLACED_BY_STAFF");
 
+/**
+ * Searching patron requests by tag (`tagCode:`) and by note text (`noteText:`), and the
+ * grids' Tags column, which needs dcb-service to fetch a page's tags in one batch rather
+ * than one query per row. No dcb-service release serves it yet. Gates the documents and
+ * the queries: an older dcb-service rejects both search fields.
+ */
+export const isRequestTagAndNoteSearchEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_REQUEST_TAG_AND_NOTE_SEARCH");
+
 /** A setting that is not on or off, read from where readFlag reads. */
 const readSetting = (name: string): string | undefined => {
 	const injected =

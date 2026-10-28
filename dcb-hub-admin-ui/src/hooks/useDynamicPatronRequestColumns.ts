@@ -9,7 +9,17 @@ import {
 	placedByStaffColumn,
 	standardPatronRequestColumns,
 } from "@columns/getPatronRequestColumns";
-import { isPlacedByStaffEnabled } from "@helpers/featureFlags";
+import {
+	isPlacedByStaffEnabled,
+	isRequestNotesEnabled,
+	isRequestTagAndNoteSearchEnabled,
+	isRequestTagsEnabled,
+} from "@helpers/featureFlags";
+import { useQuery } from "@tanstack/react-query";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { requestTagsQuery } from "@/queryOptions/requestTags";
+import { noteTextColumn, tagsColumn } from "@columns/requestTagColumns";
 import { isOnly } from "@filters/isOnly";
 import { getDcbWorkflowOptions } from "@constants/workflows/DCBWorkflows";
 import { PICKUP_LIBRARY_DELIMITER } from "@helpers/dataGrid/buildFilterQuery";
@@ -90,15 +100,36 @@ export const useDynamicPatronRequestColumns = ({
 
 	const workflowOptions = useMemo(() => getDcbWorkflowOptions(t), [t]);
 
+	const searchable = isRequestTagAndNoteSearchEnabled();
+	const showTags = searchable && isRequestTagsEnabled();
+	const showNoteText = searchable && isRequestNotesEnabled();
+
+	// The Tags column's filter offers the consortium's list: at most 100 tags, not paged
+	const vocabulary = useQuery({
+		...requestTagsQuery(useGraphQLClient()),
+		...nonCriticalQuery,
+		enabled: showTags,
+	});
+	const tagOptions = useMemo(
+		() =>
+			(vocabulary.data?.requestTags ?? []).flatMap((tag) =>
+				tag?.code ? [{ value: tag.code, label: tag.label ?? tag.code }] : [],
+			),
+		[vocabulary.data],
+	);
+
 	const baseColumns =
 		variant === "noStatus"
 			? patronRequestColumnsNoStatusFilter
 			: standardPatronRequestColumns;
 
 	const columns = useMemo(() => {
-		const withFlagged = isPlacedByStaffEnabled()
-			? [...baseColumns, placedByStaffColumn(t)]
-			: baseColumns;
+		const withFlagged = [
+			...baseColumns,
+			...(isPlacedByStaffEnabled() ? [placedByStaffColumn(t)] : []),
+			...(showTags ? [tagsColumn(t, tagOptions)] : []),
+			...(showNoteText ? [noteTextColumn(t)] : []),
+		];
 		return withFlagged.map((col) => {
 			if (col.field === "pickupLocationCode") {
 				return {
@@ -158,6 +189,9 @@ export const useDynamicPatronRequestColumns = ({
 		pickupLibraryOptions,
 		pickupLibraryTokenByLocationId,
 		workflowOptions,
+		showTags,
+		showNoteText,
+		tagOptions,
 		t,
 	]);
 

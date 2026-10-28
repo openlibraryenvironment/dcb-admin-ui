@@ -10,17 +10,27 @@ import type { ColumnLayout } from "@hooks/useGridView";
 // MUI's own columns (`__check__`, `__detail_panel_toggle__`) are not the reader's to move
 export const isOwnColumn = (field: string) => field.startsWith("__");
 
-/** Columns in this order; any the order does not name keep their relative places after it. */
-const orderColumns = (
+/**
+ * Columns in this order; any the order does not name keep their relative places after it.
+ * MUI's own columns keep their slots: the order never names them, so sorting them would put
+ * the checkbox and the expander last.
+ */
+export const orderColumns = (
 	columns: GridColDef[],
 	order: readonly string[] | undefined,
 ) => {
 	if (!order?.length) return columns;
 	const rank = new Map(order.map((field, index) => [field, index]));
-	return [...columns].sort(
-		(a, b) =>
-			(rank.get(a.field) ?? Number.MAX_SAFE_INTEGER) -
-			(rank.get(b.field) ?? Number.MAX_SAFE_INTEGER),
+	const sorted = columns
+		.filter((column) => !isOwnColumn(column.field))
+		.sort(
+			(a, b) =>
+				(rank.get(a.field) ?? Number.MAX_SAFE_INTEGER) -
+				(rank.get(b.field) ?? Number.MAX_SAFE_INTEGER),
+		);
+	let next = 0;
+	return columns.map((column) =>
+		isOwnColumn(column.field) ? column : sorted[next++],
 	);
 };
 
