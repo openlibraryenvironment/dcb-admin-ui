@@ -2595,6 +2595,7 @@
 			"link_zero": "No notes",
 			"link_one": "{{count}} note",
 			"link_other": "{{count}} notes",
+			"search": "Note text",
 			"explanation": "Notes are shared with the libraries involved in this request. A note cannot be edited: retract it and add a new one. A retracted note stays on the request, marked as retracted.",
 			"body": "Note",
 			"body_help": "{{count}} of {{max}} characters",
@@ -3444,6 +3445,7 @@
 			"shelf_browse": "Shelf browse",
 			"request_tags": "Request tags",
 			"request_notes": "Request notes",
+			"request_tag_and_note_search": "Search by tag and note, and a Tags column",
 			"placed_by_staff": "Placed by staff or patron"
 		},
 		"status": {
