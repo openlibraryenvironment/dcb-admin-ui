@@ -55,8 +55,9 @@ Note text goes as a quoted phrase. A bare term would have its spaces turned into
 be parsed as a wildcard, which dcb-service does not read as a note search.
 
 **Why the column has a flag of its own.** dcb-service 9.2.0 already returns `tags` on a
-patron request, but fetches them one request at a time: an access check and a query per
-row, so a 100-row page costs about 200 queries. The column waits for the dcb-service that
-fetches a page's tags in one batch, and the search fields arrive in the same change. Both
+patron request, but fetches them one request at a time: a tags query and a tag-list query
+per row, so a 100-row page costs about 200 queries for consortium staff. The column waits
+for the dcb-service that fetches a page's tags in one batch, two queries a page whatever
+its size, and the search fields arrive in the same change. Both
 are on dcb-service `feat/patron-request-tag-and-note-search` and in no release yet, so
 the flag's capability row has `since: null`.
