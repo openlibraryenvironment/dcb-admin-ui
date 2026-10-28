@@ -16,6 +16,24 @@
 			}
 		}
 	},
+	"help": {
+		"patron_request_status": {
+			"values": {
+				"NOT_SUPPLIED_CURRENT_SUPPLIER": "The supplier's hold was canceled, or has gone missing, in its host LMS. If the consortium has 'Re-resolution' turned on and the patron did not choose a particular item, OpenRS DCB resolves the request again, excluding this supplier. Otherwise, or if no other library can supply, the request moves to 'No items selectable at any agency'.",
+				"NO_ITEMS_SELECTABLE_AT_ANY_AGENCY": "Resolution found no item that any library could supply, so the request will not be filled. OpenRS DCB cancels any holds it placed, then finalizes the request.",
+				"AWAITING_RETURN_TO_SUPPLIER": "The patron's hold was canceled after the item had left the supplying library. OpenRS DCB keeps its records and keeps tracking the item until it is back, then cancels and finalizes the request.",
+				"CANCELLED": "The request was canceled before the item left the supplier, or the item has since gone back. OpenRS DCB has canceled its holds, and finalizes the request next.",
+				"COMPLETED": "Nothing more is needed from the libraries: the supplier's host LMS reports the item back, or the request was ended with 'Force clean up'. OpenRS DCB finalizes it next."
+			},
+			"waiting": {
+				"NO_ITEMS_SELECTABLE_AT_ANY_AGENCY": "In this status, the finalization process runs straight away. A request that stays here has not finalized; the audit log shows the last attempt.",
+				"REQUEST_PLACED_AT_SUPPLYING_AGENCY": "The supplier has not yet confirmed the hold. Compare 'Local request status' on the 'Supplying' tab: OpenRS DCB moves on when it reads the hold as confirmed or in transit, and to 'Not supplied by current supplier' if the hold is canceled or missing.",
+				"READY_FOR_PICKUP": "The item has not yet been checked out to the patron. OpenRS DCB moves on when the item is checked out. If the patron's hold is canceled first, the request moves to 'Awaiting return to supplier'.",
+				"CANCELLED": "Finalizing runs straight away. A request that stays here has not finalized; the audit log shows the last attempt.",
+				"COMPLETED": "Finalizing runs straight away. A request that stays here has not finalized; the audit log shows the last attempt."
+			}
+		}
+	},
 	"hostlms": {
 		"verification": {
 			"ingest_timeout_advice": "DCB stops waiting after 20 seconds. For a large catalog the harvest often succeeds shortly afterwards, so check the library's Bib records page once setup is finished before treating this as a failure."

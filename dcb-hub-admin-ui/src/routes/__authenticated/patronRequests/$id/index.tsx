@@ -30,6 +30,7 @@ import {
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Error from "@components/Error/Error";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
+import AttributeHelp from "@components/HelpPopover/AttributeHelp";
 import DataGrid from "@components/DataGrid/DataGrid";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
 import PageLoading from "@components/Loading/PageLoading";
@@ -792,7 +793,23 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("patron_request.status")}
 								</Typography>
-								<RenderAttribute attribute={patronRequest?.status} />
+								<Stack
+									direction="row"
+									sx={{ alignItems: "center" }}
+									spacing={0.5}
+								>
+									<RenderAttribute attribute={patronRequest?.status} />
+									<AttributeHelp
+										topic="patron_request_status"
+										label={t("patron_request.status")}
+										value={patronRequest?.status}
+										valueLabel={
+											patronRequest?.status
+												? t(`patron_request.statuses.${patronRequest.status}`)
+												: undefined
+										}
+									/>
+								</Stack>
 							</Stack>
 						</Grid>
 
