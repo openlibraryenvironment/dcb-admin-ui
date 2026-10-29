@@ -3349,6 +3349,8 @@
 			"explanation": "Upload a CSV or TSV file with one row per library. Nothing is created until you have seen what would change and confirmed it.",
 			"download_template": "Download the template",
 			"choose_file": "Choose a file",
+			"loading_lookups": "Loading the Host LMS systems and libraries your file is checked against…",
+			"lookups_failed": "We could not load the Host LMS systems and libraries your file is checked against. Nothing can be checked until they load.",
 			"limits": "Up to {{rows}} rows and {{size}}. CSV or TSV; the separator is detected from the file.",
 			"too_large": "That file is {{size}}, which is over the {{max}} limit. Split it into smaller files, or check that it is a spreadsheet export and not a whole workbook.",
 			"no_rows": "That file has a header but no library rows in it.",
