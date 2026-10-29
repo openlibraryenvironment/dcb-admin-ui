@@ -463,6 +463,21 @@ test.describe("Setup - structure and behaviour", () => {
 		await expect(page).toHaveURL(/\/setup\/done$/);
 	});
 
+	test("a finished setup does not report the optional chapter as passed over", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, { ...MOCKS, LoadConsortium: finishedConsortium });
+		await page.goto("/setup/done");
+
+		await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+			"You are set up",
+		);
+		await expect(page.getByText(/you passed over/i)).toBeHidden();
+		await expect(
+			page.getByRole("listitem").filter({ hasText: "Appearance" }),
+		).toContainText("Optional");
+	});
+
 	test("the inventory links every chapter, finished ones included", async ({
 		page,
 	}) => {

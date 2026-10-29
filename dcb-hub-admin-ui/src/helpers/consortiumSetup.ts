@@ -153,6 +153,11 @@ export interface ConsortiumSetupProgress {
 
 export interface ConsortiumSetupState {
 	steps: ConsortiumSetupStep[];
+	/**
+	 * Reachable chapters with work left in them, in flow order. Never the optional one,
+	 * and never a skipped one. Every list of "still to do" reads this.
+	 */
+	outstandingSteps: ConsortiumSetupStep[];
 	/** The first chapter with outstanding work. Undefined when nothing is outstanding. */
 	firstIncompleteStep?: ConsortiumSetupStepId;
 	/**
@@ -289,6 +294,7 @@ export const evaluateConsortiumSetup = ({
 
 	return {
 		steps,
+		outstandingSteps: outstanding,
 		firstIncompleteStep,
 		resumeStep:
 			!hasConsortium || !firstIncompleteStep ? enabled[0] : firstIncompleteStep,

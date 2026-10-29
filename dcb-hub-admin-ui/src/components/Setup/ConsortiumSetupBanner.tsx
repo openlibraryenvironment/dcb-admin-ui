@@ -39,9 +39,7 @@ export default function ConsortiumSetupBanner() {
 	if (isPending || isError || !canAct) return null;
 	if (state.isComplete || bannerDismissed) return null;
 
-	const outstanding = state.steps.filter(
-		(step) => step.available && !step.complete && !step.skipped,
-	);
+	const outstanding = state.outstandingSteps;
 	if (outstanding.length === 0) return null;
 
 	return (
