@@ -107,10 +107,12 @@ function SetupDonePage() {
 						? t("setup.done.title")
 						: t("setup.done.title_partial")}
 				</Typography>
-				<Typography sx={{ color: "text.secondary" }}>
-					{t("setup.done.subtitle", { count: libraryCount })}
-					{state.isComplete ? ` ${t("setup.done.revisit_hint")}` : ""}
-				</Typography>
+				{!state.isFresh && (
+					<Typography sx={{ color: "text.secondary" }}>
+						{t("setup.done.subtitle", { count: libraryCount })}
+						{state.isComplete ? ` ${t("setup.done.revisit_hint")}` : ""}
+					</Typography>
+				)}
 
 				<List>
 					{state.steps.map((step) => {

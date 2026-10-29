@@ -478,6 +478,18 @@ test.describe("Setup - structure and behaviour", () => {
 		).toContainText("Optional");
 	});
 
+	test("the finish page does not claim a consortium that does not exist", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, { ...MOCKS, LoadConsortium: noConsortium });
+		await page.goto("/setup/done");
+
+		await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+			"Setup so far",
+		);
+		await expect(page.getByText(/your consortium exists/i)).toBeHidden();
+	});
+
 	test("the inventory links every chapter, finished ones included", async ({
 		page,
 	}) => {
