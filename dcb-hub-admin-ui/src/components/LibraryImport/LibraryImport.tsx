@@ -243,6 +243,7 @@ export default function LibraryImport({
 			applyLibraryImport(gqlClient, selected, {
 				consortiumGroupId,
 				onProgress: (done, total) => setProgress({ done, total }),
+				unknownError: t("ui.error.general"),
 			}),
 		onSuccess: (results) => {
 			setOutcomes(results);
