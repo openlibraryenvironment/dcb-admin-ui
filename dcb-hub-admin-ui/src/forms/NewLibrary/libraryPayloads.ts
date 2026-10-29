@@ -79,6 +79,7 @@ export const EMPTY_LIBRARY_FORM: LibraryFormDefaults = {
 	reason: defaultCreationReason("libraries.library"),
 	changeReferenceUrl: "",
 	libraryId: "",
+	hostLmsId: "",
 	contacts: [{ ...EMPTY_CONTACT }],
 	groupId: "",
 };
@@ -104,6 +105,7 @@ export const formValuesFromLibrary = (library: any): LibraryFormDefaults => {
 	return {
 		...EMPTY_LIBRARY_FORM,
 		hostLmsCode: library?.agency?.hostLms?.code ?? "",
+		hostLmsId: library?.agency?.hostLms?.id ?? "",
 		hostLmsName: library?.agency?.hostLms?.name ?? "",
 		lmsClientClass: library?.agency?.hostLms?.lmsClientClass ?? "",
 		agencyCode: library?.agencyCode ?? "",

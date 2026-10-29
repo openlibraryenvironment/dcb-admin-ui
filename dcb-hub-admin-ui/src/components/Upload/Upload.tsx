@@ -337,7 +337,8 @@ export default function FileUpload({
 							count: existingMappingCount,
 							fileName: addedFile?.name,
 							code,
-							category,
+							// Locations have no category of their own; the wizard never sets one.
+							category: type === "Locations" ? type.toLowerCase() : category,
 							type,
 							libraryName,
 						}}

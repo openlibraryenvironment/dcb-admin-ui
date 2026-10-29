@@ -204,10 +204,11 @@ export default function NewLibrary({
 			: EMPTY_LIBRARY_FORM,
 	});
 
-	const [watchedHostLmsCode, watchedAgencyCode, lmsClientClass] = useWatch({
-		control: methods.control,
-		name: ["hostLmsCode", "agencyCode", "lmsClientClass"],
-	});
+	const [watchedHostLmsCode, watchedAgencyCode, lmsClientClass, hostLmsId] =
+		useWatch({
+			control: methods.control,
+			name: ["hostLmsCode", "agencyCode", "lmsClientClass", "hostLmsId"],
+		});
 	const requiresNumericMappings =
 		lmsClientClass?.toLowerCase().includes("sierra") ||
 		lmsClientClass?.toLowerCase().includes("polaris");
@@ -466,6 +467,7 @@ export default function NewLibrary({
 					throw new Error(t("hostlms.error.no_data_returned"));
 				}
 				methods.setValue("hostLmsCode", hostLmsData.hostLms.code);
+				methods.setValue("hostLmsId", hostLmsData.hostLms.id);
 				const agencyCode = agencyCodeFromHostLms(
 					formData.agencyCode,
 					clientConfig,
@@ -718,6 +720,7 @@ export default function NewLibrary({
 				return (
 					<LocationsStep
 						hostLmsCode={watchedHostLmsCode}
+						hostLmsId={hostLmsId}
 						agencyCode={watchedAgencyCode ?? ""}
 					/>
 				);

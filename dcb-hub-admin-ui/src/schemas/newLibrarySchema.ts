@@ -213,6 +213,7 @@ export const newLibrarySchema = z
 		// mutation payload, so whatever the user typed was silently discarded.
 		changeReferenceUrl: z.string().optional(),
 		libraryId: z.string().optional(),
+		hostLmsId: z.string().optional(),
 		contacts: z
 			.array(
 				z.object({

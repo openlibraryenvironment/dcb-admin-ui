@@ -10,11 +10,14 @@ import { getILS } from "@helpers/getILS";
 
 interface LocationsStepProps {
 	hostLmsCode: string;
+	/** Lets the import count the locations a file would replace, and warn first. */
+	hostLmsId?: string;
 	agencyCode: string;
 }
 
 export default function LocationsStep({
 	hostLmsCode,
+	hostLmsId,
 	agencyCode,
 }: LocationsStepProps) {
 	const { t } = useTranslation();
@@ -149,6 +152,7 @@ export default function LocationsStep({
 					onClose={() => setShowImport(false)}
 					type="Locations"
 					presetHostLms={hostLmsCode}
+					presetHostLmsId={hostLmsId || undefined}
 					libraryName={libraryName}
 					onImported={(count) => setAddedCount((prev) => (prev ?? 0) + count)}
 				/>

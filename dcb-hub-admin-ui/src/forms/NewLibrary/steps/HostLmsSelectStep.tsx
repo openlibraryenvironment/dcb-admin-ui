@@ -100,6 +100,7 @@ export default function HostLmsSelectStep() {
 							// has to travel with the code rather than be inferred later.
 							setValue("lmsClientClass", selected?.lmsClientClass ?? "");
 							setValue("hostLmsName", selected?.name ?? "");
+							setValue("hostLmsId", selected?.id ?? "");
 						}}
 						onBlur={field.onBlur}
 						renderInput={(params) => (
