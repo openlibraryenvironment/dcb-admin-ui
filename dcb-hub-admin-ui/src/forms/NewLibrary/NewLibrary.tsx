@@ -78,6 +78,7 @@ import {
 	shouldCreateLibrary,
 	shouldJoinGroup,
 } from "./libraryPayloads";
+import { invalidateLibraryCaches as invalidateLibraryCachesOf } from "./libraryCaches";
 import type {
 	CreateHostLmsMutationVariables,
 	CreateLibraryMutationVariables,
@@ -285,20 +286,9 @@ export default function NewLibrary({
 
 	// One invalidation for both paths: whether the library was just created or
 	// just completed, every list, detail page and setup-completeness count that
-	// mentions it is now stale. The "library"/"libraries" prefixes are the same
-	// ones the entity registry sweeps.
+	// mentions it is now stale. Not awaited: the next step does not read any of it.
 	const invalidateLibraryCaches = () => {
-		queryClient.invalidateQueries({
-			predicate: (query) => {
-				const root = query.queryKey[0];
-				return (
-					typeof root === "string" &&
-					["library", "libraries", "librariesList", "agencies", "agency"].some(
-						(prefix) => root.startsWith(prefix),
-					)
-				);
-			},
-		});
+		void invalidateLibraryCachesOf(queryClient);
 	};
 
 	const { mutateAsync: createLibrary, isPending: isLibraryPending } =
