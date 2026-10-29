@@ -17,7 +17,6 @@ import { MAPPING_OPTIONS } from "@constants/mappingsImportConstants";
 import { MappingOption } from "@models/MappingOption";
 import useCode from "@hooks/useCode";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
-import { useEffect } from "react";
 
 type ImportForm = {
 	show: boolean;
@@ -41,14 +40,7 @@ export default function Import({
 }: ImportForm) {
 	const { t } = useTranslation();
 
-	const { category, updateCategory, resetAll, updateCode } = useCode();
-
-	// Sync the presetHostLms to the global code state so Upload.tsx can read it
-	useEffect(() => {
-		if (presetHostLms && updateCode) {
-			updateCode(presetHostLms);
-		}
-	}, [presetHostLms, updateCode]);
+	const { code, category, updateCategory, resetAll } = useCode();
 
 	const handleCloseImport = () => {
 		resetAll(); // Reset both code and category when closing the import dialog
@@ -148,6 +140,7 @@ export default function Import({
 
 					<Upload
 						onCancel={handleCloseImport}
+						code={presetHostLms || code}
 						category={category}
 						type={type}
 						presetHostLmsId={presetHostLmsId}

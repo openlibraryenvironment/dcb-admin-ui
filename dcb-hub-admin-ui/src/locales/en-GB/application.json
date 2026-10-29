@@ -1935,6 +1935,7 @@
 		"longitude": "Longitude",
 		"import": {
 			"button": "Import",
+			"submit": "Import locations",
 			"confirmation_body": "<paragraph> <bold>{{existingMappingCount}}</bold> pickup locations for {{libraryName}} will be <bold>deleted</bold> and replaced with pickup locations from the file “{{fileName}}.”</paragraph>",
 			"confirmation_warning": "<paragraph> It will not be possible to undo the import. Please backup your pickup locations before continuing.</paragraph> <paragraph> A backup can be exported from the <linkComponent>{{type}} grid</linkComponent> </paragraph>",
 			"confirmation_replace": "To go ahead, select “Replace locations.",
@@ -2109,6 +2110,9 @@
 		"cancel": "Cancel",
 		"category": "Category",
 		"select_file": "Select file",
+		"needs_category": "Choose a category before importing.",
+		"needs_host_lms": "Choose a Host LMS before importing.",
+		"needs_file": "Choose a file before importing.",
 		"ref_value": "Reference value mappings",
 		"ref_value_one": "Reference value mapping",
 		"ref_value_for": "Reference value mappings for {{hostLms}}",

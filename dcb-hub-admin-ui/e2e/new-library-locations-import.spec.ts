@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 
 import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
+import { scanForViolations } from "./fixtures/axe";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraryDetail from "./fixtures-data/library-detail.json";
@@ -98,7 +99,9 @@ test.describe("New Library wizard - importing locations", () => {
 			existingLocations: 4,
 		});
 		await chooseFile(page);
-		await importDialog.getByRole("button", { name: /^import$/i }).click();
+		await importDialog
+			.getByRole("button", { name: /^import locations$/i })
+			.click();
 
 		await expect(
 			page.getByRole("dialog").filter({ hasText: /will be deleted/ }),
@@ -127,7 +130,7 @@ test.describe("New Library wizard - importing locations", () => {
 		});
 		await chooseFile(page);
 		const importButton = importDialog.getByRole("button", {
-			name: /^import$/i,
+			name: /^import locations$/i,
 		});
 		await importButton.click();
 		await expect(importButton).toBeDisabled();
@@ -155,7 +158,7 @@ test.describe("New Library wizard - importing locations", () => {
 		});
 		await chooseFile(page);
 		const importButton = importDialog.getByRole("button", {
-			name: /^import$/i,
+			name: /^import locations$/i,
 		});
 		await importButton.click();
 
@@ -168,5 +171,36 @@ test.describe("New Library wizard - importing locations", () => {
 			.filter({ hasText: /close/i })
 			.click();
 		await expect(importDialog).toBeHidden();
+	});
+	test("says why Import is unavailable until a file is chosen", async ({
+		page,
+	}) => {
+		const importDialog = await openLocationsImport(page, {
+			existingLocations: 0,
+		});
+		const importButton = importDialog.getByRole("button", {
+			name: /^import locations$/i,
+		});
+
+		await expect(importButton).toBeDisabled();
+		await expect(importButton).toHaveAccessibleDescription(
+			"Choose a file before importing.",
+		);
+		await expect(
+			importDialog.getByText("Choose a file before importing."),
+		).toBeVisible();
+		// The dialog fades in; scanning mid-fade measures contrast at partial opacity.
+		await page.evaluate(() =>
+			Promise.all(
+				document.getAnimations().map((animation) => animation.finished),
+			),
+		);
+		await scanForViolations(page);
+
+		await chooseFile(page);
+		await expect(importButton).toBeEnabled();
+		await expect(
+			importDialog.getByText("Choose a file before importing."),
+		).toBeHidden();
 	});
 });

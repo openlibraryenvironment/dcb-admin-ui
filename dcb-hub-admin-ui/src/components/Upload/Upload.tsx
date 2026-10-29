@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import {
 	Box,
@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 
-import useCode from "@hooks/useCode";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -39,6 +38,8 @@ const ALLOWED_FILE_TYPES = {
 };
 
 interface FileUploadProps {
+	/** The Host LMS the file is for. */
+	code: string;
 	category: string;
 	onCancel: () => void;
 	type: "Reference value mappings" | "Numeric range mappings" | "Locations";
@@ -50,6 +51,7 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({
+	code,
 	category,
 	onCancel,
 	type,
@@ -60,7 +62,6 @@ export default function FileUpload({
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const client = useDcbRestClient();
-	const { code } = useCode();
 
 	const [addedFile, setAddedFile] = useState<File | null>(null);
 	const [failedFile, setFailedFile] = useState<File | null>(null);
@@ -275,6 +276,16 @@ export default function FileUpload({
 			: "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin";
 
 	const filesAdded = addedFile !== null;
+	// What still has to be chosen, in the order the dialog asks for it.
+	const missingKey =
+		type !== "Locations" && !category
+			? "mappings.needs_category"
+			: !code
+				? "mappings.needs_host_lms"
+				: !filesAdded
+					? "mappings.needs_file"
+					: null;
+	const missingId = useId();
 
 	return (
 		<Stack spacing={1}>
@@ -328,13 +339,8 @@ export default function FileUpload({
 				</Button>
 				<Box sx={{ flex: 1 }} />
 				<Button
-					disabled={
-						isUploading ||
-						isImported ||
-						(type != "Locations"
-							? !filesAdded || !code || !category
-							: !filesAdded || !code)
-					}
+					disabled={isUploading || isImported || missingKey !== null}
+					aria-describedby={missingKey ? missingId : undefined}
 					onClick={handleUploadCheck}
 					color="primary"
 					variant="contained"
@@ -345,10 +351,19 @@ export default function FileUpload({
 					}
 				>
 					{type == "Locations"
-						? t("locations.import.button")
+						? t("locations.import.submit")
 						: t("mappings.import_file")}
 				</Button>
 			</Stack>
+			{missingKey && (
+				<Typography
+					id={missingId}
+					variant="body2"
+					sx={{ color: "text.secondary", textAlign: "end" }}
+				>
+					{t(missingKey)}
+				</Typography>
+			)}
 			<Confirmation
 				open={isConfirmOpen}
 				onClose={() => setConfirmOpen(false)}
