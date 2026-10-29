@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
+import {
+	Box,
+	Button,
+	CircularProgress,
+	Divider,
+	Link,
+	Stack,
+	Typography,
+} from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 
 import useCode from "@hooks/useCode";
@@ -75,6 +83,22 @@ export default function FileUpload({
 	const [ignoredCount, setIgnoredCount] = useState(0);
 	const [deletedCount, setDeletedCount] = useState(0);
 
+	// A ref as well as state: a second click can land before the disabled render does.
+	const inFlight = useRef(false);
+	const [isUploading, setUploading] = useState(false);
+
+	const guarded = async (work: () => Promise<void>) => {
+		if (inFlight.current) return;
+		inFlight.current = true;
+		setUploading(true);
+		try {
+			await work();
+		} finally {
+			inFlight.current = false;
+			setUploading(false);
+		}
+	};
+
 	const uploadPath =
 		type === "Locations" ? "/locations/upload" : "/uploadedMappings/upload";
 
@@ -129,6 +153,10 @@ export default function FileUpload({
 
 		if (!code) return;
 		if (type !== "Locations" && !category) return;
+		await guarded(checkThenUpload);
+	};
+
+	const checkThenUpload = async () => {
 		try {
 			let totalSize = 0;
 
@@ -175,7 +203,7 @@ export default function FileUpload({
 			setExistingMappingCount(totalSize);
 
 			if (totalSize === 0) {
-				uploadFile();
+				await uploadFile();
 			} else {
 				setReplacement(true);
 				setConfirmOpen(true);
@@ -302,13 +330,19 @@ export default function FileUpload({
 				<Box sx={{ flex: 1 }} />
 				<Button
 					disabled={
-						type != "Locations"
+						isUploading ||
+						(type != "Locations"
 							? !filesAdded || !code || !category
-							: !filesAdded || !code
+							: !filesAdded || !code)
 					}
 					onClick={handleUploadCheck}
 					color="primary"
 					variant="contained"
+					startIcon={
+						isUploading ? (
+							<CircularProgress size={16} color="inherit" />
+						) : undefined
+					}
 				>
 					{type == "Locations"
 						? t("locations.import.button")
@@ -320,7 +354,9 @@ export default function FileUpload({
 				onClose={() => setConfirmOpen(false)}
 				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
 					setConfirmOpen(false);
-					uploadFile(reason, changeCategory, changeReferenceUrl);
+					void guarded(() =>
+						uploadFile(reason, changeCategory, changeReferenceUrl),
+					);
 				}}
 				action="uploadReplacement"
 				entityName={

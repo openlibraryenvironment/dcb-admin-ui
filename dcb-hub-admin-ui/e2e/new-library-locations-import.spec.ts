@@ -107,4 +107,36 @@ test.describe("New Library wizard - importing locations", () => {
 		);
 		expect(uploads).toBe(0);
 	});
+
+	test("sends the file once, however often Import is pressed while it uploads", async ({
+		page,
+	}) => {
+		let uploads = 0;
+		let release: () => void = () => {};
+		const held = new Promise<void>((resolve) => (release = resolve));
+		await page.route("**/locations/upload", async (route) => {
+			uploads++;
+			await held;
+			await route.fulfill({
+				json: { recordsImported: 3, recordsDeleted: 0, recordsIgnored: 0 },
+			});
+		});
+
+		const importDialog = await openLocationsImport(page, {
+			existingLocations: 0,
+		});
+		await chooseFile(page);
+		const importButton = importDialog.getByRole("button", {
+			name: /^import$/i,
+		});
+		await importButton.click();
+		await expect(importButton).toBeDisabled();
+		// Forced: a person can still press a button that has gone grey.
+		await importButton.click({ force: true });
+		await importButton.click({ force: true });
+
+		release();
+		await expect(page.getByText(/3 .*locations/i).first()).toBeVisible();
+		expect(uploads).toBe(1);
+	});
 });
