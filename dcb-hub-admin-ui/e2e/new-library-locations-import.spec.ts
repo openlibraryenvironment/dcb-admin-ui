@@ -139,4 +139,34 @@ test.describe("New Library wizard - importing locations", () => {
 		await expect(page.getByText(/3 .*locations/i).first()).toBeVisible();
 		expect(uploads).toBe(1);
 	});
+	test("after a successful import, the file cannot be sent again and closing is the user's call", async ({
+		page,
+	}) => {
+		let uploads = 0;
+		await page.route("**/locations/upload", async (route) => {
+			uploads++;
+			await route.fulfill({
+				json: { recordsImported: 3, recordsDeleted: 0, recordsIgnored: 0 },
+			});
+		});
+
+		const importDialog = await openLocationsImport(page, {
+			existingLocations: 0,
+		});
+		await chooseFile(page);
+		const importButton = importDialog.getByRole("button", {
+			name: /^import$/i,
+		});
+		await importButton.click();
+
+		await expect(page.getByText(/3 .*locations/i).first()).toBeVisible();
+		await expect(importButton).toBeDisabled();
+		expect(uploads).toBe(1);
+
+		await importDialog
+			.getByRole("button", { name: /^close$/i })
+			.filter({ hasText: /close/i })
+			.click();
+		await expect(importDialog).toBeHidden();
+	});
 });

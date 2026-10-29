@@ -60,7 +60,7 @@ export default function FileUpload({
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const client = useDcbRestClient();
-	const { code, resetAll } = useCode();
+	const { code } = useCode();
 
 	const [addedFile, setAddedFile] = useState<File | null>(null);
 	const [failedFile, setFailedFile] = useState<File | null>(null);
@@ -79,6 +79,9 @@ export default function FileUpload({
 	const [errorReference, setErrorReference] = useState<string | null>(null);
 
 	const [isSuccess, setSuccess] = useState(false);
+	// Outlives the success alert, which hides itself: this file has been sent, and
+	// pressing Import again would send it twice. Choosing another file clears it.
+	const [isImported, setImported] = useState(false);
 	const [successCount, setSuccessCount] = useState(0);
 	const [ignoredCount, setIgnoredCount] = useState(0);
 	const [deletedCount, setDeletedCount] = useState(0);
@@ -140,6 +143,7 @@ export default function FileUpload({
 		}
 
 		setAddedFile(file);
+		setImported(false);
 		setErrorDisplayed(false);
 		setValidationErrorDisplayed(false);
 	};
@@ -253,12 +257,7 @@ export default function FileUpload({
 			setDeletedCount(response.data.recordsDeleted ?? 0);
 			setIgnoredCount(response.data.recordsIgnored ?? 0);
 			onImported?.(response.data.recordsImported ?? 0);
-
-			setTimeout(() => {
-				onCancel();
-				resetAll();
-				setAddedFile(null);
-			}, 6000);
+			setImported(true);
 		} catch (error: any) {
 			if (error.response) {
 				setUploadErrorMessage(error.response.data);
@@ -325,12 +324,13 @@ export default function FileUpload({
 			<Divider aria-hidden="true" />
 			<Stack spacing={1} direction="row">
 				<Button variant="outlined" onClick={onCancel}>
-					{t("mappings.cancel")}
+					{isImported ? t("ui.actions.close") : t("mappings.cancel")}
 				</Button>
 				<Box sx={{ flex: 1 }} />
 				<Button
 					disabled={
 						isUploading ||
+						isImported ||
 						(type != "Locations"
 							? !filesAdded || !code || !category
 							: !filesAdded || !code)
