@@ -126,10 +126,15 @@ export default function ContactsChapter() {
 				CreateConsortiumContactMutationVariables
 			>(createConsortiumContact, { input });
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] });
-			queryClient.invalidateQueries({ queryKey: CONSORTIUM_BASICS_QUERY_KEY });
-		},
+		// Returned, so the save waits for the read-back: the rail and a Back to this
+		// chapter would otherwise show the consortium without the new contact.
+		onSuccess: () =>
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
+				queryClient.invalidateQueries({
+					queryKey: CONSORTIUM_BASICS_QUERY_KEY,
+				}),
+			]),
 	});
 
 	const handleContinue = async () => {
