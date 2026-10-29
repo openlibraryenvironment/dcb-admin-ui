@@ -55,6 +55,7 @@ export default function DiscoveryBrandFields({
 				<BrandImageField
 					value={field.value ?? ""}
 					onChange={field.onChange}
+					inputRef={field.ref}
 					stagedFile={stagedImages[field.name] ?? null}
 					onStageFile={(file) => onStageFile(field.name, file)}
 					label={t(labelKey)}
@@ -85,7 +86,8 @@ export default function DiscoveryBrandFields({
 						fullWidth
 						error={!!errors.brandLogoAlt}
 						helperText={
-							errors.brandLogoAlt?.message ?? t("consortium.brand.logo_alt_help")
+							errors.brandLogoAlt?.message ??
+							t("consortium.brand.logo_alt_help")
 						}
 					/>
 				)}
@@ -136,7 +138,8 @@ export default function DiscoveryBrandFields({
 						fullWidth
 						error={!!errors.defaultThemeName}
 						helperText={
-							errors.defaultThemeName?.message ?? t("consortium.brand.theme_help")
+							errors.defaultThemeName?.message ??
+							t("consortium.brand.theme_help")
 						}
 					>
 						<MenuItem value="">{t("consortium.brand.theme_default")}</MenuItem>

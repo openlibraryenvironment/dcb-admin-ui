@@ -137,14 +137,22 @@ export default function DiscoveryChapter() {
 			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
 	});
 
+	// Nothing typed and nothing staged: there is no change to write, and writing one
+	// anyway records an audited update that changed nothing.
+	const nothingToSave = !isDirty && !hasStagedImages(stagedImages);
+
 	const handleContinue = async () => {
+		if (nothingToSave) {
+			goNext();
+			return;
+		}
 		if (isSubmitting.current || !consortium) return;
 		isSubmitting.current = true;
 		setBusy(true);
 		setError(null);
 
 		try {
-			if (!(await trigger())) return;
+			if (!(await trigger(undefined, { shouldFocus: true }))) return;
 
 			let values = getValues();
 
@@ -241,7 +249,11 @@ export default function DiscoveryChapter() {
 			<SetupFooter
 				onBack={goBack}
 				onContinue={handleContinue}
-				continueLabel={t("setup.actions.save_and_continue")}
+				continueLabel={
+					nothingToSave
+						? t("setup.actions.continue")
+						: t("setup.actions.save_and_continue")
+				}
 				onSkip={skipAndContinue}
 				skipLabel={t("setup.discovery.skip")}
 				busy={isBusy}
