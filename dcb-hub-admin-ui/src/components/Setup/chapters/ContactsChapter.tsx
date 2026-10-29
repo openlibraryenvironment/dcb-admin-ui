@@ -137,7 +137,15 @@ export default function ContactsChapter() {
 			]),
 	});
 
+	// A consortium that already has a contact has answered this chapter; adding another
+	// is optional, so an untouched form moves on rather than failing validation.
+	const nothingToSave = alreadyHasContacts && !methods.formState.isDirty;
+
 	const handleContinue = async () => {
+		if (nothingToSave) {
+			goNext();
+			return;
+		}
 		if (isSubmitting.current) return;
 		isSubmitting.current = true;
 		setBusy(true);
@@ -197,7 +205,11 @@ export default function ContactsChapter() {
 			<SetupFooter
 				onBack={goBack}
 				onContinue={handleContinue}
-				continueLabel={t("setup.actions.save_and_continue")}
+				continueLabel={
+					nothingToSave
+						? t("setup.actions.continue")
+						: t("setup.actions.save_and_continue")
+				}
 				onSkip={skipAndContinue}
 				busy={isBusy}
 			/>
