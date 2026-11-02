@@ -221,10 +221,10 @@ declares the fields the surface reads.
 
 ### Linking to discovery's staff settings
 
-`VITE_DISCOVERY_URL` is where symposia-ui is mounted, for example `https://discovery.example.org/`.
-With it set, the consortium Branding tab links to symposia-ui's `/staff` pages, where discovery's
+`VITE_DISCOVERY_URL` is where the discovery UI is mounted, for example `https://discovery.example.org/`.
+With it set, the consortium Branding tab links to the discovery UI's `/staff` pages, where discovery's
 front page, relevance rules, search ranking and online access holdings are changed. Those
-settings live in symposia-service and symposia-ui is their one editor, so DCB Admin links to it
+settings live in the discovery service and the discovery UI is their one editor, so DCB Admin links to it
 rather than carrying a second copy of the forms. Unset, the link is not offered. Unlike the
 flags above, this depends on no dcb-service release.
 
@@ -604,7 +604,7 @@ to be rebuilt.
 
 #### Images
 
-CI pushes this Dockerfile's image to `harbor.k-int.com/knowledgeintegration/dcb-admin-ui`, the K-Int Harbor registry that symposia-service and ors-discovery-spa publish to:
+CI pushes this Dockerfile's image to `harbor.k-int.com/knowledgeintegration/dcb-admin-ui`, the K-Int Harbor registry:
 
 | Pipeline                           | Tags                                 |                         |
 | ---------------------------------- | ------------------------------------ | ----------------------- |

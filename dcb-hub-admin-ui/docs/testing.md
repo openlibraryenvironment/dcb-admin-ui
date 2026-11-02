@@ -152,7 +152,7 @@ the tag on no other runner.
 
 `ki-onprem` bind-mounts the host's Docker socket into every container, so a `docker:dind`
 service started with its defaults fails with "device or resource busy" and its daemon exits.
-`verify_container` therefore gives dind a socket of its own, as `symposia-service` does.
+`verify_container` therefore gives dind a socket of its own.
 
 The runner needs to reach:
 

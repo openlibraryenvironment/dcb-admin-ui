@@ -441,7 +441,7 @@ verify_container:
     - name: docker:27-dind
       alias: docker
       # The ki-onprem runner bind-mounts the host's docker.sock into every container, so dind's
-      # default socket fails "device or resource busy" and the daemon exits; as in symposia-service
+      # default socket fails "device or resource busy" and the daemon exits
       command: ["dockerd", "--host=unix:///var/run/dind.sock", "--host=tcp://0.0.0.0:2375", "--tls=false"]
   variables:
     DOCKER_HOST: tcp://docker:2375
@@ -620,7 +620,7 @@ build_released_bundle:
       - dcb-hub-admin-ui/dist/
     expire_in: 1 hour
 
-# The production image, pushed to Harbor beside symposia-service's and ors-discovery-spa's:
+# The production image, pushed to Harbor:
 # main -> :main-<sha> and :next, a release -> :<version> and :latest. The first of each pair is
 # immutable. dcb-hub-admin-ui/docs/deployment.md, "Images".
 .publish_image:
