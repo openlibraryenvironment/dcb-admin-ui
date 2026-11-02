@@ -42,10 +42,11 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 		formState: { errors },
 	} = useFormContext();
 
-	const [lmsClientClass, clientConfigMode] = useWatch({
+	const [lmsClientClass, clientConfigMode, hostLmsId, hostLmsCode] = useWatch({
 		control,
-		name: ["lmsClientClass", "clientConfigMode"],
+		name: ["lmsClientClass", "clientConfigMode", "hostLmsId", "hostLmsCode"],
 	});
+	const isCreated = !!hostLmsId;
 
 	const profile = getHostLmsProfile(lmsClientClass);
 	const isJsonMode = clientConfigMode === "json";
@@ -98,12 +99,14 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 							id="host-lms-code"
 							required
 							fullWidth
-							disabled={busy}
+							disabled={busy || isCreated}
 							label={t("hostlms.code")}
 							error={!!errors.hostLmsCode}
 							helperText={
 								(errors.hostLmsCode?.message as string) ??
-								t("hostlms.code_helper")
+								(isCreated
+									? t("hostlms.created_locked", { code: hostLmsCode })
+									: t("hostlms.code_helper"))
 							}
 						/>
 					)}
@@ -136,7 +139,7 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 						select
 						required
 						fullWidth
-						disabled={busy}
+						disabled={busy || isCreated}
 						label={t("hostlms.type")}
 						error={!!errors.lmsClientClass}
 						helperText={errors.lmsClientClass?.message as string}

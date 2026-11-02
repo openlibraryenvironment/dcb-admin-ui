@@ -3,13 +3,17 @@ import type { DefaultValues } from "react-hook-form";
 
 import i18n from "@/i18n";
 import { defaultCreationReason } from "@helpers/auditDefaults";
-import type { NewLibraryFormValues } from "@schemas/newLibrarySchema";
+import {
+	resolveClientConfig,
+	type NewLibraryFormValues,
+} from "@schemas/newLibrarySchema";
 import { resolveAuthProfile } from "@constants/authProfiles";
 import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
 import type {
 	CreateLibraryContactInput,
 	LibraryInput,
 	UpdateAgencyInput,
+	UpdateHostLmsInput,
 	UpdateLibraryInput,
 } from "@generated/graphql";
 
@@ -300,9 +304,20 @@ export const newContactsOf = (contacts: NewLibraryFormValues["contacts"]) =>
  * again, no way forward either.
  */
 export const shouldCreateHostLms = (
-	hostLmsCode: string,
 	result: HostLmsVerificationResult | null,
-): boolean => result?.hostLms?.code !== hostLmsCode;
+): boolean => !result?.hostLms?.id;
+
+/**
+ * What the Host LMS step can still change once the Host LMS exists. Not the code, which
+ * would orphan the one created, and not the type, which its config was validated for.
+ */
+export const buildHostLmsSettings = (formData: NewLibraryFormValues) =>
+	({
+		name: formData.hostLmsName,
+		clientConfig: resolveClientConfig(formData),
+		suppressionRulesetName: formData.suppressionRulesetName,
+		itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
+	}) satisfies Omit<UpdateHostLmsInput, "id">;
 
 export const shouldCreateLibrary = (libraryId: string | undefined): boolean =>
 	!libraryId;

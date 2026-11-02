@@ -4,6 +4,7 @@ import {
 	agencyCodeFromHostLms,
 	buildAgencyUpdateInput,
 	buildContactInput,
+	buildHostLmsSettings,
 	buildLibraryInput,
 	buildLibraryUpdateInput,
 	existingGroupIds,
@@ -358,21 +359,48 @@ describe("newContactsOf", () => {
 describe("the write guards", () => {
 	describe("shouldCreateHostLms", () => {
 		it("creates when nothing has been created yet", () => {
-			expect(shouldCreateHostLms("TEST-LMS", null)).toBe(true);
+			expect(shouldCreateHostLms(null)).toBe(true);
 		});
 
-		it("does not create a second time for the same code", () => {
+		it("does not create a second time once one exists", () => {
 			// Previously a duplicate-code failure with no way forward.
 			expect(
-				shouldCreateHostLms("TEST-LMS", { hostLms: { code: "TEST-LMS" } }),
+				shouldCreateHostLms({ hostLms: { id: "h1", code: "TEST-LMS" } }),
 			).toBe(false);
 		});
 
-		it("creates again when the user goes back and corrects the code", () => {
-			// A different code is a different system, so this one is legitimate.
+		// A second create for a corrected code left the first Host LMS behind, attached to
+		// nothing. The step now locks the code instead.
+		it("does not create again when the code in the form changes", () => {
 			expect(
-				shouldCreateHostLms("TEST-LMS-2", { hostLms: { code: "TEST-LMS" } }),
-			).toBe(true);
+				shouldCreateHostLms({ hostLms: { id: "h1", code: "TEST-LMS" } }),
+			).toBe(false);
+		});
+
+		it("creates when a result came back without a record", () => {
+			expect(shouldCreateHostLms({ hostLms: { code: "TEST-LMS" } })).toBe(true);
+		});
+	});
+
+	describe("buildHostLmsSettings", () => {
+		it("carries what an update may change, and not the code or type", () => {
+			const settings = buildHostLmsSettings(
+				values({
+					hostLmsCode: "TEST-LMS",
+					hostLmsName: "Test LMS",
+					lmsClientClass: "org.olf.dcb.core.interaction.sierra.SierraLmsClient",
+					clientConfigMode: "json",
+					clientConfig: '{"base-url":"https://sierra.example.org"}',
+					suppressionRulesetName: "bibs",
+				}),
+			);
+
+			expect(settings).toEqual({
+				name: "Test LMS",
+				clientConfig: { "base-url": "https://sierra.example.org" },
+				suppressionRulesetName: "bibs",
+				itemSuppressionRulesetName: "",
+			});
 		});
 	});
 

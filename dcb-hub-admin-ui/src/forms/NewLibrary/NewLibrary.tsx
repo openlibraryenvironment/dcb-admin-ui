@@ -32,6 +32,7 @@ import Confirmation from "@components/Confirmation/Confirmation";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
 import { createHostLmsMutation } from "@mutations/createHostLms";
+import { updateHostLmsMutation } from "@mutations/updateHostLms";
 import { createLibraryMutation } from "@mutations/createLibrary";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ModeSelectionStep from "./steps/ModeSelectionStep";
@@ -48,7 +49,6 @@ import CompletionStep from "./steps/CompletionStep";
 import { addLibraryToGroup } from "@mutations/addLibraryToGroup";
 import {
 	newLibrarySchema,
-	resolveClientConfig,
 	type NewLibraryFormValues,
 } from "@schemas/newLibrarySchema";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
@@ -56,6 +56,7 @@ import { getHostLmsProfile } from "@helpers/hostLmsClientConfig";
 import type { LibrarySetupStepId } from "@helpers/librarySetup";
 import {
 	isIngestTimeout,
+	verificationFrom,
 	type HostLmsVerificationResult,
 } from "@helpers/hostLmsVerification";
 import {
@@ -69,6 +70,7 @@ import {
 	agencyCodeFromHostLms,
 	buildAgencyUpdateInput,
 	buildContactInput,
+	buildHostLmsSettings,
 	buildLibraryInput,
 	buildLibraryUpdateInput,
 	EMPTY_LIBRARY_FORM,
@@ -81,8 +83,12 @@ import {
 } from "./libraryPayloads";
 import { invalidateLibraryCaches as invalidateLibraryCachesOf } from "./libraryCaches";
 import type {
+	CreateHostLmsInput,
 	CreateHostLmsMutationVariables,
 	CreateLibraryMutationVariables,
+	UpdateHostLmsInput,
+	UpdateHostLmsMutation,
+	UpdateHostLmsMutationVariables,
 } from "@generated/graphql";
 import { errorForLog } from "@helpers/safeErrorLog";
 
@@ -182,6 +188,10 @@ export default function NewLibrary({
 	}>({ open: false, severity: "success", text: "" });
 	const [hostLmsResult, setHostLmsResult] =
 		useState<HostLmsVerificationResult | null>(null);
+	/** The settings last written to the created Host LMS, so an unchanged Next writes nothing. */
+	const [savedHostLmsSettings, setSavedHostLmsSettings] = useState<
+		string | null
+	>(null);
 	/** What is happening right now, in words, while a mutation is in flight. */
 	const [busyMessage, setBusyMessage] = useState<string | null>(null);
 	const [showAbandonConfirmation, setShowAbandonConfirmation] = useState(false);
@@ -277,11 +287,22 @@ export default function NewLibrary({
 	// Mutations
 	const { mutateAsync: createHostLms, isPending: isHostLmsPending } =
 		useMutation({
-			mutationFn: (variables: { input: any }) =>
+			mutationFn: (variables: { input: CreateHostLmsInput }) =>
 				gqlClient.request<any, CreateHostLmsMutationVariables>(
 					createHostLmsMutation(),
 					variables,
 				),
+			onSuccess: () =>
+				queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
+		});
+
+	const { mutateAsync: updateHostLms, isPending: isHostLmsUpdatePending } =
+		useMutation({
+			mutationFn: (variables: { input: UpdateHostLmsInput }) =>
+				gqlClient.request<
+					UpdateHostLmsMutation,
+					UpdateHostLmsMutationVariables
+				>(updateHostLmsMutation(), variables),
 			onSuccess: () =>
 				queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
 		});
@@ -382,6 +403,7 @@ export default function NewLibrary({
 
 	const isBusy =
 		isHostLmsPending ||
+		isHostLmsUpdatePending ||
 		isLibraryPending ||
 		isLibraryUpdatePending ||
 		isAgencyUpdatePending ||
@@ -437,46 +459,61 @@ export default function NewLibrary({
 
 			const formData = methods.getValues();
 
-			// Phase 1: If creating a Host LMS.
-			//
-			// Guarded on the result, not on the step - see shouldCreateHostLms.
-			if (
-				stepId === "hostLms" &&
-				shouldCreateHostLms(formData.hostLmsCode, hostLmsResult)
-			) {
-				// Ping and ingest checks run server-side and are capped at 20
-				// seconds, so this step can sit there for a while. Say what it is
-				// doing rather than greying out a button.
-				setBusyMessage(
-					t("hostlms.busy_creating", { code: formData.hostLmsCode }),
-				);
-				const clientConfig = resolveClientConfig(formData);
-				const result = await createHostLms({
-					input: {
-						code: formData.hostLmsCode,
-						name: formData.hostLmsName,
-						lmsClientClass: formData.lmsClientClass,
-						ingestSourceClass: getHostLmsProfile(formData.lmsClientClass)
-							?.ingestSourceClass,
-						clientConfig,
-						suppressionRulesetName: formData.suppressionRulesetName,
-						itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
-					},
-				});
-				const hostLmsData = result?.createHostLms;
+			// Phase 1: the Host LMS. Created once - see shouldCreateHostLms - and after that
+			// Back-then-Next is an update, so a corrected setting is saved rather than dropped.
+			if (stepId === "hostLms") {
+				const settings = buildHostLmsSettings(formData);
+				const settingsKey = JSON.stringify(settings);
 
-				// Just in case we get something weird from dcb-service.
-				if (!hostLmsData || !hostLmsData.hostLms) {
-					throw new Error(t("hostlms.error.no_data_returned"));
+				if (shouldCreateHostLms(hostLmsResult)) {
+					// Ping and ingest checks run server-side and are capped at 20
+					// seconds, so this step can sit there for a while. Say what it is
+					// doing rather than greying out a button.
+					setBusyMessage(
+						t("hostlms.busy_creating", { code: formData.hostLmsCode }),
+					);
+					const result = await createHostLms({
+						input: {
+							code: formData.hostLmsCode,
+							lmsClientClass: formData.lmsClientClass,
+							ingestSourceClass: getHostLmsProfile(formData.lmsClientClass)
+								?.ingestSourceClass,
+							...settings,
+						},
+					});
+					const hostLmsData = result?.createHostLms;
+
+					// The id is what every later step and every update addresses.
+					if (!hostLmsData?.hostLms?.id) {
+						throw new Error(t("hostlms.error.no_data_returned"));
+					}
+					methods.setValue("hostLmsCode", hostLmsData.hostLms.code ?? "");
+					methods.setValue("hostLmsId", hostLmsData.hostLms.id);
+					const agencyCode = agencyCodeFromHostLms(
+						formData.agencyCode,
+						settings.clientConfig,
+					);
+					if (agencyCode) methods.setValue("agencyCode", agencyCode);
+					setHostLmsResult(hostLmsData); // Surface ping/ingest/warnings on a dedicated verification step
+					setSavedHostLmsSettings(settingsKey);
+				} else if (settingsKey !== savedHostLmsSettings) {
+					setBusyMessage(
+						t("hostlms.busy_updating", { code: formData.hostLmsCode }),
+					);
+					const result = await updateHostLms({
+						input: {
+							id: hostLmsResult?.hostLms?.id as string,
+							...settings,
+							changeCategory: "New Host LMS",
+						},
+					});
+					// The update probed the system again; its answer replaces the create's.
+					setHostLmsResult({
+						hostLms: hostLmsResult?.hostLms,
+						...verificationFrom(result?.updateHostLms),
+					});
+					setSavedHostLmsSettings(settingsKey);
 				}
-				methods.setValue("hostLmsCode", hostLmsData.hostLms.code);
-				methods.setValue("hostLmsId", hostLmsData.hostLms.id);
-				const agencyCode = agencyCodeFromHostLms(
-					formData.agencyCode,
-					clientConfig,
-				);
-				if (agencyCode) methods.setValue("agencyCode", agencyCode);
-				setHostLmsResult(hostLmsData); // Surface ping/ingest/warnings on a dedicated verification step
 			}
 
 			// Phase 2a: resuming saves the profile straight away, because the
@@ -637,6 +674,7 @@ export default function NewLibrary({
 		setWizardMode("unselected");
 		setActiveStepId(null);
 		setHostLmsResult(null);
+		setSavedHostLmsSettings(null);
 		// "Add another library" starts a different library; the memberships and
 		// the created Host LMS belong to the previous one.
 		setJoinedGroupIds([]);

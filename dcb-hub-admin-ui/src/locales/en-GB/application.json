@@ -806,6 +806,8 @@
 		},
 		"code_helper": "A short, unique code for this system. It is used throughout DCB to identify the Host LMS.",
 		"busy_creating": "Creating Host LMS {{code}} and testing the connection. The ingest check can take up to 20 seconds.",
+		"busy_updating": "Saving Host LMS {{code}} and testing the connection again. The ingest check can take up to 20 seconds.",
+		"created_locked": "Host LMS {{code}} has been created, so its code and type can no longer change. Its other settings can: changes are saved when you press Next.",
 		"none_to_select": "There are no Host LMS systems on this instance yet. Go back and choose “Create new system” instead.",
 		"select_existing_explanation": "Choose the Host LMS this library runs on. Its mappings and locations will be imported against this system.",
 		"select_existing_helper": "Only systems already configured in DCB are listed.",

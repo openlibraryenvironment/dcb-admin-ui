@@ -33,6 +33,37 @@ const openWizardOnHostLmsStep = async (page: Page) => {
 	await page.getByRole("button", { name: /continue/i }).click();
 };
 
+// The update answers a correction made after going back
+const sierraHostLmsMocks = {
+	CreateHostLms: {
+		createHostLms: {
+			hostLms: { id: "host-lms-1", code: "testcode" },
+			pingStatus: "OK",
+		},
+	},
+	UpdateHostLms: {
+		updateHostLms: {
+			hostLms: { id: "host-lms-1", code: "testcode" },
+			pingStatus: "OK",
+			warnings: [],
+		},
+	},
+};
+
+const fillSierraHostLms = async (page: Page) => {
+	const dialog = wizard(page);
+	await dialog.getByLabel(/host lms code/i).fill("testcode");
+	await dialog.getByLabel(/host lms name/i).fill("Test LMS");
+	await dialog.getByLabel(/lms type/i).click();
+	await page.getByRole("option", { name: "Sierra" }).click();
+	const configField = (name: RegExp) => dialog.getByRole("textbox", { name });
+	await configField(/base url/i).fill("https://sierra.example.org");
+	await configField(/sierra api key/i).fill("test-key");
+	await configField(/sierra api secret/i).fill("test-secret");
+	await configField(/default agency code/i).fill("TESTAGENCY");
+	await configField(/page size/i).fill("100");
+};
+
 test.describe("New Library wizard", () => {
 	test.beforeEach(async ({ page }) => {
 		await seedAuth(page);
@@ -90,9 +121,7 @@ test.describe("New Library wizard", () => {
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,
-			CreateHostLms: {
-				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
-			},
+			...sierraHostLmsMocks,
 		});
 		await openWizardOnHostLmsStep(page);
 
@@ -126,6 +155,52 @@ test.describe("New Library wizard", () => {
 		);
 	});
 
+	test("saves a correction made after going back", async ({ page }) => {
+		const sent: { operation: string; input: any }[] = [];
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			CreateHostLms: (variables: any) => {
+				sent.push({ operation: "create", input: variables.input });
+				return sierraHostLmsMocks.CreateHostLms;
+			},
+			UpdateHostLms: (variables: any) => {
+				sent.push({ operation: "update", input: variables.input });
+				return sierraHostLmsMocks.UpdateHostLms;
+			},
+		});
+		await openWizardOnHostLmsStep(page);
+		const dialog = wizard(page);
+		const activeStep = dialog.locator(".MuiStepLabel-label.Mui-active");
+
+		await fillSierraHostLms(page);
+		await dialog.getByRole("button", { name: "Next" }).click();
+		await expect(activeStep).toHaveText("Verification");
+
+		expect(sent.map((call) => call.operation)).toEqual(["create"]);
+
+		// Before, a corrected setting was dropped, and a corrected code made a second Host LMS
+		await dialog.getByRole("button", { name: "Back" }).click();
+		await expect(dialog.getByLabel(/host lms code/i)).toBeDisabled();
+		await dialog
+			.getByRole("textbox", { name: /base url/i })
+			.fill("https://sierra2.example.org");
+		await dialog.getByRole("button", { name: "Next" }).click();
+		await expect(activeStep).toHaveText("Verification");
+
+		expect(sent.map((call) => call.operation)).toEqual(["create", "update"]);
+		expect(sent[1].input).toMatchObject({
+			id: "host-lms-1",
+			clientConfig: { "base-url": "https://sierra2.example.org" },
+		});
+
+		// Nothing changed, so nothing is written and the system is not contacted again
+		await dialog.getByRole("button", { name: "Back" }).click();
+		await dialog.getByRole("button", { name: "Next" }).click();
+		await expect(activeStep).toHaveText("Verification");
+		expect(sent).toHaveLength(2);
+	});
+
 	test("shows the configuration and authentication profile checks the server ran", async ({
 		page,
 	}) => {
@@ -137,9 +212,10 @@ test.describe("New Library wizard", () => {
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,
+			UpdateHostLms: sierraHostLmsMocks.UpdateHostLms,
 			CreateHostLms: {
 				createHostLms: {
-					hostLms: { code: "testcode" },
+					hostLms: { id: "host-lms-1", code: "testcode" },
 					pingStatus: "Status: OK",
 					ingestStatus: "Success: Retrieved chunk with 3 records.",
 					configurationStatus: "Missing: item.fine-code-id",
@@ -175,9 +251,7 @@ test.describe("New Library wizard", () => {
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,
-			CreateHostLms: {
-				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
-			},
+			...sierraHostLmsMocks,
 		});
 		await openWizardOnHostLmsStep(page);
 
@@ -213,9 +287,7 @@ test.describe("New Library wizard", () => {
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,
-			CreateHostLms: {
-				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
-			},
+			...sierraHostLmsMocks,
 		});
 		await openWizardOnHostLmsStep(page);
 
@@ -250,9 +322,7 @@ test.describe("New Library wizard", () => {
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,
-			CreateHostLms: {
-				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
-			},
+			...sierraHostLmsMocks,
 		});
 		await openWizardOnHostLmsStep(page);
 
@@ -281,9 +351,7 @@ test.describe("New Library wizard", () => {
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,
-			CreateHostLms: {
-				createHostLms: { hostLms: { code: "testcode" }, pingStatus: "OK" },
-			},
+			...sierraHostLmsMocks,
 		});
 		await openWizardOnHostLmsStep(page);
 
