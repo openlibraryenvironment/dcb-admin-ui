@@ -335,7 +335,6 @@ const SHARED_FIELDS: ClientConfigField[] = [
 		"hostlms.config_fields.context_hierarchy_description",
 		"optional",
 		"stringList",
-		"SHARED-KOHA, MOBIUS, GLOBAL",
 	),
 ];
 
@@ -1695,6 +1694,25 @@ export const hasSharedSystemConflict = (
 	lmsClientClass !== HOST_LMS_CLASSES.orsAppliance &&
 	sharedSystemSet(values) &&
 	!isBlank(readPath(values, ["default-agency-code"]));
+
+/**
+ * A contextHierarchy that leaves out this Host LMS's own code. Set, it replaces the
+ * [hostLmsCode] default rather than extending it, so the mappings imported under the code
+ * are not read. Warned about, not refused: mappings kept only in a shared context are valid.
+ */
+export const contextHierarchyOmitsCode = (
+	values: any,
+	hostLmsCode: string | undefined | null,
+): boolean => {
+	const raw = readPath(values, ["contextHierarchy"]);
+	const contexts = (
+		Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(",") : []
+	)
+		.map((context) => String(context).trim())
+		.filter(Boolean);
+	const code = hostLmsCode?.trim();
+	return !!code && contexts.length > 0 && !contexts.includes(code);
+};
 
 export const isAdvancedField = (configField: ClientConfigField): boolean =>
 	configField.advanced ?? configField.defaultValue !== undefined;

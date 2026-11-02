@@ -34,6 +34,7 @@ import {
 	type ClientConfigField,
 	type ClientConfigOption,
 	type ClientConfigGroup,
+	contextHierarchyOmitsCode,
 	fieldName,
 	getHostLmsProfile,
 	isAdvancedField,
@@ -732,25 +733,39 @@ const readFieldValue = (values: any, path: string[]): string => {
  */
 export const RecommendedConfigGaps = ({
 	lmsClientClass,
+	hostLmsCode,
 }: {
 	lmsClientClass?: string | null;
+	hostLmsCode?: string | null;
 }) => {
 	const { t } = useTranslation();
 	const { control } = useFormContext();
 	const values = useWatch({ control, name: "clientConfigFields" });
 
 	const gaps = missingRecommendedClientConfig(lmsClientClass, values ?? {});
-	if (gaps.length === 0) return null;
+	const omitsCode = contextHierarchyOmitsCode(values ?? {}, hostLmsCode);
+	if (gaps.length === 0 && !omitsCode) return null;
 
 	return (
-		<Alert severity="info">
-			<AlertTitle>
-				{t("hostlms.config_fields.recommended_missing_title")}
-			</AlertTitle>
-			{t("hostlms.config_fields.recommended_missing_body", {
-				fields: gaps.map((problem) => t(problem.labelKey)).join(", "),
-			})}
-		</Alert>
+		<Stack spacing={2}>
+			{gaps.length > 0 && (
+				<Alert severity="info">
+					<AlertTitle>
+						{t("hostlms.config_fields.recommended_missing_title")}
+					</AlertTitle>
+					{t("hostlms.config_fields.recommended_missing_body", {
+						fields: gaps.map((problem) => t(problem.labelKey)).join(", "),
+					})}
+				</Alert>
+			)}
+			{omitsCode && (
+				<Alert severity="warning">
+					{t("hostlms.config_fields.context_hierarchy_omits_code", {
+						code: hostLmsCode?.trim(),
+					})}
+				</Alert>
+			)}
+		</Stack>
 	);
 };
 

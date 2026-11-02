@@ -393,7 +393,10 @@ function NewHostLms() {
 									{t("hostlms.config_fields.shared_system_conflict")}
 								</Alert>
 							)}
-							<RecommendedConfigGaps lmsClientClass={lmsClientClass} />
+							<RecommendedConfigGaps
+								lmsClientClass={lmsClientClass}
+								hostLmsCode={code}
+							/>
 							<ClientConfigFields lmsClientClass={lmsClientClass} />
 						</>
 					) : (

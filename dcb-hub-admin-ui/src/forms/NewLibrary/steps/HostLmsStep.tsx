@@ -257,7 +257,10 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 					{/* Only meaningful for the guided form: in JSON mode the user is
 					    editing the object directly and has the whole thing in view. */}
 					{!isJsonMode && (
-						<RecommendedConfigGaps lmsClientClass={lmsClientClass} />
+						<RecommendedConfigGaps
+							lmsClientClass={lmsClientClass}
+							hostLmsCode={hostLmsCode}
+						/>
 					)}
 
 					<Stack direction={{ xs: "column", sm: "row" }} spacing={2}>

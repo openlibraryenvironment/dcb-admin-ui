@@ -6,6 +6,7 @@ import {
 	buildClientConfig,
 	clientConfigFieldsFor,
 	clientConfigToFields,
+	contextHierarchyOmitsCode,
 	creatableHostLmsProfiles,
 	getHostLmsProfile,
 	hasSharedSystemConflict,
@@ -1215,6 +1216,38 @@ describe("the ingest source class sent on create", () => {
 			[HOST_LMS_CLASSES.foundation]: undefined,
 			[HOST_LMS_CLASSES.orsAppliance]: undefined,
 		});
+	});
+});
+
+// LocationToAgencyMappingService and HostLmsContextService use a set list instead of
+// [hostLmsCode], in 8.71.0 and 9.2.0 alike
+describe("a context hierarchy without the Host LMS's own code", () => {
+	it("is reported, whether typed as a list or stored as an array", () => {
+		expect(
+			contextHierarchyOmitsCode({ contextHierarchy: "SHARED, DCB" }, "LIB1"),
+		).toBe(true);
+		expect(
+			contextHierarchyOmitsCode(
+				{ contextHierarchy: ["SHARED", "DCB"] },
+				"LIB1",
+			),
+		).toBe(true);
+	});
+
+	it("is not reported when the code is in it, or when nothing is set", () => {
+		expect(
+			contextHierarchyOmitsCode({ contextHierarchy: " LIB1 , SHARED" }, "LIB1"),
+		).toBe(false);
+		expect(contextHierarchyOmitsCode({}, "LIB1")).toBe(false);
+		expect(contextHierarchyOmitsCode({ contextHierarchy: "" }, "LIB1")).toBe(
+			false,
+		);
+	});
+
+	it("is not reported before there is a code to compare", () => {
+		expect(contextHierarchyOmitsCode({ contextHierarchy: "SHARED" }, "")).toBe(
+			false,
+		);
 	});
 });
 

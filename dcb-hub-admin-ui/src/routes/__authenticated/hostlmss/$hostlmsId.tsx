@@ -499,6 +499,7 @@ function HostLMSDetails() {
 								)}
 								<RecommendedConfigGaps
 									lmsClientClass={hostlms.lmsClientClass}
+									hostLmsCode={hostlms.code}
 								/>
 								<ClientConfigFields lmsClientClass={hostlms.lmsClientClass} />
 							</Stack>
