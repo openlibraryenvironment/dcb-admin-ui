@@ -1844,6 +1844,8 @@
 			}
 		},
 		"setup": {
+			"complete_title": "Setup is complete",
+			"complete_body": "Every setup step is done: {{steps}}.",
 			"incomplete_title": "Setup is not finished",
 			"incomplete_body_other": "This library is missing configuration it needs before it can borrow or supply. {{count}} steps still to complete.",
 			"finish": "Finish setup",
