@@ -1039,6 +1039,18 @@ describe("hostLmsClientConfig", () => {
 			expect(merged.nested).toEqual({ "also-bespoke": 7 });
 		});
 
+		// 8.71.0 never acted on it and 9.2.0 refuses it, so keeping it blocked every save
+		it("drops a Polaris borrower-lending-flow, and keeps other unmapped keys", () => {
+			const merged = mergeClientConfigEdit(
+				{ "borrower-lending-flow": "ILL", "some-bespoke-flag": "keep me" },
+				HOST_LMS_CLASSES.polaris,
+				{},
+			);
+
+			expect(merged).not.toHaveProperty("borrower-lending-flow");
+			expect(merged["some-bespoke-flag"]).toBe("keep me");
+		});
+
 		it("clears a guided field the user emptied", () => {
 			const merged = mergeClientConfigEdit(
 				{ "base-url": "https://sierra.example.org", key: "k", secret: "s" },

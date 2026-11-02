@@ -1791,12 +1791,24 @@ export const clientConfigToFields = (
  * So: start from what is stored, remove only the paths the guided form OWNS (which is
  * what makes clearing a field clear it), then overlay the form's answers.
  */
+/**
+ * Keys dcb-service 9.2.0 refuses outright and no release acts on. Kept, they block every
+ * config save of a record written before; dropped, the Host LMS behaves exactly as it did.
+ */
+const REFUSED_KEYS: Readonly<Record<string, readonly string[]>> = {
+	[HOST_LMS_CLASSES.polaris]: ["borrower-lending-flow"],
+};
+
 export const mergeClientConfigEdit = (
 	existing: Record<string, unknown> | null | undefined,
 	lmsClientClass: string | undefined | null,
 	values: any,
 ): Record<string, unknown> => {
 	const merged = structuredClone(existing ?? {}) as Record<string, unknown>;
+
+	for (const key of REFUSED_KEYS[lmsClientClass ?? ""] ?? []) {
+		delete merged[key];
+	}
 
 	for (const configField of clientConfigFieldsFor(lmsClientClass)) {
 		deletePath(merged, configField.path);
