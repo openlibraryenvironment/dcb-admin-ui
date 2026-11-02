@@ -642,7 +642,7 @@ const FOLIO: HostLmsProfile = {
 					"hostlms.config_fields.folio_base_url_description",
 					"required",
 					"url",
-					"https://okapi.example.org",
+					"https://edge.example.org",
 				),
 				field(
 					["apikey"],
