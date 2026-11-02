@@ -1234,6 +1234,16 @@ describe("whole-number settings", () => {
 		]);
 	});
 
+	// 9.2.0 matches -?\d{1,9}, so a ten-digit id Integer.parseInt would take is refused there
+	it("refuses ten digits, as dcb-service 9.2.0 does", () => {
+		expect(
+			notWholeNumberClientConfig(HOST_LMS_CLASSES.polaris, {
+				"logon-branch-id": "1000000000",
+				"logon-user-id": "999999999",
+			}).map((problem) => problem.name),
+		).toEqual(["logon-branch-id"]);
+	});
+
 	// Text fields, because stored configs mix "2" and 2, but PolarisConfig reads Integers
 	it("refuses text where Polaris reads an id", () => {
 		expect(

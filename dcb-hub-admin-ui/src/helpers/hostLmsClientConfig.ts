@@ -1640,13 +1640,12 @@ export const missingRequiredClientConfig = (
 			requirement: "required" as const,
 		}));
 
-/** Integer.parseInt's ceiling. Every setting here counts or identifies, so none is negative. */
-const JAVA_INT_MAX = 2_147_483_647;
-
-const isWholeNumber = (value: unknown): boolean => {
-	const text = String(value).trim();
-	return /^\d+$/.test(text) && Number(text) <= JAVA_INT_MAX;
-};
+/**
+ * At most nine digits: dcb-service 9.2.0's validator refuses ten whatever their value. Every
+ * setting here counts or identifies, so none is negative.
+ */
+const isWholeNumber = (value: unknown): boolean =>
+	/^\d{1,9}$/.test(String(value).trim());
 
 /**
  * Whole-number settings holding anything else. Blocks submission: on dcb-service 8.71.0 a
