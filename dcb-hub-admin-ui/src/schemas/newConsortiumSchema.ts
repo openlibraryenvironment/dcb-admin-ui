@@ -106,7 +106,10 @@ export const newConsortiumSchema = z.object({
 							}),
 					}),
 				email: z.email({
-					error: () => i18n.t("ui.data_grid.validation.email"),
+					error: () =>
+						i18n.t("ui.data_grid.validation.email", {
+							field: i18n.t("libraries.contacts.email"),
+						}),
 				}),
 				role: z.string().min(1, {
 					error: () =>

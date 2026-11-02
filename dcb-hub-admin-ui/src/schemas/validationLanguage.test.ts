@@ -40,4 +40,24 @@ describe("validation messages", () => {
 			library.error?.issues.find((i) => i.path[0] === "latitude")?.message,
 		).toBe("ZZ# zz-lat");
 	});
+
+	it.each([
+		["library", newLibrarySchema],
+		["consortium", newConsortiumSchema],
+	] as const)("name the contact email field on the %s form", (_, schema) => {
+		const contact = {
+			firstName: "Ada",
+			lastName: "Lovelace",
+			email: "not an email",
+			role: "OPERATIONS",
+			isPrimaryContact: true,
+		};
+		const message = schema
+			.safeParse({ contacts: [contact] })
+			.error?.issues.find(
+				(i) => i.path[0] === "contacts" && i.path[2] === "email",
+			)?.message;
+
+		expect(message).toBe("The field “Email” must be an email address.");
+	});
 });
