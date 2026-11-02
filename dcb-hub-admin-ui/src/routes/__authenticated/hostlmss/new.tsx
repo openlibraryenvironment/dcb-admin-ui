@@ -25,7 +25,7 @@ import ClientConfigFields, {
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useIsConsortiumAdmin } from "@hooks/useIsConsortiumAdmin";
-import { createHostLmsMutation } from "@mutations/createHostLms";
+import { createHostLmsRecord } from "@helpers/hostLmsCreation";
 import {
 	buildClientConfig,
 	creatableHostLmsProfiles,
@@ -43,11 +43,7 @@ import {
 	libraryOptionsQuery,
 	type LibraryAutocompleteOption,
 } from "@/queryOptions/libraries";
-import type {
-	CreateHostLmsInput,
-	CreateHostLmsMutation,
-	CreateHostLmsMutationVariables,
-} from "@generated/graphql";
+import type { CreateHostLmsInput } from "@generated/graphql";
 
 interface NewHostLmsFormFields {
 	library: LibraryAutocompleteOption | null;
@@ -63,6 +59,7 @@ interface CreatedHostLms {
 	id: string;
 	code: string;
 	verification: HostLmsVerificationResult;
+	ingestSourceMissing: boolean;
 }
 
 export const Route = createFileRoute("/__authenticated/hostlmss/new")({
@@ -140,10 +137,7 @@ function NewHostLms() {
 
 	const { mutateAsync: create, isPending } = useMutation({
 		mutationFn: (input: CreateHostLmsInput) =>
-			gqlClient.request<CreateHostLmsMutation, CreateHostLmsMutationVariables>(
-				createHostLmsMutation(),
-				{ input },
-			),
+			createHostLmsRecord(gqlClient, input),
 	});
 
 	/**
@@ -199,6 +193,7 @@ function NewHostLms() {
 				id: payload.hostLms.id,
 				code: payload.hostLms.code ?? formData.code.trim(),
 				verification: verificationFrom(payload),
+				ingestSourceMissing: result.ingestSourceMissing,
 			});
 		} catch (error: any) {
 			// Named, not swallowed: the validator returns a 400 listing exactly which
@@ -243,6 +238,12 @@ function NewHostLms() {
 					<Alert severity="success">
 						{t("hostlms.new_host_lms.created_body", { code: created.code })}
 					</Alert>
+
+					{created.ingestSourceMissing && (
+						<Alert severity="warning">
+							{t("hostlms.ingest_source_missing", { code: created.code })}
+						</Alert>
+					)}
 
 					<Alert severity="warning">
 						<AlertTitle>

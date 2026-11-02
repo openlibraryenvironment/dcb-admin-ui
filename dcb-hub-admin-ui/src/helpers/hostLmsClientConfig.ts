@@ -148,8 +148,7 @@ export interface HostLmsProfile {
 	labelKey: string;
 	/**
 	 * What harvests this ILS's catalogue, sent with every create. Absent where the ILS has
-	 * no harvester. dcb-service 9.2.0 and earlier ignore it on create and derive their own;
-	 * before 9.2.0 that stored a blank for Sierra and Polaris, which 9.2.0 will not harvest.
+	 * no harvester. No release to 9.2.0 reads it on create - see ingestSourceClassToUpdate.
 	 */
 	ingestSourceClass?: string;
 	groups: ClientConfigGroup[];
@@ -1489,6 +1488,24 @@ export const getHostLmsProfile = (
 		})),
 	};
 };
+
+/**
+ * createHostLms derives the ingest source class and ignores the one it is sent. Before
+ * 9.2.0 it derives a blank for these two, and 9.2.0 does not harvest a Host LMS whose
+ * class is blank; only updateHostLms stores the class it is given.
+ */
+const INGEST_SOURCE_SET_BY_UPDATE: ReadonlySet<string> = new Set([
+	HOST_LMS_CLASSES.sierra,
+	HOST_LMS_CLASSES.polaris,
+]);
+
+/** The class to store with updateHostLms straight after a create, if any. */
+export const ingestSourceClassToUpdate = (
+	lmsClientClass?: string | null,
+): string | undefined =>
+	lmsClientClass && INGEST_SOURCE_SET_BY_UPDATE.has(lmsClientClass)
+		? getHostLmsProfile(lmsClientClass)?.ingestSourceClass
+		: undefined;
 
 export const clientConfigFieldsFor = (
 	lmsClientClass?: string | null,

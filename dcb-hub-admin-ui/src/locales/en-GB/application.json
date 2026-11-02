@@ -808,6 +808,8 @@
 		"busy_creating": "Creating Host LMS {{code}} and testing the connection. The ingest check can take up to 20 seconds.",
 		"busy_updating": "Saving Host LMS {{code}} and testing the connection again. The ingest check can take up to 20 seconds.",
 		"created_locked": "Host LMS {{code}} has been created, so its code and type can no longer change. Its other settings can: changes are saved when you press Next.",
+		"ingest_source_retry": "Host LMS {{code}} was created, but DCB could not record which harvester reads its catalogue, and from dcb-service 9.2.0 it will not be harvested without one. Press Next to try again.",
+		"ingest_source_missing": "Host LMS {{code}} was created, but DCB could not record which harvester reads its catalogue. From dcb-service 9.2.0 it will not be harvested until a DCB administrator sets its ingest source class.",
 		"none_to_select": "There are no Host LMS systems on this instance yet. Go back and choose “Create new system” instead.",
 		"select_existing_explanation": "Choose the Host LMS this library runs on. Its mappings and locations will be imported against this system.",
 		"select_existing_helper": "Only systems already configured in DCB are listed.",

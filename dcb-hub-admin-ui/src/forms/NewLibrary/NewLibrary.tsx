@@ -31,7 +31,7 @@ import { requestReferenceOf } from "@helpers/requestReference";
 import Confirmation from "@components/Confirmation/Confirmation";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 
-import { createHostLmsMutation } from "@mutations/createHostLms";
+import { createHostLmsRecord } from "@helpers/hostLmsCreation";
 import { updateHostLmsMutation } from "@mutations/updateHostLms";
 import { createLibraryMutation } from "@mutations/createLibrary";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -52,7 +52,10 @@ import {
 	type NewLibraryFormValues,
 } from "@schemas/newLibrarySchema";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
-import { getHostLmsProfile } from "@helpers/hostLmsClientConfig";
+import {
+	getHostLmsProfile,
+	ingestSourceClassToUpdate,
+} from "@helpers/hostLmsClientConfig";
 import type { LibrarySetupStepId } from "@helpers/librarySetup";
 import {
 	isIngestTimeout,
@@ -84,7 +87,6 @@ import {
 import { invalidateLibraryCaches as invalidateLibraryCachesOf } from "./libraryCaches";
 import type {
 	CreateHostLmsInput,
-	CreateHostLmsMutationVariables,
 	CreateLibraryMutationVariables,
 	UpdateHostLmsInput,
 	UpdateHostLmsMutation,
@@ -192,6 +194,8 @@ export default function NewLibrary({
 	const [savedHostLmsSettings, setSavedHostLmsSettings] = useState<
 		string | null
 	>(null);
+	/** Created, but the follow-up that stores its ingest source class failed. */
+	const [ingestSourcePending, setIngestSourcePending] = useState(false);
 	/** What is happening right now, in words, while a mutation is in flight. */
 	const [busyMessage, setBusyMessage] = useState<string | null>(null);
 	const [showAbandonConfirmation, setShowAbandonConfirmation] = useState(false);
@@ -288,10 +292,7 @@ export default function NewLibrary({
 	const { mutateAsync: createHostLms, isPending: isHostLmsPending } =
 		useMutation({
 			mutationFn: (variables: { input: CreateHostLmsInput }) =>
-				gqlClient.request<any, CreateHostLmsMutationVariables>(
-					createHostLmsMutation(),
-					variables,
-				),
+				createHostLmsRecord(gqlClient, variables.input),
 			onSuccess: () =>
 				queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
 		});
@@ -496,7 +497,22 @@ export default function NewLibrary({
 					if (agencyCode) methods.setValue("agencyCode", agencyCode);
 					setHostLmsResult(hostLmsData); // Surface ping/ingest/warnings on a dedicated verification step
 					setSavedHostLmsSettings(settingsKey);
-				} else if (settingsKey !== savedHostLmsSettings) {
+
+					if (result.ingestSourceMissing) {
+						setIngestSourcePending(true);
+						setAlert({
+							open: true,
+							severity: "error",
+							text: t("hostlms.ingest_source_retry", {
+								code: formData.hostLmsCode,
+							}),
+						});
+						return;
+					}
+				} else if (
+					ingestSourcePending ||
+					settingsKey !== savedHostLmsSettings
+				) {
 					setBusyMessage(
 						t("hostlms.busy_updating", { code: formData.hostLmsCode }),
 					);
@@ -504,6 +520,9 @@ export default function NewLibrary({
 						input: {
 							id: hostLmsResult?.hostLms?.id as string,
 							...settings,
+							ingestSourceClass: ingestSourcePending
+								? ingestSourceClassToUpdate(formData.lmsClientClass)
+								: undefined,
 							changeCategory: "New Host LMS",
 						},
 					});
@@ -513,6 +532,7 @@ export default function NewLibrary({
 						...verificationFrom(result?.updateHostLms),
 					});
 					setSavedHostLmsSettings(settingsKey);
+					setIngestSourcePending(false);
 				}
 			}
 
@@ -675,6 +695,7 @@ export default function NewLibrary({
 		setActiveStepId(null);
 		setHostLmsResult(null);
 		setSavedHostLmsSettings(null);
+		setIngestSourcePending(false);
 		// "Add another library" starts a different library; the memberships and
 		// the created Host LMS belong to the previous one.
 		setJoinedGroupIds([]);

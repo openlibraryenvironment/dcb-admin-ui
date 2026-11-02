@@ -33,7 +33,11 @@ const openWizardOnHostLmsStep = async (page: Page) => {
 	await page.getByRole("button", { name: /continue/i }).click();
 };
 
-// The update answers a correction made after going back
+const SIERRA_CLIENT_CLASS =
+	"org.olf.dcb.core.interaction.sierra.SierraLmsClient";
+
+// A Sierra create is followed by an update that stores its ingest source class, which
+// createHostLms leaves blank before dcb-service 9.2.0
 const sierraHostLmsMocks = {
 	CreateHostLms: {
 		createHostLms: {
@@ -155,7 +159,9 @@ test.describe("New Library wizard", () => {
 		);
 	});
 
-	test("saves a correction made after going back", async ({ page }) => {
+	test("stores a Sierra's ingest source class, and saves a correction made after going back", async ({
+		page,
+	}) => {
 		const sent: { operation: string; input: any }[] = [];
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
@@ -177,7 +183,12 @@ test.describe("New Library wizard", () => {
 		await dialog.getByRole("button", { name: "Next" }).click();
 		await expect(activeStep).toHaveText("Verification");
 
-		expect(sent.map((call) => call.operation)).toEqual(["create"]);
+		expect(sent.map((call) => call.operation)).toEqual(["create", "update"]);
+		expect(sent[1].input).toEqual({
+			id: "host-lms-1",
+			ingestSourceClass: SIERRA_CLIENT_CLASS,
+			changeCategory: "New Host LMS",
+		});
 
 		// Before, a corrected setting was dropped, and a corrected code made a second Host LMS
 		await dialog.getByRole("button", { name: "Back" }).click();
@@ -188,17 +199,22 @@ test.describe("New Library wizard", () => {
 		await dialog.getByRole("button", { name: "Next" }).click();
 		await expect(activeStep).toHaveText("Verification");
 
-		expect(sent.map((call) => call.operation)).toEqual(["create", "update"]);
-		expect(sent[1].input).toMatchObject({
+		expect(sent.map((call) => call.operation)).toEqual([
+			"create",
+			"update",
+			"update",
+		]);
+		expect(sent[2].input).toMatchObject({
 			id: "host-lms-1",
 			clientConfig: { "base-url": "https://sierra2.example.org" },
 		});
+		expect(sent[2].input).not.toHaveProperty("ingestSourceClass");
 
 		// Nothing changed, so nothing is written and the system is not contacted again
 		await dialog.getByRole("button", { name: "Back" }).click();
 		await dialog.getByRole("button", { name: "Next" }).click();
 		await expect(activeStep).toHaveText("Verification");
-		expect(sent).toHaveLength(2);
+		expect(sent).toHaveLength(3);
 	});
 
 	test("shows the configuration and authentication profile checks the server ran", async ({

@@ -9,6 +9,7 @@ import {
 	creatableHostLmsProfiles,
 	getHostLmsProfile,
 	hasSharedSystemConflict,
+	ingestSourceClassToUpdate,
 	isAdvancedField,
 	missingRecommendedClientConfig,
 	missingRequiredClientConfig,
@@ -1164,6 +1165,27 @@ describe("the ingest source class sent on create", () => {
 			[HOST_LMS_CLASSES.foundation]: undefined,
 			[HOST_LMS_CLASSES.orsAppliance]:
 				"org.olf.dcb.core.interaction.ors.ORSApplianceOaiPmhIngestSource",
+		});
+	});
+
+	// createHostLms derives the class itself in every release; before 9.2.0 it derives a
+	// blank for these two, and 9.2.0 skips a Host LMS whose class is blank
+	it("stores Sierra's and Polaris's with an update, and no other ILS's", () => {
+		const updated = Object.fromEntries(
+			HOST_LMS_PROFILES.map((profile) => [
+				profile.lmsClientClass,
+				ingestSourceClassToUpdate(profile.lmsClientClass),
+			]),
+		);
+
+		expect(updated).toEqual({
+			[HOST_LMS_CLASSES.alma]: undefined,
+			[HOST_LMS_CLASSES.polaris]: HOST_LMS_CLASSES.polaris,
+			[HOST_LMS_CLASSES.folio]: undefined,
+			[HOST_LMS_CLASSES.koha]: undefined,
+			[HOST_LMS_CLASSES.sierra]: HOST_LMS_CLASSES.sierra,
+			[HOST_LMS_CLASSES.foundation]: undefined,
+			[HOST_LMS_CLASSES.orsAppliance]: undefined,
 		});
 	});
 });
