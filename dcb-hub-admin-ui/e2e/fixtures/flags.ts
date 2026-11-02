@@ -37,6 +37,7 @@ const ALL_FEATURES: Record<string, string> = {
 	// silently tests the legacy path in every spec that asks for the new one.
 	VITE_FEATURE_LOCAL_HOLDS: "true",
 	VITE_FEATURE_HOST_LMS_PROBES: "true",
+	VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS: "true",
 	VITE_FEATURE_SETTINGS_INHERITANCE: "true",
 	VITE_FEATURE_SHELF_BROWSE: "true",
 	VITE_FEATURE_REQUEST_TAGS: "true",

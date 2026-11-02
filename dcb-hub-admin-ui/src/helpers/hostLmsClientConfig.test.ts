@@ -27,6 +27,20 @@ const extendedConfig = (on: boolean) =>
 		__APP_ENV__: { VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG: String(on) },
 	});
 
+const circulationSettings = (on: boolean) =>
+	vi.stubGlobal("window", {
+		__APP_ENV__: { VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS: String(on) },
+	});
+
+/** The 9.2.0 catalogue, which host-lms-defaults.json is a snapshot of. */
+const latestRelease = () =>
+	vi.stubGlobal("window", {
+		__APP_ENV__: {
+			VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG: "true",
+			VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS: "true",
+		},
+	});
+
 afterEach(() => {
 	vi.unstubAllGlobals();
 });
@@ -81,7 +95,6 @@ describe("hostLmsClientConfig", () => {
 					"default-agency-code",
 					"institution-code",
 					"metadata-prefix",
-					"request-cancellation-reason",
 					"sharing-library-code",
 					"virtual-item-library-code",
 					"virtual-item-location-code",
@@ -807,6 +820,7 @@ describe("hostLmsClientConfig", () => {
 		];
 
 		it("gives every field dcb-service defaults its default, from the snapshot", () => {
+			latestRelease();
 			const unmatched: string[] = [];
 
 			for (const [lmsClientClass, defaults] of Object.entries(
@@ -878,6 +892,7 @@ describe("hostLmsClientConfig", () => {
 		});
 
 		it("offers the virtual patron mailbox on every adapter that sets it", () => {
+			latestRelease();
 			for (const lmsClass of [
 				HOST_LMS_CLASSES.sierra,
 				HOST_LMS_CLASSES.polaris,
@@ -1248,6 +1263,52 @@ describe("a context hierarchy without the Host LMS's own code", () => {
 		expect(contextHierarchyOmitsCode({ contextHierarchy: "SHARED" }, "")).toBe(
 			false,
 		);
+	});
+});
+
+// No release before 9.2.0 reads these, and the cancellation reason was required on 8.71.0
+describe("settings first read by dcb-service 9.2.0", () => {
+	const paths = (lmsClientClass: string) =>
+		clientConfigFieldsFor(lmsClientClass).map((configField) =>
+			configField.path.join("."),
+		);
+
+	it("are neither offered nor required before then", () => {
+		circulationSettings(false);
+
+		expect(paths(HOST_LMS_CLASSES.alma)).not.toContain(
+			"request-cancellation-reason",
+		);
+		expect(paths(HOST_LMS_CLASSES.sierra)).not.toContain("api-version");
+		expect(paths(HOST_LMS_CLASSES.koha)).not.toContain("do-not-renew-note");
+		expect(
+			missingRequiredClientConfig(HOST_LMS_CLASSES.alma, {}).map(
+				(problem) => problem.name,
+			),
+		).not.toContain("request-cancellation-reason");
+	});
+
+	it("are offered, and the cancellation reason required, from then", () => {
+		circulationSettings(true);
+
+		expect(paths(HOST_LMS_CLASSES.polaris)).toContain("virtual-patron-email");
+		expect(
+			missingRequiredClientConfig(HOST_LMS_CLASSES.alma, {}).map(
+				(problem) => problem.name,
+			),
+		).toContain("request-cancellation-reason");
+	});
+
+	it("keep a stored value when the rest of the config is edited", () => {
+		circulationSettings(false);
+
+		const merged = mergeClientConfigEdit(
+			{ "request-cancellation-reason": "DCB_CANCEL" },
+			HOST_LMS_CLASSES.alma,
+			{},
+		);
+
+		expect(merged["request-cancellation-reason"]).toBe("DCB_CANCEL");
 	});
 });
 

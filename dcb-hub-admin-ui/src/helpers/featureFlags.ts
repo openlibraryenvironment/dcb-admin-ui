@@ -62,6 +62,14 @@ export const isHostLmsExtendedConfigEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG");
 
 /**
+ * Host LMS settings no release before dcb-service 9.2.0 reads: Alma's cancellation and
+ * renewal settings, visiting patron details for Sierra, Polaris and Koha, and Sierra's
+ * API version. Off, they are not offered - Alma's cancellation reason was required there.
+ */
+export const isHostLmsCirculationSettingsEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS");
+
+/**
  * Confirming a request's item is back at the supplying library — a dcb-service route first
  * released in 9.2.0 (POST .../transition/confirm-returned). Older servers answer 404.
  */

@@ -13,7 +13,10 @@
  */
 
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
-import { isHostLmsExtendedConfigEnabled } from "@helpers/featureFlags";
+import {
+	isHostLmsCirculationSettingsEnabled,
+	isHostLmsExtendedConfigEnabled,
+} from "@helpers/featureFlags";
 
 export const HOST_LMS_CLASSES = {
 	alma: "org.olf.dcb.core.interaction.alma.AlmaHostLmsClient",
@@ -1444,11 +1447,51 @@ const CLASSES_SINCE_9_0_0: ReadonlySet<string> = new Set([
 	HOST_LMS_CLASSES.orsAppliance,
 ]);
 
-/** 8.71.0 reads neither, and refuses a shared system's missing default agency. */
-const KEYS_SINCE_9_0_0: ReadonlySet<string> = new Set([
-	"shared-system",
-	"base-url-qualifier",
-]);
+/**
+ * Settings no release before the flag's reads, by ILS ("*" is every ILS). Off, they are
+ * not offered, required or written; a stored value is kept on edit.
+ */
+const SETTINGS_SINCE: ReadonlyArray<{
+	enabled: () => boolean;
+	keys: Readonly<Record<string, readonly string[]>>;
+}> = [
+	{
+		// 8.71.0 also refuses a shared system's missing default agency
+		enabled: isHostLmsExtendedConfigEnabled,
+		keys: {
+			"*": ["shared-system", "base-url-qualifier"],
+			[HOST_LMS_CLASSES.polaris]: ["harvest-watermark-overlap-minutes"],
+		},
+	},
+	{
+		enabled: isHostLmsCirculationSettingsEnabled,
+		keys: {
+			[HOST_LMS_CLASSES.alma]: [
+				"request-cancellation-reason",
+				"sharing-circ-desk-code",
+				"alternative-sharing-library-code",
+				"no-renew-item-policy",
+				"virtual-patron-barcode-prefix",
+			],
+			[HOST_LMS_CLASSES.sierra]: ["api-version", "virtual-patron-email"],
+			[HOST_LMS_CLASSES.polaris]: ["virtual-patron-email"],
+			[HOST_LMS_CLASSES.koha]: [
+				"virtual-patron-email",
+				"virtual-patron-category",
+				"do-not-renew-note",
+			],
+		},
+	},
+];
+
+/** What this deployment's dcb-service does not read for this ILS. Read per call. */
+const unreadSettings = (lmsClientClass: string): Set<string> =>
+	new Set(
+		SETTINGS_SINCE.filter((gate) => !gate.enabled()).flatMap((gate) => [
+			...(gate.keys["*"] ?? []),
+			...(gate.keys[lmsClientClass] ?? []),
+		]),
+	);
 
 /**
  * The types the picker offers: the ones this deployment's dcb-service will create.
@@ -1480,14 +1523,17 @@ export const getHostLmsProfile = (
 	const profile = HOST_LMS_PROFILES.find(
 		(candidate) => candidate.lmsClientClass === lmsClientClass,
 	);
-	if (!profile || isHostLmsExtendedConfigEnabled()) return profile;
+	if (!profile) return undefined;
+
+	const unread = unreadSettings(profile.lmsClientClass);
+	if (unread.size === 0) return profile;
 
 	return {
 		...profile,
 		groups: profile.groups.map((group) => ({
 			...group,
 			fields: group.fields.filter(
-				(configField) => !KEYS_SINCE_9_0_0.has(configField.path.join(".")),
+				(configField) => !unread.has(configField.path.join(".")),
 			),
 		})),
 	};

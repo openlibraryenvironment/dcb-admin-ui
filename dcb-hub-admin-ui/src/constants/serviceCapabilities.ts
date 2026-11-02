@@ -5,6 +5,7 @@ import {
 	isConfirmItemReturnedEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
+	isHostLmsCirculationSettingsEnabled,
 	isHostLmsExtendedConfigEnabled,
 	isHostLmsProbesEnabled,
 	isInsightsEnabled,
@@ -296,6 +297,14 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 			Consortium: CONSORTIUM_SUPPORT_FIELDS,
 			UpdateConsortiumInput: CONSORTIUM_SUPPORT_FIELDS,
 		},
+	},
+	{
+		// Adapter settings, not schema: clientConfig is JSON in every release.
+		id: "host_lms_circulation_settings",
+		flag: "VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS",
+		enabled: isHostLmsCirculationSettingsEnabled,
+		since: "9.2.0",
+		fields: {},
 	},
 	{
 		id: "host_lms_probes",
