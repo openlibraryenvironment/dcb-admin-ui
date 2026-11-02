@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useRef } from "react";
+import { PropsWithChildren, ReactNode, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Box,
@@ -16,24 +16,19 @@ import SetupRunProvider from "./SetupRunProvider";
 import { useSetupDirty } from "./setupRun";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
-import SetupIntro from "./SetupIntro";
 import SetupRail from "./SetupRail";
-import { SETUP_CHAPTERS } from "./setupChapters";
+import type { SetupFlow } from "./setupFlow";
 import { visuallyHidden } from "@mui/utils";
-import {
-	consortiumSetupSteps,
-	stepNumber,
-	type ConsortiumSetupState,
-	type ConsortiumSetupStepId,
-} from "@helpers/consortiumSetup";
 
 interface SetupLayoutProps {
-	step: ConsortiumSetupStepId;
-	state: ConsortiumSetupState;
+	step: string;
+	flow: SetupFlow;
+	/** Shown above the chapter, such as the first-run introduction. */
+	intro?: ReactNode;
 }
 
 /**
- * The frame every chapter is rendered in — W-4.
+ * The frame every chapter of a setup flow is rendered in.
  *
  * Two things here are not decoration:
  *
@@ -49,24 +44,24 @@ interface SetupLayoutProps {
  */
 function SetupLayoutInner({
 	step,
-	state,
+	flow,
+	intro,
 	children,
 }: PropsWithChildren<SetupLayoutProps>) {
 	const { t } = useTranslation();
 	const headingRef = useRef<HTMLHeadingElement>(null);
 	const isDirtyNow = useSetupDirty();
 
-	const chapter = SETUP_CHAPTERS[step];
-	// The chapters this deployment actually asks. Not every one this flow knows about:
-	// the discovery chapter is absent before dcb-service 9.0.0 and wherever Symposia is
-	// not run, and announcing "Step 5 of 6" over a rail showing five would be a worse
-	// answer than not asking at all.
-	const steps = consortiumSetupSteps();
-	const isFirstChapter = step === steps[0];
+	// The chapters this deployment actually asks, not every one a flow knows about:
+	// announcing "Step 5 of 6" over a rail showing five would be worse than not asking.
+	const steps = flow.steps;
+	const index = steps.findIndex((candidate) => candidate.id === step);
+	const chapter = steps[index];
+	const number = index + 1;
 	const announcement = t("setup.announcement", {
-		number: stepNumber(step),
+		number,
 		total: steps.length,
-		title: t(chapter.labelKey),
+		title: t(chapter?.labelKey ?? ""),
 	});
 
 	useEffect(() => {
@@ -92,7 +87,7 @@ function SetupLayoutInner({
 	});
 
 	return (
-		<PageContainer title={t("setup.page_title")} hideTitleBox hideBreadcrumbs>
+		<PageContainer title={t(flow.pageTitleKey)} hideTitleBox hideBreadcrumbs>
 			{/* Polite, and keyed on the step so the text genuinely changes between
 			    chapters - an identical string rewritten into a live region is not
 			    re-announced by most screen readers. */}
@@ -105,14 +100,11 @@ function SetupLayoutInner({
 				spacing={4}
 				sx={{ alignItems: "flex-start" }}
 			>
-				<SetupRail current={step} state={state} />
+				<SetupRail current={step} flow={flow} />
 
 				<Box sx={{ flexGrow: 1, maxWidth: 780, width: "100%" }}>
 					<Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5 }}>
-						{t("setup.step_of", {
-							number: stepNumber(step),
-							total: steps.length,
-						})}
+						{t("setup.step_of", { number, total: steps.length })}
 					</Typography>
 					<Typography
 						variant="h1"
@@ -124,15 +116,13 @@ function SetupLayoutInner({
 						// leave a sighted keyboard user with no idea where they landed.
 						sx={{ outlineOffset: 4, mb: 1 }}
 					>
-						{t(chapter.titleKey)}
+						{t(chapter?.titleKey ?? "")}
 					</Typography>
 					<Typography sx={{ color: "text.secondary", mb: 3 }}>
-						{t(chapter.subtitleKey)}
+						{t(chapter?.subtitleKey ?? "")}
 					</Typography>
 
-					{/* First screen of a first run only. See SetupIntro on why it is not
-					    shown to somebody who has been here before. */}
-					{isFirstChapter && state.isFresh && <SetupIntro />}
+					{intro}
 
 					{children}
 				</Box>

@@ -9,24 +9,17 @@ import {
 	Typography,
 } from "@mui/material";
 
-import { CustomLink } from "@components/CustomLink/CustomLink";
 import DCBStepIcon from "@components/DCBStepIcon/DCBStepIcon";
 import { useVisitedChapters } from "./setupRun";
-
-import {
-	consortiumSetupSteps,
-	type ConsortiumSetupState,
-	type ConsortiumSetupStepId,
-} from "@helpers/consortiumSetup";
-import { SETUP_CHAPTERS } from "./setupChapters";
+import type { SetupFlow } from "./setupFlow";
 
 interface SetupRailProps {
-	current: ConsortiumSetupStepId;
-	state: ConsortiumSetupState;
+	current: string;
+	flow: SetupFlow;
 }
 
 /**
- * Where the user is, what is behind them, and what is left — W-4.
+ * Where the user is, what is behind them, and what is left.
  *
  * <h2>A Stepper, and still a list of links</h2>
  *
@@ -87,26 +80,23 @@ interface SetupRailProps {
  * it is the wording of the home-page banner they have already read. The bar still draws
  * the proportion; it just no longer has to defend a number.
  */
-export default function SetupRail({ current, state }: SetupRailProps) {
+export default function SetupRail({ current, flow }: SetupRailProps) {
 	const { t } = useTranslation();
 
 	// Annotated: TypeScript otherwise picks Box's div overload for component="nav" and
 	// reports the aria-label as unknown rather than resolving the polymorphic props.
 	const railLabel: string = t("setup.rail_label");
 
-	const stepFor = (id: ConsortiumSetupStepId) =>
-		state.steps.find((step) => step.id === id);
-
 	// The chapters this deployment asks, so the rail, its numbers and the announced
-	// total all come from one list. See consortiumSetupSteps.
-	const chapters = consortiumSetupSteps();
-	const activeIndex = chapters.indexOf(current);
+	// total all come from one list.
+	const chapters = flow.steps;
+	const activeIndex = chapters.findIndex((step) => step.id === current);
 
 	// Chapters seen during THIS pass. Only used to settle the optional one - the rest
 	// report what the data says, which does not care whether anybody looked at it.
 	const visited = useVisitedChapters();
 
-	const { progress } = state;
+	const { progress } = flow;
 	const progressId = useId();
 
 	const progressSummary =
@@ -167,8 +157,8 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 					"& .MuiStepLabel-root": { py: 1 },
 				}}
 			>
-				{chapters.map((id) => {
-					const step = stepFor(id);
+				{chapters.map((step, index) => {
+					const { id } = step;
 					const isCurrent = id === current;
 
 					// The state is on the icon, which is decorative, so it is also said in
@@ -180,17 +170,17 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 					// afterwards. Passing through IS the whole of the work - there is nothing
 					// to save - so a tick is the honest report of it, and it is per-run rather
 					// than remembered, which is what stops a wiped deployment inheriting one.
-					const settledOptional = step?.optional && visited.includes(id);
+					const settledOptional = step.optional && visited.includes(id);
 
 					const status = settledOptional
 						? t("setup.status.done")
-						: step?.optional
+						: step.optional
 							? t("setup.status.optional")
-							: step?.complete
+							: step.complete
 								? t("setup.status.done")
-								: step?.skipped
+								: step.skipped
 									? t("setup.status.skipped")
-									: step?.available
+									: step.available
 										? t("setup.status.not_started")
 										: t("setup.status.not_yet_available");
 
@@ -203,7 +193,7 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 							// hold in high contrast too.
 							sx={{ fontWeight: isCurrent ? 700 : 400 }}
 						>
-							{t(SETUP_CHAPTERS[id].labelKey)}
+							{t(step.labelKey)}
 						</Typography>
 					);
 
@@ -218,38 +208,19 @@ export default function SetupRail({ current, state }: SetupRailProps) {
 					);
 
 					return (
-						<Step
-							key={id}
-							completed={(step?.complete ?? false) || !!settledOptional}
-						>
+						<Step key={id} completed={step.complete || !!settledOptional}>
 							<StepLabel
 								optional={optional}
 								icon={
 									<DCBStepIcon
-										icon={chapters.indexOf(id) + 1}
+										icon={index + 1}
 										active={isCurrent}
-										completed={(step?.complete ?? false) || !!settledOptional}
+										completed={step.complete || !!settledOptional}
 									/>
 								}
 							>
-								{step?.available ? (
-									<CustomLink
-										to="/setup/$step"
-										params={{ step: id }}
-										underline="hover"
-										// Fills the row so the hit area is the whole label rather than
-										// the few words in it (WCAG 2.5.8).
-										sx={{
-											display: "block",
-											py: 0.5,
-											color: "primary.linkText",
-										}}
-									>
-										{label}
-									</CustomLink>
-								) : (
-									label
-								)}
+								{/* The flow renders the link, typed against its own route */}
+								{step.available ? flow.renderLink(id, label) : label}
 							</StepLabel>
 						</Step>
 					);

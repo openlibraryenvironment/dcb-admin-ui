@@ -1,7 +1,5 @@
 import { createContext, useCallback, useContext, useEffect } from "react";
 
-import type { ConsortiumSetupStepId } from "@helpers/consortiumSetup";
-
 /**
  * What is true about THIS pass through setup, and nothing beyond it.
  *
@@ -55,8 +53,8 @@ export interface SetupRunValue {
 	 * the time the navigation is attempted. This says it directly.
 	 */
 	clearDirty: () => void;
-	visited: readonly ConsortiumSetupStepId[];
-	markVisited: (id: ConsortiumSetupStepId) => void;
+	visited: readonly string[];
+	markVisited: (id: string) => void;
 }
 
 export const SetupRunContext = createContext<SetupRunValue | undefined>(
@@ -75,7 +73,7 @@ export function useSetupDirty(): () => boolean {
 }
 
 /** Read by the rail, to decide whether an optional chapter has been dealt with. */
-export function useVisitedChapters(): readonly ConsortiumSetupStepId[] {
+export function useVisitedChapters(): readonly string[] {
 	return useContext(SetupRunContext)?.visited ?? [];
 }
 

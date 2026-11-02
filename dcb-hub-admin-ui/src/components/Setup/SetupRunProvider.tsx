@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 
-import type { ConsortiumSetupStepId } from "@helpers/consortiumSetup";
 import { SetupRunContext, type SetupRunValue } from "./setupRun";
 
 /** Holds the per-run setup state. See ./setupRun for what it is and why none of it lasts. */
@@ -16,9 +15,9 @@ export default function SetupRunProvider({
 	// a navigation is attempted - see ./setupRun. State would answer with the value from
 	// before the save that has just happened.
 	const dirtyById = useRef<Record<string, boolean>>({});
-	const [visited, setVisited] = useState<ConsortiumSetupStepId[]>([]);
+	const [visited, setVisited] = useState<string[]>([]);
 
-	const markVisited = useCallback((id: ConsortiumSetupStepId) => {
+	const markVisited = useCallback((id: string) => {
 		setVisited((current) =>
 			current.includes(id) ? current : [...current, id],
 		);

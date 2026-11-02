@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import Error from "@components/Error/Error";
 import SetupLayout from "@components/Setup/SetupLayout";
+import SetupIntro from "@components/Setup/SetupIntro";
+import { consortiumSetupFlow } from "@components/Setup/consortiumSetupFlow";
 import AppearanceChapter from "@components/Setup/chapters/AppearanceChapter";
 import ConsortiumChapter from "@components/Setup/chapters/ConsortiumChapter";
 import HowItWorksChapter from "@components/Setup/chapters/HowItWorksChapter";
@@ -138,7 +140,17 @@ function SetupStepPage() {
 	const chapterState = state.steps.find((entry) => entry.id === stepId);
 
 	return (
-		<SetupLayout step={stepId} state={state}>
+		<SetupLayout
+			step={stepId}
+			flow={consortiumSetupFlow(state)}
+			// First screen of a first run only. See SetupIntro on why it is not shown to
+			// somebody who has been here before.
+			intro={
+				stepId === consortiumSetupSteps()[0] && state.isFresh ? (
+					<SetupIntro />
+				) : undefined
+			}
+		>
 			{chapterState?.available ? (
 				<Chapter />
 			) : (
