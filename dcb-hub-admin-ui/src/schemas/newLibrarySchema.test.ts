@@ -1,7 +1,17 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 
 import { newLibrarySchema, resolveClientConfig } from "./newLibrarySchema";
 import { HOST_LMS_CLASSES } from "@helpers/hostLmsClientConfig";
+
+/** Shared systems exist from dcb-service 9.0.0; vitest.setup.ts starts every flag off. */
+const extendedConfig = () =>
+	vi.stubGlobal("window", {
+		__APP_ENV__: { VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG: "true" },
+	});
+
+afterEach(() => {
+	vi.unstubAllGlobals();
+});
 
 const validLibrary = () => ({
 	hostLmsCode: "EXAMPLE",
@@ -203,6 +213,8 @@ describe("newLibrarySchema", () => {
 					"api-url": "https://koha.example.org/api/v1",
 					client_id: "id",
 					client_secret: "secret",
+					"base-url": "https://catalogue.example.org",
+					"metadata-prefix": "marcxml",
 					"default-agency-code": "EX",
 					"sharing-library-code": "SHARE",
 					"virtual-item-library-code": "VLIB",
@@ -212,6 +224,7 @@ describe("newLibrarySchema", () => {
 		});
 
 		it("accepts a shared Koha with no default agency code", () => {
+			extendedConfig();
 			// The 60-library case. Before shared-system existed in this table the form
 			// demanded default-agency-code, which dcb-service then rejected outright -
 			// so a shared Host LMS could not be created through the guided form at all.
@@ -223,6 +236,8 @@ describe("newLibrarySchema", () => {
 					"api-url": "https://koha.example.org/api/v1",
 					client_id: "id",
 					client_secret: "secret",
+					"base-url": "https://catalogue.example.org",
+					"metadata-prefix": "marcxml",
 					"sharing-library-code": "SHARE",
 					"virtual-item-library-code": "VLIB",
 					"shared-system": true,
@@ -232,6 +247,7 @@ describe("newLibrarySchema", () => {
 		});
 
 		it("refuses a shared system that also names a default agency", () => {
+			extendedConfig();
 			const result = newLibrarySchema.safeParse({
 				...validLibrary(),
 				isCreatingHostLms: true,
@@ -240,6 +256,8 @@ describe("newLibrarySchema", () => {
 					"api-url": "https://koha.example.org/api/v1",
 					client_id: "id",
 					client_secret: "secret",
+					"base-url": "https://catalogue.example.org",
+					"metadata-prefix": "marcxml",
 					"sharing-library-code": "SHARE",
 					"virtual-item-library-code": "VLIB",
 					"shared-system": true,
@@ -254,6 +272,50 @@ describe("newLibrarySchema", () => {
 					issue.path.join(".").endsWith("default-agency-code"),
 				),
 			).toBe(true);
+		});
+
+		// Sierra parses get-holds-retry-attempts in its constructor, so 2.5 saves and then
+		// leaves the client unbuildable
+		it("reports a setting that is not a whole number against its own input", () => {
+			const result = newLibrarySchema.safeParse({
+				...validLibrary(),
+				isCreatingHostLms: true,
+				lmsClientClass: HOST_LMS_CLASSES.sierra,
+				clientConfigFields: {
+					"base-url": "https://sierra.example.org",
+					key: "k",
+					secret: "s",
+					"default-agency-code": "EX",
+					"page-size": "100",
+					"get-holds-retry-attempts": "2.5",
+				},
+			});
+
+			expect(result.success).toBe(false);
+			expect(
+				result.error?.issues.map((issue) => issue.path.join(".")),
+			).toContain("clientConfigFields.get-holds-retry-attempts");
+		});
+
+		it("holds the JSON editor to the same whole-number rule", () => {
+			const result = newLibrarySchema.safeParse({
+				...validLibrary(),
+				isCreatingHostLms: true,
+				lmsClientClass: HOST_LMS_CLASSES.sierra,
+				clientConfigMode: "json",
+				clientConfig: JSON.stringify({
+					"base-url": "https://sierra.example.org",
+					key: "k",
+					secret: "s",
+					"default-agency-code": "EX",
+					"page-size": "one hundred",
+				}),
+			});
+
+			expect(result.success).toBe(false);
+			expect(
+				result.error?.issues.map((issue) => issue.path.join(".")),
+			).toContain("clientConfig");
 		});
 
 		it("reports each missing required guided field against its own input", () => {

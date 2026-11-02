@@ -52,6 +52,7 @@ import {
 	type NewLibraryFormValues,
 } from "@schemas/newLibrarySchema";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { getHostLmsProfile } from "@helpers/hostLmsClientConfig";
 import type { LibrarySetupStepId } from "@helpers/librarySetup";
 import {
 	isIngestTimeout,
@@ -455,6 +456,8 @@ export default function NewLibrary({
 						code: formData.hostLmsCode,
 						name: formData.hostLmsName,
 						lmsClientClass: formData.lmsClientClass,
+						ingestSourceClass: getHostLmsProfile(formData.lmsClientClass)
+							?.ingestSourceClass,
 						clientConfig,
 						suppressionRulesetName: formData.suppressionRulesetName,
 						itemSuppressionRulesetName: formData.itemSuppressionRulesetName,

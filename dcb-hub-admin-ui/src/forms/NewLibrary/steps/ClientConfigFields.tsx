@@ -57,6 +57,15 @@ const errorAt = (errors: any, path: string[]): string | undefined => {
 	return typeof node?.message === "string" ? node.message : undefined;
 };
 
+/** An unset box shows what the adapter does without the key. */
+const isChecked = (value: unknown, defaultValue?: string): boolean => {
+	const effective =
+		value === undefined || value === null || value === ""
+			? defaultValue
+			: value;
+	return effective === true || effective === "true";
+};
+
 /** Values are stored as text and coerced when the config object is built. */
 const SecretField = ({
 	configField,
@@ -184,7 +193,7 @@ const ConfigFieldControl = ({
 								<Checkbox
 									{...field}
 									id={inputId}
-									checked={field.value === true || field.value === "true"}
+									checked={isChecked(field.value, configField.defaultValue)}
 									onChange={(event) => field.onChange(event.target.checked)}
 									disabled={disabled}
 									slotProps={{

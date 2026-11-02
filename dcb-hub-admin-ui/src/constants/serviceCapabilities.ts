@@ -5,6 +5,7 @@ import {
 	isConfirmItemReturnedEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
+	isHostLmsExtendedConfigEnabled,
 	isHostLmsProbesEnabled,
 	isInsightsEnabled,
 	isInsightsTrendsEnabled,
@@ -229,6 +230,15 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		id: "guarded_cleanup",
 		flag: "VITE_FEATURE_GUARDED_CLEANUP",
 		enabled: isGuardedCleanupEnabled,
+		since: "9.0.0",
+		fields: {},
+	},
+	{
+		// HostLmsConfigValidator cases and adapter settings, not schema: lmsClientClass and
+		// clientConfig are a String and JSON in every release, so nothing to select or strip.
+		id: "host_lms_extended_config",
+		flag: "VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG",
+		enabled: isHostLmsExtendedConfigEnabled,
 		since: "9.0.0",
 		fields: {},
 	},

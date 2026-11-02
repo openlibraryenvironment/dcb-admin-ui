@@ -1,5 +1,6 @@
 import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
+import { useAllFeatures } from "./fixtures/flags";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
@@ -9,6 +10,8 @@ import libraries from "./fixtures-data/libraries.json";
 test.describe("New Host LMS: derived settings", () => {
 	test.beforeEach(async ({ page }) => {
 		await seedAuth(page);
+		// Foundation and the appliance are offered only with the 9.0.0 flag on
+		await useAllFeatures(page);
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,

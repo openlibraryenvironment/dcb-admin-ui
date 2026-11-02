@@ -27,10 +27,12 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useIsConsortiumAdmin } from "@hooks/useIsConsortiumAdmin";
 import { createHostLmsMutation } from "@mutations/createHostLms";
 import {
-	HOST_LMS_PROFILES,
 	buildClientConfig,
+	creatableHostLmsProfiles,
+	getHostLmsProfile,
 	hasSharedSystemConflict,
 	missingRequiredClientConfig,
+	notWholeNumberClientConfig,
 	bibSuppressionDefault,
 } from "@helpers/hostLmsClientConfig";
 import {
@@ -131,6 +133,10 @@ function NewHostLms() {
 		lmsClientClass,
 		configValues ?? {},
 	);
+	const numberGaps = notWholeNumberClientConfig(
+		lmsClientClass,
+		configValues ?? {},
+	);
 
 	const { mutateAsync: create, isPending } = useMutation({
 		mutationFn: (input: CreateHostLmsInput) =>
@@ -166,8 +172,8 @@ function NewHostLms() {
 				code: formData.code.trim(),
 				name: formData.name.trim() || formData.code.trim(),
 				lmsClientClass: formData.lmsClientClass,
-				// ingestSourceClass is deliberately absent: CreateHostLmsDataFetcher
-				// derives it from lmsClientClass, and nothing in this app has ever sent it.
+				ingestSourceClass: getHostLmsProfile(formData.lmsClientClass)
+					?.ingestSourceClass,
 				clientConfig: buildClientConfig(
 					formData.lmsClientClass,
 					formData.clientConfigFields ?? {},
@@ -210,6 +216,7 @@ function NewHostLms() {
 		!code.trim() ||
 		!lmsClientClass ||
 		requiredGaps.length > 0 ||
+		numberGaps.length > 0 ||
 		sharedSystemConflict ||
 		isPending;
 
@@ -363,7 +370,7 @@ function NewHostLms() {
 									t("hostlms.new_host_lms.client_class_help")
 								}
 							>
-								{HOST_LMS_PROFILES.map((profile) => (
+								{creatableHostLmsProfiles().map((profile) => (
 									<MenuItem
 										key={profile.lmsClientClass}
 										value={profile.lmsClientClass}
@@ -408,6 +415,14 @@ function NewHostLms() {
 						<Alert severity="error">
 							{t("hostlms.config_fields.missing_required", {
 								fields: requiredGaps.map((gap) => t(gap.labelKey)).join(", "),
+							})}
+						</Alert>
+					)}
+
+					{numberGaps.length > 0 && lmsClientClass && (
+						<Alert severity="error">
+							{t("hostlms.config_fields.not_whole_number", {
+								fields: numberGaps.map((gap) => t(gap.labelKey)).join(", "),
 							})}
 						</Alert>
 					)}

@@ -51,6 +51,17 @@ export const isGuardedCleanupEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_GUARDED_CLEANUP");
 
 /**
+ * Koha, Foundation and OpenRS appliance Host LMS types, and the `shared-system` and
+ * `base-url-qualifier` settings — dcb-service 9.0.0 and later.
+ *
+ * 8.71.0's HostLmsConfigValidator answers "Unsupported LMS Client Class" for all three
+ * types, and has no shared systems: it ignores both settings and still demands
+ * `default-agency-code`, so a Host LMS marked shared cannot be saved there at all.
+ */
+export const isHostLmsExtendedConfigEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG");
+
+/**
  * Confirming a request's item is back at the supplying library — a dcb-service route first
  * released in 9.2.0 (POST .../transition/confirm-returned). Older servers answer 404.
  */

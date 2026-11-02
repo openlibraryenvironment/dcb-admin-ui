@@ -175,6 +175,7 @@ than computed.
 | `VITE_FEATURE_NCIP_ONBOARDING`             | **9.0.0** or later          | Service Info → DCB NCIP onboarding (`/api/v1/dcb-profile-ncip2`)                                                                                                                                              |
 | `VITE_FEATURE_INSIGHTS`                    | **9.0.0** or later          | Insights, consortium- and library-level (`/insights`)                                                                                                                                                         |
 | `VITE_FEATURE_GUARDED_CLEANUP`             | **9.0.0** or later          | Clean up checks the request for updates first, and offers the override when dcb-service refuses it (`?force=`)                                                                                                |
+| `VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG`    | **9.0.0** or later          | Koha, Foundation and OpenRS appliance in the Host LMS type list, and the shared system and system qualifier settings. 8.71.0 refuses all three types, and cannot save a Host LMS marked shared                |
 | `VITE_FEATURE_LIBRARY_USER_PROVISIONING`   | **9.1.0** or later          | A library's Accounts tab: inviting, enabling and re-inviting DCB Admin for Libraries users                                                                                                                    |
 | `VITE_FEATURE_LOCAL_HOLDS`                 | **9.1.0** or later          | The per-agency maximum local holds field on a library's Settings tab                                                                                                                                          |
 | `VITE_FEATURE_INSIGHTS_TRENDS`             | **9.1.0** or later          | The Insights trend charts (`/insights/trend`)                                                                                                                                                                 |
@@ -588,11 +589,12 @@ docker run -p 8080:80 \
   -e VITE_FEATURE_NCIP_ONBOARDING="true" \
   -e VITE_FEATURE_INSIGHTS="true" \
   -e VITE_FEATURE_GUARDED_CLEANUP="true" \
+  -e VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG="true" \
   dcb-admin-ui
 
 ```
 
-The four feature flags above are the dcb-service **9.0.0** set (see Section 2a); 9.1.0 adds
+The five feature flags above are the dcb-service **9.0.0** set (see Section 2a); 9.1.0 adds
 `LIBRARY_USER_PROVISIONING`, `LOCAL_HOLDS` and `INSIGHTS_TRENDS`, and 9.2.0 adds
 `CONSORTIUM_SUPPORT_URL`, plus `ANNOUNCEMENTS` and `SHELF_BROWSE` where the consortium runs a
 discovery front end. Against 8.71.0, leave them all out. Switching them on later is a changed `-e` and a container restart:

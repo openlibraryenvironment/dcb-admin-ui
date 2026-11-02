@@ -18,8 +18,8 @@ import ClientConfigFields, {
 	RecommendedConfigGaps,
 } from "./ClientConfigFields";
 import {
-	HOST_LMS_PROFILES,
 	buildClientConfig,
+	creatableHostLmsProfiles,
 	clientConfigToFields,
 	getHostLmsProfile,
 	bibSuppressionDefault,
@@ -29,11 +29,9 @@ import {
  * Everything needed to create a Host LMS, with the client config asked for
  * field by field.
  *
- * The step previously offered a single free-text JSON box and every ILS in the
- * dropdown. Two things were wrong with that: the required keys were only
- * discoverable by reading dcb-service's 400, and three of the seven ILS options
- * cannot be created at all - HostLmsConfigValidator has no case for Koha, the
- * Foundation connector or the OpenRS appliance, so it rejects them outright.
+ * The step previously offered a single free-text JSON box, so the required keys
+ * were only discoverable by reading dcb-service's 400. The dropdown offers only the
+ * types this deployment's dcb-service will create - see creatableHostLmsProfiles.
  */
 export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 	const { t } = useTranslation();
@@ -143,7 +141,7 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 						error={!!errors.lmsClientClass}
 						helperText={errors.lmsClientClass?.message as string}
 					>
-						{HOST_LMS_PROFILES.map((option) => (
+						{creatableHostLmsProfiles().map((option) => (
 							<MenuItem
 								key={option.lmsClientClass}
 								value={option.lmsClientClass}

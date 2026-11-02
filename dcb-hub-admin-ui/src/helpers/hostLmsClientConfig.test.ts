@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 
 import {
 	HOST_LMS_CLASSES,
@@ -6,16 +6,28 @@ import {
 	buildClientConfig,
 	clientConfigFieldsFor,
 	clientConfigToFields,
+	creatableHostLmsProfiles,
 	getHostLmsProfile,
 	hasSharedSystemConflict,
 	isAdvancedField,
 	missingRecommendedClientConfig,
 	missingRequiredClientConfig,
 	mergeClientConfigEdit,
+	notWholeNumberClientConfig,
 	originOf,
 } from "./hostLmsClientConfig";
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
 import application from "@/locales/en-GB/application.json";
+
+/** Flags start off in every test file; vitest.setup.ts clears them. */
+const extendedConfig = (on: boolean) =>
+	vi.stubGlobal("window", {
+		__APP_ENV__: { VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG: String(on) },
+	});
+
+afterEach(() => {
+	vi.unstubAllGlobals();
+});
 
 /**
  * These assertions are the frontend half of a contract that lives in
@@ -51,7 +63,9 @@ describe("hostLmsClientConfig", () => {
 			expect(missing).toContain("apikey");
 		});
 
-		it("demands everything HostLmsConfigValidator demands for Alma", () => {
+		// metadata-prefix is not the validator's: no release defaults it, and the ingest
+		// source cannot be built without it
+		it("demands everything an Alma cannot run without", () => {
 			const missing = missingRequiredClientConfig(
 				HOST_LMS_CLASSES.alma,
 				{},
@@ -64,6 +78,7 @@ describe("hostLmsClientConfig", () => {
 					"base-url",
 					"default-agency-code",
 					"institution-code",
+					"metadata-prefix",
 					"request-cancellation-reason",
 					"sharing-library-code",
 					"virtual-item-library-code",
@@ -103,6 +118,7 @@ describe("hostLmsClientConfig", () => {
 				apikey: "abc",
 				"default-agency-code": "EX",
 				"record-syntax": "oai_dc",
+				"metadata-prefix": "marc21_withholdings",
 			};
 
 			expect(
@@ -113,14 +129,18 @@ describe("hostLmsClientConfig", () => {
 			).toEqual([]);
 		});
 
-		it("never requires the FOLIO harvest settings dcb-service defaults", () => {
-			const missing = missingRequiredClientConfig(
-				HOST_LMS_CLASSES.folio,
-				{},
-			).map((problem) => problem.name);
+		// dcb-service 8.71.0-9.1.0 have no default for either, and cannot construct the
+		// ingest source without them
+		it("requires the FOLIO harvest settings", () => {
+			const missing = missingRequiredClientConfig(HOST_LMS_CLASSES.folio, {
+				"base-url": "https://edge.example.org",
+				apikey: "abc",
+				"default-agency-code": "EX",
+				ingest: true,
+			}).map((problem) => problem.name);
 
-			expect(missing).not.toContain("record-syntax");
-			expect(missing).not.toContain("metadata-prefix");
+			expect(missing).toContain("record-syntax");
+			expect(missing).toContain("metadata-prefix");
 		});
 
 		it("reports nested Polaris fields by their dotted path", () => {
@@ -167,9 +187,9 @@ describe("hostLmsClientConfig", () => {
 				{},
 			).map((problem) => problem.name);
 
-			// KohaClientConfig reads "api-url", not "base-url" like every other ILS.
+			// KohaClientConfig reads "api-url", where every other ILS reads "base-url"; Koha
+			// has both, and base-url is the OPAC the harvest needs
 			expect(missing).toContain("api-url");
-			expect(missing).not.toContain("base-url");
 			expect(missing).toContain("client_id");
 			expect(missing).toContain("client_secret");
 			expect(missing).toContain("sharing-library-code");
@@ -197,22 +217,25 @@ describe("hostLmsClientConfig", () => {
 			expect(paths).toContain("oai-path");
 		});
 
-		it("warns about the Koha OAI keys rather than blocking submission", () => {
-			// dcb-service warns rather than rejecting, because a member that only
-			// borrows is legitimately created with ingest off.
-			const missing = missingRequiredClientConfig(
-				HOST_LMS_CLASSES.koha,
-				{},
-			).map((problem) => problem.name);
-			const recommended = missingRecommendedClientConfig(
-				HOST_LMS_CLASSES.koha,
-				{},
-			).map((problem) => problem.name);
+		// dcb-service 9.0.0 and 9.1.0 build every ingest source before reading `ingest`,
+		// and one that cannot be built ends the harvest for every Host LMS
+		it("demands the Koha OAI keys, with ingest on or off", () => {
+			for (const ingest of [undefined, true, false]) {
+				const missing = missingRequiredClientConfig(HOST_LMS_CLASSES.koha, {
+					ingest,
+				}).map((problem) => problem.name);
 
-			expect(missing).not.toContain("base-url");
-			expect(missing).not.toContain("metadata-prefix");
-			expect(recommended).toContain("base-url");
-			expect(recommended).toContain("metadata-prefix");
+				expect(missing, `ingest ${ingest}`).toContain("base-url");
+				expect(missing, `ingest ${ingest}`).toContain("metadata-prefix");
+			}
+		});
+
+		it("does not ask Koha for a page size no dcb-service release reads", () => {
+			const paths = clientConfigFieldsFor(HOST_LMS_CLASSES.koha).map(
+				(configField) => configField.path.join("."),
+			);
+
+			expect(paths).not.toContain("page-size");
 		});
 
 		it("writes the Koha OAI keys at the top level, not into a nested group", () => {
@@ -345,6 +368,8 @@ describe("hostLmsClientConfig", () => {
 	 * sixty members and a Sierra shared with a non-participant, needed the JSON editor.
 	 */
 	describe("shared systems", () => {
+		beforeEach(() => extendedConfig(true));
+
 		it("offers the flag on every ILS, because any of them can be shared", () => {
 			for (const lmsClientClass of Object.values(HOST_LMS_CLASSES)) {
 				const paths = clientConfigFieldsFor(lmsClientClass).map((configField) =>
@@ -757,8 +782,11 @@ describe("hostLmsClientConfig", () => {
 	});
 
 	describe("adapter defaults", () => {
-		// Keys the snapshot lists and the guided form has no field for yet
-		const NOT_YET_IN_THE_FORM: string[] = [];
+		// Keys the snapshot lists and the guided form has no field for. Polaris'
+		// enableDoubleDelete has a getter nothing calls.
+		const NOT_YET_IN_THE_FORM: string[] = [
+			`${HOST_LMS_CLASSES.polaris} enableDoubleDelete`,
+		];
 
 		it("gives every field dcb-service defaults its default, from the snapshot", () => {
 			const unmatched: string[] = [];
@@ -846,20 +874,33 @@ describe("hostLmsClientConfig", () => {
 		});
 
 		it("offers every Polaris key PolarisConfig reads that the form could not set", () => {
+			extendedConfig(true);
+			const paths = clientConfigFieldsFor(HOST_LMS_CLASSES.polaris).map(
+				(configField) => configField.path.join("."),
+			);
+
+			for (const key of [
+				"hold-fetching-delay",
+				"hold-fetching-max-retry",
+				"harvest-watermark-overlap-minutes",
+				"base-url-qualifier",
+			]) {
+				expect(paths, key).toContain(key);
+			}
+		});
+
+		// The first two have getters nothing calls; 9.2.0 refuses the third outright
+		it("offers no Polaris setting that does nothing or is refused", () => {
 			const paths = clientConfigFieldsFor(HOST_LMS_CLASSES.polaris).map(
 				(configField) => configField.path.join("."),
 			);
 
 			for (const key of [
 				"virtual-patron-branch-id",
-				"borrower-lending-flow",
-				"hold-fetching-delay",
-				"hold-fetching-max-retry",
-				"harvest-watermark-overlap-minutes",
 				"enableDoubleDelete",
-				"base-url-qualifier",
+				"borrower-lending-flow",
 			]) {
-				expect(paths, key).toContain(key);
+				expect(paths, key).not.toContain(key);
 			}
 		});
 
@@ -1045,5 +1086,177 @@ describe("every key a profile names is in the en-GB catalogue", () => {
 			(key) => typeof resolve(key) !== "string",
 		);
 		expect(missing).toEqual([]);
+	});
+});
+
+describe("dcb-service 8.71.0 and 9.0.0", () => {
+	it("offers only what 8.71.0 can create while the flag is off", () => {
+		extendedConfig(false);
+
+		expect(
+			creatableHostLmsProfiles()
+				.map((profile) => profile.lmsClientClass)
+				.sort(),
+		).toEqual(
+			[
+				HOST_LMS_CLASSES.alma,
+				HOST_LMS_CLASSES.folio,
+				HOST_LMS_CLASSES.polaris,
+				HOST_LMS_CLASSES.sierra,
+			].sort(),
+		);
+	});
+
+	it("offers Koha, Foundation and the appliance once the flag is on", () => {
+		extendedConfig(true);
+
+		expect(creatableHostLmsProfiles()).toEqual(HOST_LMS_PROFILES);
+	});
+
+	it("still gives an existing Koha its guided form while the flag is off", () => {
+		extendedConfig(false);
+
+		expect(getHostLmsProfile(HOST_LMS_CLASSES.koha)).toBeDefined();
+	});
+
+	// 8.71.0 reads neither key, and demands default-agency-code on every system
+	it("offers no shared system before 9.0.0, and still demands the agency", () => {
+		extendedConfig(false);
+
+		for (const lmsClientClass of Object.values(HOST_LMS_CLASSES)) {
+			const paths = clientConfigFieldsFor(lmsClientClass).map((configField) =>
+				configField.path.join("."),
+			);
+			expect(paths, lmsClientClass).not.toContain("shared-system");
+			expect(paths, lmsClientClass).not.toContain("base-url-qualifier");
+		}
+		expect(
+			missingRequiredClientConfig(HOST_LMS_CLASSES.folio, {
+				"shared-system": true,
+			}).map((problem) => problem.name),
+		).toContain("default-agency-code");
+		expect(
+			buildClientConfig(HOST_LMS_CLASSES.folio, { "shared-system": true }),
+		).not.toHaveProperty("shared-system");
+	});
+});
+
+describe("the ingest source class sent on create", () => {
+	// Mirrors dcb-service's table of ingest sources: Sierra and Polaris harvest through
+	// their own client, Foundation has no harvester
+	it("names each ILS's harvester, and none for Foundation", () => {
+		const sent = Object.fromEntries(
+			HOST_LMS_PROFILES.map((profile) => [
+				profile.lmsClientClass,
+				profile.ingestSourceClass,
+			]),
+		);
+
+		expect(sent).toEqual({
+			[HOST_LMS_CLASSES.alma]:
+				"org.olf.dcb.core.interaction.alma.AlmaOaiPmhIngestSource",
+			[HOST_LMS_CLASSES.polaris]: HOST_LMS_CLASSES.polaris,
+			[HOST_LMS_CLASSES.folio]:
+				"org.olf.dcb.core.interaction.folio.FolioOaiPmhIngestSource",
+			[HOST_LMS_CLASSES.koha]:
+				"org.olf.dcb.core.interaction.koha.KohaOaiPmhIngestSource",
+			[HOST_LMS_CLASSES.sierra]: HOST_LMS_CLASSES.sierra,
+			[HOST_LMS_CLASSES.foundation]: undefined,
+			[HOST_LMS_CLASSES.orsAppliance]:
+				"org.olf.dcb.core.interaction.ors.ORSApplianceOaiPmhIngestSource",
+		});
+	});
+});
+
+describe("whole-number settings", () => {
+	const sierra = {
+		"base-url": "https://sierra.example.org",
+		key: "k",
+		secret: "s",
+		"default-agency-code": "AG1",
+		"page-size": "100",
+	};
+
+	it("accepts whole numbers, typed or as a stored config holds them", () => {
+		expect(
+			notWholeNumberClientConfig(HOST_LMS_CLASSES.sierra, {
+				...sierra,
+				"get-holds-retry-attempts": 25,
+				"place-hold-delay": " 2 ",
+			}),
+		).toEqual([]);
+		expect(
+			notWholeNumberClientConfig(HOST_LMS_CLASSES.polaris, {
+				"logon-branch-id": "74",
+				item: { "ill-location-id": 74, "renewal-limit": "2" },
+			}),
+		).toEqual([]);
+	});
+
+	// Sierra parses get-holds-retry-attempts in its constructor, so 2.5 leaves the
+	// client unbuildable
+	it("refuses what Integer.parseInt refuses", () => {
+		expect(
+			notWholeNumberClientConfig(HOST_LMS_CLASSES.sierra, {
+				...sierra,
+				"get-holds-retry-attempts": "2.5",
+				"place-hold-delay": "two",
+				"get-hold-delay": "-1",
+				"page-size": "2147483648",
+			}).map((problem) => problem.name),
+		).toEqual([
+			"page-size",
+			"get-holds-retry-attempts",
+			"place-hold-delay",
+			"get-hold-delay",
+		]);
+	});
+
+	// Text fields, because stored configs mix "2" and 2, but PolarisConfig reads Integers
+	it("refuses text where Polaris reads an id", () => {
+		expect(
+			notWholeNumberClientConfig(HOST_LMS_CLASSES.polaris, {
+				"logon-branch-id": "Main",
+				services: { "workstation-id": "ws1" },
+				item: { "ill-location-id": "74" },
+			}).map((problem) => problem.name),
+		).toEqual(["logon-branch-id", "services.workstation-id"]);
+	});
+
+	it("leaves a blank setting to the adapter's default", () => {
+		expect(notWholeNumberClientConfig(HOST_LMS_CLASSES.sierra, sierra)).toEqual(
+			[],
+		);
+	});
+});
+
+describe("an Alma's system qualifier", () => {
+	// dcb-service 9.x names an Alma by its regional gateway, so two institutions on
+	// one gateway compare as one system and never lend to each other
+	it("follows the institution code", () => {
+		const institutionCode = clientConfigFieldsFor(HOST_LMS_CLASSES.alma).find(
+			(configField) => configField.path.join(".") === "institution-code",
+		);
+
+		expect(institutionCode?.derives?.path).toEqual(["base-url-qualifier"]);
+		expect(institutionCode?.derives?.from(" 01GALI_UNG ")).toBe("01GALI_UNG");
+	});
+});
+
+describe("the ingest setting", () => {
+	// Every adapter harvests when the key is absent
+	it("reads as on when unset, and is still left out of the config", () => {
+		const ingest = clientConfigFieldsFor(HOST_LMS_CLASSES.sierra).find(
+			(configField) => configField.path.join(".") === "ingest",
+		);
+
+		expect(ingest?.defaultValue).toBe("true");
+		expect(isAdvancedField(ingest!)).toBe(false);
+		expect(buildClientConfig(HOST_LMS_CLASSES.sierra, {})).not.toHaveProperty(
+			"ingest",
+		);
+		expect(
+			buildClientConfig(HOST_LMS_CLASSES.sierra, { ingest: false }).ingest,
+		).toBe(false);
 	});
 });
