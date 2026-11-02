@@ -313,6 +313,22 @@ describe("hostLmsClientConfig", () => {
 			);
 		});
 
+		// The ingest source cannot be built without these, and on 9.0.0 and 9.1.0 that ends
+		// the harvest for every Host LMS
+		it("requires what the appliance harvests with: a prefix, and a tenant unless the endpoint is given", () => {
+			const missing = (values: object) =>
+				missingRequiredClientConfig(HOST_LMS_CLASSES.orsAppliance, values).map(
+					(problem) => problem.name,
+				);
+
+			expect(missing({})).toEqual(
+				expect.arrayContaining(["metadata-prefix", "tenant-id"]),
+			);
+			expect(
+				missing({ "oai-endpoint-url": "https://ors.example.org/oai" }),
+			).not.toContain("tenant-id");
+		});
+
 		it("offers exactly Ex Libris' six regional gateways for Alma", () => {
 			const almaUrl = clientConfigFieldsFor(HOST_LMS_CLASSES.alma).find(
 				(configField) => configField.path.join(".") === "alma-url",

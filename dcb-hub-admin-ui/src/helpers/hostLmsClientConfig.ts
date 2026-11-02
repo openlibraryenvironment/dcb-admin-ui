@@ -1296,14 +1296,18 @@ const ORS_APPLIANCE: HostLmsProfile = {
 					"recommended",
 				),
 				// ORSApplianceOaiPmhIngestSource throws on construction without one
-				// of these two, which surfaces as a harvest that never runs. The URL,
-				// when set, wins; the tenant ID builds the standard path otherwise
-				field(
-					["tenant-id"],
-					"hostlms.config_fields.tenant_id",
-					"hostlms.config_fields.tenant_id_description",
-					"recommended",
-				),
+				// of these two, which on 9.0.0 and 9.1.0 ends the harvest for every Host
+				// LMS. The URL, when set, wins; the tenant ID builds the standard path
+				{
+					...field(
+						["tenant-id"],
+						"hostlms.config_fields.tenant_id",
+						"hostlms.config_fields.tenant_id_description",
+						"required",
+					),
+					requiredUnless: (values: any) =>
+						!isBlank(values?.["oai-endpoint-url"]),
+				},
 				{
 					...field(
 						["oai-endpoint-url"],
@@ -1316,11 +1320,12 @@ const ORS_APPLIANCE: HostLmsProfile = {
 					// What DcbProfileRegistrationService writes for an appliance it registers
 					derives: { path: ["base-url"], from: originOf },
 				},
+				// No release defaults it for a hand-built appliance; registration writes marcxml
 				field(
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
-					"hostlms.config_fields.metadata_prefix_description",
-					"optional",
+					"hostlms.config_fields.ors_metadata_prefix_description",
+					"required",
 					"text",
 					"marcxml",
 				),
