@@ -85,7 +85,7 @@ workflow:
     - if: $ON_DEMAND_REPORT == "true"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
-        paths: &app_paths
+        paths:
           - dcb-hub-admin-ui/src/**/*
           - dcb-hub-admin-ui/e2e*/**/*
           - dcb-hub-admin-ui/public/**/*
