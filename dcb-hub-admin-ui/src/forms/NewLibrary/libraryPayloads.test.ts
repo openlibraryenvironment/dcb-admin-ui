@@ -223,8 +223,20 @@ describe("buildLibraryInput", () => {
 		]);
 	});
 
-	it("sends no loan cap as null here too", () => {
-		expect(buildLibraryInput(values()).maxConsortialLoans).toBeNull();
+	// dcb-service before 9.1.0 throws a NullPointerException on an explicit null
+	it("leaves a blank loan cap out of createLibrary", () => {
+		expect(buildLibraryInput(values())).not.toHaveProperty(
+			"maxConsortialLoans",
+		);
+		expect(
+			buildLibraryInput(values({ maxConsortialLoans: "   " })),
+		).not.toHaveProperty("maxConsortialLoans");
+	});
+
+	it("sends a loan cap that was given", () => {
+		expect(
+			buildLibraryInput(values({ maxConsortialLoans: "3" })).maxConsortialLoans,
+		).toBe(3);
 	});
 
 	// Nobody is asked for these: the change log records what the wizard says

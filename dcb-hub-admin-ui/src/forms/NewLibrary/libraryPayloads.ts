@@ -162,6 +162,16 @@ const localHoldsInput = (formData: NewLibraryFormValues) =>
 		? { maxLocalHolds: loanCap(formData.maxLocalHolds) }
 		: {};
 
+/**
+ * Blank is absent, never null: before dcb-service 9.1.0 CreateLibraryDataFetcher
+ * checks containsKey and then calls toString() on the value, so a null loan cap
+ * is a NullPointerException that fails the whole createLibrary.
+ */
+const loanCapInput = (value: string | undefined) => {
+	const cap = loanCap(value);
+	return cap === null ? {} : { maxConsortialLoans: cap };
+};
+
 const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	agencyCode: formData.agencyCode,
 	fullName: formData.fullName,
@@ -180,7 +190,7 @@ const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	backupDowntimeSchedule: formData.backupDowntimeSchedule,
 	isBorrowingAgency: formData.isBorrowingAgency,
 	isSupplyingAgency: formData.isSupplyingAgency,
-	maxConsortialLoans: loanCap(formData.maxConsortialLoans),
+	...loanCapInput(formData.maxConsortialLoans),
 	...localHoldsInput(formData),
 	reason: formData.reason,
 	changeCategory: "New member",
