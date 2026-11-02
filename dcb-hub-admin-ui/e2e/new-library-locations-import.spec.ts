@@ -8,10 +8,8 @@ import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraryDetail from "./fixtures-data/library-detail.json";
 
 /**
- * Importing pickup locations from the New Library wizard's Locations step.
- *
- * Reached through "Finish setup" on a library whose only outstanding work is its
- * locations, which drops the wizard straight onto that step.
+ * Importing pickup locations from a library's setup. Reached through "Finish setup" on a
+ * library whose only outstanding work is its locations, which links to that chapter.
  */
 
 const LIBRARY_ID = "c23df3ab-77c0-5689-b56d-fc8a2d6a5f22";
@@ -62,12 +60,15 @@ async function openLocationsImport(
 	});
 
 	await page.goto(`/libraries/${LIBRARY_ID}`);
-	await page.getByRole("button", { name: /finish setup/i }).click();
-	const wizard = page.getByRole("dialog").first();
-	await expect(wizard.locator(".MuiStepLabel-label.Mui-active")).toHaveText(
-		/locations/i,
-	);
-	await wizard.getByRole("button", { name: /^import$/i }).click();
+	await page.getByRole("link", { name: /finish setup/i }).click();
+	const chapter = page.getByRole("main");
+	await expect(
+		chapter.getByRole("heading", {
+			level: 1,
+			name: /where can patrons collect items/i,
+		}),
+	).toBeVisible();
+	await chapter.getByRole("button", { name: /^import$/i }).click();
 
 	const importDialog = page
 		.getByRole("dialog")
@@ -83,7 +84,7 @@ const chooseFile = (page: Page) =>
 		buffer: Buffer.from("code,name\nA,B\n"),
 	});
 
-test.describe("New Library wizard - importing locations", () => {
+test.describe("Library setup - importing locations", () => {
 	test("warns before replacing the Host LMS's existing locations", async ({
 		page,
 	}) => {

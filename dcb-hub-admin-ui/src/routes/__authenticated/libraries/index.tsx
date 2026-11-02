@@ -35,7 +35,6 @@ import Loading from "@components/Loading/Loading";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 
 import AddLibraryToGroup from "@forms/AddLibraryToGroup/AddLibraryToGroup";
-import NewLibrary from "@forms/NewLibrary/NewLibrary";
 import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -44,7 +43,6 @@ import { useCustomColumns } from "@hooks/useCustomColumns";
 import { buildRowEditActionsColumn } from "@helpers/dataGrid/buildRowEditActions";
 
 import { getLibraries } from "@queries/getLibraries";
-import { useConsortiumInfoStore } from "@hooks/consortiumInfoStore";
 import { libraryColumns } from "@columns/libraryColumns";
 import {
 	consortiumBasicsQuery,
@@ -85,7 +83,6 @@ function Libraries() {
 	const gqlClient = useGraphQLClient();
 	const customColumns = useCustomColumns();
 	const auth = useAuth();
-	const displayName = useConsortiumInfoStore((s) => s.displayName);
 
 	const apiRef = useGridApiRef();
 	const [selectedLibraryIds, setSelectedLibraryIds] = useState<GridRowId[]>([]);
@@ -101,7 +98,6 @@ function Libraries() {
 	const libraryMutation = useEntityMutation("library");
 
 	const navigate = useNavigate();
-	const [showNewLibrary, setShowNewLibrary] = useState(false);
 	const [groupModalLibraries, setGroupModalLibraries] = useState<
 		{ id: string; name: string }[] | null
 	>(null);
@@ -226,7 +222,12 @@ function Libraries() {
 			: []),
 		{
 			key: "newLibrary",
-			onClick: () => setShowNewLibrary(true),
+			onClick: () =>
+				navigate({
+					to: "/libraries/new/$step",
+					params: { step: "system" },
+					search: {},
+				}),
 			disabled: !isAnAdmin || consortiumMissing,
 			tooltip: needsConsortium,
 			label: t("libraries.new.title"),
@@ -336,20 +337,6 @@ function Libraries() {
 					setSelectedLibraryIds(extractedIds as GridRowId[]);
 				}}
 			/>
-
-			{showNewLibrary && (
-				<NewLibrary
-					show={showNewLibrary}
-					onClose={() => setShowNewLibrary(false)}
-					consortiumName={displayName}
-					// Closes the wizard and hands over to the setup flow, which is now the
-					// only place a consortium is created.
-					onCreateConsortium={() => {
-						setShowNewLibrary(false);
-						navigate({ to: "/setup/$step", params: { step: "consortium" } });
-					}}
-				/>
-			)}
 
 			{groupModalLibraries !== null && (
 				<AddLibraryToGroup

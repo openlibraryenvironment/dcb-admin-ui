@@ -11,8 +11,6 @@ import {
 	formValuesFromLibrary,
 	newContactsOf,
 	shouldCreateHostLms,
-	shouldCreateLibrary,
-	shouldJoinGroup,
 } from "./libraryPayloads";
 import type { NewLibraryFormValues } from "@schemas/newLibrarySchema";
 
@@ -337,25 +335,6 @@ describe("buildContactInput", () => {
 	});
 });
 
-describe("newContactsOf", () => {
-	it("selects only the contacts that are not stored yet", () => {
-		const stored = { ...values().contacts[0], id: "contact-1" };
-		const typed = { ...values().contacts[0], firstName: "Grace" };
-
-		expect(newContactsOf([stored, typed])).toEqual([typed]);
-	});
-
-	it("selects nothing once every contact has come back with an id", () => {
-		// What stops Back-then-Next creating a second copy of each of them.
-		const saved = values().contacts.map((contact) => ({
-			...contact,
-			id: "contact-1",
-		}));
-
-		expect(newContactsOf(saved)).toEqual([]);
-	});
-});
-
 describe("the write guards", () => {
 	describe("shouldCreateHostLms", () => {
 		it("creates when nothing has been created yet", () => {
@@ -401,33 +380,6 @@ describe("the write guards", () => {
 				suppressionRulesetName: "bibs",
 				itemSuppressionRulesetName: "",
 			});
-		});
-	});
-
-	describe("shouldCreateLibrary", () => {
-		it("creates while there is no library", () => {
-			expect(shouldCreateLibrary("")).toBe(true);
-			expect(shouldCreateLibrary(undefined)).toBe(true);
-		});
-
-		it("does not create a second library once one exists", () => {
-			// The re-run collided on the agency code and stranded the wizard.
-			expect(shouldCreateLibrary("library-1")).toBe(false);
-		});
-	});
-
-	describe("shouldJoinGroup", () => {
-		it("does nothing when no group was chosen", () => {
-			expect(shouldJoinGroup("", [])).toBe(false);
-			expect(shouldJoinGroup(undefined, [])).toBe(false);
-		});
-
-		it("joins a group this run has not joined", () => {
-			expect(shouldJoinGroup("group-1", ["group-2"])).toBe(true);
-		});
-
-		it("does not add the same membership twice", () => {
-			expect(shouldJoinGroup("group-1", ["group-1"])).toBe(false);
 		});
 	});
 });

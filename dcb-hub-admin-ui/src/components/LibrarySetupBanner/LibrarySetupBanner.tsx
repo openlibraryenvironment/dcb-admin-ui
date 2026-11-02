@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, AlertTitle, Button, Stack } from "@mui/material";
+import { Alert, AlertTitle, Stack } from "@mui/material";
 
-import NewLibrary from "@forms/NewLibrary/NewLibrary";
+import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { librarySetupCountsQuery } from "@/queryOptions/librarySetup";
 import { evaluateLibrarySetup } from "@helpers/librarySetup";
@@ -15,14 +14,9 @@ interface LibrarySetupBannerProps {
 }
 
 /**
- * Tells the user whether a library's setup is finished and, when it is not, what
- * it still needs, reopening the new-library wizard at the first outstanding step.
- *
- * The wizard could previously only be completed in one sitting: if it was
- * closed after the library was created (which happens on the contacts step)
- * everything after that was simply never done, and nothing on the library said
- * so. The onboarding grid knew, but only as a red cross on a consortium-wide
- * page - not where someone looking at the library would see it.
+ * Tells the user whether a library's setup is finished and, when it is not, what it still
+ * needs, linking to the first outstanding chapter of its setup - a URL, so it can be sent
+ * to whoever is finishing it.
  */
 export default function LibrarySetupBanner({
 	library,
@@ -30,7 +24,6 @@ export default function LibrarySetupBanner({
 }: LibrarySetupBannerProps) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
-	const [showWizard, setShowWizard] = useState(false);
 
 	const { data: counts } = useQuery(
 		librarySetupCountsQuery(gqlClient, library),
@@ -68,14 +61,18 @@ export default function LibrarySetupBanner({
 				sx={{ mb: 3 }}
 				action={
 					canEdit ? (
-						<Button
+						<CustomLinkButton
+							to="/libraries/$libraryId/setup/$step"
+							params={{
+								libraryId: library.id,
+								step: setup.firstIncompleteStep ?? "profile",
+							}}
 							color="inherit"
 							size="small"
 							variant="outlined"
-							onClick={() => setShowWizard(true)}
 						>
 							{t("libraries.setup.finish")}
-						</Button>
+						</CustomLinkButton>
 					) : undefined
 				}
 			>
@@ -95,15 +92,6 @@ export default function LibrarySetupBanner({
 					</span>
 				</Stack>
 			</Alert>
-
-			{showWizard && (
-				<NewLibrary
-					show={showWizard}
-					onClose={() => setShowWizard(false)}
-					resumeLibrary={library}
-					startAtStep={setup.firstIncompleteStep}
-				/>
-			)}
 		</>
 	);
 }

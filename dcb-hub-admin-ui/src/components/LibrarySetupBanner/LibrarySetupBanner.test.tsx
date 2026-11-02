@@ -9,7 +9,14 @@ import LibrarySetupBanner from "./LibrarySetupBanner";
 const fetchCounts = vi.fn<() => Promise<LibrarySetupCounts>>();
 
 vi.mock("@hooks/useGraphQLClient", () => ({ useGraphQLClient: () => ({}) }));
-vi.mock("@forms/NewLibrary/NewLibrary", () => ({ default: () => null }));
+// A router link needs a router; what matters here is where it points
+vi.mock("@components/CustomLink/CustomLink", () => ({
+	CustomLinkButton: ({ children, params }: any) => (
+		<a href={`#/libraries/${params.libraryId}/setup/${params.step}`}>
+			{children}
+		</a>
+	),
+}));
 vi.mock("@/queryOptions/librarySetup", () => ({
 	librarySetupCountsQuery: () => ({
 		queryKey: ["library", "setupCounts", "lib-1"],
@@ -89,6 +96,18 @@ describe("LibrarySetupBanner", () => {
 		expect(
 			screen.queryByText("libraries.setup.complete_title"),
 		).not.toBeInTheDocument();
+	});
+
+	it("links to the first chapter still outstanding", async () => {
+		fetchCounts.mockResolvedValue({
+			...everythingCounted,
+			pickupLocationCount: 0,
+		});
+		renderBanner();
+
+		expect(
+			await screen.findByRole("link", { name: "libraries.setup.finish" }),
+		).toHaveAttribute("href", "#/libraries/lib-1/setup/locations");
 	});
 
 	it("claims neither when the counts could not be fetched", async () => {

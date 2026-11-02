@@ -14,19 +14,17 @@ import {
 import { LibraryAdd, UploadFile } from "@mui/icons-material";
 
 import SetupFooter from "../SetupFooter";
+import { CustomLinkButton } from "@components/CustomLink/CustomLink";
 import { useSetupNavigation } from "@hooks/useSetupNavigation";
 import { useConsortiumSetup } from "@hooks/useConsortiumSetup";
 
-// Both are heavy and neither is opened by most visits to this chapter: the New Library
-// wizard is thirteen steps and several mutations, and the importer pulls in a table, a
-// parser and two lookups. Splitting them keeps the chapter itself small.
-const NewLibrary = lazy(() => import("@forms/NewLibrary/NewLibrary"));
+// Most visits never open the importer, and it pulls in a table, a parser and two lookups.
 const LibraryImport = lazy(
 	() => import("@components/LibraryImport/LibraryImport"),
 );
 
 /**
- * C6 — "Now let's add your libraries."
+ * "Now let's add your libraries."
  *
  * Two routes in, presented as a choice rather than a default with an escape hatch, because
  * which one is right depends entirely on where the consortium is starting from. A brand
@@ -34,17 +32,14 @@ const LibraryImport = lazy(
  * migrating five hundred members already has the spreadsheet and would never do it five
  * hundred times.
  *
- * The single-library route embeds the EXISTING wizard rather than reimplementing it. That
- * wizard already handles Host LMS creation and verification, mappings, locations, resume
- * from a half-finished library, and a long list of defects that were found and fixed in
- * it. A second implementation here would inherit none of that.
+ * The single-library route is the library setup conversation at /libraries/new, linked
+ * rather than embedded, so this chapter stays where it is while a library is added.
  */
 export default function LibrariesChapter() {
 	const { t } = useTranslation();
 	const { goNext, goBack, skipAndContinue } = useSetupNavigation("libraries");
-	const { consortium, consortiumGroupId, libraryCount } = useConsortiumSetup();
+	const { consortiumGroupId, libraryCount } = useConsortiumSetup();
 
-	const [showWizard, setShowWizard] = useState(false);
 	const [showImport, setShowImport] = useState(false);
 
 	return (
@@ -67,13 +62,16 @@ export default function LibrariesChapter() {
 						</Typography>
 					</CardContent>
 					<CardActions>
-						<Button
+						{/* A link, so it can open in a new tab and leave setup where it is */}
+						<CustomLinkButton
+							to="/libraries/new/$step"
+							params={{ step: "system" }}
+							search={{}}
 							startIcon={<LibraryAdd />}
 							variant="contained"
-							onClick={() => setShowWizard(true)}
 						>
 							{t("setup.libraries.one_action")}
-						</Button>
+						</CustomLinkButton>
 					</CardActions>
 				</Card>
 
@@ -112,13 +110,6 @@ export default function LibrariesChapter() {
 			/>
 
 			<Suspense fallback={<Skeleton variant="rounded" height={4} />}>
-				{showWizard && (
-					<NewLibrary
-						show={showWizard}
-						onClose={() => setShowWizard(false)}
-						consortiumName={consortium?.displayName ?? consortium?.name}
-					/>
-				)}
 				{showImport && (
 					<LibraryImport
 						show={showImport}

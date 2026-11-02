@@ -1845,6 +1845,82 @@
 			}
 		},
 		"setup": {
+			"page_title": "Library setup",
+			"error_title": "This library could not be loaded",
+			"error_body": "Its setup cannot be shown until the library has loaded. Try again in a moment.",
+			"chapters": {
+				"system": {
+					"label": "System",
+					"title": "Which system does this library use?",
+					"subtitle": "DCB talks to each library through its library management system, so this decides what we ask next."
+				},
+				"connection": {
+					"label": "Connection",
+					"title": "How does DCB reach it?",
+					"subtitle": "Use a system DCB is already connected to, or give the details for a new one. A new one is tested as soon as it is saved."
+				},
+				"profile": {
+					"label": "Library",
+					"title": "Tell us about the library",
+					"subtitle": "Its names, its agency code and where it is. Continuing adds the library to DCB, so the rest can be done by anyone you send the link to."
+				},
+				"contacts": {
+					"label": "Contacts",
+					"title": "Who should we contact about it?",
+					"subtitle": "The people DCB staff and other libraries reach when something about this library needs a person."
+				},
+				"group": {
+					"label": "Groups",
+					"title": "Which groups is it part of?",
+					"subtitle": "Every library is in the consortium's own group. Add it to any others it lends and borrows within."
+				},
+				"refMappings": {
+					"label": "Mappings",
+					"title": "What do its patron types, item types and locations mean?",
+					"subtitle": "DCB translates this library's own codes into the ones every library shares. Without them a request cannot be routed."
+				},
+				"numMappings": {
+					"label": "Numeric ranges",
+					"title": "Which numeric ranges does it use?",
+					"subtitle": "Sierra and Polaris identify patron and item types by number, so DCB maps ranges of them."
+				},
+				"locations": {
+					"label": "Pickup locations",
+					"title": "Where can patrons collect items?",
+					"subtitle": "A library with no pickup location cannot receive a request."
+				}
+			},
+			"system": {
+				"question": "Library management system",
+				"required": "Choose the system this library uses."
+			},
+			"connection": {
+				"no_system": "Choose the library's system first.",
+				"system": "System: {{ils}}",
+				"connected": "This library will use {{name}} ({{code}}).",
+				"not_found": "No Host LMS with the code {{code}} was found. Choose the connection again.",
+				"choose_again": "Use a different connection",
+				"invitation_title": "Appliances connect themselves",
+				"invitation_body": "An OpenRS appliance registers with DCB when it redeems an invitation, and DCB creates its Host LMS, agency, library and locations from what it sends. Issue the invitation rather than entering the details here.",
+				"invitation_action": "Issue an invitation",
+				"by_hand": "Enter the details by hand instead",
+				"existing_question": "Is it on a system DCB is already connected to?",
+				"existing_option": "Yes: {{name}} ({{code}})",
+				"new_option": "No, connect a new system",
+				"create": "Save and test the connection"
+			},
+			"profile": {
+				"create": "Add the library"
+			},
+			"done": {
+				"page_title": "Library setup",
+				"title": "{{library}} is set up",
+				"title_partial": "{{library}} still has setup to finish",
+				"harvested_one": "DCB has harvested {{count}} record from this library's system.",
+				"harvested_other": "DCB has harvested {{count}} records from this library's system.",
+				"not_harvested": "DCB has not harvested any records from this library's system yet, so it cannot supply anything. A first harvest can take a while to start.",
+				"not_supplying": "No records have been harvested, which is expected: this library does not supply."
+			},
 			"complete_title": "Setup is complete",
 			"complete_body": "Every setup step is done: {{steps}}.",
 			"incomplete_title": "Setup is not finished",

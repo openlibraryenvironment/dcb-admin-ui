@@ -7,12 +7,9 @@ import libraries from "./fixtures-data/libraries.json";
 
 // dcb-service overwrites a new library's coordinates with its agency's when the agency has
 // them, so the wizard shows those rather than asking for values it would discard
-const wizard = (page: Page) =>
-	page
-		.getByRole("dialog")
-		.filter({ hasNot: page.getByText(/unsaved changes/i) });
+const wizard = (page: Page) => page.getByRole("main");
 
-test.describe("New Library wizard: coordinates", () => {
+test.describe("New library: coordinates", () => {
 	test.beforeEach(async ({ page }) => {
 		await seedAuth(page);
 		await mockGraphQL(page, {
@@ -55,20 +52,13 @@ test.describe("New Library wizard: coordinates", () => {
 				},
 			},
 		});
-		await page.goto("/libraries");
-		await expect(page.getByText("Alpha Test Library")).toBeVisible();
-
-		await page.getByRole("button", { name: /actions/i }).click();
-		await page.getByRole("menuitem", { name: /create a new library/i }).click();
-		await page.getByRole("radio", { name: /use existing system/i }).check();
-		await page.getByRole("button", { name: /continue/i }).click();
-		const dialog = wizard(page);
-		await dialog.getByRole("combobox", { name: /host lms/i }).click();
-		await page.getByRole("option", { name: /SIERRA1/ }).click();
-		await dialog.getByRole("button", { name: /next/i }).click();
-		await expect(dialog.locator(".MuiStepLabel-label.Mui-active")).toHaveText(
-			/profile/i,
-		);
+		await page.goto("/libraries/new/profile?ils=sierra&hostLms=SIERRA1");
+		await expect(
+			wizard(page).getByRole("heading", {
+				level: 1,
+				name: /tell us about the library/i,
+			}),
+		).toBeVisible();
 	});
 
 	test("shows an existing agency's coordinates instead of asking", async ({

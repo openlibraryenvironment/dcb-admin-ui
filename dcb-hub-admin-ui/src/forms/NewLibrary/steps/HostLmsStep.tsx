@@ -5,7 +5,6 @@ import { useFormContext, Controller, useWatch } from "react-hook-form";
 import {
 	Alert,
 	AlertTitle,
-	MenuItem,
 	Stack,
 	TextField,
 	ToggleButton,
@@ -19,19 +18,15 @@ import ClientConfigFields, {
 } from "./ClientConfigFields";
 import {
 	buildClientConfig,
-	creatableHostLmsProfiles,
 	clientConfigToFields,
 	getHostLmsProfile,
 	bibSuppressionDefault,
 } from "@helpers/hostLmsClientConfig";
 
 /**
- * Everything needed to create a Host LMS, with the client config asked for
- * field by field.
- *
- * The step previously offered a single free-text JSON box, so the required keys
- * were only discoverable by reading dcb-service's 400. The dropdown offers only the
- * types this deployment's dcb-service will create - see creatableHostLmsProfiles.
+ * Everything needed to create a Host LMS, with the client config asked for field by
+ * field. The type is the answer to library setup's first question, so the connection
+ * chapter states it rather than this step asking again.
  */
 export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 	const { t } = useTranslation();
@@ -93,9 +88,12 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 				<Controller
 					name="hostLmsCode"
 					control={control}
-					render={({ field }) => (
+					// The ref goes to the input, not the TextField's root, so a failed
+					// validation can put the caret here
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							id="host-lms-code"
 							required
 							fullWidth
@@ -114,9 +112,12 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 				<Controller
 					name="hostLmsName"
 					control={control}
-					render={({ field }) => (
+					// The ref goes to the input, not the TextField's root, so a failed
+					// validation can put the caret here
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							id="host-lms-name"
 							required
 							fullWidth
@@ -129,40 +130,8 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 				/>
 			</Stack>
 
-			<Controller
-				name="lmsClientClass"
-				control={control}
-				render={({ field }) => (
-					<TextField
-						{...field}
-						id="host-lms-type"
-						select
-						required
-						fullWidth
-						disabled={busy || isCreated}
-						label={t("hostlms.type")}
-						error={!!errors.lmsClientClass}
-						helperText={errors.lmsClientClass?.message as string}
-					>
-						{creatableHostLmsProfiles().map((option) => (
-							<MenuItem
-								key={option.lmsClientClass}
-								value={option.lmsClientClass}
-							>
-								{t(option.labelKey)}
-							</MenuItem>
-						))}
-					</TextField>
-				)}
-			/>
-
-			{!lmsClientClass && (
-				<Alert severity="info">{t("hostlms.select_type_first")}</Alert>
-			)}
-
-			{/* Every class the picker offers is one HostLmsConfigValidator accepts,
-			    so a chosen type always has a profile. The guard is for a Host LMS
-			    resumed from a record written before this list existed. */}
+			{/* Every class the system question offers has a profile. The guard is for a
+			    link naming a type this deployment cannot create. */}
 			{lmsClientClass && !profile && (
 				<Alert severity="warning">
 					<AlertTitle>{t("hostlms.unsupported_title")}</AlertTitle>
