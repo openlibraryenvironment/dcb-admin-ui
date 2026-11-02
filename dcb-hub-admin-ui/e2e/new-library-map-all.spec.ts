@@ -99,8 +99,12 @@ test.describe("New Library wizard: map every DCB type", () => {
 	}) => {
 		const dialog = await reachMappingStep(page);
 
-		await dialog.getByLabel(/your patron type/i).fill("15");
-		await dialog.getByLabel(/your item type/i).fill("BOOK");
+		await dialog
+			.getByLabel(/patron type for patrons from other libraries/i)
+			.fill("15");
+		await dialog
+			.getByLabel(/item type for items borrowed from other libraries/i)
+			.fill("BOOK");
 
 		await expect(dialog.getByRole("table")).toContainText(
 			"14 mappings will be created",
@@ -122,7 +126,9 @@ test.describe("New Library wizard: map every DCB type", () => {
 
 	test("passes axe with the preview shown", async ({ page }) => {
 		const dialog = await reachMappingStep(page);
-		await dialog.getByLabel(/your item type/i).fill("BOOK");
+		await dialog
+			.getByLabel(/item type for items borrowed from other libraries/i)
+			.fill("BOOK");
 		await expect(dialog.getByRole("table")).toBeVisible();
 
 		await scanForViolations(page);
