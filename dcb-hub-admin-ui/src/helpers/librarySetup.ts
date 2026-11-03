@@ -160,6 +160,14 @@ export const evaluateLibraryIngest = (
 	};
 };
 
+/** The one sentence about the harvest, so the library page and setup's end agree. */
+export const ingestMessageKey = (ingest: LibraryIngestState) =>
+	ingest.hasBibs
+		? "libraries.setup.harvest.harvested"
+		: ingest.isIngestOutstanding
+			? "libraries.setup.harvest.not_harvested"
+			: "libraries.setup.harvest.not_supplying";
+
 export interface LibrarySetupStep {
 	id: LibrarySetupStepId;
 	complete: boolean;

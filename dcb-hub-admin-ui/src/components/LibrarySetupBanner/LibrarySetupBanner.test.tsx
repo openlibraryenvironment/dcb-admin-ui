@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -7,6 +7,7 @@ import type { LibrarySetupCounts } from "@helpers/librarySetup";
 import LibrarySetupBanner from "./LibrarySetupBanner";
 
 const fetchCounts = vi.fn<() => Promise<LibrarySetupCounts>>();
+const fetchHarvest = vi.fn<() => Promise<{ bibCount: number }>>();
 
 vi.mock("@hooks/useGraphQLClient", () => ({ useGraphQLClient: () => ({}) }));
 // A router link needs a router; what matters here is where it points
@@ -24,11 +25,22 @@ vi.mock("@/queryOptions/librarySetup", () => ({
 		retry: false,
 		throwOnError: false,
 	}),
+	libraryHarvestQuery: () => ({
+		queryKey: ["library", "harvestedBibs", "h-1"],
+		queryFn: fetchHarvest,
+		retry: false,
+		throwOnError: false,
+	}),
 }));
+
+beforeEach(() => {
+	fetchHarvest.mockResolvedValue({ bibCount: 1 });
+});
 
 afterEach(() => {
 	cleanup();
 	fetchCounts.mockReset();
+	fetchHarvest.mockReset();
 });
 
 const library = {
@@ -72,6 +84,7 @@ const renderBanner = (client = new QueryClient()) =>
 describe("LibrarySetupBanner", () => {
 	it("says setup is complete for a library with nothing outstanding", async () => {
 		fetchCounts.mockResolvedValue(everythingCounted);
+		fetchHarvest.mockResolvedValue({ bibCount: 120 });
 		renderBanner();
 
 		expect(
@@ -80,7 +93,39 @@ describe("LibrarySetupBanner", () => {
 		expect(screen.getByRole("status")).toHaveTextContent(
 			"libraries.setup.complete_body",
 		);
+		expect(screen.getByRole("status")).toHaveTextContent(
+			"libraries.setup.harvest.harvested",
+		);
 		expect(screen.queryByRole("button")).not.toBeInTheDocument();
+	});
+
+	it("does not call a library complete that nothing has been harvested from", async () => {
+		fetchCounts.mockResolvedValue(everythingCounted);
+		fetchHarvest.mockResolvedValue({ bibCount: 0 });
+		renderBanner();
+
+		expect(
+			await screen.findByText("libraries.setup.complete_unharvested_title"),
+		).toBeInTheDocument();
+		expect(screen.getByRole("status")).toHaveTextContent(
+			"libraries.setup.harvest.not_harvested",
+		);
+		expect(
+			screen.queryByText("libraries.setup.complete_title"),
+		).not.toBeInTheDocument();
+	});
+
+	it("claims nothing about the harvest when it could not be counted", async () => {
+		fetchCounts.mockResolvedValue(everythingCounted);
+		fetchHarvest.mockRejectedValue(new Error("network"));
+		renderBanner();
+
+		expect(
+			await screen.findByText("libraries.setup.complete_title"),
+		).toBeInTheDocument();
+		expect(screen.getByRole("status")).not.toHaveTextContent(
+			"libraries.setup.harvest",
+		);
 	});
 
 	it("says what is outstanding for an incomplete library", async () => {

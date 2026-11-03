@@ -31,7 +31,7 @@ import {
 	librarySetupCountsQuery,
 } from "@/queryOptions/librarySetup";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
-import { evaluateLibraryIngest } from "@helpers/librarySetup";
+import { evaluateLibraryIngest, ingestMessageKey } from "@helpers/librarySetup";
 import {
 	isLibrarySetupStepId,
 	libraryFlowState,
@@ -198,11 +198,7 @@ function LibrarySetupDone() {
 						severity={ingest.isIngestOutstanding ? "warning" : "success"}
 						role="status"
 					>
-						{ingest.hasBibs
-							? t("libraries.setup.done.harvested", { count: ingest.bibCount })
-							: ingest.isIngestOutstanding
-								? t("libraries.setup.done.not_harvested")
-								: t("libraries.setup.done.not_supplying")}
+						{t(ingestMessageKey(ingest), { count: ingest.bibCount })}
 					</Alert>
 				)}
 
