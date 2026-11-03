@@ -97,4 +97,29 @@ test.describe("New Host LMS", () => {
 
 		await expect.poll(() => sent?.clientConfig?.ingest).toBe(false);
 	});
+
+	test("says a failed create went wrong, not what the exchange was", async ({
+		page,
+	}) => {
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+		});
+		// A 500 with no errors array: graphql-request's message is then the whole exchange
+		await page.route("**/graphql", (route) =>
+			route.request().postDataJSON()?.operationName === "CreateHostLms"
+				? route.fulfill({ status: 500, json: { message: "boom" } })
+				: route.fallback(),
+		);
+		await page.goto("/hostlmss/new");
+		await fillFolio(page);
+		await submit(page);
+
+		await expect(
+			main(page)
+				.getByRole("alert")
+				.filter({ hasText: "Something went wrong. Please try again." }),
+		).toBeVisible();
+		await expect(main(page)).not.toContainText("GraphQL Error");
+	});
 });
