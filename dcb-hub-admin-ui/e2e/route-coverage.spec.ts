@@ -97,6 +97,10 @@ const NOT_SCANNED: Record<string, string> = {
 		"starts a real sign-out, so a scan would end every other test's session",
 	"/search/$clusterId":
 		"redirects in beforeLoad to /cluster, which is in ROUTES",
+	"/libraries/new":
+		"redirects in beforeLoad to /libraries/new/system, which is in ROUTES",
+	"/libraries/$libraryId/setup":
+		"shows a skeleton while it reads progress, then replaces itself with /setup/$step or /setup/done, both in ROUTES",
 };
 
 const declaredPaths = ROUTES.map((route) => route.path);
