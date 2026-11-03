@@ -8,10 +8,8 @@ import Error from "@components/Error/Error";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { libraryQuery } from "@/queryOptions/library";
 import { librarySetupCountsQuery } from "@/queryOptions/librarySetup";
-import {
-	isLibrarySetupStepId,
-	libraryFlowState,
-} from "@helpers/librarySetupFlow";
+import { isLibrarySetupStepId } from "@helpers/librarySetupFlow";
+import { libraryFlowState } from "@helpers/librarySetup";
 import i18n from "@/i18n";
 import { errorForDisplay } from "@helpers/safeErrorLog";
 

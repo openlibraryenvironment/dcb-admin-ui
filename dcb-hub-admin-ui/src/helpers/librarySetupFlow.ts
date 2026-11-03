@@ -1,11 +1,7 @@
 import { z } from "@schemas/zod";
 
-import { HOST_LMS_CLASSES } from "@helpers/hostLmsClientConfig";
-import {
-	evaluateLibrarySetup,
-	type LibrarySetupCounts,
-	type LibrarySetupStepId,
-} from "@helpers/librarySetup";
+import { HOST_LMS_CLASSES } from "@constants/hostLmsClasses";
+import type { LibrarySetupStepId } from "@helpers/librarySetup";
 
 /**
  * Adding a library, as one conversation: which system, how DCB reaches it, then the
@@ -70,7 +66,7 @@ export interface LibraryFlowState {
 
 const NUMERIC_RANGE_ILS: ReadonlySet<IlsKey> = new Set(["sierra", "polaris"]);
 
-const withProgress = (steps: LibraryFlowStep[]): LibraryFlowState => {
+export const withProgress = (steps: LibraryFlowStep[]): LibraryFlowState => {
 	const done = steps.filter((step) => step.complete).length;
 	return {
 		steps,
@@ -103,24 +99,3 @@ export const newLibraryFlowState = ({
 			available: false,
 		})),
 	]);
-
-/** Once it exists: its Host LMS answers the first two; evaluateLibrarySetup the rest. */
-export const libraryFlowState = (
-	library: any,
-	counts: LibrarySetupCounts,
-): LibraryFlowState => {
-	const setup = evaluateLibrarySetup(library, counts);
-	const hasHostLms = !!library?.agency?.hostLms?.id;
-
-	return withProgress([
-		{ id: "system", complete: hasHostLms, available: hasHostLms },
-		{ id: "connection", complete: hasHostLms, available: hasHostLms },
-		...setup.steps
-			.filter((step) => step.applicable)
-			.map((step) => ({
-				id: step.id,
-				complete: step.complete,
-				available: true,
-			})),
-	]);
-};

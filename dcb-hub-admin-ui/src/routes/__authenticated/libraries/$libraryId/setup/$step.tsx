@@ -33,9 +33,9 @@ import { librarySetupCountsQuery } from "@/queryOptions/librarySetup";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import {
 	isLibrarySetupStepId,
-	libraryFlowState,
 	type LibraryFlowStepId,
 } from "@helpers/librarySetupFlow";
+import { libraryFlowState } from "@helpers/librarySetup";
 import { adminOrConsortiumAdmin } from "@constants/roles";
 import i18n from "@/i18n";
 import { errorForDisplay } from "@helpers/safeErrorLog";

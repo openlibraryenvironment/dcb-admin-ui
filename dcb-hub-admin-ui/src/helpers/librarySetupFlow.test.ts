@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { HOST_LMS_CLASSES } from "@helpers/hostLmsClientConfig";
 import {
 	ilsKeyOf,
-	libraryFlowState,
 	newLibraryFlowState,
 	newLibrarySearchSchema,
 } from "./librarySetupFlow";
+import { libraryFlowState } from "./librarySetup";
 
 const ids = (state: { steps: { id: string }[] }) =>
 	state.steps.map((step) => step.id);
