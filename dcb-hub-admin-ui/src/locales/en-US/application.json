@@ -35,6 +35,8 @@
 		}
 	},
 	"hostlms": {
+		"ingest_source_retry": "Host LMS {{code}} was created, but DCB could not record which harvester reads its catalog, and from dcb-service 9.2.0 it will not be harvested without one. Press Next to try again.",
+		"ingest_source_missing": "Host LMS {{code}} was created, but DCB could not record which harvester reads its catalog. From dcb-service 9.2.0 it will not be harvested until a DCB administrator sets its ingest source class.",
 		"verification": {
 			"ingest_timeout_advice": "DCB stops waiting after 20 seconds. For a large catalog the harvest often succeeds shortly afterwards, so check the library's Bib records page once setup is finished before treating this as a failure."
 		},

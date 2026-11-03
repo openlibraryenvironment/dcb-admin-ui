@@ -46,6 +46,7 @@ import {
 	hasSharedSystemConflict,
 	mergeClientConfigEdit,
 	missingRequiredClientConfig,
+	notWholeNumberClientConfig,
 } from "@helpers/hostLmsClientConfig";
 import {
 	type HostLmsVerificationResult,
@@ -176,7 +177,12 @@ function HostLMSDetails() {
 		hostlms?.lmsClientClass,
 		configValues ?? {},
 	);
-	const configBlocked = requiredGaps.length > 0 || sharedSystemConflict;
+	const numberGaps = notWholeNumberClientConfig(
+		hostlms?.lmsClientClass,
+		configValues ?? {},
+	);
+	const configBlocked =
+		requiredGaps.length > 0 || numberGaps.length > 0 || sharedSystemConflict;
 
 	const {
 		showUnsavedChangesModal,
@@ -477,6 +483,15 @@ function HostLMSDetails() {
 										})}
 									</Alert>
 								)}
+								{numberGaps.length > 0 && (
+									<Alert severity="error">
+										{t("hostlms.config_fields.not_whole_number", {
+											fields: numberGaps
+												.map((gap) => t(gap.labelKey))
+												.join(", "),
+										})}
+									</Alert>
+								)}
 								{sharedSystemConflict && (
 									<Alert severity="error">
 										{t("hostlms.config_fields.shared_system_conflict")}
@@ -484,6 +499,7 @@ function HostLMSDetails() {
 								)}
 								<RecommendedConfigGaps
 									lmsClientClass={hostlms.lmsClientClass}
+									hostLmsCode={hostlms.code}
 								/>
 								<ClientConfigFields lmsClientClass={hostlms.lmsClientClass} />
 							</Stack>

@@ -6,6 +6,7 @@ import {
 	getHostLmsProfile,
 	hasSharedSystemConflict,
 	missingRequiredClientConfig,
+	notWholeNumberClientConfig,
 } from "@helpers/hostLmsClientConfig";
 import {
 	isUnsupportedAuthProfile,
@@ -213,6 +214,7 @@ export const newLibrarySchema = z
 		// mutation payload, so whatever the user typed was silently discarded.
 		changeReferenceUrl: z.string().optional(),
 		libraryId: z.string().optional(),
+		hostLmsId: z.string().optional(),
 		contacts: z
 			.array(
 				z.object({
@@ -236,7 +238,10 @@ export const newLibrarySchema = z
 							}),
 					}),
 					email: z.email({
-						error: () => i18n.t("ui.data_grid.validation.email"),
+						error: () =>
+							i18n.t("ui.data_grid.validation.email", {
+								field: i18n.t("libraries.contacts.email"),
+							}),
 					}),
 					role: z.string().min(1, {
 						error: () =>
@@ -329,6 +334,21 @@ export const newLibrarySchema = z
 					message: i18n.t("hostlms.config_fields.shared_system_conflict"),
 				});
 			}
+			const notWhole = notWholeNumberClientConfig(
+				values.lmsClientClass,
+				parsed,
+			);
+			if (notWhole.length > 0) {
+				ctx.addIssue({
+					code: "custom",
+					path: ["clientConfig"],
+					message: i18n.t("hostlms.config_fields.not_whole_number", {
+						fields: notWhole
+							.map((problem) => i18n.t(problem.labelKey))
+							.join(", "),
+					}),
+				});
+			}
 			return;
 		}
 
@@ -340,6 +360,19 @@ export const newLibrarySchema = z
 				code: "custom",
 				path: ["clientConfigFields", ...problem.name.split(".")],
 				message: i18n.t("ui.validation.required", {
+					field: i18n.t(problem.labelKey),
+				}),
+			});
+		}
+
+		for (const problem of notWholeNumberClientConfig(
+			values.lmsClientClass,
+			values.clientConfigFields ?? {},
+		)) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["clientConfigFields", ...problem.name.split(".")],
+				message: i18n.t("ui.validation.non_negative_integer", {
 					field: i18n.t(problem.labelKey),
 				}),
 			});

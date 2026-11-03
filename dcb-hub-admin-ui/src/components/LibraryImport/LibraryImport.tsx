@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -106,7 +106,7 @@ export default function LibraryImport({
 	// Both are needed to judge a row, and both are cheap and change rarely. Asked ONCE
 	// while the dialog is open rather than per row - a per-row lookup over 500 rows is
 	// exactly the fan-out this feature exists to avoid.
-	const { data: hostLmsData } = useQuery({
+	const hostLmsQuery = useQuery({
 		...nonCriticalQuery,
 		queryKey: ["LoadHostLmsCodes", "libraryImport"],
 		enabled: show,
@@ -118,7 +118,7 @@ export default function LibraryImport({
 			}),
 	});
 
-	const { data: librariesData } = useQuery({
+	const librariesQuery = useQuery({
 		...nonCriticalQuery,
 		queryKey: ["LoadLibraries", "libraryImport"],
 		enabled: show,
@@ -134,6 +134,18 @@ export default function LibraryImport({
 				orderBy: "ASC",
 			}),
 	});
+
+	const hostLmsData = hostLmsQuery.data;
+	const librariesData = librariesQuery.data;
+	// A file judged before both arrive is judged against empty lists, and is not
+	// re-judged when they land: so no file is read until they have.
+	const lookupsReady = hostLmsQuery.isSuccess && librariesQuery.isSuccess;
+	const lookupsFailed = hostLmsQuery.isError || librariesQuery.isError;
+	const lookupsStatusId = useId();
+	const retryLookups = () => {
+		if (hostLmsQuery.isError) void hostLmsQuery.refetch();
+		if (librariesQuery.isError) void librariesQuery.refetch();
+	};
 
 	const knownHostLmsCodes = useMemo(
 		() =>
@@ -231,6 +243,7 @@ export default function LibraryImport({
 			applyLibraryImport(gqlClient, selected, {
 				consortiumGroupId,
 				onProgress: (done, total) => setProgress({ done, total }),
+				unknownError: t("ui.error.general"),
 			}),
 		onSuccess: (results) => {
 			setOutcomes(results);
@@ -302,7 +315,8 @@ export default function LibraryImport({
 							startIcon={<CloudUpload />}
 							variant="contained"
 							onClick={() => fileInput.current?.click()}
-							disabled={isApplying}
+							disabled={isApplying || !lookupsReady}
+							aria-describedby={lookupsReady ? undefined : lookupsStatusId}
 						>
 							{t("setup.import.choose_file")}
 						</Button>
@@ -320,6 +334,31 @@ export default function LibraryImport({
 							}}
 						/>
 					</Stack>
+
+					{!lookupsReady &&
+						(lookupsFailed ? (
+							<Alert
+								id={lookupsStatusId}
+								severity="error"
+								role="alert"
+								action={
+									<Button color="inherit" size="small" onClick={retryLookups}>
+										{t("ui.actions.try_again")}
+									</Button>
+								}
+							>
+								{t("setup.import.lookups_failed")}
+							</Alert>
+						) : (
+							<Typography
+								id={lookupsStatusId}
+								role="status"
+								variant="body2"
+								sx={{ color: "text.secondary" }}
+							>
+								{t("setup.import.loading_lookups")}
+							</Typography>
+						))}
 
 					<Typography variant="body2" sx={{ color: "text.secondary" }}>
 						{t("setup.import.limits", {

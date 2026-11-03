@@ -34,6 +34,7 @@ import {
 	type ClientConfigField,
 	type ClientConfigOption,
 	type ClientConfigGroup,
+	contextHierarchyOmitsCode,
 	fieldName,
 	getHostLmsProfile,
 	isAdvancedField,
@@ -55,6 +56,15 @@ const errorAt = (errors: any, path: string[]): string | undefined => {
 		errors?.clientConfigFields,
 	);
 	return typeof node?.message === "string" ? node.message : undefined;
+};
+
+/** An unset box shows what the adapter does without the key. */
+const isChecked = (value: unknown, defaultValue?: string): boolean => {
+	const effective =
+		value === undefined || value === null || value === ""
+			? defaultValue
+			: value;
+	return effective === true || effective === "true";
 };
 
 /** Values are stored as text and coerced when the config object is built. */
@@ -184,7 +194,7 @@ const ConfigFieldControl = ({
 								<Checkbox
 									{...field}
 									id={inputId}
-									checked={field.value === true || field.value === "true"}
+									checked={isChecked(field.value, configField.defaultValue)}
 									onChange={(event) => field.onChange(event.target.checked)}
 									disabled={disabled}
 									slotProps={{
@@ -723,25 +733,39 @@ const readFieldValue = (values: any, path: string[]): string => {
  */
 export const RecommendedConfigGaps = ({
 	lmsClientClass,
+	hostLmsCode,
 }: {
 	lmsClientClass?: string | null;
+	hostLmsCode?: string | null;
 }) => {
 	const { t } = useTranslation();
 	const { control } = useFormContext();
 	const values = useWatch({ control, name: "clientConfigFields" });
 
 	const gaps = missingRecommendedClientConfig(lmsClientClass, values ?? {});
-	if (gaps.length === 0) return null;
+	const omitsCode = contextHierarchyOmitsCode(values ?? {}, hostLmsCode);
+	if (gaps.length === 0 && !omitsCode) return null;
 
 	return (
-		<Alert severity="info">
-			<AlertTitle>
-				{t("hostlms.config_fields.recommended_missing_title")}
-			</AlertTitle>
-			{t("hostlms.config_fields.recommended_missing_body", {
-				fields: gaps.map((problem) => t(problem.labelKey)).join(", "),
-			})}
-		</Alert>
+		<Stack spacing={2}>
+			{gaps.length > 0 && (
+				<Alert severity="info">
+					<AlertTitle>
+						{t("hostlms.config_fields.recommended_missing_title")}
+					</AlertTitle>
+					{t("hostlms.config_fields.recommended_missing_body", {
+						fields: gaps.map((problem) => t(problem.labelKey)).join(", "),
+					})}
+				</Alert>
+			)}
+			{omitsCode && (
+				<Alert severity="warning">
+					{t("hostlms.config_fields.context_hierarchy_omits_code", {
+						code: hostLmsCode?.trim(),
+					})}
+				</Alert>
+			)}
+		</Stack>
 	);
 };
 

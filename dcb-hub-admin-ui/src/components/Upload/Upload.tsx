@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Box, Button, Divider, Link, Stack, Typography } from "@mui/material";
+import {
+	Box,
+	Button,
+	CircularProgress,
+	Divider,
+	Link,
+	Stack,
+	Typography,
+} from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 
-import useCode from "@hooks/useCode";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import TimedAlert from "@components/TimedAlert/TimedAlert";
@@ -31,6 +38,8 @@ const ALLOWED_FILE_TYPES = {
 };
 
 interface FileUploadProps {
+	/** The Host LMS the file is for. */
+	code: string;
 	category: string;
 	onCancel: () => void;
 	type: "Reference value mappings" | "Numeric range mappings" | "Locations";
@@ -42,6 +51,7 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({
+	code,
 	category,
 	onCancel,
 	type,
@@ -52,7 +62,6 @@ export default function FileUpload({
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const client = useDcbRestClient();
-	const { code, resetAll } = useCode();
 
 	const [addedFile, setAddedFile] = useState<File | null>(null);
 	const [failedFile, setFailedFile] = useState<File | null>(null);
@@ -71,9 +80,28 @@ export default function FileUpload({
 	const [errorReference, setErrorReference] = useState<string | null>(null);
 
 	const [isSuccess, setSuccess] = useState(false);
+	// Outlives the success alert, which hides itself: this file has been sent, and
+	// pressing Import again would send it twice. Choosing another file clears it.
+	const [isImported, setImported] = useState(false);
 	const [successCount, setSuccessCount] = useState(0);
 	const [ignoredCount, setIgnoredCount] = useState(0);
 	const [deletedCount, setDeletedCount] = useState(0);
+
+	// A ref as well as state: a second click can land before the disabled render does.
+	const inFlight = useRef(false);
+	const [isUploading, setUploading] = useState(false);
+
+	const guarded = async (work: () => Promise<void>) => {
+		if (inFlight.current) return;
+		inFlight.current = true;
+		setUploading(true);
+		try {
+			await work();
+		} finally {
+			inFlight.current = false;
+			setUploading(false);
+		}
+	};
 
 	const uploadPath =
 		type === "Locations" ? "/locations/upload" : "/uploadedMappings/upload";
@@ -116,6 +144,7 @@ export default function FileUpload({
 		}
 
 		setAddedFile(file);
+		setImported(false);
 		setErrorDisplayed(false);
 		setValidationErrorDisplayed(false);
 	};
@@ -129,6 +158,10 @@ export default function FileUpload({
 
 		if (!code) return;
 		if (type !== "Locations" && !category) return;
+		await guarded(checkThenUpload);
+	};
+
+	const checkThenUpload = async () => {
 		try {
 			let totalSize = 0;
 
@@ -175,7 +208,7 @@ export default function FileUpload({
 			setExistingMappingCount(totalSize);
 
 			if (totalSize === 0) {
-				uploadFile();
+				await uploadFile();
 			} else {
 				setReplacement(true);
 				setConfirmOpen(true);
@@ -225,12 +258,7 @@ export default function FileUpload({
 			setDeletedCount(response.data.recordsDeleted ?? 0);
 			setIgnoredCount(response.data.recordsIgnored ?? 0);
 			onImported?.(response.data.recordsImported ?? 0);
-
-			setTimeout(() => {
-				onCancel();
-				resetAll();
-				setAddedFile(null);
-			}, 6000);
+			setImported(true);
 		} catch (error: any) {
 			if (error.response) {
 				setUploadErrorMessage(error.response.data);
@@ -248,6 +276,16 @@ export default function FileUpload({
 			: "https://openlibraryfoundation.atlassian.net/wiki/spaces/DCB/pages/3201400850/Importing+mappings+in+DCB+Admin";
 
 	const filesAdded = addedFile !== null;
+	// What still has to be chosen, in the order the dialog asks for it.
+	const missingKey =
+		type !== "Locations" && !category
+			? "mappings.needs_category"
+			: !code
+				? "mappings.needs_host_lms"
+				: !filesAdded
+					? "mappings.needs_file"
+					: null;
+	const missingId = useId();
 
 	return (
 		<Stack spacing={1}>
@@ -297,30 +335,43 @@ export default function FileUpload({
 			<Divider aria-hidden="true" />
 			<Stack spacing={1} direction="row">
 				<Button variant="outlined" onClick={onCancel}>
-					{t("mappings.cancel")}
+					{isImported ? t("ui.actions.close") : t("mappings.cancel")}
 				</Button>
 				<Box sx={{ flex: 1 }} />
 				<Button
-					disabled={
-						type != "Locations"
-							? !filesAdded || !code || !category
-							: !filesAdded || !code
-					}
+					disabled={isUploading || isImported || missingKey !== null}
+					aria-describedby={missingKey ? missingId : undefined}
 					onClick={handleUploadCheck}
 					color="primary"
 					variant="contained"
+					startIcon={
+						isUploading ? (
+							<CircularProgress size={16} color="inherit" />
+						) : undefined
+					}
 				>
 					{type == "Locations"
-						? t("locations.import.button")
+						? t("locations.import.submit")
 						: t("mappings.import_file")}
 				</Button>
 			</Stack>
+			{missingKey && (
+				<Typography
+					id={missingId}
+					variant="body2"
+					sx={{ color: "text.secondary", textAlign: "end" }}
+				>
+					{t(missingKey)}
+				</Typography>
+			)}
 			<Confirmation
 				open={isConfirmOpen}
 				onClose={() => setConfirmOpen(false)}
 				onConfirm={(reason, changeCategory, changeReferenceUrl) => {
 					setConfirmOpen(false);
-					uploadFile(reason, changeCategory, changeReferenceUrl);
+					void guarded(() =>
+						uploadFile(reason, changeCategory, changeReferenceUrl),
+					);
 				}}
 				action="uploadReplacement"
 				entityName={
@@ -337,7 +388,8 @@ export default function FileUpload({
 							count: existingMappingCount,
 							fileName: addedFile?.name,
 							code,
-							category,
+							// Locations have no category of their own; the wizard never sets one.
+							category: type === "Locations" ? type.toLowerCase() : category,
 							type,
 							libraryName,
 						}}

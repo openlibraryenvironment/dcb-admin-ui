@@ -13,6 +13,10 @@
  */
 
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
+import {
+	isHostLmsCirculationSettingsEnabled,
+	isHostLmsExtendedConfigEnabled,
+} from "@helpers/featureFlags";
 
 export const HOST_LMS_CLASSES = {
 	alma: "org.olf.dcb.core.interaction.alma.AlmaHostLmsClient",
@@ -113,6 +117,11 @@ export interface ClientConfigField {
 	 * let go without the key, and the server would not accept it with one.
 	 */
 	requiredUnless?: (values: any) => boolean;
+	/**
+	 * dcb-service parses it as a Java Integer, so anything else saves and then fails when
+	 * the client is built or first needs it. Implied by type `number`.
+	 */
+	wholeNumber?: boolean;
 }
 
 export interface ClientConfigGroup {
@@ -132,14 +141,19 @@ export interface ClientConfigGroup {
 /**
  * A client class this catalogue knows how to configure.
  *
- * The set of profiles here is exactly the set `HostLmsConfigValidator` accepts;
- * anything absent is rejected server-side with "Unsupported LMS Client Class",
- * so the picker offers these and nothing else.
+ * The set of profiles here is the set dcb-service 9.0.0's `HostLmsConfigValidator`
+ * accepts; anything absent is rejected server-side with "Unsupported LMS Client Class".
+ * 8.71.0 accepts fewer - see `creatableHostLmsProfiles`.
  */
 export interface HostLmsProfile {
 	lmsClientClass: string;
 	/** i18n key for the ILS name, as shown in the type dropdown. */
 	labelKey: string;
+	/**
+	 * What harvests this ILS's catalogue, sent with every create. Absent where the ILS has
+	 * no harvester. No release to 9.2.0 reads it on create - see ingestSourceClassToUpdate.
+	 */
+	ingestSourceClass?: string;
 	groups: ClientConfigGroup[];
 }
 
@@ -161,15 +175,22 @@ const field = (
 	docs,
 });
 
+const wholeNumber = (configField: ClientConfigField): ClientConfigField => ({
+	...configField,
+	wholeNumber: true,
+});
+
 /**
  * Does this config declare a system hosting more than one participating library?
  *
  * Read from the form values rather than the built config because it has to answer
  * while the user is still typing, which is when `default-agency-code` stops being
- * required.
+ * required. Never, before dcb-service 9.0.0: 8.71.0 has no shared systems, and its
+ * validator demands `default-agency-code` regardless.
  */
 const sharedSystemSet = (values: any): boolean =>
-	values?.["shared-system"] === true || values?.["shared-system"] === "true";
+	isHostLmsExtendedConfigEnabled() &&
+	(values?.["shared-system"] === true || values?.["shared-system"] === "true");
 
 /**
  * `default-agency-code`, in the six profiles where it means "the agency to assume
@@ -254,13 +275,18 @@ const VIRTUAL_PATRON_EMAIL: ClientConfigField = {
 };
 
 const SHARED_FIELDS: ClientConfigField[] = [
-	field(
-		["ingest"],
-		"hostlms.config_fields.ingest",
-		"hostlms.config_fields.ingest_description",
-		"optional",
-		"boolean",
-	),
+	{
+		...field(
+			["ingest"],
+			"hostlms.config_fields.ingest",
+			"hostlms.config_fields.ingest_description",
+			"optional",
+			"boolean",
+		),
+		// Every adapter harvests when the key is absent, so an unset box must read as ticked
+		defaultValue: "true",
+		advanced: false,
+	},
 	{
 		...field(
 			["roles"],
@@ -312,13 +338,13 @@ const SHARED_FIELDS: ClientConfigField[] = [
 		"hostlms.config_fields.context_hierarchy_description",
 		"optional",
 		"stringList",
-		"SHARED-KOHA, MOBIUS, GLOBAL",
 	),
 ];
 
 const SIERRA: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.sierra,
 	labelKey: "hostlms.names.sierra",
+	ingestSourceClass: HOST_LMS_CLASSES.sierra,
 	groups: [
 		{
 			id: "",
@@ -350,7 +376,7 @@ const SIERRA: HostLmsProfile = {
 				field(
 					["page-size"],
 					"hostlms.config_fields.page_size",
-					"hostlms.config_fields.page_size_description",
+					"hostlms.config_fields.sierra_page_size_description",
 					"required",
 					"number",
 					"100",
@@ -419,13 +445,11 @@ const SIERRA: HostLmsProfile = {
  * regional Ex Libris gateway. `base-url` is what OaiPmhIngestSource harvests
  * from - the institution's own Alma domain. Getting them the wrong way round
  * produces a Host LMS that pings and never ingests, or vice versa.
- *
- * There is no ingest source class to supply: CreateHostLmsDataFetcher derives
- * AlmaOaiPmhIngestSource from the client class on creation.
  */
 const ALMA: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.alma,
 	labelKey: "hostlms.names.alma",
+	ingestSourceClass: "org.olf.dcb.core.interaction.alma.AlmaOaiPmhIngestSource",
 	groups: [
 		{
 			// Heading only, so `required` stays false - none of these are nested.
@@ -567,28 +591,36 @@ const ALMA: HostLmsProfile = {
 			fields: [
 				// Required by HostLmsConfigValidator even though only the ingest
 				// source reads it - it is what the OAI request path is built from.
-				field(
-					["institution-code"],
-					"hostlms.config_fields.institution_code",
-					"hostlms.config_fields.alma_institution_code_description",
-					"required",
-					"text",
-					"01ABC_DEF",
-				),
+				{
+					...field(
+						["institution-code"],
+						"hostlms.config_fields.institution_code",
+						"hostlms.config_fields.alma_institution_code_description",
+						"required",
+						"text",
+						"01ABC_DEF",
+					),
+					// dcb-service 9.x names an Alma by its regional gateway alone, so two
+					// institutions on one gateway are one system and never lend to each other
+					derives: {
+						path: ["base-url-qualifier"],
+						from: (value: string) => value.trim(),
+					},
+				},
 				field(
 					["oai-set"],
 					"hostlms.config_fields.oai_set",
 					"hostlms.config_fields.alma_oai_set_description",
 					"recommended",
 				),
-				// OaiPmhIngestSource calls .get() on this Optional, so a harvest
-				// cannot even be constructed without it. Creation still succeeds,
-				// which is exactly what "recommended" means here.
+				// No dcb-service release defaults it, and the ingest source cannot be built
+				// without it; before 9.2.0 that failure stops every Host LMS's harvest,
+				// whether this one's ingest is on or not.
 				field(
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
 					"hostlms.config_fields.alma_metadata_prefix_description",
-					"recommended",
+					"required",
 					"text",
 					"marc21",
 				),
@@ -600,6 +632,8 @@ const ALMA: HostLmsProfile = {
 const FOLIO: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.folio,
 	labelKey: "hostlms.names.folio",
+	ingestSourceClass:
+		"org.olf.dcb.core.interaction.folio.FolioOaiPmhIngestSource",
 	groups: [
 		{
 			id: "",
@@ -611,7 +645,7 @@ const FOLIO: HostLmsProfile = {
 					"hostlms.config_fields.folio_base_url_description",
 					"required",
 					"url",
-					"https://okapi.example.org",
+					"https://edge.example.org",
 				),
 				field(
 					["apikey"],
@@ -621,12 +655,13 @@ const FOLIO: HostLmsProfile = {
 					"secret",
 				),
 				defaultAgencyCode(),
-				// FolioOaiPmhIngestSource2.DEFAULT_RECORD_SYNTAX applies when this is blank
+				// No default before dcb-service 9.2.0: the ingest source calls .get() on
+				// both, so a Host LMS created without them never harvests.
 				field(
 					["record-syntax"],
 					"hostlms.config_fields.record_syntax",
 					"hostlms.config_fields.folio_record_syntax_description",
-					"optional",
+					"required",
 					"text",
 					"oai_dc",
 				),
@@ -634,7 +669,7 @@ const FOLIO: HostLmsProfile = {
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
 					"hostlms.config_fields.folio_metadata_prefix_description",
-					"optional",
+					"required",
 					"text",
 					"marc21_withholdings",
 				),
@@ -646,6 +681,7 @@ const FOLIO: HostLmsProfile = {
 const POLARIS: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.polaris,
 	labelKey: "hostlms.names.polaris",
+	ingestSourceClass: HOST_LMS_CLASSES.polaris,
 	groups: [
 		{
 			id: "",
@@ -684,17 +720,23 @@ const POLARIS: HostLmsProfile = {
 					"hostlms.config_fields.domain_id_description",
 					"required",
 				),
-				field(
-					["logon-branch-id"],
-					"hostlms.config_fields.logon_branch_id",
-					"hostlms.config_fields.logon_branch_id_description",
-					"required",
+				// The whole-number Polaris fields stay text: stored configs hold both "2" and
+				// 2, and PolarisConfig coerces either, so a number type would rewrite them
+				wholeNumber(
+					field(
+						["logon-branch-id"],
+						"hostlms.config_fields.logon_branch_id",
+						"hostlms.config_fields.logon_branch_id_description",
+						"required",
+					),
 				),
-				field(
-					["logon-user-id"],
-					"hostlms.config_fields.logon_user_id",
-					"hostlms.config_fields.logon_user_id_description",
-					"required",
+				wholeNumber(
+					field(
+						["logon-user-id"],
+						"hostlms.config_fields.logon_user_id",
+						"hostlms.config_fields.logon_user_id_description",
+						"required",
+					),
 				),
 				field(
 					["staff-username"],
@@ -713,13 +755,14 @@ const POLARIS: HostLmsProfile = {
 				// Everything below appears in real Polaris configurations but was
 				// absent from this table, so the guided form silently dropped it on
 				// anyone who switched out of the JSON editor.
+				// PolarisLmsClient caps the page at 90
 				field(
 					["page-size"],
 					"hostlms.config_fields.page_size",
 					"hostlms.config_fields.page_size_description",
 					"optional",
 					"number",
-					"100",
+					"90",
 				),
 				// contextHierarchy is in SHARED_FIELDS - every ILS reads it, not just this one.
 				// dcb-service warns when this is absent and falls back to defaults.
@@ -745,33 +788,9 @@ const POLARIS: HostLmsProfile = {
 						labelKey: `hostlms.config_fields.loan_policy_${value.toLowerCase()}`,
 					})),
 				},
-				// Read by PolarisConfig and absent from this table until now
-				{
-					...field(
-						["virtual-patron-branch-id"],
-						"hostlms.config_fields.virtual_patron_branch_id",
-						"hostlms.config_fields.virtual_patron_branch_id_description",
-						"optional",
-						"number",
-					),
-					advanced: true,
-				},
-				{
-					...field(
-						["borrower-lending-flow"],
-						"hostlms.config_fields.borrower_lending_flow",
-						"hostlms.config_fields.borrower_lending_flow_description",
-						"optional",
-						"select",
-					),
-					options: [
-						{
-							value: "ILL",
-							labelKey: "hostlms.config_fields.borrower_lending_flow_ill",
-						},
-					],
-					advanced: true,
-				},
+				// No virtual-patron-branch-id or enableDoubleDelete: PolarisConfig declares
+				// both and nothing calls either getter. No borrower-lending-flow: 8.71.0
+				// compares it with == and never matches, and 9.2.0 refuses it.
 				VIRTUAL_PATRON_EMAIL,
 				field(
 					["hold-fetching-delay"],
@@ -793,13 +812,6 @@ const POLARIS: HostLmsProfile = {
 					"hostlms.config_fields.harvest_watermark_overlap_minutes_description",
 					"optional",
 					"number",
-				),
-				field(
-					["enableDoubleDelete"],
-					"hostlms.config_fields.enable_double_delete",
-					"hostlms.config_fields.enable_double_delete_description",
-					"optional",
-					"boolean",
 				),
 			],
 		},
@@ -853,11 +865,13 @@ const POLARIS: HostLmsProfile = {
 					"hostlms.config_fields.services_site_domain_description",
 					"recommended",
 				),
-				field(
-					["services", "workstation-id"],
-					"hostlms.client_config.services_workstation_id",
-					"hostlms.config_fields.services_workstation_id_description",
-					"recommended",
+				wholeNumber(
+					field(
+						["services", "workstation-id"],
+						"hostlms.client_config.services_workstation_id",
+						"hostlms.config_fields.services_workstation_id_description",
+						"recommended",
+					),
 				),
 				field(
 					["services", "product-id"],
@@ -897,51 +911,65 @@ const POLARIS: HostLmsProfile = {
 					"hostlms.config_fields.barcode_prefix_description",
 					"recommended",
 				),
-				field(
-					["item", "ill-location-id"],
-					"hostlms.client_config.ill_location_id",
-					"hostlms.config_fields.ill_location_id_description",
-					"required",
+				wholeNumber(
+					field(
+						["item", "ill-location-id"],
+						"hostlms.client_config.ill_location_id",
+						"hostlms.config_fields.ill_location_id_description",
+						"required",
+					),
 				),
-				field(
-					["item", "fine-code-id"],
-					"hostlms.client_config.fine",
-					"hostlms.config_fields.fine_code_id_description",
-					"required",
+				wholeNumber(
+					field(
+						["item", "fine-code-id"],
+						"hostlms.client_config.fine",
+						"hostlms.config_fields.fine_code_id_description",
+						"required",
+					),
 				),
 				// Text, not number. PolarisConfig.ItemConfig declares every one of
 				// these as `Object` and coerces String<->Integer on read, and real
 				// configurations mix the two - so typing it as a number here would
 				// rewrite a working config's "2" into 2 for no gain.
-				field(
-					["item", "renewal-limit"],
-					"hostlms.client_config.renewal_limit",
-					"hostlms.config_fields.renewal_limit_description",
-					"required",
+				wholeNumber(
+					field(
+						["item", "renewal-limit"],
+						"hostlms.client_config.renewal_limit",
+						"hostlms.config_fields.renewal_limit_description",
+						"required",
+					),
 				),
-				field(
-					["item", "history-action-id"],
-					"hostlms.client_config.history_action_id",
-					"hostlms.config_fields.history_action_id_description",
-					"required",
+				wholeNumber(
+					field(
+						["item", "history-action-id"],
+						"hostlms.client_config.history_action_id",
+						"hostlms.config_fields.history_action_id_description",
+						"required",
+					),
 				),
-				field(
-					["item", "shelving-scheme-id"],
-					"hostlms.client_config.shelving_scheme_id",
-					"hostlms.config_fields.shelving_scheme_id_description",
-					"required",
+				wholeNumber(
+					field(
+						["item", "shelving-scheme-id"],
+						"hostlms.client_config.shelving_scheme_id",
+						"hostlms.config_fields.shelving_scheme_id_description",
+						"required",
+					),
 				),
-				field(
-					["item", "loan-period-code-id"],
-					"hostlms.client_config.loan_id",
-					"hostlms.config_fields.loan_period_code_id_description",
-					"required",
+				wholeNumber(
+					field(
+						["item", "loan-period-code-id"],
+						"hostlms.client_config.loan_id",
+						"hostlms.config_fields.loan_period_code_id_description",
+						"required",
+					),
 				),
-				field(
-					["item", "av-loan-period-code-id"],
-					"hostlms.config_fields.av_loan_period_code_id",
-					"hostlms.config_fields.av_loan_period_code_id_description",
-					"required",
+				wholeNumber(
+					field(
+						["item", "av-loan-period-code-id"],
+						"hostlms.config_fields.av_loan_period_code_id",
+						"hostlms.config_fields.av_loan_period_code_id_description",
+						"required",
+					),
 				),
 				{
 					path: ["item", "item-agency-resolution-method"],
@@ -963,11 +991,13 @@ const POLARIS: HostLmsProfile = {
 						},
 					],
 				},
-				field(
-					["item", "av-renewal-limit"],
-					"hostlms.client_config.renewal_limit_av",
-					"hostlms.config_fields.renewal_limit_av_description",
-					"optional",
+				wholeNumber(
+					field(
+						["item", "av-renewal-limit"],
+						"hostlms.client_config.renewal_limit_av",
+						"hostlms.config_fields.renewal_limit_av_description",
+						"optional",
+					),
 				),
 			],
 		},
@@ -995,6 +1025,7 @@ const POLARIS: HostLmsProfile = {
 const KOHA: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.koha,
 	labelKey: "hostlms.names.koha",
+	ingestSourceClass: "org.olf.dcb.core.interaction.koha.KohaOaiPmhIngestSource",
 	groups: [
 		{
 			// Heading only, so nothing is nested under it - the empty-id group is the
@@ -1062,15 +1093,8 @@ const KOHA: HostLmsProfile = {
 				// No virtual-item-location-code. KohaHostLmsClient.createItem sets
 				// home_library_id and holding_library_id and nothing else - a shelving
 				// location was never sent - so this was required configuration that no
-				// code path read. Alma still has one; that adapter does use it.
-				field(
-					["page-size"],
-					"hostlms.config_fields.page_size",
-					"hostlms.config_fields.page_size_description",
-					"recommended",
-					"number",
-					"100",
-				),
+				// code path read. Alma still has one; that adapter does use it. No
+				// page-size either: no dcb-service release reads it for Koha.
 			],
 		},
 		{
@@ -1079,15 +1103,14 @@ const KOHA: HostLmsProfile = {
 			descriptionKey: "hostlms.config_fields.koha_harvesting_group_description",
 			required: false,
 			fields: [
-				// Not `required`: a member that only borrows has nothing to contribute
-				// to the shared index and is legitimately created with `ingest` off.
-				// dcb-service warns on both of these rather than rejecting, for the
-				// same reason.
+				// Required even with `ingest` off, although dcb-service only warns: 9.0.0
+				// and 9.1.0 build every Host LMS's ingest source before reading `ingest`,
+				// and one that cannot be built ends the harvest for all of them.
 				field(
 					["base-url"],
 					"hostlms.config_fields.koha_base_url",
 					"hostlms.config_fields.koha_base_url_description",
-					"recommended",
+					"required",
 					"url",
 					"https://catalogue.example.org",
 				),
@@ -1095,7 +1118,7 @@ const KOHA: HostLmsProfile = {
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
 					"hostlms.config_fields.koha_metadata_prefix_description",
-					"recommended",
+					"required",
 					"text",
 					"marcxml",
 				),
@@ -1227,6 +1250,8 @@ const FOUNDATION: HostLmsProfile = {
 const ORS_APPLIANCE: HostLmsProfile = {
 	lmsClientClass: HOST_LMS_CLASSES.orsAppliance,
 	labelKey: "hostlms.names.ors_appliance",
+	ingestSourceClass:
+		"org.olf.dcb.core.interaction.ors.ORSApplianceOaiPmhIngestSource",
 	groups: [
 		{
 			id: "",
@@ -1273,14 +1298,18 @@ const ORS_APPLIANCE: HostLmsProfile = {
 					"recommended",
 				),
 				// ORSApplianceOaiPmhIngestSource throws on construction without one
-				// of these two, which surfaces as a harvest that never runs. The URL,
-				// when set, wins; the tenant ID builds the standard path otherwise
-				field(
-					["tenant-id"],
-					"hostlms.config_fields.tenant_id",
-					"hostlms.config_fields.tenant_id_description",
-					"recommended",
-				),
+				// of these two, which on 9.0.0 and 9.1.0 ends the harvest for every Host
+				// LMS. The URL, when set, wins; the tenant ID builds the standard path
+				{
+					...field(
+						["tenant-id"],
+						"hostlms.config_fields.tenant_id",
+						"hostlms.config_fields.tenant_id_description",
+						"required",
+					),
+					requiredUnless: (values: any) =>
+						!isBlank(values?.["oai-endpoint-url"]),
+				},
 				{
 					...field(
 						["oai-endpoint-url"],
@@ -1293,11 +1322,12 @@ const ORS_APPLIANCE: HostLmsProfile = {
 					// What DcbProfileRegistrationService writes for an appliance it registers
 					derives: { path: ["base-url"], from: originOf },
 				},
+				// No release defaults it for a hand-built appliance; registration writes marcxml
 				field(
 					["metadata-prefix"],
 					"hostlms.config_fields.metadata_prefix",
-					"hostlms.config_fields.metadata_prefix_description",
-					"optional",
+					"hostlms.config_fields.ors_metadata_prefix_description",
+					"required",
 					"text",
 					"marcxml",
 				),
@@ -1368,10 +1398,6 @@ const withSharedFields = (profile: HostLmsProfile): HostLmsProfile => ({
 });
 
 /**
- * Exactly the classes `HostLmsConfigValidator` accepts, in picker order.
- * Adding one here without adding it there produces a 400 the user cannot act on.
- */
-/**
  * Each field the adapter defaults is given that default, from the copy of dcb-service's
  * docs/host-lms-defaults.json at the root of this app. A required field takes none: the
  * server will not accept it blank, so there is nothing to leave blank.
@@ -1398,6 +1424,10 @@ const withAdapterDefaults = (profile: HostLmsProfile): HostLmsProfile => {
 	};
 };
 
+/**
+ * The classes dcb-service 9.0.0's `HostLmsConfigValidator` accepts, in picker order.
+ * Adding one here without adding it there produces a 400 the user cannot act on.
+ */
 export const HOST_LMS_PROFILES: HostLmsProfile[] = [
 	ALMA,
 	POLARIS,
@@ -1410,6 +1440,70 @@ export const HOST_LMS_PROFILES: HostLmsProfile[] = [
 	.map(withSharedFields)
 	.map(withAdapterDefaults);
 
+/** 8.71.0's validator answers "Unsupported LMS Client Class" for these. */
+const CLASSES_SINCE_9_0_0: ReadonlySet<string> = new Set([
+	HOST_LMS_CLASSES.koha,
+	HOST_LMS_CLASSES.foundation,
+	HOST_LMS_CLASSES.orsAppliance,
+]);
+
+/**
+ * Settings no release before the flag's reads, by ILS ("*" is every ILS). Off, they are
+ * not offered, required or written; a stored value is kept on edit.
+ */
+const SETTINGS_SINCE: ReadonlyArray<{
+	enabled: () => boolean;
+	keys: Readonly<Record<string, readonly string[]>>;
+}> = [
+	{
+		// 8.71.0 also refuses a shared system's missing default agency
+		enabled: isHostLmsExtendedConfigEnabled,
+		keys: {
+			"*": ["shared-system", "base-url-qualifier"],
+			[HOST_LMS_CLASSES.polaris]: ["harvest-watermark-overlap-minutes"],
+		},
+	},
+	{
+		enabled: isHostLmsCirculationSettingsEnabled,
+		keys: {
+			[HOST_LMS_CLASSES.alma]: [
+				"request-cancellation-reason",
+				"sharing-circ-desk-code",
+				"alternative-sharing-library-code",
+				"no-renew-item-policy",
+				"virtual-patron-barcode-prefix",
+			],
+			[HOST_LMS_CLASSES.sierra]: ["api-version", "virtual-patron-email"],
+			[HOST_LMS_CLASSES.polaris]: ["virtual-patron-email"],
+			[HOST_LMS_CLASSES.koha]: [
+				"virtual-patron-email",
+				"virtual-patron-category",
+				"do-not-renew-note",
+			],
+		},
+	},
+];
+
+/** What this deployment's dcb-service does not read for this ILS. Read per call. */
+const unreadSettings = (lmsClientClass: string): Set<string> =>
+	new Set(
+		SETTINGS_SINCE.filter((gate) => !gate.enabled()).flatMap((gate) => [
+			...(gate.keys["*"] ?? []),
+			...(gate.keys[lmsClientClass] ?? []),
+		]),
+	);
+
+/**
+ * The types the picker offers: the ones this deployment's dcb-service will create.
+ * Read per call, because the flag is injected after this module loads.
+ */
+export const creatableHostLmsProfiles = (): HostLmsProfile[] =>
+	isHostLmsExtendedConfigEnabled()
+		? HOST_LMS_PROFILES
+		: HOST_LMS_PROFILES.filter(
+				(profile) => !CLASSES_SINCE_9_0_0.has(profile.lmsClientClass),
+			);
+
 /**
  * The bib suppression ruleset dcb-service applies when none is named: FOLIO's ingest
  * source falls back to folio-default, which application.yml seeds.
@@ -1419,12 +1513,49 @@ export const bibSuppressionDefault = (
 ): string | undefined =>
 	lmsClientClass === HOST_LMS_CLASSES.folio ? "folio-default" : undefined;
 
+/**
+ * Every profile, so an existing record of any type keeps its guided form; only the
+ * settings this deployment's dcb-service reads.
+ */
 export const getHostLmsProfile = (
 	lmsClientClass?: string | null,
-): HostLmsProfile | undefined =>
-	HOST_LMS_PROFILES.find(
-		(profile) => profile.lmsClientClass === lmsClientClass,
+): HostLmsProfile | undefined => {
+	const profile = HOST_LMS_PROFILES.find(
+		(candidate) => candidate.lmsClientClass === lmsClientClass,
 	);
+	if (!profile) return undefined;
+
+	const unread = unreadSettings(profile.lmsClientClass);
+	if (unread.size === 0) return profile;
+
+	return {
+		...profile,
+		groups: profile.groups.map((group) => ({
+			...group,
+			fields: group.fields.filter(
+				(configField) => !unread.has(configField.path.join(".")),
+			),
+		})),
+	};
+};
+
+/**
+ * createHostLms derives the ingest source class and ignores the one it is sent. Before
+ * 9.2.0 it derives a blank for these two, and 9.2.0 does not harvest a Host LMS whose
+ * class is blank; only updateHostLms stores the class it is given.
+ */
+const INGEST_SOURCE_SET_BY_UPDATE: ReadonlySet<string> = new Set([
+	HOST_LMS_CLASSES.sierra,
+	HOST_LMS_CLASSES.polaris,
+]);
+
+/** The class to store with updateHostLms straight after a create, if any. */
+export const ingestSourceClassToUpdate = (
+	lmsClientClass?: string | null,
+): string | undefined =>
+	lmsClientClass && INGEST_SOURCE_SET_BY_UPDATE.has(lmsClientClass)
+		? getHostLmsProfile(lmsClientClass)?.ingestSourceClass
+		: undefined;
 
 export const clientConfigFieldsFor = (
 	lmsClientClass?: string | null,
@@ -1560,6 +1691,36 @@ export const missingRequiredClientConfig = (
 		}));
 
 /**
+ * At most nine digits: dcb-service 9.2.0's validator refuses ten whatever their value. Every
+ * setting here counts or identifies, so none is negative.
+ */
+const isWholeNumber = (value: unknown): boolean =>
+	/^\d{1,9}$/.test(String(value).trim());
+
+/**
+ * Whole-number settings holding anything else. Blocks submission: on dcb-service 8.71.0 a
+ * client that cannot be built ends the harvest for every Host LMS.
+ */
+export const notWholeNumberClientConfig = (
+	lmsClientClass: string | undefined | null,
+	values: any,
+): ClientConfigProblem[] =>
+	clientConfigFieldsFor(lmsClientClass)
+		.filter((configField) => {
+			const raw = readPath(values, configField.path);
+			return (
+				(configField.wholeNumber ?? configField.type === "number") &&
+				!isBlank(raw) &&
+				!isWholeNumber(raw)
+			);
+		})
+		.map((configField) => ({
+			name: fieldName(configField),
+			labelKey: configField.labelKey,
+			requirement: configField.requirement,
+		}));
+
+/**
  * The one combination dcb-service refuses outright, checked here so the user is told
  * by the field they just filled in rather than by a 400 after submitting.
  *
@@ -1579,6 +1740,25 @@ export const hasSharedSystemConflict = (
 	lmsClientClass !== HOST_LMS_CLASSES.orsAppliance &&
 	sharedSystemSet(values) &&
 	!isBlank(readPath(values, ["default-agency-code"]));
+
+/**
+ * A contextHierarchy that leaves out this Host LMS's own code. Set, it replaces the
+ * [hostLmsCode] default rather than extending it, so the mappings imported under the code
+ * are not read. Warned about, not refused: mappings kept only in a shared context are valid.
+ */
+export const contextHierarchyOmitsCode = (
+	values: any,
+	hostLmsCode: string | undefined | null,
+): boolean => {
+	const raw = readPath(values, ["contextHierarchy"]);
+	const contexts = (
+		Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(",") : []
+	)
+		.map((context) => String(context).trim())
+		.filter(Boolean);
+	const code = hostLmsCode?.trim();
+	return !!code && contexts.length > 0 && !contexts.includes(code);
+};
 
 export const isAdvancedField = (configField: ClientConfigField): boolean =>
 	configField.advanced ?? configField.defaultValue !== undefined;
@@ -1675,12 +1855,24 @@ export const clientConfigToFields = (
  * So: start from what is stored, remove only the paths the guided form OWNS (which is
  * what makes clearing a field clear it), then overlay the form's answers.
  */
+/**
+ * Keys dcb-service 9.2.0 refuses outright and no release acts on. Kept, they block every
+ * config save of a record written before; dropped, the Host LMS behaves exactly as it did.
+ */
+const REFUSED_KEYS: Readonly<Record<string, readonly string[]>> = {
+	[HOST_LMS_CLASSES.polaris]: ["borrower-lending-flow"],
+};
+
 export const mergeClientConfigEdit = (
 	existing: Record<string, unknown> | null | undefined,
 	lmsClientClass: string | undefined | null,
 	values: any,
 ): Record<string, unknown> => {
 	const merged = structuredClone(existing ?? {}) as Record<string, unknown>;
+
+	for (const key of REFUSED_KEYS[lmsClientClass ?? ""] ?? []) {
+		delete merged[key];
+	}
 
 	for (const configField of clientConfigFieldsFor(lmsClientClass)) {
 		deletePath(merged, configField.path);

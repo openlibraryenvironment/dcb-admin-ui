@@ -1,6 +1,7 @@
 import { type Page } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
+import { useAllFeatures } from "./fixtures/flags";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { scanForViolations } from "./fixtures/axe";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
@@ -23,6 +24,8 @@ const choose = async (page: Page, field: string, option: string | RegExp) => {
 test.describe("New Host LMS: closed vocabularies", () => {
 	test.beforeEach(async ({ page }) => {
 		await seedAuth(page);
+		// Foundation and the appliance are offered only with the 9.0.0 flag on
+		await useAllFeatures(page);
 		await mockGraphQL(page, {
 			LoadConsortiumHeader: consortiumBasics,
 			LoadLibraries: libraries,

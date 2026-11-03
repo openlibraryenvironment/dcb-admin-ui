@@ -119,19 +119,27 @@ export default function ConsortiumChapter() {
 							: t("consortium.new.busy_consortium"),
 					),
 			}),
-		onSuccess: ({ groupCreated }) => {
+		onSuccess: async ({ groupCreated }) => {
 			if (groupCreated) {
 				queryClient.invalidateQueries({ queryKey: ["groupsSelection"] });
 				queryClient.invalidateQueries({ queryKey: ["groups"] });
 			}
 			// Narrow keys only. A bare invalidateQueries() would re-fire every mounted
 			// query in the application to reflect one new row.
-			queryClient.invalidateQueries({ queryKey: CONSORTIUM_BASICS_QUERY_KEY });
-			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] });
+			// Awaited: the next chapter is gated on the consortium existing, and
+			// navigating before the read-back lands opens it on "create one first".
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: CONSORTIUM_BASICS_QUERY_KEY,
+				}),
+				queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
+			]);
 		},
 	});
 
-	if (consortium) {
+	// While saving, the read-back lands before the navigation does; the form stays up
+	// rather than flashing the "already set up" view for that moment.
+	if (consortium && busyMessage === null) {
 		return (
 			<Stack spacing={3}>
 				<Alert severity="success">
@@ -167,8 +175,10 @@ export default function ConsortiumChapter() {
 		} catch (failure: any) {
 			console.error("Consortium creation failed:", failure);
 			setError(describeGraphQLError(failure, t("consortium.new.error")));
-		} finally {
+			// Cleared on failure only. On success the chapter is navigating away, and
+			// clearing it here would show the "already set up" view as it goes.
 			setBusyMessage(null);
+		} finally {
 			isSubmitting.current = false;
 		}
 	};

@@ -23,12 +23,18 @@ const NOT_APP = [
 	"package-lock.json",
 ];
 
-/** The `&app_paths` list in .gitlab-ci.yml: what a merge request must touch to run the gates. */
+/** The `.rules` `app` changes list in .gitlab-ci.yml: what a merge request must touch to run the gates. */
 const appPaths = (() => {
 	const lines = readFileSync(resolve(repoRoot, ".gitlab-ci.yml"), "utf8").split(
 		"\n",
 	);
-	const start = lines.findIndex((line) => line.includes("paths: &app_paths"));
+	const rules = lines.findIndex((line) => /^\.rules:\s*$/.test(line));
+	const app = lines.findIndex(
+		(line, index) => index > rules && /^ {2}app:\s*$/.test(line),
+	);
+	const start = lines.findIndex(
+		(line, index) => index > app && /^\s+paths:\s*$/.test(line),
+	);
 	const paths: string[] = [];
 	for (const line of lines.slice(start + 1)) {
 		const item = /^\s+- "?([^"]+)"?\s*$/.exec(line);

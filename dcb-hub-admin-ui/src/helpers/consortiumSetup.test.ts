@@ -202,6 +202,20 @@ describe("the appearance chapter", () => {
 		expect(done.firstIncompleteStep).toBeUndefined();
 		expect(done.resumeStep).toBe("appearance");
 	});
+
+	it("is not among the outstanding chapters the finish page and the banner name", () => {
+		const partway = evaluateConsortiumSetup({
+			consortium: { functionalSettings: [], contacts: [] },
+			libraryCount: 0,
+		});
+
+		expect(partway.outstandingSteps.map((step) => step.id)).not.toContain(
+			"appearance",
+		);
+		expect(partway.outstandingSteps.map((step) => step.id)).toContain(
+			"contacts",
+		);
+	});
 });
 
 describe("progress", () => {

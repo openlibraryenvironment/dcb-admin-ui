@@ -13,7 +13,7 @@ interface DiscoveryPreviewProps {
 }
 
 /**
- * What a patron will see, drawn from the same values symposia-service serves. A mock rather
+ * What a patron will see, drawn from the same values the discovery service serves. A mock rather
  * than a frame of the live app, and an approximation that says so on screen - see
  * docs/theming.md.
  */
@@ -76,7 +76,12 @@ export default function DiscoveryPreview({
 							component="img"
 							src={parts.headerIcon}
 							alt=""
-							sx={{ height: 24, width: 24, objectFit: "contain", flexShrink: 0 }}
+							sx={{
+								height: 24,
+								width: 24,
+								objectFit: "contain",
+								flexShrink: 0,
+							}}
 						/>
 					)}
 					<Typography variant="subtitle1" noWrap sx={{ fontWeight: 500 }}>

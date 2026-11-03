@@ -126,13 +126,26 @@ export default function ContactsChapter() {
 				CreateConsortiumContactMutationVariables
 			>(createConsortiumContact, { input });
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] });
-			queryClient.invalidateQueries({ queryKey: CONSORTIUM_BASICS_QUERY_KEY });
-		},
+		// Returned, so the save waits for the read-back: the rail and a Back to this
+		// chapter would otherwise show the consortium without the new contact.
+		onSuccess: () =>
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
+				queryClient.invalidateQueries({
+					queryKey: CONSORTIUM_BASICS_QUERY_KEY,
+				}),
+			]),
 	});
 
+	// A consortium that already has a contact has answered this chapter; adding another
+	// is optional, so an untouched form moves on rather than failing validation.
+	const nothingToSave = alreadyHasContacts && !methods.formState.isDirty;
+
 	const handleContinue = async () => {
+		if (nothingToSave) {
+			goNext();
+			return;
+		}
 		if (isSubmitting.current) return;
 		isSubmitting.current = true;
 		setBusy(true);
@@ -192,7 +205,11 @@ export default function ContactsChapter() {
 			<SetupFooter
 				onBack={goBack}
 				onContinue={handleContinue}
-				continueLabel={t("setup.actions.save_and_continue")}
+				continueLabel={
+					nothingToSave
+						? t("setup.actions.continue")
+						: t("setup.actions.save_and_continue")
+				}
 				onSkip={skipAndContinue}
 				busy={isBusy}
 			/>

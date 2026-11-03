@@ -5,7 +5,11 @@
 // "Success: Retrieved chunk with N records.", "Skipped: ...",
 // "Ingest Check Failed: ...".
 export type HostLmsVerificationResult = {
-	hostLms?: { code?: string | null; name?: string | null } | null;
+	hostLms?: {
+		id?: string | null;
+		code?: string | null;
+		name?: string | null;
+	} | null;
 	pingStatus?: string | null;
 	ingestStatus?: string | null;
 	// Only selected where VITE_FEATURE_HOST_LMS_PROBES is on, so absent otherwise

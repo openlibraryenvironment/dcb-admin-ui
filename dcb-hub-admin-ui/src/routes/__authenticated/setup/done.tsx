@@ -93,9 +93,7 @@ function SetupDonePage() {
 		);
 	}
 
-	const outstanding = state.steps.filter(
-		(step) => step.available && !step.complete && !step.skipped,
-	);
+	const outstanding = state.outstandingSteps;
 
 	return (
 		<PageContainer
@@ -109,19 +107,23 @@ function SetupDonePage() {
 						? t("setup.done.title")
 						: t("setup.done.title_partial")}
 				</Typography>
-				<Typography sx={{ color: "text.secondary" }}>
-					{t("setup.done.subtitle", { count: libraryCount })}
-					{state.isComplete ? ` ${t("setup.done.revisit_hint")}` : ""}
-				</Typography>
+				{!state.isFresh && (
+					<Typography sx={{ color: "text.secondary" }}>
+						{t("setup.done.subtitle", { count: libraryCount })}
+						{state.isComplete ? ` ${t("setup.done.revisit_hint")}` : ""}
+					</Typography>
+				)}
 
 				<List>
 					{state.steps.map((step) => {
 						const label = t(SETUP_CHAPTERS[step.id].labelKey);
-						const status = step.complete
-							? t("setup.status.done")
-							: step.skipped
-								? t("setup.status.skipped")
-								: t("setup.status.not_started");
+						const status = step.optional
+							? t("setup.status.optional")
+							: step.complete
+								? t("setup.status.done")
+								: step.skipped
+									? t("setup.status.skipped")
+									: t("setup.status.not_started");
 
 						return (
 							<ListItem key={step.id} sx={{ px: 0 }}>

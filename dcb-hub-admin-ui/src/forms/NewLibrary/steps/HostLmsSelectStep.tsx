@@ -11,10 +11,8 @@ import {
 } from "@mui/material";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { getHostLmsSelection } from "@queries/getHostLmsSelection";
 import { getILS } from "@helpers/getILS";
-import type { LoadHostLmsSelectionQueryVariables } from "@generated/graphql";
-import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
 
 /**
  * Picks the existing Host LMS a new library belongs to.
@@ -34,16 +32,9 @@ export default function HostLmsSelectStep() {
 		formState: { errors },
 	} = useFormContext();
 
-	const { data, isLoading, isError } = useQuery({
-		...nonCriticalQuery,
-		queryKey: ["hostLmsSelection"],
-		queryFn: () =>
-			gqlClient.request<any, LoadHostLmsSelectionQueryVariables>(
-				getHostLmsSelection,
-				{ pagesize: 1000 },
-			),
-		staleTime: 1000 * 60 * 5,
-	});
+	const { data, isLoading, isError } = useQuery(
+		hostLmsSelectionQuery(gqlClient),
+	);
 
 	const options = (data?.hostLms?.content ?? []) as {
 		id: string;
@@ -100,6 +91,7 @@ export default function HostLmsSelectStep() {
 							// has to travel with the code rather than be inferred later.
 							setValue("lmsClientClass", selected?.lmsClientClass ?? "");
 							setValue("hostLmsName", selected?.name ?? "");
+							setValue("hostLmsId", selected?.id ?? "");
 						}}
 						onBlur={field.onBlur}
 						renderInput={(params) => (

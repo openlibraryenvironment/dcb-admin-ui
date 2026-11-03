@@ -15,17 +15,14 @@ interface LibrarySetupBannerProps {
 }
 
 /**
- * Tells the user what a library still needs, and reopens the new-library wizard
- * at the first outstanding step.
+ * Tells the user whether a library's setup is finished and, when it is not, what
+ * it still needs, reopening the new-library wizard at the first outstanding step.
  *
  * The wizard could previously only be completed in one sitting: if it was
  * closed after the library was created (which happens on the contacts step)
  * everything after that was simply never done, and nothing on the library said
  * so. The onboarding grid knew, but only as a red cross on a consortium-wide
  * page - not where someone looking at the library would see it.
- *
- * Renders nothing when the library is fully configured; a banner that is always
- * present stops being read.
  */
 export default function LibrarySetupBanner({
 	library,
@@ -35,16 +32,30 @@ export default function LibrarySetupBanner({
 	const gqlClient = useGraphQLClient();
 	const [showWizard, setShowWizard] = useState(false);
 
-	const { data: counts, isLoading } = useQuery(
+	const { data: counts } = useQuery(
 		librarySetupCountsQuery(gqlClient, library),
 	);
 
-	// Say nothing until the counts are in: flashing "setup incomplete" at
-	// someone whose library is fine is worse than a moment's silence.
-	if (isLoading || !library) return null;
+	// Say nothing until the counts are in. A failed count is not a zero: read as
+	// one, it reported mappings and pickup locations missing from a library that
+	// had them.
+	if (!counts || !library) return null;
 
-	const setup = evaluateLibrarySetup(library, counts ?? {});
-	if (setup.isComplete) return null;
+	const setup = evaluateLibrarySetup(library, counts);
+
+	if (setup.isComplete) {
+		return (
+			<Alert severity="success" role="status" sx={{ mb: 3 }}>
+				<AlertTitle>{t("libraries.setup.complete_title")}</AlertTitle>
+				{t("libraries.setup.complete_body", {
+					steps: setup.steps
+						.filter((step) => step.applicable)
+						.map((step) => t(`libraries.setup.step.${step.id}`))
+						.join(", "),
+				})}
+			</Alert>
+		);
+	}
 
 	const outstanding = setup.steps.filter(
 		(step) => step.applicable && !step.complete,

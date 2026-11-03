@@ -129,12 +129,16 @@ export default function HowItWorksChapter() {
 				});
 			}
 		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] });
-			queryClient.invalidateQueries({
-				queryKey: ["LoadConsortiumFunctionalSettings"],
-			});
-		},
+		// Settled, not succeeded, and awaited: a failure part-way through has still
+		// saved the settings before it, and a retry has to see them or it adds them
+		// a second time.
+		onSettled: () =>
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["LoadConsortium"] }),
+				queryClient.invalidateQueries({
+					queryKey: ["LoadConsortiumFunctionalSettings"],
+				}),
+			]),
 	});
 
 	const handleContinue = async () => {

@@ -13,6 +13,7 @@ import type {
 	UpdateLibraryMutation,
 	UpdateLibraryMutationVariables,
 } from "@generated/graphql";
+import { describeGraphQLError } from "@helpers/graphQLErrors";
 
 /**
  * Writing the rows the user selected — W-10.
@@ -61,6 +62,8 @@ export interface ApplyOptions {
 	consortiumGroupId?: string | null;
 	/** Called after each row settles, for the progress readout. */
 	onProgress?: (done: number, total: number) => void;
+	/** The reason given for a failed row when the server did not give one. Translated. */
+	unknownError: string;
 }
 
 const text = (value: string | undefined): string => (value ?? "").trim();
@@ -106,7 +109,7 @@ const contactsOf = (values: Record<string, string>) => {
 export async function applyLibraryImport(
 	gqlClient: GraphQLClient,
 	rows: readonly LibraryImportRow[],
-	{ consortiumGroupId, onProgress }: ApplyOptions = {},
+	{ consortiumGroupId, onProgress, unknownError }: ApplyOptions,
 ): Promise<ImportOutcome[]> {
 	const selected = rows.filter((row) => row.selected);
 	let done = 0;
@@ -192,10 +195,7 @@ export async function applyLibraryImport(
 				line: row.line,
 				agencyCode,
 				ok: false,
-				error:
-					failure?.response?.errors?.[0]?.message ??
-					failure?.message ??
-					"Unknown error",
+				error: describeGraphQLError(failure, unknownError),
 			};
 		} finally {
 			done += 1;

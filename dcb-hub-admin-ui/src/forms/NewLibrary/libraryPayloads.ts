@@ -3,13 +3,17 @@ import type { DefaultValues } from "react-hook-form";
 
 import i18n from "@/i18n";
 import { defaultCreationReason } from "@helpers/auditDefaults";
-import type { NewLibraryFormValues } from "@schemas/newLibrarySchema";
+import {
+	resolveClientConfig,
+	type NewLibraryFormValues,
+} from "@schemas/newLibrarySchema";
 import { resolveAuthProfile } from "@constants/authProfiles";
 import type { HostLmsVerificationResult } from "@helpers/hostLmsVerification";
 import type {
 	CreateLibraryContactInput,
 	LibraryInput,
 	UpdateAgencyInput,
+	UpdateHostLmsInput,
 	UpdateLibraryInput,
 } from "@generated/graphql";
 
@@ -79,6 +83,7 @@ export const EMPTY_LIBRARY_FORM: LibraryFormDefaults = {
 	reason: defaultCreationReason("libraries.library"),
 	changeReferenceUrl: "",
 	libraryId: "",
+	hostLmsId: "",
 	contacts: [{ ...EMPTY_CONTACT }],
 	groupId: "",
 };
@@ -104,6 +109,7 @@ export const formValuesFromLibrary = (library: any): LibraryFormDefaults => {
 	return {
 		...EMPTY_LIBRARY_FORM,
 		hostLmsCode: library?.agency?.hostLms?.code ?? "",
+		hostLmsId: library?.agency?.hostLms?.id ?? "",
 		hostLmsName: library?.agency?.hostLms?.name ?? "",
 		lmsClientClass: library?.agency?.hostLms?.lmsClientClass ?? "",
 		agencyCode: library?.agencyCode ?? "",
@@ -160,6 +166,16 @@ const localHoldsInput = (formData: NewLibraryFormValues) =>
 		? { maxLocalHolds: loanCap(formData.maxLocalHolds) }
 		: {};
 
+/**
+ * Blank is absent, never null: before dcb-service 9.1.0 CreateLibraryDataFetcher
+ * checks containsKey and then calls toString() on the value, so a null loan cap
+ * is a NullPointerException that fails the whole createLibrary.
+ */
+const loanCapInput = (value: string | undefined) => {
+	const cap = loanCap(value);
+	return cap === null ? {} : { maxConsortialLoans: cap };
+};
+
 const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	agencyCode: formData.agencyCode,
 	fullName: formData.fullName,
@@ -178,7 +194,7 @@ const buildLibraryProfile = (formData: NewLibraryFormValues) => ({
 	backupDowntimeSchedule: formData.backupDowntimeSchedule,
 	isBorrowingAgency: formData.isBorrowingAgency,
 	isSupplyingAgency: formData.isSupplyingAgency,
-	maxConsortialLoans: loanCap(formData.maxConsortialLoans),
+	...loanCapInput(formData.maxConsortialLoans),
 	...localHoldsInput(formData),
 	reason: formData.reason,
 	changeCategory: "New member",
@@ -288,9 +304,20 @@ export const newContactsOf = (contacts: NewLibraryFormValues["contacts"]) =>
  * again, no way forward either.
  */
 export const shouldCreateHostLms = (
-	hostLmsCode: string,
 	result: HostLmsVerificationResult | null,
-): boolean => result?.hostLms?.code !== hostLmsCode;
+): boolean => !result?.hostLms?.id;
+
+/**
+ * What the Host LMS step can still change once the Host LMS exists. Not the code, which
+ * would orphan the one created, and not the type, which its config was validated for.
+ */
+export const buildHostLmsSettings = (formData: NewLibraryFormValues) =>
+	({
+		name: formData.hostLmsName,
+		clientConfig: resolveClientConfig(formData),
+		suppressionRulesetName: formData.suppressionRulesetName,
+		itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
+	}) satisfies Omit<UpdateHostLmsInput, "id">;
 
 export const shouldCreateLibrary = (libraryId: string | undefined): boolean =>
 	!libraryId;

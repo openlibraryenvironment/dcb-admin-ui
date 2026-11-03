@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type Ref, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -21,6 +21,8 @@ type Props = {
 	onStageFile: (file: File | null) => void;
 	label: string;
 	helperText: string;
+	/** The URL input, so a form can focus it when it fails validation. */
+	inputRef?: Ref<HTMLInputElement>;
 	error?: boolean;
 	disabled?: boolean;
 	/**
@@ -70,6 +72,7 @@ export function BrandImageField({
 	onStageFile,
 	label,
 	helperText,
+	inputRef,
 	error,
 	disabled,
 	uploadsAvailable = true,
@@ -213,6 +216,7 @@ export function BrandImageField({
 			<TextField
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
+				inputRef={inputRef}
 				fullWidth
 				size="small"
 				// Typing a URL and staging a file are alternatives, not a merge: the column

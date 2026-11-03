@@ -5,6 +5,8 @@ import {
 	isConfirmItemReturnedEnabled,
 	isConsortiumSupportUrlEnabled,
 	isGuardedCleanupEnabled,
+	isHostLmsCirculationSettingsEnabled,
+	isHostLmsExtendedConfigEnabled,
 	isHostLmsProbesEnabled,
 	isInsightsEnabled,
 	isInsightsTrendsEnabled,
@@ -233,6 +235,15 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		fields: {},
 	},
 	{
+		// HostLmsConfigValidator cases and adapter settings, not schema: lmsClientClass and
+		// clientConfig are a String and JSON in every release, so nothing to select or strip.
+		id: "host_lms_extended_config",
+		flag: "VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG",
+		enabled: isHostLmsExtendedConfigEnabled,
+		since: "9.0.0",
+		fields: {},
+	},
+	{
 		// A REST route, first released in 9.2.0, so nothing to select or strip.
 		id: "confirm_item_returned",
 		flag: "VITE_FEATURE_CONFIRM_ITEM_RETURNED",
@@ -286,6 +297,14 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 			Consortium: CONSORTIUM_SUPPORT_FIELDS,
 			UpdateConsortiumInput: CONSORTIUM_SUPPORT_FIELDS,
 		},
+	},
+	{
+		// Adapter settings, not schema: clientConfig is JSON in every release.
+		id: "host_lms_circulation_settings",
+		flag: "VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS",
+		enabled: isHostLmsCirculationSettingsEnabled,
+		since: "9.2.0",
+		fields: {},
 	},
 	{
 		id: "host_lms_probes",
