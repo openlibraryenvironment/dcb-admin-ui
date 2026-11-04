@@ -63,6 +63,8 @@ import { Route as _authenticatedLibrariesLibraryIdContactsRouteImport } from './
 import { Route as _authenticatedLibrariesLibraryIdInsightsRouteImport } from './routes/__authenticated/libraries/$libraryId/insights'
 import { Route as _authenticatedLibrariesLibraryIdServiceRouteImport } from './routes/__authenticated/libraries/$libraryId/service'
 import { Route as _authenticatedLibrariesLibraryIdSettingsRouteImport } from './routes/__authenticated/libraries/$libraryId/settings'
+import { Route as _authenticatedLibrariesNewIndexRouteImport } from './routes/__authenticated/libraries/new/index'
+import { Route as _authenticatedLibrariesNewStepRouteImport } from './routes/__authenticated/libraries/new/$step'
 import { Route as _authenticatedMappingsAllNumericRangeIndexRouteImport } from './routes/__authenticated/mappings/allNumericRange/index'
 import { Route as _authenticatedMappingsAllReferenceValueIndexRouteImport } from './routes/__authenticated/mappings/allReferenceValue/index'
 import { Route as _authenticatedPatronRequestsIdIndexRouteImport } from './routes/__authenticated/patronRequests/$id/index'
@@ -98,6 +100,9 @@ import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsAllRoute
 import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/itemType'
 import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/location'
 import { Route as _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport } from './routes/__authenticated/libraries/$libraryId/referenceValueMappings/patronType'
+import { Route as _authenticatedLibrariesLibraryIdSetupIndexRouteImport } from './routes/__authenticated/libraries/$libraryId/setup/index'
+import { Route as _authenticatedLibrariesLibraryIdSetupStepRouteImport } from './routes/__authenticated/libraries/$libraryId/setup/$step'
+import { Route as _authenticatedLibrariesLibraryIdSetupDoneRouteImport } from './routes/__authenticated/libraries/$libraryId/setup/done'
 import { Route as _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport } from './routes/__authenticated/libraries/$libraryId/supplierRequests/all'
 import { Route as _authenticatedPatronRequestsAuditsAuditIdIndexRouteImport } from './routes/__authenticated/patronRequests/audits/$auditId/index'
 
@@ -411,6 +416,18 @@ const _authenticatedLibrariesLibraryIdSettingsRoute =
     path: '/libraries/$libraryId/settings',
     getParentRoute: () => _authenticatedRoute,
   } as any)
+const _authenticatedLibrariesNewIndexRoute =
+  _authenticatedLibrariesNewIndexRouteImport.update({
+    id: '/libraries/new/',
+    path: '/libraries/new/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesNewStepRoute =
+  _authenticatedLibrariesNewStepRouteImport.update({
+    id: '/libraries/new/$step',
+    path: '/libraries/new/$step',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
 const _authenticatedMappingsAllNumericRangeIndexRoute =
   _authenticatedMappingsAllNumericRangeIndexRouteImport.update({
     id: '/mappings/allNumericRange/',
@@ -633,6 +650,24 @@ const _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute =
       getParentRoute: () => _authenticatedRoute,
     } as any,
   )
+const _authenticatedLibrariesLibraryIdSetupIndexRoute =
+  _authenticatedLibrariesLibraryIdSetupIndexRouteImport.update({
+    id: '/libraries/$libraryId/setup/',
+    path: '/libraries/$libraryId/setup/',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdSetupStepRoute =
+  _authenticatedLibrariesLibraryIdSetupStepRouteImport.update({
+    id: '/libraries/$libraryId/setup/$step',
+    path: '/libraries/$libraryId/setup/$step',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
+const _authenticatedLibrariesLibraryIdSetupDoneRoute =
+  _authenticatedLibrariesLibraryIdSetupDoneRouteImport.update({
+    id: '/libraries/$libraryId/setup/done',
+    path: '/libraries/$libraryId/setup/done',
+    getParentRoute: () => _authenticatedRoute,
+  } as any)
 const _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute =
   _authenticatedLibrariesLibraryIdSupplierRequestsAllRouteImport.update({
     id: '/libraries/$libraryId/supplierRequests/all',
@@ -698,6 +733,7 @@ export interface FileRoutesByFullPath {
   '/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
   '/libraries/$libraryId/settings': typeof _authenticatedLibrariesLibraryIdSettingsRoute
+  '/libraries/new/$step': typeof _authenticatedLibrariesNewStepRoute
   '/search/$clusterId/cluster': typeof _authenticatedSearchClusterIdClusterRoute
   '/search/$clusterId/clusterExplanation': typeof _authenticatedSearchClusterIdClusterExplanationRoute
   '/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
@@ -708,6 +744,7 @@ export interface FileRoutesByFullPath {
   '/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/groups/$groupId/': typeof _authenticatedGroupsGroupIdIndexRoute
   '/libraries/$libraryId/': typeof _authenticatedLibrariesLibraryIdIndexRoute
+  '/libraries/new/': typeof _authenticatedLibrariesNewIndexRoute
   '/mappings/allNumericRange/': typeof _authenticatedMappingsAllNumericRangeIndexRoute
   '/mappings/allReferenceValue/': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/patronRequests/$id/': typeof _authenticatedPatronRequestsIdIndexRoute
@@ -731,11 +768,14 @@ export interface FileRoutesByFullPath {
   '/libraries/$libraryId/referenceValueMappings/itemType': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRoute
   '/libraries/$libraryId/referenceValueMappings/location': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRoute
   '/libraries/$libraryId/referenceValueMappings/patronType': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute
+  '/libraries/$libraryId/setup/$step': typeof _authenticatedLibrariesLibraryIdSetupStepRoute
+  '/libraries/$libraryId/setup/done': typeof _authenticatedLibrariesLibraryIdSetupDoneRoute
   '/libraries/$libraryId/supplierRequests/all': typeof _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute
   '/groups/$groupId/patronRequests/': typeof _authenticatedGroupsGroupIdPatronRequestsIndexRoute
   '/groups/$groupId/supplierRequests/': typeof _authenticatedGroupsGroupIdSupplierRequestsIndexRoute
   '/libraries/$libraryId/bibs/': typeof _authenticatedLibrariesLibraryIdBibsIndexRoute
   '/libraries/$libraryId/locations/': typeof _authenticatedLibrariesLibraryIdLocationsIndexRoute
+  '/libraries/$libraryId/setup/': typeof _authenticatedLibrariesLibraryIdSetupIndexRoute
   '/patronRequests/audits/$auditId/': typeof _authenticatedPatronRequestsAuditsAuditIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -789,6 +829,7 @@ export interface FileRoutesByTo {
   '/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
   '/libraries/$libraryId/settings': typeof _authenticatedLibrariesLibraryIdSettingsRoute
+  '/libraries/new/$step': typeof _authenticatedLibrariesNewStepRoute
   '/search/$clusterId/cluster': typeof _authenticatedSearchClusterIdClusterRoute
   '/search/$clusterId/clusterExplanation': typeof _authenticatedSearchClusterIdClusterExplanationRoute
   '/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
@@ -799,6 +840,7 @@ export interface FileRoutesByTo {
   '/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/groups/$groupId': typeof _authenticatedGroupsGroupIdIndexRoute
   '/libraries/$libraryId': typeof _authenticatedLibrariesLibraryIdIndexRoute
+  '/libraries/new': typeof _authenticatedLibrariesNewIndexRoute
   '/mappings/allNumericRange': typeof _authenticatedMappingsAllNumericRangeIndexRoute
   '/mappings/allReferenceValue': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/patronRequests/$id': typeof _authenticatedPatronRequestsIdIndexRoute
@@ -822,11 +864,14 @@ export interface FileRoutesByTo {
   '/libraries/$libraryId/referenceValueMappings/itemType': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRoute
   '/libraries/$libraryId/referenceValueMappings/location': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRoute
   '/libraries/$libraryId/referenceValueMappings/patronType': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute
+  '/libraries/$libraryId/setup/$step': typeof _authenticatedLibrariesLibraryIdSetupStepRoute
+  '/libraries/$libraryId/setup/done': typeof _authenticatedLibrariesLibraryIdSetupDoneRoute
   '/libraries/$libraryId/supplierRequests/all': typeof _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute
   '/groups/$groupId/patronRequests': typeof _authenticatedGroupsGroupIdPatronRequestsIndexRoute
   '/groups/$groupId/supplierRequests': typeof _authenticatedGroupsGroupIdSupplierRequestsIndexRoute
   '/libraries/$libraryId/bibs': typeof _authenticatedLibrariesLibraryIdBibsIndexRoute
   '/libraries/$libraryId/locations': typeof _authenticatedLibrariesLibraryIdLocationsIndexRoute
+  '/libraries/$libraryId/setup': typeof _authenticatedLibrariesLibraryIdSetupIndexRoute
   '/patronRequests/audits/$auditId': typeof _authenticatedPatronRequestsAuditsAuditIdIndexRoute
 }
 export interface FileRoutesById {
@@ -883,6 +928,7 @@ export interface FileRoutesById {
   '/__authenticated/libraries/$libraryId/insights': typeof _authenticatedLibrariesLibraryIdInsightsRoute
   '/__authenticated/libraries/$libraryId/service': typeof _authenticatedLibrariesLibraryIdServiceRoute
   '/__authenticated/libraries/$libraryId/settings': typeof _authenticatedLibrariesLibraryIdSettingsRoute
+  '/__authenticated/libraries/new/$step': typeof _authenticatedLibrariesNewStepRoute
   '/__authenticated/search/$clusterId/cluster': typeof _authenticatedSearchClusterIdClusterRoute
   '/__authenticated/search/$clusterId/clusterExplanation': typeof _authenticatedSearchClusterIdClusterExplanationRoute
   '/__authenticated/search/$clusterId/identifiers': typeof _authenticatedSearchClusterIdIdentifiersRoute
@@ -893,6 +939,7 @@ export interface FileRoutesById {
   '/__authenticated/serviceInfo/requestErrors/requests': typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   '/__authenticated/groups/$groupId/': typeof _authenticatedGroupsGroupIdIndexRoute
   '/__authenticated/libraries/$libraryId/': typeof _authenticatedLibrariesLibraryIdIndexRoute
+  '/__authenticated/libraries/new/': typeof _authenticatedLibrariesNewIndexRoute
   '/__authenticated/mappings/allNumericRange/': typeof _authenticatedMappingsAllNumericRangeIndexRoute
   '/__authenticated/mappings/allReferenceValue/': typeof _authenticatedMappingsAllReferenceValueIndexRoute
   '/__authenticated/patronRequests/$id/': typeof _authenticatedPatronRequestsIdIndexRoute
@@ -916,11 +963,14 @@ export interface FileRoutesById {
   '/__authenticated/libraries/$libraryId/referenceValueMappings/itemType': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRoute
   '/__authenticated/libraries/$libraryId/referenceValueMappings/location': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRoute
   '/__authenticated/libraries/$libraryId/referenceValueMappings/patronType': typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute
+  '/__authenticated/libraries/$libraryId/setup/$step': typeof _authenticatedLibrariesLibraryIdSetupStepRoute
+  '/__authenticated/libraries/$libraryId/setup/done': typeof _authenticatedLibrariesLibraryIdSetupDoneRoute
   '/__authenticated/libraries/$libraryId/supplierRequests/all': typeof _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute
   '/__authenticated/groups/$groupId/patronRequests/': typeof _authenticatedGroupsGroupIdPatronRequestsIndexRoute
   '/__authenticated/groups/$groupId/supplierRequests/': typeof _authenticatedGroupsGroupIdSupplierRequestsIndexRoute
   '/__authenticated/libraries/$libraryId/bibs/': typeof _authenticatedLibrariesLibraryIdBibsIndexRoute
   '/__authenticated/libraries/$libraryId/locations/': typeof _authenticatedLibrariesLibraryIdLocationsIndexRoute
+  '/__authenticated/libraries/$libraryId/setup/': typeof _authenticatedLibrariesLibraryIdSetupIndexRoute
   '/__authenticated/patronRequests/audits/$auditId/': typeof _authenticatedPatronRequestsAuditsAuditIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -977,6 +1027,7 @@ export interface FileRouteTypes {
     | '/libraries/$libraryId/insights'
     | '/libraries/$libraryId/service'
     | '/libraries/$libraryId/settings'
+    | '/libraries/new/$step'
     | '/search/$clusterId/cluster'
     | '/search/$clusterId/clusterExplanation'
     | '/search/$clusterId/identifiers'
@@ -987,6 +1038,7 @@ export interface FileRouteTypes {
     | '/serviceInfo/requestErrors/requests'
     | '/groups/$groupId/'
     | '/libraries/$libraryId/'
+    | '/libraries/new/'
     | '/mappings/allNumericRange/'
     | '/mappings/allReferenceValue/'
     | '/patronRequests/$id/'
@@ -1010,11 +1062,14 @@ export interface FileRouteTypes {
     | '/libraries/$libraryId/referenceValueMappings/itemType'
     | '/libraries/$libraryId/referenceValueMappings/location'
     | '/libraries/$libraryId/referenceValueMappings/patronType'
+    | '/libraries/$libraryId/setup/$step'
+    | '/libraries/$libraryId/setup/done'
     | '/libraries/$libraryId/supplierRequests/all'
     | '/groups/$groupId/patronRequests/'
     | '/groups/$groupId/supplierRequests/'
     | '/libraries/$libraryId/bibs/'
     | '/libraries/$libraryId/locations/'
+    | '/libraries/$libraryId/setup/'
     | '/patronRequests/audits/$auditId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1068,6 +1123,7 @@ export interface FileRouteTypes {
     | '/libraries/$libraryId/insights'
     | '/libraries/$libraryId/service'
     | '/libraries/$libraryId/settings'
+    | '/libraries/new/$step'
     | '/search/$clusterId/cluster'
     | '/search/$clusterId/clusterExplanation'
     | '/search/$clusterId/identifiers'
@@ -1078,6 +1134,7 @@ export interface FileRouteTypes {
     | '/serviceInfo/requestErrors/requests'
     | '/groups/$groupId'
     | '/libraries/$libraryId'
+    | '/libraries/new'
     | '/mappings/allNumericRange'
     | '/mappings/allReferenceValue'
     | '/patronRequests/$id'
@@ -1101,11 +1158,14 @@ export interface FileRouteTypes {
     | '/libraries/$libraryId/referenceValueMappings/itemType'
     | '/libraries/$libraryId/referenceValueMappings/location'
     | '/libraries/$libraryId/referenceValueMappings/patronType'
+    | '/libraries/$libraryId/setup/$step'
+    | '/libraries/$libraryId/setup/done'
     | '/libraries/$libraryId/supplierRequests/all'
     | '/groups/$groupId/patronRequests'
     | '/groups/$groupId/supplierRequests'
     | '/libraries/$libraryId/bibs'
     | '/libraries/$libraryId/locations'
+    | '/libraries/$libraryId/setup'
     | '/patronRequests/audits/$auditId'
   id:
     | '__root__'
@@ -1161,6 +1221,7 @@ export interface FileRouteTypes {
     | '/__authenticated/libraries/$libraryId/insights'
     | '/__authenticated/libraries/$libraryId/service'
     | '/__authenticated/libraries/$libraryId/settings'
+    | '/__authenticated/libraries/new/$step'
     | '/__authenticated/search/$clusterId/cluster'
     | '/__authenticated/search/$clusterId/clusterExplanation'
     | '/__authenticated/search/$clusterId/identifiers'
@@ -1171,6 +1232,7 @@ export interface FileRouteTypes {
     | '/__authenticated/serviceInfo/requestErrors/requests'
     | '/__authenticated/groups/$groupId/'
     | '/__authenticated/libraries/$libraryId/'
+    | '/__authenticated/libraries/new/'
     | '/__authenticated/mappings/allNumericRange/'
     | '/__authenticated/mappings/allReferenceValue/'
     | '/__authenticated/patronRequests/$id/'
@@ -1194,11 +1256,14 @@ export interface FileRouteTypes {
     | '/__authenticated/libraries/$libraryId/referenceValueMappings/itemType'
     | '/__authenticated/libraries/$libraryId/referenceValueMappings/location'
     | '/__authenticated/libraries/$libraryId/referenceValueMappings/patronType'
+    | '/__authenticated/libraries/$libraryId/setup/$step'
+    | '/__authenticated/libraries/$libraryId/setup/done'
     | '/__authenticated/libraries/$libraryId/supplierRequests/all'
     | '/__authenticated/groups/$groupId/patronRequests/'
     | '/__authenticated/groups/$groupId/supplierRequests/'
     | '/__authenticated/libraries/$libraryId/bibs/'
     | '/__authenticated/libraries/$libraryId/locations/'
+    | '/__authenticated/libraries/$libraryId/setup/'
     | '/__authenticated/patronRequests/audits/$auditId/'
   fileRoutesById: FileRoutesById
 }
@@ -1592,6 +1657,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSettingsRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/libraries/new/': {
+      id: '/__authenticated/libraries/new/'
+      path: '/libraries/new'
+      fullPath: '/libraries/new/'
+      preLoaderRoute: typeof _authenticatedLibrariesNewIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/new/$step': {
+      id: '/__authenticated/libraries/new/$step'
+      path: '/libraries/new/$step'
+      fullPath: '/libraries/new/$step'
+      preLoaderRoute: typeof _authenticatedLibrariesNewStepRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
     '/__authenticated/mappings/allNumericRange/': {
       id: '/__authenticated/mappings/allNumericRange/'
       path: '/mappings/allNumericRange'
@@ -1837,6 +1916,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRouteImport
       parentRoute: typeof _authenticatedRoute
     }
+    '/__authenticated/libraries/$libraryId/setup/': {
+      id: '/__authenticated/libraries/$libraryId/setup/'
+      path: '/libraries/$libraryId/setup'
+      fullPath: '/libraries/$libraryId/setup/'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSetupIndexRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/setup/$step': {
+      id: '/__authenticated/libraries/$libraryId/setup/$step'
+      path: '/libraries/$libraryId/setup/$step'
+      fullPath: '/libraries/$libraryId/setup/$step'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSetupStepRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
+    '/__authenticated/libraries/$libraryId/setup/done': {
+      id: '/__authenticated/libraries/$libraryId/setup/done'
+      path: '/libraries/$libraryId/setup/done'
+      fullPath: '/libraries/$libraryId/setup/done'
+      preLoaderRoute: typeof _authenticatedLibrariesLibraryIdSetupDoneRouteImport
+      parentRoute: typeof _authenticatedRoute
+    }
     '/__authenticated/libraries/$libraryId/supplierRequests/all': {
       id: '/__authenticated/libraries/$libraryId/supplierRequests/all'
       path: '/libraries/$libraryId/supplierRequests/all'
@@ -1930,11 +2030,13 @@ interface _authenticatedRouteChildren {
   _authenticatedLibrariesLibraryIdInsightsRoute: typeof _authenticatedLibrariesLibraryIdInsightsRoute
   _authenticatedLibrariesLibraryIdServiceRoute: typeof _authenticatedLibrariesLibraryIdServiceRoute
   _authenticatedLibrariesLibraryIdSettingsRoute: typeof _authenticatedLibrariesLibraryIdSettingsRoute
+  _authenticatedLibrariesNewStepRoute: typeof _authenticatedLibrariesNewStepRoute
   _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute: typeof _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute
   _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute: typeof _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute
   _authenticatedServiceInfoRequestErrorsRequestsRoute: typeof _authenticatedServiceInfoRequestErrorsRequestsRoute
   _authenticatedGroupsGroupIdIndexRoute: typeof _authenticatedGroupsGroupIdIndexRoute
   _authenticatedLibrariesLibraryIdIndexRoute: typeof _authenticatedLibrariesLibraryIdIndexRoute
+  _authenticatedLibrariesNewIndexRoute: typeof _authenticatedLibrariesNewIndexRoute
   _authenticatedMappingsAllNumericRangeIndexRoute: typeof _authenticatedMappingsAllNumericRangeIndexRoute
   _authenticatedMappingsAllReferenceValueIndexRoute: typeof _authenticatedMappingsAllReferenceValueIndexRoute
   _authenticatedPatronRequestsIdIndexRoute: typeof _authenticatedPatronRequestsIdIndexRoute
@@ -1957,11 +2059,14 @@ interface _authenticatedRouteChildren {
   _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsItemTypeRoute
   _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRoute
   _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute: typeof _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute
+  _authenticatedLibrariesLibraryIdSetupStepRoute: typeof _authenticatedLibrariesLibraryIdSetupStepRoute
+  _authenticatedLibrariesLibraryIdSetupDoneRoute: typeof _authenticatedLibrariesLibraryIdSetupDoneRoute
   _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute: typeof _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute
   _authenticatedGroupsGroupIdPatronRequestsIndexRoute: typeof _authenticatedGroupsGroupIdPatronRequestsIndexRoute
   _authenticatedGroupsGroupIdSupplierRequestsIndexRoute: typeof _authenticatedGroupsGroupIdSupplierRequestsIndexRoute
   _authenticatedLibrariesLibraryIdBibsIndexRoute: typeof _authenticatedLibrariesLibraryIdBibsIndexRoute
   _authenticatedLibrariesLibraryIdLocationsIndexRoute: typeof _authenticatedLibrariesLibraryIdLocationsIndexRoute
+  _authenticatedLibrariesLibraryIdSetupIndexRoute: typeof _authenticatedLibrariesLibraryIdSetupIndexRoute
   _authenticatedPatronRequestsAuditsAuditIdIndexRoute: typeof _authenticatedPatronRequestsAuditsAuditIdIndexRoute
 }
 
@@ -2031,6 +2136,7 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedLibrariesLibraryIdServiceRoute,
   _authenticatedLibrariesLibraryIdSettingsRoute:
     _authenticatedLibrariesLibraryIdSettingsRoute,
+  _authenticatedLibrariesNewStepRoute: _authenticatedLibrariesNewStepRoute,
   _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute:
     _authenticatedServiceInfoCatalogMetricsByHostLmsHostlmsIdRoute,
   _authenticatedServiceInfoDataChangeLogDataChangeLogIdRoute:
@@ -2040,6 +2146,7 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
   _authenticatedGroupsGroupIdIndexRoute: _authenticatedGroupsGroupIdIndexRoute,
   _authenticatedLibrariesLibraryIdIndexRoute:
     _authenticatedLibrariesLibraryIdIndexRoute,
+  _authenticatedLibrariesNewIndexRoute: _authenticatedLibrariesNewIndexRoute,
   _authenticatedMappingsAllNumericRangeIndexRoute:
     _authenticatedMappingsAllNumericRangeIndexRoute,
   _authenticatedMappingsAllReferenceValueIndexRoute:
@@ -2084,6 +2191,10 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedLibrariesLibraryIdReferenceValueMappingsLocationRoute,
   _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute:
     _authenticatedLibrariesLibraryIdReferenceValueMappingsPatronTypeRoute,
+  _authenticatedLibrariesLibraryIdSetupStepRoute:
+    _authenticatedLibrariesLibraryIdSetupStepRoute,
+  _authenticatedLibrariesLibraryIdSetupDoneRoute:
+    _authenticatedLibrariesLibraryIdSetupDoneRoute,
   _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute:
     _authenticatedLibrariesLibraryIdSupplierRequestsAllRoute,
   _authenticatedGroupsGroupIdPatronRequestsIndexRoute:
@@ -2094,6 +2205,8 @@ const _authenticatedRouteChildren: _authenticatedRouteChildren = {
     _authenticatedLibrariesLibraryIdBibsIndexRoute,
   _authenticatedLibrariesLibraryIdLocationsIndexRoute:
     _authenticatedLibrariesLibraryIdLocationsIndexRoute,
+  _authenticatedLibrariesLibraryIdSetupIndexRoute:
+    _authenticatedLibrariesLibraryIdSetupIndexRoute,
   _authenticatedPatronRequestsAuditsAuditIdIndexRoute:
     _authenticatedPatronRequestsAuditsAuditIdIndexRoute,
 }

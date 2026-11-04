@@ -319,9 +319,6 @@ export const buildHostLmsSettings = (formData: NewLibraryFormValues) =>
 		itemSuppressionRulesetName: formData.itemSuppressionRulesetName,
 	}) satisfies Omit<UpdateHostLmsInput, "id">;
 
-export const shouldCreateLibrary = (libraryId: string | undefined): boolean =>
-	!libraryId;
-
 /**
  * The agency code the Host LMS step already answered, offered on the Profile step instead of
  * asked a second time. Never overwrites a code the user has entered.
@@ -338,11 +335,6 @@ export const agencyCodeFromHostLms = (
 		? defaultAgencyCode.trim()
 		: undefined;
 };
-
-export const shouldJoinGroup = (
-	groupId: string | undefined,
-	joinedGroupIds: string[],
-): boolean => !!groupId && !joinedGroupIds.includes(groupId);
 
 /**
  * The groups a library already belongs to, from its own record.

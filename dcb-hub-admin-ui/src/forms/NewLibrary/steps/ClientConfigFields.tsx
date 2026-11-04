@@ -18,6 +18,8 @@ import {
 	InputAdornment,
 	Link,
 	MenuItem,
+	Radio,
+	RadioGroup,
 	Stack,
 	TextField,
 	Typography,
@@ -58,8 +60,8 @@ const errorAt = (errors: any, path: string[]): string | undefined => {
 	return typeof node?.message === "string" ? node.message : undefined;
 };
 
-/** An unset box shows what the adapter does without the key. */
-const isChecked = (value: unknown, defaultValue?: string): boolean => {
+/** An unanswered question shows what the adapter does without the key. */
+const answersYes = (value: unknown, defaultValue?: string): boolean => {
 	const effective =
 		value === undefined || value === null || value === ""
 			? defaultValue
@@ -188,28 +190,36 @@ const ConfigFieldControl = ({
 				name={`clientConfigFields.${name}`}
 				control={control}
 				render={({ field }) => (
-					<Stack>
-						<FormControlLabel
-							control={
-								<Checkbox
-									{...field}
-									id={inputId}
-									checked={isChecked(field.value, configField.defaultValue)}
-									onChange={(event) => field.onChange(event.target.checked)}
-									disabled={disabled}
-									slotProps={{
-										input: {
-											"aria-describedby": `${inputId}-helper-text`,
-										},
-									}}
-								/>
+					<FormControl component="fieldset" disabled={disabled}>
+						<FormLabel component="legend" id={`${inputId}-label`}>
+							{label}
+						</FormLabel>
+						<RadioGroup
+							row
+							name={inputId}
+							aria-labelledby={`${inputId}-label`}
+							aria-describedby={`${inputId}-helper-text`}
+							value={String(answersYes(field.value, configField.defaultValue))}
+							onChange={(event) =>
+								field.onChange(event.target.value === "true")
 							}
-							label={label}
-						/>
+							onBlur={field.onBlur}
+						>
+							<FormControlLabel
+								value="true"
+								control={<Radio />}
+								label={t("ui.actions.yes")}
+							/>
+							<FormControlLabel
+								value="false"
+								control={<Radio />}
+								label={t("ui.actions.no")}
+							/>
+						</RadioGroup>
 						<FormHelperText id={`${inputId}-helper-text`}>
 							{helperText}
 						</FormHelperText>
-					</Stack>
+					</FormControl>
 				)}
 			/>
 		);

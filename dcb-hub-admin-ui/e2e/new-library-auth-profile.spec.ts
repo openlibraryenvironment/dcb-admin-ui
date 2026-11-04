@@ -2,7 +2,7 @@ import { Page } from "@playwright/test";
 import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
-import { scanForViolations, waitForDialogToSettle } from "./fixtures/axe";
+import { scanForViolations } from "./fixtures/axe";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
 
@@ -34,30 +34,17 @@ const hostLmsSelection = {
 	},
 };
 
-const wizard = (page: Page) =>
-	page
-		.getByRole("dialog")
-		.filter({ hasNot: page.getByText(/unsaved changes/i) });
-
-const openProfileStepFor = async (page: Page, hostLmsName: RegExp) => {
-	await page.getByRole("button", { name: /actions/i }).click();
-	await page.getByRole("menuitem", { name: /create a new library/i }).click();
-	await page.getByRole("radio", { name: /use existing system/i }).check();
-	await page.getByRole("button", { name: /continue/i }).click();
-
-	const dialog = wizard(page);
-	await dialog.getByRole("combobox", { name: /host lms/i }).click();
-	await page.getByRole("option", { name: hostLmsName }).click();
-	await dialog.getByRole("button", { name: /next/i }).click();
-
-	await expect(dialog.locator(".MuiStepLabel-label.Mui-active")).toHaveText(
-		/profile/i,
-	);
-
-	return dialog;
+// The profile question for a library on an existing system, opened by its link
+const openProfileStepFor = async (page: Page, ils: string, code: string) => {
+	await page.goto(`/libraries/new/profile?ils=${ils}&hostLms=${code}`);
+	const main = page.getByRole("main");
+	await expect(
+		main.getByRole("heading", { level: 1, name: /tell us about the library/i }),
+	).toBeVisible();
+	return main;
 };
 
-test.describe("New Library wizard: authentication profile", () => {
+test.describe("New library: authentication profile", () => {
 	test.beforeEach(async ({ page }) => {
 		await seedAuth(page);
 		await mockGraphQL(page, {
@@ -65,14 +52,12 @@ test.describe("New Library wizard: authentication profile", () => {
 			LoadLibraries: libraries,
 			LoadHostLmsSelection: hostLmsSelection,
 		});
-		await page.goto("/libraries");
-		await expect(page.getByText("Alpha Test Library")).toBeVisible();
 	});
 
 	test("offers the profiles Sierra accepts, barcode and PIN first", async ({
 		page,
 	}) => {
-		const dialog = await openProfileStepFor(page, /SIERRA1/);
+		const dialog = await openProfileStepFor(page, "sierra", "SIERRA1");
 
 		const profile = dialog.getByRole("combobox", {
 			name: /authentication profile/i,
@@ -90,7 +75,7 @@ test.describe("New Library wizard: authentication profile", () => {
 	});
 
 	test("offers only the profiles Polaris accepts", async ({ page }) => {
-		const dialog = await openProfileStepFor(page, /POL1/);
+		const dialog = await openProfileStepFor(page, "polaris", "POL1");
 
 		await dialog
 			.getByRole("combobox", { name: /authentication profile/i })
@@ -103,7 +88,7 @@ test.describe("New Library wizard: authentication profile", () => {
 	});
 
 	test("asks nothing for Koha, which ignores the profile", async ({ page }) => {
-		const dialog = await openProfileStepFor(page, /KOHA1/);
+		const dialog = await openProfileStepFor(page, "koha", "KOHA1");
 		await expect(dialog.getByLabel(/full name/i)).toBeVisible();
 
 		// Counted once, not retried: toHaveCount(0) passes as soon as any render lacks it
@@ -111,9 +96,8 @@ test.describe("New Library wizard: authentication profile", () => {
 	});
 
 	test("the profile select passes axe", async ({ page }) => {
-		await openProfileStepFor(page, /SIERRA1/);
+		await openProfileStepFor(page, "sierra", "SIERRA1");
 
-		await waitForDialogToSettle(page);
 		await scanForViolations(page);
 	});
 });

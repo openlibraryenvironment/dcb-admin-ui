@@ -114,6 +114,9 @@ export const MOCKS = {
 	},
 	LoadGroups: groups,
 	LoadAgencies: agencies,
+	// Library setup's connection question and group question
+	LoadHostLmsSelection: { hostLms: { totalSize: 0, content: [] } },
+	LoadGroupsSelection: groups,
 	LoadDataChangeLog: dataChangeLog,
 	// The detail route's own operation, over the same shape as the list's. Absent from
 	// here rather than unfixturable, which is why that route was unscanned.
@@ -286,6 +289,41 @@ export const ROUTES: ScannedRoute[] = [
 		// scan of the same path is below, in its own block: pressing Edit replaces
 		// the page with a form, and neither covers the other.
 		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22",
+		ready: async (page) => {
+			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/new/system",
+		ready: async (page) => {
+			await expect(page.getByRole("radio", { name: "Sierra" })).toBeVisible();
+		},
+	},
+	{
+		// The new Host LMS form: the largest form in the application
+		path: "/libraries/new/connection?ils=sierra",
+		ready: async (page) => {
+			await expect(page.getByLabel(/host lms code/i)).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/setup/contacts",
+		ready: async (page) => {
+			await expect(
+				page.getByRole("heading", { level: 1, name: /who should we contact/i }),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/setup/group",
+		ready: async (page) => {
+			await expect(
+				page.getByRole("heading", { level: 1, name: /which groups/i }),
+			).toBeVisible();
+		},
+	},
+	{
+		path: "/libraries/c23df3ab-77c0-5689-b56d-fc8a2d6a5f22/setup/done",
 		ready: async (page) => {
 			await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 		},

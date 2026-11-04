@@ -4,12 +4,14 @@ import { GraphQLClient } from "graphql-request";
 import { getMappings } from "@queries/getMappings";
 import { getLocations } from "@queries/getLocations";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
+import { getBibs } from "@queries/getBibs";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import {
 	requiresNumericRangeMappings,
 	type LibrarySetupCounts,
 } from "@helpers/librarySetup";
 import type {
+	LoadBibsQueryVariables,
 	LoadLocationsQueryVariables,
 	LoadMappingsQueryVariables,
 	LoadNumericRangeMappingsQueryVariables,
@@ -118,4 +120,28 @@ export const librarySetupCountsQuery = (
 		queryFn: () => fetchLibrarySetupCounts(gqlClient, library),
 		enabled: !!library?.id,
 		staleTime: 1000 * 30,
+	});
+
+/** One row is enough: the total says whether this system has been harvested at all. */
+export const libraryHarvestQuery = (
+	gqlClient: GraphQLClient,
+	hostLmsId: string | undefined,
+) =>
+	queryOptions({
+		...nonCriticalQuery,
+		queryKey: ["library", "harvestedBibs", hostLmsId],
+		queryFn: async () => {
+			const result = await gqlClient.request<any, LoadBibsQueryVariables>(
+				getBibs,
+				{
+					query: `sourceSystemId: ${hostLmsId}`,
+					order: "dateCreated",
+					pageno: 0,
+					pagesize: 1,
+				},
+			);
+			return { bibCount: result?.sourceBibs?.totalSize ?? 0 };
+		},
+		enabled: !!hostLmsId,
+		staleTime: 1000 * 60,
 	});

@@ -1,6 +1,10 @@
 import { formatBreadcrumbTitles } from "@helpers/formatBreadcrumbTitles";
 import type { ConsortiumSetupStepId } from "@helpers/consortiumSetup";
 import { SETUP_CHAPTERS } from "@components/Setup/setupChapters";
+import {
+	isLibrarySetupStepId,
+	isNewLibraryStepId,
+} from "@helpers/librarySetupFlow";
 
 // Pages with no `nav.` key, labelled with their own title. A page that hides its crumbs
 // still needs these: the location moves before the page being left unmounts.
@@ -59,6 +63,12 @@ export function getBreadcrumbKey(
 		}
 	}
 
+	if (pathArray[0] === "libraries" && pathArray[1] === "new") {
+		return pathArray[2] && isNewLibraryStepId(pathArray[2])
+			? `libraries.setup.chapters.${pathArray[2]}.label`
+			: "libraries.new.title";
+	}
+
 	if (pathArray[0] === "libraries" && pathArray.length > 2) {
 		// First, check for library ID (UUID)
 		if (pathArray[1].length === 36) {
@@ -91,6 +101,12 @@ export function getBreadcrumbKey(
 						return "nav.libraries.supplierRequests.all";
 					}
 					return "nav.libraries.supplierRequests.name";
+				case "setup":
+					if (pathArray[3] === "done") return "libraries.setup.done.page_title";
+					if (pathArray[3] && isLibrarySetupStepId(pathArray[3])) {
+						return `libraries.setup.chapters.${pathArray[3]}.label`;
+					}
+					return "libraries.setup.page_title";
 			}
 		}
 	}

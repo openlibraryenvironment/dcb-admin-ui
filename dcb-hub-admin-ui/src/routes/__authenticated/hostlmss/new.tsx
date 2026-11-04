@@ -26,6 +26,7 @@ import ClientConfigFields, {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useIsConsortiumAdmin } from "@hooks/useIsConsortiumAdmin";
 import { createHostLmsRecord } from "@helpers/hostLmsCreation";
+import { describeGraphQLError } from "@helpers/graphQLErrors";
 import {
 	buildClientConfig,
 	creatableHostLmsProfiles,
@@ -195,14 +196,10 @@ function NewHostLms() {
 				verification: verificationFrom(payload),
 				ingestSourceMissing: result.ingestSourceMissing,
 			});
-		} catch (error: any) {
+		} catch (error) {
 			// Named, not swallowed: the validator returns a 400 listing exactly which
 			// keys it refused, and that message is the only thing that says which.
-			setSubmitError(
-				error?.response?.errors?.[0]?.message ??
-					error?.message ??
-					t("hostlms.error.no_data_returned"),
-			);
+			setSubmitError(describeGraphQLError(error, t("ui.error.general")));
 		}
 	};
 

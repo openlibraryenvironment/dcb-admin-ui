@@ -864,14 +864,14 @@
 			"context_hierarchy_omits_code": "The context hierarchy does not include {{code}}, so DCB will not use mappings imported for {{code}}. Add it first, unless every mapping for this system is kept under a shared context.",
 			"missing_required": "The client configuration is missing: {{fields}}",
 			"not_whole_number": "These settings must be whole numbers of 0 or more: {{fields}}",
-			"ingest": "Enable ingest",
-			"ingest_description": "Whether DCB harvests bibliographic records from this system.",
+			"ingest": "Should DCB harvest records from this system?",
+			"ingest_description": "DCB harvests bibliographic records from a system unless told not to.",
 			"base_url": "Base URL",
 			"default_agency_code": "Default agency code",
 			"default_agency_code_description": "The agency to attribute a patron to when their home location has no mapping. Leave blank on a shared system: with several libraries here, no single agency can stand in.",
 			"ors_default_agency_code_description": "The agency DCB names for this appliance in NCIP messages. Required whether or not the appliance serves several libraries.",
-			"shared_system": "Shared system",
-			"shared_system_description": "Set this when more than one participating library is hosted on this system. DCB then requires every branch to be mapped to an agency explicitly, instead of falling back to a default agency or a wildcard, either of which would silently attribute one library's patrons or holdings to another.",
+			"shared_system": "Does more than one participating library use this system?",
+			"shared_system_description": "Answer yes when this system hosts more than one participating library. DCB then requires every branch to be mapped to an agency explicitly, instead of falling back to a default agency or a wildcard, either of which would silently attribute one library's patrons or holdings to another.",
 			"shared_system_conflict": "A shared system cannot have a default agency code. With several libraries on one system, no single agency can stand in for an unmapped location - map each library's locations to its agency instead.",
 			"page_size": "Page size",
 			"page_size_description": "How many bib records DCB requests per harvest page. Polaris serves at most 90, which is also what DCB uses when this is left blank.",
@@ -1845,8 +1845,87 @@
 			}
 		},
 		"setup": {
+			"page_title": "Library setup",
+			"error_title": "This library could not be loaded",
+			"error_body": "Its setup cannot be shown until the library has loaded. Try again in a moment.",
+			"chapters": {
+				"system": {
+					"label": "System",
+					"title": "Which system does this library use?",
+					"subtitle": "DCB talks to each library through its library management system, so this decides what we ask next."
+				},
+				"connection": {
+					"label": "Connection",
+					"title": "How does DCB reach it?",
+					"subtitle": "Use a system DCB is already connected to, or give the details for a new one. A new one is tested as soon as it is saved."
+				},
+				"profile": {
+					"label": "Library",
+					"title": "Tell us about the library",
+					"subtitle": "Its names, its agency code and where it is. Continuing adds the library to DCB, so the rest can be done by anyone you send the link to."
+				},
+				"contacts": {
+					"label": "Contacts",
+					"title": "Who should we contact about it?",
+					"subtitle": "The people DCB staff and other libraries reach when something about this library needs a person."
+				},
+				"group": {
+					"label": "Groups",
+					"title": "Which groups is it part of?",
+					"subtitle": "Every library is in the consortium's own group. Add it to any others it lends and borrows within."
+				},
+				"refMappings": {
+					"label": "Mappings",
+					"title": "What do its patron types, item types and locations mean?",
+					"subtitle": "DCB translates this library's own codes into the ones every library shares. Without them a request cannot be routed."
+				},
+				"numMappings": {
+					"label": "Numeric ranges",
+					"title": "Which numeric ranges does it use?",
+					"subtitle": "Sierra and Polaris identify patron and item types by number, so DCB maps ranges of them."
+				},
+				"locations": {
+					"label": "Pickup locations",
+					"title": "Where can patrons collect items?",
+					"subtitle": "A library with no pickup location cannot receive a request."
+				}
+			},
+			"system": {
+				"question": "Library management system",
+				"required": "Choose the system this library uses."
+			},
+			"connection": {
+				"no_system": "Choose the library's system first.",
+				"system": "System: {{ils}}",
+				"connected": "This library will use {{name}} ({{code}}).",
+				"not_found": "No Host LMS with the code {{code}} was found. Choose the connection again.",
+				"choose_again": "Use a different connection",
+				"invitation_title": "Appliances connect themselves",
+				"invitation_body": "An OpenRS appliance registers with DCB when it redeems an invitation, and DCB creates its Host LMS, agency, library and locations from what it sends. Issue the invitation rather than entering the details here.",
+				"invitation_action": "Issue an invitation",
+				"by_hand": "Enter the details by hand instead",
+				"existing_question": "Is it on a system DCB is already connected to?",
+				"existing_option": "Yes: {{name}} ({{code}})",
+				"new_option": "No, connect a new system",
+				"create": "Save and test the connection"
+			},
+			"profile": {
+				"create": "Add the library"
+			},
+			"done": {
+				"page_title": "Library setup",
+				"title": "{{library}} is set up",
+				"title_partial": "{{library}} still has setup to finish"
+			},
+			"harvest": {
+				"harvested_one": "DCB has harvested {{count}} record from this library's system.",
+				"harvested_other": "DCB has harvested {{count}} records from this library's system.",
+				"not_harvested": "DCB has not harvested any records from this library's system yet, so it cannot supply anything. A first harvest can take a while to start.",
+				"not_supplying": "No records have been harvested, which is expected: this library does not supply."
+			},
 			"complete_title": "Setup is complete",
 			"complete_body": "Every setup step is done: {{steps}}.",
+			"complete_unharvested_title": "Setup is complete, but nothing has been harvested yet",
 			"incomplete_title": "Setup is not finished",
 			"incomplete_body_other": "This library is missing configuration it needs before it can borrow or supply. {{count}} steps still to complete.",
 			"finish": "Finish setup",

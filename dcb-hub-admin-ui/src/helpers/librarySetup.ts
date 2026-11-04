@@ -1,4 +1,5 @@
 import { getILS } from "@helpers/getILS";
+import { withProgress, type LibraryFlowState } from "@helpers/librarySetupFlow";
 
 /**
  * Which parts of a library's setup are done, and which are not.
@@ -159,6 +160,14 @@ export const evaluateLibraryIngest = (
 		isIngestOutstanding: !hasBibs && !isSupplyingDisabled(library),
 	};
 };
+
+/** The one sentence about the harvest, so the library page and setup's end agree. */
+export const ingestMessageKey = (ingest: LibraryIngestState) =>
+	ingest.hasBibs
+		? "libraries.setup.harvest.harvested"
+		: ingest.isIngestOutstanding
+			? "libraries.setup.harvest.not_harvested"
+			: "libraries.setup.harvest.not_supplying";
 
 export interface LibrarySetupStep {
 	id: LibrarySetupStepId;
@@ -352,4 +361,25 @@ export const evaluateLibrarySetup = (
 		missingProfileFields: missing,
 		mappings,
 	};
+};
+
+/** Once it exists: its Host LMS answers the first two; evaluateLibrarySetup the rest. */
+export const libraryFlowState = (
+	library: any,
+	counts: LibrarySetupCounts,
+): LibraryFlowState => {
+	const setup = evaluateLibrarySetup(library, counts);
+	const hasHostLms = !!library?.agency?.hostLms?.id;
+
+	return withProgress([
+		{ id: "system", complete: hasHostLms, available: hasHostLms },
+		{ id: "connection", complete: hasHostLms, available: hasHostLms },
+		...setup.steps
+			.filter((step) => step.applicable)
+			.map((step) => ({
+				id: step.id,
+				complete: step.complete,
+				available: true,
+			})),
+	]);
 };
