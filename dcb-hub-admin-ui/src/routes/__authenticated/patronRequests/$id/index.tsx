@@ -1137,6 +1137,26 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
+									{t("patron_request.automatic_polls_in_status")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.autoPollCountForCurrentStatus?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.manual_polls_in_status")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.manualPollCountForCurrentStatus?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
 									{t("patron_request.patron_hostlms")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.patronHostlmsCode} />
@@ -1664,6 +1684,36 @@ function RouteComponent() {
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
 								<Typography variant="attributeTitle">
+									{t("patron_request.supplier_hold_count")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers?.[0]?.localHoldCount?.toString()}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.supplier_renewable")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers?.[0]?.localRenewable}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.supplier_holding_id")}
+								</Typography>
+								<RenderAttribute
+									attribute={patronRequest?.suppliers?.[0]?.localHoldingId}
+								/>
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
 									{t("patron_request.local_item_type")}
 								</Typography>
 								<RenderAttribute
@@ -1987,6 +2037,14 @@ function RouteComponent() {
 								/>
 							</Stack>
 						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.borrower_holding_id")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.localHoldingId} />
+							</Stack>
+						</Grid>
 					</Grid>
 				</TabPanel>
 				<TabPanel value={4}>
@@ -2176,6 +2234,22 @@ function RouteComponent() {
 									{t("patron_request.pickup_item_id")}
 								</Typography>
 								<RenderAttribute attribute={patronRequest?.pickupItemId} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.pickup_item_barcode")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.pickupItemBarcode} />
+							</Stack>
+						</Grid>
+						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+							<Stack direction={"column"}>
+								<Typography variant="attributeTitle">
+									{t("patron_request.pickup_holding_id")}
+								</Typography>
+								<RenderAttribute attribute={patronRequest?.pickupHoldingId} />
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>

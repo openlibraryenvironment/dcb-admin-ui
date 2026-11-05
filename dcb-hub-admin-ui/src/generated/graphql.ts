@@ -2173,12 +2173,17 @@ export type LoadPatronRequestQuery = {
 			previousStatus: string | null;
 			isTooLong: boolean | null;
 			pollCountForCurrentStatus: number | null;
+			autoPollCountForCurrentStatus: number | null;
+			manualPollCountForCurrentStatus: number | null;
 			currentStatusTimestamp: string | null;
 			nextExpectedStatus: string | null;
 			outOfSequenceFlag: boolean | null;
 			elapsedTimeInCurrentStatus: number | null;
 			localItemHostlmsCode: string | null;
 			localItemAgencyCode: string | null;
+			localHoldingId: string | null;
+			pickupItemBarcode: string | null;
+			pickupHoldingId: string | null;
 			isManuallySelectedItem: boolean | null;
 			resolutionCount: number | null;
 			renewalCount: number | null;
@@ -2259,6 +2264,9 @@ export type LoadPatronRequestQuery = {
 				localItemType: string | null;
 				localId: string | null;
 				localRenewalCount: number | null;
+				localRenewable: boolean | null;
+				localHoldCount: number | null;
+				localHoldingId: string | null;
 				localStatus: string | null;
 				localAgency: string | null;
 				rawLocalItemStatus: string | null;
