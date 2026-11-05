@@ -454,6 +454,15 @@
 		"reason_completing_setup": "Completing library setup"
 	},
 	"environment": {
+		"tracking_backlog": {
+			"title": "Tracking backlog",
+			"description": "Requests with a tracking check scheduled, by status, and how many of those checks are already due. Requests DCB has stopped tracking because they ran too long are counted too, so a status that stays overdue may be one of those.",
+			"status": "Status",
+			"scheduled": "Scheduled",
+			"overdue": "Due now",
+			"total": "Total",
+			"error": "The tracking backlog could not be loaded."
+		},
 		"your": "Your $t(app.dcb) environment",
 		"cannot_check": "Cannot check",
 		"changelog": "Changelog",
