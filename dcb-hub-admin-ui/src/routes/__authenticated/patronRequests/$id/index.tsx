@@ -735,7 +735,12 @@ function RouteComponent() {
 						) : patronLibraryLoading ||
 						  patronAgencyCodeLoading ||
 						  patronAgencyCodeLoading ? (
-							<CircularProgress size="1rem" aria-label={t("common.loading")} />
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<CircularProgress
+									size="1rem"
+									aria-label={t("common.loading")}
+								/>
+							</Grid>
 						) : null}
 						{supplierLibrary?.fullName ? (
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -764,7 +769,12 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : supplierLibraryLoading ? (
-							<CircularProgress size="1rem" aria-label={t("common.loading")} />
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<CircularProgress
+									size="1rem"
+									aria-label={t("common.loading")}
+								/>
+							</Grid>
 						) : null}
 						{pickupLibrary?.fullName ? (
 							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -791,7 +801,12 @@ function RouteComponent() {
 								</Stack>
 							</Grid>
 						) : pickupLibraryLoading ? (
-							<CircularProgress size="1rem" aria-label={t("common.loading")} />
+							<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+								<CircularProgress
+									size="1rem"
+									aria-label={t("common.loading")}
+								/>
+							</Grid>
 						) : null}
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 							<Stack direction={"column"}>
