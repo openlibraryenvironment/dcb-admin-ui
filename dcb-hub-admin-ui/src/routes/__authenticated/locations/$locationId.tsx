@@ -45,6 +45,31 @@ interface LocationFormFields {
 	localId?: string | null;
 }
 
+// Whole keys in …Key properties so translationKeys.test.ts checks them: built from parts,
+// all eight were missing and the alerts showed raw keys
+const TOGGLE_TEXT = {
+	isPickup: {
+		enable: {
+			successKey: "locations.pickup_enable_success",
+			errorKey: "locations.location_pickup_error_enable",
+		},
+		disable: {
+			successKey: "locations.pickup_disable_success",
+			errorKey: "locations.location_pickup_error_disable",
+		},
+	},
+	isEnabledForPickupAnywhere: {
+		enable: {
+			successKey: "locations.pickup_anywhere_enable_success",
+			errorKey: "locations.location_pickup_anywhere_error_enable",
+		},
+		disable: {
+			successKey: "locations.pickup_anywhere_disable_success",
+			errorKey: "locations.location_pickup_anywhere_error_disable",
+		},
+	},
+} as const;
+
 export const Route = createFileRoute("/__authenticated/locations/$locationId")({
 	component: LocationDetails,
 });
@@ -236,18 +261,15 @@ function LocationDetails() {
 		field: "isPickup" | "isEnabledForPickupAnywhere",
 	) => {
 		const isEnabled = !location[field];
-		const scope = field === "isPickup" ? "pickup" : "pickup_anywhere";
-		const verb = isEnabled ? "enable" : "disable";
+		const text = TOGGLE_TEXT[field][isEnabled ? "enable" : "disable"];
+		const changedFields: Partial<Location> = { [field]: isEnabled };
 		locationMutation.requestFormEdit({
 			id: location.id,
 			name: location.name,
-			changedFields: { [field]: isEnabled },
-			successText: t(`locations.${scope}_${verb}_success`, {
-				location: location.name,
-			}),
-			errorText: t(`locations.location_${scope}_error_${verb}`, {
-				location: location.name,
-			}),
+			changedFields,
+			changeSummary: formatChangedFields(changedFields, location),
+			successText: t(text.successKey, { location: location.name }),
+			errorText: t(text.errorKey, { location: location.name }),
 		});
 	};
 

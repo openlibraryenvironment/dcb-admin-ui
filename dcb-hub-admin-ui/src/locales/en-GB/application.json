@@ -437,6 +437,7 @@
 		}
 	},
 	"data_change_log": {
+		"not_set": "Not set",
 		"action": "Action",
 		"category": "Change category",
 		"category_required": "Please select a category before proceeding.",
@@ -2129,6 +2130,14 @@
 		"type": "Location type",
 		"uuid": "Location UUID",
 		"view_location": "View pickup location",
+		"pickup_enable_success": "Pickup is now enabled at {{location}}.",
+		"pickup_disable_success": "Pickup is now disabled at {{location}}.",
+		"pickup_anywhere_enable_success": "Pickup anywhere is now enabled at {{location}}.",
+		"pickup_anywhere_disable_success": "Pickup anywhere is now disabled at {{location}}.",
+		"location_pickup_error_enable": "Pickup could not be enabled at {{location}}.",
+		"location_pickup_error_disable": "Pickup could not be disabled at {{location}}.",
+		"location_pickup_anywhere_error_enable": "Pickup anywhere could not be enabled at {{location}}.",
+		"location_pickup_anywhere_error_disable": "Pickup anywhere could not be disabled at {{location}}.",
 		"pickup_count": "Pickup locations: {{count}}",
 		"pickup_locations": "Pickup locations"
 	},
