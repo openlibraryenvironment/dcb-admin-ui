@@ -5,7 +5,10 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 
+import { useAuth } from "react-oidc-context";
+
 import PageContainer from "@layout/PageContainer/PageContainer";
+import BibAuditLog from "@components/BibAuditLog/BibAuditLog";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
@@ -47,6 +50,8 @@ function SourceBibDetails() {
 
 	const [isCanonicalExpanded, setIsCanonicalExpanded] = useState(true);
 	const [isSourceRecordExpanded, setIsSourceRecordExpanded] = useState(false);
+	// dcb-service serves the audit log to ADMIN alone
+	const isAdmin = useAuth()?.user?.profile?.roles?.includes("ADMIN") ?? false;
 
 	const {
 		data: bibData,
@@ -394,6 +399,7 @@ function SourceBibDetails() {
 					)}
 				</StyledAccordionDetails>
 			</StyledAccordion>
+			{isAdmin && <BibAuditLog bibId={bibId} />}
 		</PageContainer>
 	);
 }

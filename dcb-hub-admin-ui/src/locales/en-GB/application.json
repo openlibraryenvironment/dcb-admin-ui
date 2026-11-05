@@ -104,6 +104,14 @@
 		"audit_to_status": "toStatus"
 	},
 	"bibRecords": {
+		"audit_log": {
+			"title": "Ingest audit log",
+			"time": "Time",
+			"process": "Process",
+			"message": "Message",
+			"none": "Nothing was recorded the last time this record was ingested.",
+			"error": "The ingest audit log could not be loaded."
+		},
 		"bibs_one": "bib record",
 		"contributor_uuid": "Contributor UUID",
 		"edition": "Edition",
