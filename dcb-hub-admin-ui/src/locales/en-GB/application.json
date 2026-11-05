@@ -2991,6 +2991,13 @@
 		"cluster_audit_message": "Cluster audit message",
 		"cluster_bib_multiple_records": "One of the bib records in this cluster has multiple source records associated with it. Please review.",
 		"cluster_explainer_title": "Clustering explanation for {{record}}",
+		"export_members": {
+			"action": "Export member records",
+			"in_progress": "Exporting member records…",
+			"empty": "This cluster has no member records to export.",
+			"forbidden": "Only administrators can export a cluster's member records.",
+			"failed": "The member records could not be exported."
+		},
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",

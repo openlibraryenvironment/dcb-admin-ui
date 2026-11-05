@@ -6,6 +6,8 @@
  * deliberately not built: INSIGHTS_IA_AND_UX_PLAN.md section 9.
  */
 
+import { downloadBlob } from "@helpers/downloadBlob";
+
 export interface CsvColumn<T> {
 	/** Already translated: the file is read by a person, not by this application. */
 	header: string;
@@ -66,12 +68,6 @@ export function panelCsv<T>(
 	].join("\r\n");
 }
 
-/**
- * Hand the file to the reader.
- *
- * An object URL rather than a data URI: a data URI large enough to matter is refused by
- * some browsers, and this one is revoked as soon as the click is dispatched.
- */
 export function downloadCsv(name: string, content: string): void {
 	// The BOM is what makes Excel read the file as UTF-8 rather than as the machine's
 	// codepage, which is where an accented author's name turns into mojibake. As an escape
@@ -79,14 +75,7 @@ export function downloadCsv(name: string, content: string): void {
 	const blob = new Blob(["﻿" + content], {
 		type: "text/csv;charset=utf-8",
 	});
-	const url = URL.createObjectURL(blob);
-
-	const anchor = document.createElement("a");
-	anchor.href = url;
-	anchor.download = name;
-	anchor.click();
-
-	URL.revokeObjectURL(url);
+	downloadBlob(name, blob);
 }
 
 /** A filename a reader can tell apart from the last one they downloaded. */
