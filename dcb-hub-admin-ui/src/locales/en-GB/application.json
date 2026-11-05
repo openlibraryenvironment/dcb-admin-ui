@@ -799,7 +799,11 @@
 			"request_cancellation_reason": "Request cancellation reason",
 			"user_identifier": "User identifier",
 			"virtual_library": "Virtual item library code",
-			"virtual_location": "Virtual item location code"
+			"virtual_location": "Virtual item location code",
+			"default_value": "{{value}} (default)",
+			"entry_count_one": "{{count}} entry",
+			"entry_count_other": "{{count}} entries",
+			"other_settings": "Other stored settings"
 		},
 		"error": {
 			"no_data_returned": "The Host LMS did not return any data."
@@ -979,7 +983,7 @@
 			"ill_location_id_description": "Location identifier used for interlibrary loan items.",
 			"fine_code_id_description": "Fine code applied to virtual items.",
 			"renewal_limit_description": "Renewal limit applied to virtual items.",
-			"renewal_limit_av_description": "Renewal limit applied to audiovisual virtual items, where it differs from the standard one.",
+			"renewal_limit_av_description": "Renewal limit applied to audiovisual virtual items, where it differs from the standard one. Leave blank to use the standard one.",
 			"item_agency_resolution_method": "Item agency resolution",
 			"item_agency_resolution_method_description": "How DCB decides which library owns an item. Blank uses shelf location.",
 			"item_agency_resolution_legacy": "Shelf location (Legacy)",
@@ -1063,7 +1067,16 @@
 			"av_loan_period_code_id": "AV loan period code ID",
 			"av_loan_period_code_id_description": "Loan period applied to audiovisual virtual items. Required: use the standard loan period code if the two do not differ.",
 			"policy_count_one": "{{count}} shelf location mapped",
-			"policy_count_other": "{{count}} shelf locations mapped"
+			"policy_count_other": "{{count}} shelf locations mapped",
+			"systems_librarian_contact_email": "Systems librarian contact email",
+			"systems_librarian_contact_email_description": "Who to contact about this system. DCB raises an alarm for any Host LMS without one.",
+			"hold_policy_description": "Whether DCB places item-level or title-level holds in Sierra.",
+			"hold_policy_item": "Item-level",
+			"hold_policy_title": "Title-level",
+			"folio_oai_set_description": "The OAI set to restrict harvesting to. Leave blank to harvest every record.",
+			"use_new_bib_chunk_ingest": "Use new bib chunk ingest",
+			"use_new_bib_chunk_ingest_description": "Fetches changed bibliographic records from Polaris in chunks by modification date. Off unless set.",
+			"foundation_overrides_description": "Per-operation overrides of the base protocol, as JSON: each key is an operation and each value the strategy to use for it."
 		},
 		"edit": {
 			"immutable_note": "The code and the client class cannot be changed. They identify this system to every mapping, location and record already pointing at it, so changing one is a new Host LMS rather than an edit.",
