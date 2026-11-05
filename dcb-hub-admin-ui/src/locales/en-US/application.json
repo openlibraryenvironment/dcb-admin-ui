@@ -173,6 +173,17 @@
 		}
 	},
 	"patron_request": {
+		"supplier_actions": {
+			"skip_warning_no_re_resolution": "Re-resolution is off for this consortium, so the whole request will be canceled.",
+			"skip_warning_manual": "This item was chosen by hand, so DCB will not look for another supplier: the whole request will be canceled.",
+			"skip_warning_unknown": "If re-resolution is off for this consortium, the whole request will be canceled instead of moving to another supplier.",
+			"outcome": {
+				"skipped": "DCB canceled the hold at {{agency}} and checked the request again. Its status on this page shows what happened.",
+				"cancelled": "The hold at {{agency}} is canceled and the supplier is paused.",
+				"cancel_not_confirmed": "{{agency}} did not report the hold canceled, so the supplier was not paused.",
+				"cancel_not_confirmed_status": "{{agency}} reports the hold as {{status}}, not canceled, so the supplier was not paused."
+			}
+		},
 		"cleanup_confirm_body": "Clean up finalizes a request and deletes the temporary records DCB made for it in each library's system. It cannot be undone.",
 		"cleanup_successful": "The cleanup operation has been successful, and the patron request has been finalized.",
 		"confirm_returned_body": "Do this once the item is back on the supplying library's shelf: the library has not reported it. The request is then released as if it had. A canceled request finishes as canceled, and a returned loan completes.",

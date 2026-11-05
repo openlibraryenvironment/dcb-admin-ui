@@ -1581,6 +1581,31 @@ export type LoadHostLmsSelectionQuery = {
 	};
 };
 
+export type LoadInactiveSupplierRequestsQueryVariables = Exact<{
+	query: string;
+	pagesize: number;
+	order: string;
+	orderBy: string;
+}>;
+
+export type LoadInactiveSupplierRequestsQuery = {
+	inactiveSupplierRequests: {
+		totalSize: number | null;
+		content: Array<{
+			id: string;
+			dateCreated: string | null;
+			localAgency: string | null;
+			hostLmsCode: string | null;
+			localItemId: string | null;
+			localItemBarcode: string | null;
+			localItemLocationCode: string | null;
+			localItemType: string | null;
+			canonicalItemType: string | null;
+			localBibId: string | null;
+		} | null> | null;
+	};
+};
+
 export type LoadLibrariesQueryVariables = Exact<{
 	pageno: number;
 	pagesize: number;

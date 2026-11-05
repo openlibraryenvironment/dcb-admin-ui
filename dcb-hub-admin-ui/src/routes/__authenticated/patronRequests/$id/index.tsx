@@ -107,6 +107,12 @@ import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
 import { errorForLog } from "@helpers/safeErrorLog";
 import { z } from "@schemas/zod";
+import PreviousSuppliers from "@components/PreviousSuppliers/PreviousSuppliers";
+import SupplierActionDialog from "@components/SupplierActionDialog/SupplierActionDialog";
+import {
+	type SupplierAction,
+	availableSupplierActions,
+} from "@helpers/supplierRequestActions";
 import { patronRequestNotesQuery } from "@/queryOptions/patronRequestNotesAndTags";
 
 // In the address, by name, so a link can open a request on its notes
@@ -118,6 +124,7 @@ const REQUEST_TABS = [
 	"pickup",
 	"audit",
 	"notes",
+	"previousSuppliers",
 ] as const;
 type RequestTab = (typeof REQUEST_TABS)[number];
 const requestTabSchema = z.object({
@@ -211,14 +218,19 @@ function RouteComponent() {
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
+	const [supplierAction, setSupplierAction] = useState<SupplierAction | null>(
+		null,
+	);
 	const navigate = useNavigate({ from: "/patronRequests/$id/" });
 	const requestedTab = useSearch({
 		from: "/__authenticated/patronRequests/$id/",
 		select: (search) => search.tab,
 	});
-	// A shared link to notes on a deployment without them opens on General
+	const isAdmin = auth?.user?.profile?.roles?.includes("ADMIN") ?? false;
+	// A shared link to a tab this user or deployment does not have opens on General
 	const tabName: RequestTab =
-		requestedTab === "notes" && !isRequestNotesEnabled()
+		(requestedTab === "notes" && !isRequestNotesEnabled()) ||
+		(requestedTab === "previousSuppliers" && !isAdmin)
 			? "general"
 			: (requestedTab ?? "general");
 	const activeTab = REQUEST_TABS.indexOf(tabName);
@@ -425,7 +437,6 @@ function RouteComponent() {
 	// Rollback restores the previous status of an errored request. Gated to ADMIN
 	// and ERROR-only, and always confirmed first because it is only safe after an
 	// outage - see the warning in the confirmation modal.
-	const isAdmin = auth?.user?.profile?.roles?.includes("ADMIN") ?? false;
 	const canRollback = rollbackStatuses.includes(patronRequest?.status);
 
 	const rollbackMutation = useMutation({
@@ -655,11 +666,31 @@ function RouteComponent() {
 		});
 	}
 
+	// ADMIN as asked, and CONSORTIUM_ADMIN because dcb-service refuses anyone without it
+	const supplier = patronRequest?.suppliers?.[0];
+	if (isAdmin && roles.includes("CONSORTIUM_ADMIN") && supplier?.id) {
+		for (const action of availableSupplierActions(supplier)) {
+			pageActions.push({
+				key: `supplier-${action}`,
+				label: t(`patron_request.supplier_actions.${action}`),
+				onClick: () => setSupplierAction(action),
+			});
+		}
+	}
+
 	return (
 		<PageContainer title={patronRequest?.clusterRecord?.title}>
 			<Stack direction="row" sx={{ justifyContent: "flex-end", mb: 2 }}>
 				<PageActionsMenu actions={pageActions} pending={actionProgress} />
 			</Stack>
+			{supplierAction && supplier?.id && (
+				<SupplierActionDialog
+					action={supplierAction}
+					supplier={{ id: supplier.id, localAgency: supplier.localAgency }}
+					isManuallySelectedItem={patronRequest?.isManuallySelectedItem}
+					onClose={() => setSupplierAction(null)}
+				/>
+			)}
 			<TabContext value={activeTab}>
 				<TabList
 					onChange={handleTabChange}
@@ -677,6 +708,12 @@ function RouteComponent() {
 					<Tab label={t("patron_request.general")} value={0} />
 					<Tab label={t("requesting.bib_record")} value={1} />
 					<Tab label={t("patron_request.supplying")} value={2} />
+					{isAdmin && (
+						<Tab
+							label={t("patron_request.previous_suppliers.title")}
+							value={7}
+						/>
+					)}
 					<Tab label={t("patron_request.borrowing")} value={3} />
 					<Tab label={t("patron_request.pickup")} value={4} />
 					<Tab label={t("audit_log.title")} value={5} />
@@ -2328,6 +2365,12 @@ function RouteComponent() {
 						onSortModelChange={audit.onSortModelChange}
 					/>
 				</TabPanel>
+
+				{isAdmin && (
+					<TabPanel value={7}>
+						<PreviousSuppliers patronRequestId={id} />
+					</TabPanel>
+				)}
 
 				{isRequestNotesEnabled() && (
 					<TabPanel value={6}>
