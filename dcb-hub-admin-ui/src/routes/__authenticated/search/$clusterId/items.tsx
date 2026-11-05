@@ -12,12 +12,15 @@ import {
 	Alert,
 	Tooltip,
 } from "@mui/material";
-import { Bolt, ExpandMore } from "@mui/icons-material";
+import { Bolt, ExpandMore, ManageSearch } from "@mui/icons-material";
+import { useAuth } from "react-oidc-context";
 
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
+import LiveItemDialog from "@components/LiveItemDialog/LiveItemDialog";
+import { canLookUpLive } from "@/queryOptions/liveItem";
 
 import { useGridView } from "@hooks/useGridView";
 import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
@@ -67,6 +70,12 @@ function ItemsPageComponent() {
 	const [showWalkUp, setShowWalkUp] = useState(false);
 	const [walkUpBarcode, setWalkUpBarcode] = useState("");
 
+	const isAdmin = useAuth()?.user?.profile?.roles?.includes("ADMIN") ?? false;
+	const [liveItem, setLiveItem] = useState<{
+		hostLmsCode: string;
+		barcode: string;
+	} | null>(null);
+
 	const [isItemsAccordionExpanded, setIsItemsAccordionExpanded] =
 		useState(false);
 
@@ -113,6 +122,52 @@ function ItemsPageComponent() {
 	// walk-up, but only for items that can actually be walked up (available,
 	// requestable, not suppressed).
 	const itemColumns = useMemo(() => getItemColumns(t), [t]);
+	// ADMIN only: one click is two to four calls into a member library's system
+	const lookUpAction = useMemo(
+		() => (item: Item) =>
+			isAdmin && canLookUpLive(item)
+				? [
+						<Fragment key="liveLookup">
+							<Tooltip
+								title={t("items.live_lookup.action", {
+									barcode: item.barcode,
+								})}
+							>
+								<GridActionsCellItem
+									icon={<ManageSearch />}
+									label={t("items.live_lookup.action", {
+										barcode: item.barcode,
+									})}
+									onClick={() =>
+										setLiveItem({
+											hostLmsCode: item.hostLmsCode,
+											barcode: item.barcode,
+										})
+									}
+								/>
+							</Tooltip>
+						</Fragment>,
+					]
+				: [],
+		[isAdmin, t],
+	);
+	const itemColumnsWithLookUp: GridColDef[] = useMemo(
+		() =>
+			isAdmin
+				? [
+						...itemColumns,
+						{
+							field: "lookUpAction",
+							type: "actions",
+							headerName: t("ui.data_grid.actions"),
+							width: 80,
+							getActions: (params: GridRowParams<Item>) =>
+								lookUpAction(params.row),
+						},
+					]
+				: itemColumns,
+		[isAdmin, itemColumns, lookUpAction, t],
+	);
 	const itemColumnsWithWalkUp: GridColDef[] = useMemo(
 		() => [
 			...itemColumns,
@@ -128,7 +183,7 @@ function ItemsPageComponent() {
 						item.isRequestable &&
 						!item.isSuppressed &&
 						item.status?.code === "AVAILABLE";
-					if (!canWalkUp) return [];
+					if (!canWalkUp) return lookUpAction(item);
 					// Tooltip explains the action to sighted users (the icon alone is
 					// ambiguous); the GridActionsCellItem `label` remains the button's
 					// accessible name (aria-label). MUI Tooltip shows on hover AND focus
@@ -149,11 +204,12 @@ function ItemsPageComponent() {
 								/>
 							</Tooltip>
 						</Fragment>,
+						...lookUpAction(item),
 					];
 				},
 			},
 		],
-		[itemColumns, t],
+		[itemColumns, lookUpAction, t],
 	);
 	const itemsView = useGridView(
 		clusterItemsView,
@@ -162,7 +218,7 @@ function ItemsPageComponent() {
 	);
 	const notShownView = useGridView(
 		clusterItemsNotShownView,
-		itemColumns,
+		itemColumnsWithLookUp,
 		search,
 	);
 
@@ -190,6 +246,13 @@ function ItemsPageComponent() {
 			spacing={{ xs: 2, md: 3 }}
 			columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
 		>
+			{liveItem && (
+				<LiveItemDialog
+					hostLmsCode={liveItem.hostLmsCode}
+					barcode={liveItem.barcode}
+					onClose={() => setLiveItem(null)}
+				/>
+			)}
 			{showWalkUp && (
 				<CombinedRequestingModal
 					show={showWalkUp}
@@ -290,7 +353,7 @@ function ItemsPageComponent() {
 							<DataGrid
 								identifier={itemsNotShownGridId}
 								type="Items"
-								columns={itemColumns}
+								columns={itemColumnsWithLookUp}
 								rows={itemsNotShown}
 								loading={isLoading}
 								disablePivoting

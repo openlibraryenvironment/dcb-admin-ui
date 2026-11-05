@@ -453,6 +453,28 @@
 		"reason_default": "Adding new {{entity}}",
 		"reason_completing_setup": "Completing library setup"
 	},
+	"items": {
+		"live_lookup": {
+			"action": "Ask the library's system about item {{barcode}}",
+			"title": "Item {{barcode}} in {{hostLms}}",
+			"asking": "Asking the library's system",
+			"not_found": "{{hostLms}} has no item with barcode {{barcode}}, or DCB has no Host LMS with that code.",
+			"forbidden": "Only administrators can ask a library's system about an item.",
+			"failed": "{{hostLms}} could not be asked about this item.",
+			"fields": {
+				"status": "Status",
+				"rawStatus": "Status in the library's system",
+				"barcode": "Barcode",
+				"localId": "Item ID",
+				"bibId": "Bib ID",
+				"holdCount": "Holds",
+				"renewalCount": "Renewals",
+				"renewable": "Renewable",
+				"holdingId": "Holding ID",
+				"localRequestId": "Request ID"
+			}
+		}
+	},
 	"environment": {
 		"tracking_backlog": {
 			"title": "Tracking backlog",
