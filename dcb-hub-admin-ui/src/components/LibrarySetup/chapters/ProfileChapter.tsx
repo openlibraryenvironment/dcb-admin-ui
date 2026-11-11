@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";
 import { Alert, Skeleton } from "@mui/material";
@@ -17,6 +17,7 @@ import {
 } from "@forms/NewLibrary/libraryPayloads";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
+import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import {
 	consortiumBasicsQuery,
 	readConsortiumPresence,
@@ -111,6 +112,7 @@ function ProfileForm({
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
 	const writes = useLibrarySetupWrites();
 	const [error, setError] = useState<string | null>(null);
 	const { consortiumGroup } = readConsortiumPresence(
@@ -142,6 +144,24 @@ function ProfileForm({
 					markSaved(formData);
 				}
 				onNext?.();
+				return;
+			}
+
+			// createLibrary ids a library by its agency code and saves over one that exists
+			const taken = await queryClient.fetchQuery(
+				libraryBasicsByAgencyCodeQuery(
+					gqlClient,
+					formData.agencyCode,
+					"newLibraryAgencyCheck",
+				),
+			);
+			if (taken?.libraries?.content?.length) {
+				methods.setError("agencyCode", {
+					message: t("libraries.new.agency_has_library", {
+						code: formData.agencyCode,
+					}),
+				});
+				methods.setFocus("agencyCode");
 				return;
 			}
 

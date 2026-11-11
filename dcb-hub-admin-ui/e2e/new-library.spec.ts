@@ -439,6 +439,8 @@ test.describe("New library", () => {
 				createdInput = variables.input;
 				return { createLibrary: { id: LIBRARY_ID } };
 			},
+			// No library holds the agency yet
+			LoadLibraryBasics: { libraries: { totalSize: 0, content: [] } },
 			LoadLibrary: libraryDetail,
 			LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
 			LoadNumericRangeMappings: {
@@ -479,5 +481,58 @@ test.describe("New library", () => {
 		await expect(
 			main(page).getByRole("textbox", { name: /first name/i }),
 		).toBeFocused();
+	});
+
+	test("refuses an agency that already belongs to a library, and says so on the field", async ({
+		page,
+	}) => {
+		let created = 0;
+		let asked = "";
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			LoadHostLmsSelection: oneSierra,
+			// createLibrary would id the new library by this code and save over the existing one
+			LoadLibraryBasics: (variables: { query: string }) => {
+				asked = variables.query;
+				return {
+					libraries: {
+						totalSize: 1,
+						content: [{ id: LIBRARY_ID, fullName: "Existing library" }],
+					},
+				};
+			},
+			CreateLibrary: () => {
+				created++;
+				return { createLibrary: { id: LIBRARY_ID } };
+			},
+		});
+		await page.goto("/libraries/new/profile?ils=sierra&hostLms=SIERRA1");
+		const chapter = main(page);
+		await chapter.getByLabel("Full name").fill("New Library");
+		await chapter.getByLabel("Short name").fill("New");
+		await chapter.getByLabel("Abbreviated name").fill("NEW");
+		const agency = chapter.getByRole("combobox", {
+			name: /associated agency/i,
+		});
+		await agency.fill("TAKEN");
+		await chapter.getByLabel("Address").fill("1 Library Street");
+		await chapter.getByRole("combobox", { name: "Type" }).click();
+		await page.getByRole("option", { name: "Public" }).click();
+		await chapter.getByLabel(/latitude/i).fill("51.5");
+		await chapter.getByLabel(/longitude/i).fill("-0.12");
+		await chapter
+			.getByRole("combobox", { name: /authentication profile/i })
+			.click();
+		await page.getByRole("option", { name: "Barcode and PIN" }).click();
+		await chapter.getByRole("button", { name: /add the library/i }).click();
+
+		await expect(agency).toBeFocused();
+		await expect(agency).toHaveAccessibleDescription(
+			/TAKEN already belongs to a library/,
+		);
+		await expect(page).toHaveURL(/\/libraries\/new\/profile/);
+		expect(asked).toBe("agencyCode:TAKEN");
+		expect(created).toBe(0);
 	});
 });

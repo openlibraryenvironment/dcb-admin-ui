@@ -1710,6 +1710,7 @@
 			"section_change_record": "Change record",
 			"agency_helper": "Choose an existing agency, or type a new code to create one.",
 			"agency_will_be_created": "No agency matches “{{code}}”, so a new agency will be created with this code when the library is saved.",
+			"agency_has_library": "{{code}} already belongs to a library. Choose another agency, or finish that library's setup from its own page.",
 			"latitude_helper": "Decimal degrees between -90 and 90.",
 			"longitude_helper": "Decimal degrees between -180 and 180.",
 			"coordinates_from_agency": "Taken from agency {{code}}. DCB uses the agency's location for every library that shares it.",
