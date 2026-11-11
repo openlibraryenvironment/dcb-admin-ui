@@ -152,6 +152,9 @@ export interface HostLmsProfile {
 	groups: ClientConfigGroup[];
 }
 
+/** dcb-service 9.2.0 supplies a default for a few settings earlier releases demanded. */
+const defaultedFrom920 = (): boolean => isHostLmsCirculationSettingsEnabled();
+
 const field = (
 	path: string[],
 	labelKey: string,
@@ -382,14 +385,18 @@ const SIERRA: HostLmsProfile = {
 					"secret",
 				),
 				defaultAgencyCode(),
-				field(
-					["page-size"],
-					"hostlms.config_fields.page_size",
-					"hostlms.config_fields.sierra_page_size_description",
-					"required",
-					"number",
-					"100",
-				),
+				{
+					// 8.71.0's validator requires it; 9.2.0's defaults it
+					...field(
+						["page-size"],
+						"hostlms.config_fields.page_size",
+						"hostlms.config_fields.sierra_page_size_description",
+						"required",
+						"number",
+						"100",
+					),
+					requiredUnless: defaultedFrom920,
+				},
 				field(
 					["patron-search-tag"],
 					"hostlms.config_fields.patron_search_tag",
@@ -681,22 +688,28 @@ const FOLIO: HostLmsProfile = {
 				defaultAgencyCode(),
 				// No default before dcb-service 9.2.0: the ingest source calls .get() on
 				// both, so a Host LMS created without them never harvests.
-				field(
-					["record-syntax"],
-					"hostlms.config_fields.record_syntax",
-					"hostlms.config_fields.folio_record_syntax_description",
-					"required",
-					"text",
-					"oai_dc",
-				),
-				field(
-					["metadata-prefix"],
-					"hostlms.config_fields.metadata_prefix",
-					"hostlms.config_fields.folio_metadata_prefix_description",
-					"required",
-					"text",
-					"marc21_withholdings",
-				),
+				{
+					...field(
+						["record-syntax"],
+						"hostlms.config_fields.record_syntax",
+						"hostlms.config_fields.folio_record_syntax_description",
+						"required",
+						"text",
+						"oai_dc",
+					),
+					requiredUnless: defaultedFrom920,
+				},
+				{
+					...field(
+						["metadata-prefix"],
+						"hostlms.config_fields.metadata_prefix",
+						"hostlms.config_fields.folio_metadata_prefix_description",
+						"required",
+						"text",
+						"marc21_withholdings",
+					),
+					requiredUnless: defaultedFrom920,
+				},
 				field(
 					["oai-set"],
 					"hostlms.config_fields.oai_set",

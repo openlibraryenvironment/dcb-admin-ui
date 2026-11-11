@@ -1572,3 +1572,27 @@ describe("malformedClientConfig", () => {
 		).toEqual([]);
 	});
 });
+
+// 8.71.0 refuses a Sierra without page-size and a FOLIO without both harvest settings never
+// harvests; 9.2.0 defaults all three
+describe("settings dcb-service 9.2.0 defaults", () => {
+	const missingNames = (lmsClientClass: string) =>
+		missingRequiredClientConfig(lmsClientClass, {}).map((gap) => gap.name);
+
+	it("are required before 9.2.0", () => {
+		extendedConfig(true);
+		expect(missingNames(HOST_LMS_CLASSES.sierra)).toContain("page-size");
+		expect(missingNames(HOST_LMS_CLASSES.folio)).toEqual(
+			expect.arrayContaining(["record-syntax", "metadata-prefix"]),
+		);
+	});
+
+	it("are not required from 9.2.0", () => {
+		latestRelease();
+		expect(missingNames(HOST_LMS_CLASSES.sierra)).not.toContain("page-size");
+		expect(missingNames(HOST_LMS_CLASSES.folio)).not.toContain("record-syntax");
+		expect(missingNames(HOST_LMS_CLASSES.folio)).not.toContain(
+			"metadata-prefix",
+		);
+	});
+});
