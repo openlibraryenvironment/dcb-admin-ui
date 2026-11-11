@@ -84,7 +84,8 @@ test("a merge is named as one, and links to the cluster it merged into", async (
 	await expect(
 		page
 			.getByRole("tabpanel", { name: "Explain clustering" })
-			.getByRole("link", { name: CLUSTER_ID }),
+			.getByRole("link", { name: CLUSTER_ID })
+			.first(),
 	).toHaveAttribute("href", new RegExp(`/search/${CLUSTER_ID}/cluster$`));
 });
 
@@ -118,4 +119,22 @@ test("the explanation offers no aggregation", async ({ page }) => {
 	await expect(
 		page.getByRole("menu").getByRole("combobox", { name: "Aggregation" }),
 	).toHaveCount(0);
+});
+
+// "Bib matched against" was 100px wide for a 36-character UUID, and text
+test("the bib and cluster an event matched are whole, and links", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation?show=matchedBibId`);
+	// Grouped rows make the grid a treegrid
+	const grid = page.getByRole("treegrid");
+
+	await expect(grid.getByRole("link", { name: MATCHED_BIB })).toHaveAttribute(
+		"href",
+		new RegExp(`/bibs/${MATCHED_BIB}$`),
+	);
+	await expect(grid.getByRole("link", { name: CLUSTER_ID })).toHaveAttribute(
+		"href",
+		new RegExp(`/search/${CLUSTER_ID}/cluster$`),
+	);
 });

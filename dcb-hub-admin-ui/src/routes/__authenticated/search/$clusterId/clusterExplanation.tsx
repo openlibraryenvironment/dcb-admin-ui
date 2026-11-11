@@ -15,6 +15,7 @@ import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
 import { clusterExplanationView } from "@constants/dataGrid/gridViews";
 
 import DataGrid from "@components/DataGrid/DataGrid";
+import Link from "@components/Link/Link";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 
@@ -117,12 +118,33 @@ function ClusterExplanation() {
 			{
 				field: "matchedBibId",
 				headerName: t("search.bib_matched_against"),
-				width: 100,
+				// A whole UUID, so it can be read and copied
+				minWidth: 290,
+				renderCell: ({ value }) =>
+					value ? (
+						<Link
+							to="/bibs/$bibId"
+							params={{ bibId: value }}
+							onClick={(e: React.MouseEvent) => e.stopPropagation()}
+						>
+							{value}
+						</Link>
+					) : null,
 			},
 			{
 				field: "matchedClusterId",
 				headerName: t("search.cluster_matched"),
-				minWidth: 150,
+				minWidth: 290,
+				renderCell: ({ value }) =>
+					value ? (
+						<Link
+							to="/search/$clusterId/cluster"
+							params={{ clusterId: value }}
+							onClick={(e: React.MouseEvent) => e.stopPropagation()}
+						>
+							{value}
+						</Link>
+					) : null,
 			},
 			{
 				field: "message",
