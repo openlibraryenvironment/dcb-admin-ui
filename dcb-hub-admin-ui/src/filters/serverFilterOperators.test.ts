@@ -77,6 +77,13 @@ describe("constrainToServerOperators", () => {
 		expect(constrainToServerOperators([column])[0]).toBe(column);
 	});
 
+	// dcb-service ILIKEs "contains", and Postgres has no ILIKE for uuid: the query fails
+	it("offers an id column only the operators that compare it whole", () => {
+		expect(
+			operatorsFor({ field: "id", filterOperators: standardFilters }),
+		).toEqual(["equals", "does not equal"]);
+	});
+
 	it("does not touch columns that are not filterable", () => {
 		const column: GridColDef = { field: "title", filterable: false };
 

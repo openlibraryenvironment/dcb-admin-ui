@@ -207,7 +207,7 @@ function LibraryLocations() {
 				headerName: "Location UUID",
 				minWidth: 50,
 				flex: 0.8,
-				filterOperators: standardFilters,
+				filterOperators: equalsOnly,
 			},
 			{
 				field: "lastImported",

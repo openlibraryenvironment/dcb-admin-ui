@@ -61,6 +61,14 @@ const labelled = (operator: GridFilterOperator): GridFilterOperator => {
 	return key ? { ...operator, label: i18n.t(key) } : operator;
 };
 
+// Every dcb-service id is a uuid, which Postgres cannot ILIKE: a substring filter on one fails
+const SUBSTRING_OPERATORS = new Set([
+	"contains",
+	"containsPhrase",
+	"does not contain",
+	"doesNotContain",
+]);
+
 // What MUI hands a column that never declared `filterOperators` of its own.
 const defaultOperatorsForType = (type?: string): GridFilterOperator[] => {
 	switch (type) {
@@ -100,8 +108,10 @@ export const constrainToServerOperators = (
 
 		const operators =
 			column.filterOperators ?? defaultOperatorsForType(column.type);
-		const supported = operators.filter((operator) =>
-			serverSupportedOperators.has(operator.value),
+		const supported = operators.filter(
+			(operator) =>
+				serverSupportedOperators.has(operator.value) &&
+				!(column.field === "id" && SUBSTRING_OPERATORS.has(operator.value)),
 		);
 		const negative = supported.some(
 			(operator) => operator.value in NEGATIVE_LABEL_KEYS,
