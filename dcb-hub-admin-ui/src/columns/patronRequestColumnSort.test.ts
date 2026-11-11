@@ -45,3 +45,11 @@ describe.each([
 		).toEqual([]);
 	});
 });
+
+// It showed the supplier's item type while filtering and sorting on the request's own
+it("shows the request's own local item type, which is what it filters and sorts on", () => {
+	const column = standardPatronRequestColumns.find(
+		(each) => each.field === "localItemType",
+	);
+	expect(column?.valueGetter).toBeUndefined();
+});
