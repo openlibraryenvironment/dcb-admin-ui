@@ -1860,6 +1860,7 @@
 			"time_zone": "Time zone",
 			"title": "Contacts for {{name}}",
 			"minimum_explanation": "Every library needs at least one contact. Add more if different people handle implementation, operations and support.",
+			"stored_read_only": "Contacts the library already has are changed or removed on its Contacts page. Add new ones here.",
 			"numbered": "Contact #{{number}}",
 			"remove_numbered": "Remove contact {{number}}"
 		},

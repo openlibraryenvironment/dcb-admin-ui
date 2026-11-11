@@ -3,6 +3,7 @@ import {
 	useFormContext,
 	Controller,
 	useFieldArray,
+	useWatch,
 	FieldErrors,
 } from "react-hook-form";
 import { Add, Delete } from "@mui/icons-material";
@@ -54,11 +55,21 @@ export default function ContactsStep() {
 		LibraryFormValues["contacts"]
 	>;
 
+	// A stored contact is changed or removed on the library's Contacts page: setup writes only
+	// the contacts typed here, so an edit to one it already holds would be dropped unsaid
+	const contacts = useWatch({ control, name: "contacts" }) as
+		LibraryFormValues["contacts"] | undefined;
+	const isStored = (index: number) => !!contacts?.[index]?.id;
+	const storedPrimary =
+		contacts?.some((contact) => contact?.id && contact.isPrimaryContact) ??
+		false;
+
 	// Exactly one contact can be the primary one - it is who DCB writes to first.
 	// Letting two be ticked stores an ambiguity the backend has no way to settle.
 	const selectPrimary = (index: number, checked: boolean) => {
-		const contacts = getValues("contacts") ?? [];
-		contacts.forEach((_: unknown, position: number) => {
+		const current = getValues("contacts") ?? [];
+		current.forEach((contact: { id?: string }, position: number) => {
+			if (contact?.id) return;
 			setValue(
 				`contacts.${position}.isPrimaryContact`,
 				checked && position === index,
@@ -74,6 +85,11 @@ export default function ContactsStep() {
 			<Alert severity="info">
 				{t("libraries.contacts.minimum_explanation")}
 			</Alert>
+			{contacts?.some((contact) => contact?.id) && (
+				<Alert severity="info">
+					{t("libraries.contacts.stored_read_only")}
+				</Alert>
+			)}
 
 			{fields.map((field, index) => (
 				<Paper key={field.id} sx={{ p: 3 }} variant="outlined">
@@ -81,7 +97,7 @@ export default function ContactsStep() {
 						<Typography variant="h6" component="h3">
 							{t("libraries.contacts.numbered", { number: index + 1 })}
 						</Typography>
-						{fields.length > 1 && (
+						{fields.length > 1 && !isStored(index) && (
 							<IconButton
 								onClick={() => remove(index)}
 								aria-label={t("libraries.contacts.remove_numbered", {
@@ -101,6 +117,7 @@ export default function ContactsStep() {
 									<TextField
 										{...field}
 										inputRef={ref}
+										disabled={isStored(index)}
 										id={`contact-${index}-first-name`}
 										label={t("libraries.contacts.first_name")}
 										required
@@ -118,6 +135,7 @@ export default function ContactsStep() {
 									<TextField
 										{...field}
 										inputRef={ref}
+										disabled={isStored(index)}
 										id={`contact-${index}-last-name`}
 										label={t("libraries.contacts.last_name")}
 										required
@@ -136,6 +154,7 @@ export default function ContactsStep() {
 								<TextField
 									{...field}
 									inputRef={ref}
+									disabled={isStored(index)}
 									id={`contact-${index}-email`}
 									label={t("libraries.contacts.email")}
 									type="email"
@@ -152,6 +171,7 @@ export default function ContactsStep() {
 							control={control}
 							render={({ field }) => (
 								<Autocomplete
+									disabled={isStored(index)}
 									options={CONTACT_ROLE_OPTIONS.map((option) => option.value)}
 									getOptionLabel={(value) => t(contactRoleLabelKey(value))}
 									onChange={(_, newValue) => field.onChange(newValue ?? "")}
@@ -180,6 +200,7 @@ export default function ContactsStep() {
 									control={
 										<Checkbox
 											{...field}
+											disabled={isStored(index) || storedPrimary}
 											checked={field.value === true}
 											onChange={(event) =>
 												selectPrimary(index, event.target.checked)
