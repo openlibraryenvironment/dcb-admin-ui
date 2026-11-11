@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { Typography, Alert } from "@mui/material";
@@ -13,6 +13,9 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import RequestReference from "@components/RequestReference/RequestReference";
+import { exportClusterMembers } from "@helpers/exportClusterMembers";
 import { getClustersTitleOnly } from "@queries/getClustersTitlesOnly";
 import type { ClusterRecordsTitleOnlyQueryVariables } from "@generated/graphql";
 
@@ -32,6 +35,10 @@ function ClusterLayout() {
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const [showRequestModal, setShowRequestModal] = useState(false);
+	const restClient = useDcbRestClient();
+	const exportMembers = useMutation({
+		mutationFn: () => exportClusterMembers(restClient, clusterId),
+	});
 
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["cluster", "titleOnly", clusterId],
@@ -79,12 +86,37 @@ function ClusterLayout() {
 			label: t("requesting.place_title"),
 		},
 	];
+	// dcb-service builds the zip in memory with no size bound: ADMIN alone, as it allows
+	if (userRoles.includes("ADMIN")) {
+		pageActions.push({
+			key: "exportMembers",
+			onClick: () => exportMembers.mutate(),
+			disabled: exportMembers.isPending,
+			label: exportMembers.isPending
+				? t("search.export_members.in_progress")
+				: t("search.export_members.action"),
+		});
+	}
+	const exportOutcome = exportMembers.data;
 
 	return (
 		<PageContainer
 			title={t("search.cluster_title", { record: title })}
 			pageActions={pageActions}
 		>
+			<div role="status" aria-live="polite">
+				{exportOutcome && exportOutcome.kind !== "downloaded" && (
+					<Alert
+						severity={exportOutcome.kind === "empty" ? "info" : "error"}
+						onClose={() => exportMembers.reset()}
+					>
+						{t(`search.export_members.${exportOutcome.kind}`)}
+						{exportOutcome.kind === "failed" && exportOutcome.reference && (
+							<RequestReference reference={exportOutcome.reference} />
+						)}
+					</Alert>
+				)}
+			</div>
 			{/* Single entry point: the user picks the request type inside the modal */}
 			{showRequestModal && (
 				<CombinedRequestingModal

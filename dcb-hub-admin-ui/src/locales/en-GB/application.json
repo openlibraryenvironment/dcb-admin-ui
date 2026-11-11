@@ -104,6 +104,20 @@
 		"audit_to_status": "toStatus"
 	},
 	"bibRecords": {
+		"audit_log": {
+			"title": "Ingest audit log",
+			"time": "Time",
+			"process": "Process",
+			"message": "Message",
+			"none": "Nothing was recorded the last time this record was ingested.",
+			"error": "The ingest audit log could not be loaded."
+		},
+		"deleted": {
+			"title": "This bib record no longer exists",
+			"explanation": "DCB last recorded this bib record on {{date}} and has deleted it since. DCB does not record when or why a bib record is deleted.",
+			"audit_log": "What DCB recorded the last time it ingested this record",
+			"back": "Back to bib records"
+		},
 		"bibs_one": "bib record",
 		"contributor_uuid": "Contributor UUID",
 		"edition": "Edition",
@@ -429,6 +443,7 @@
 		}
 	},
 	"data_change_log": {
+		"not_set": "Not set",
 		"action": "Action",
 		"category": "Change category",
 		"category_required": "Please select a category before proceeding.",
@@ -453,7 +468,38 @@
 		"reason_default": "Adding new {{entity}}",
 		"reason_completing_setup": "Completing library setup"
 	},
+	"items": {
+		"live_lookup": {
+			"action": "Ask the library's system about item {{barcode}}",
+			"title": "Item {{barcode}} in {{hostLms}}",
+			"asking": "Asking the library's system",
+			"not_found": "{{hostLms}} has no item with barcode {{barcode}}, or DCB has no Host LMS with that code.",
+			"forbidden": "Only administrators can ask a library's system about an item.",
+			"failed": "{{hostLms}} could not be asked about this item.",
+			"fields": {
+				"status": "Status",
+				"rawStatus": "Status in the library's system",
+				"barcode": "Barcode",
+				"localId": "Item ID",
+				"bibId": "Bib ID",
+				"holdCount": "Holds",
+				"renewalCount": "Renewals",
+				"renewable": "Renewable",
+				"holdingId": "Holding ID",
+				"localRequestId": "Request ID"
+			}
+		}
+	},
 	"environment": {
+		"tracking_backlog": {
+			"title": "Tracking backlog",
+			"description": "Requests with a tracking check scheduled, by status, and how many of those checks are already due. Requests DCB has stopped tracking because they ran too long are counted too, so a status that stays overdue may be one of those.",
+			"status": "Status",
+			"scheduled": "Scheduled",
+			"overdue": "Due now",
+			"total": "Total",
+			"error": "The tracking backlog could not be loaded."
+		},
 		"your": "Your $t(app.dcb) environment",
 		"cannot_check": "Cannot check",
 		"changelog": "Changelog",
@@ -799,7 +845,11 @@
 			"request_cancellation_reason": "Request cancellation reason",
 			"user_identifier": "User identifier",
 			"virtual_library": "Virtual item library code",
-			"virtual_location": "Virtual item location code"
+			"virtual_location": "Virtual item location code",
+			"default_value": "{{value}} (default)",
+			"entry_count_one": "{{count}} entry",
+			"entry_count_other": "{{count}} entries",
+			"other_settings": "Other stored settings"
 		},
 		"error": {
 			"no_data_returned": "The Host LMS did not return any data."
@@ -979,7 +1029,7 @@
 			"ill_location_id_description": "Location identifier used for interlibrary loan items.",
 			"fine_code_id_description": "Fine code applied to virtual items.",
 			"renewal_limit_description": "Renewal limit applied to virtual items.",
-			"renewal_limit_av_description": "Renewal limit applied to audiovisual virtual items, where it differs from the standard one.",
+			"renewal_limit_av_description": "Renewal limit applied to audiovisual virtual items, where it differs from the standard one. Leave blank to use the standard one.",
 			"item_agency_resolution_method": "Item agency resolution",
 			"item_agency_resolution_method_description": "How DCB decides which library owns an item. Blank uses shelf location.",
 			"item_agency_resolution_legacy": "Shelf location (Legacy)",
@@ -1063,7 +1113,16 @@
 			"av_loan_period_code_id": "AV loan period code ID",
 			"av_loan_period_code_id_description": "Loan period applied to audiovisual virtual items. Required: use the standard loan period code if the two do not differ.",
 			"policy_count_one": "{{count}} shelf location mapped",
-			"policy_count_other": "{{count}} shelf locations mapped"
+			"policy_count_other": "{{count}} shelf locations mapped",
+			"systems_librarian_contact_email": "Systems librarian contact email",
+			"systems_librarian_contact_email_description": "Who to contact about this system. DCB raises an alarm for any Host LMS without one.",
+			"hold_policy_description": "Whether DCB places item-level or title-level holds in Sierra.",
+			"hold_policy_item": "Item-level",
+			"hold_policy_title": "Title-level",
+			"folio_oai_set_description": "The OAI set to restrict harvesting to. Leave blank to harvest every record.",
+			"use_new_bib_chunk_ingest": "Use new bib chunk ingest",
+			"use_new_bib_chunk_ingest_description": "Fetches changed bibliographic records from Polaris in chunks by modification date. Off unless set.",
+			"foundation_overrides_description": "Per-operation overrides of the base protocol, as JSON: each key is an operation and each value the strategy to use for it."
 		},
 		"edit": {
 			"immutable_note": "The code and the client class cannot be changed. They identify this system to every mapping, location and record already pointing at it, so changing one is a new Host LMS rather than an edit.",
@@ -2077,6 +2136,14 @@
 		"type": "Location type",
 		"uuid": "Location UUID",
 		"view_location": "View pickup location",
+		"pickup_enable_success": "Pickup is now enabled at {{location}}.",
+		"pickup_disable_success": "Pickup is now disabled at {{location}}.",
+		"pickup_anywhere_enable_success": "Pickup anywhere is now enabled at {{location}}.",
+		"pickup_anywhere_disable_success": "Pickup anywhere is now disabled at {{location}}.",
+		"location_pickup_error_enable": "Pickup could not be enabled at {{location}}.",
+		"location_pickup_error_disable": "Pickup could not be disabled at {{location}}.",
+		"location_pickup_anywhere_error_enable": "Pickup anywhere could not be enabled at {{location}}.",
+		"location_pickup_anywhere_error_disable": "Pickup anywhere could not be disabled at {{location}}.",
 		"pickup_count": "Pickup locations: {{count}}",
 		"pickup_locations": "Pickup locations"
 	},
@@ -2592,6 +2659,56 @@
 		"patron_request_uuid": "Patron request UUID",
 		"patron_type_dcb": "DCB patron type",
 		"polling_checks_in_status": "Polling checks in status",
+		"supplier_actions": {
+			"skip": "Skip supplier",
+			"skip_title": "Skip this supplier?",
+			"skip_body": "DCB will cancel the hold at {{agency}} and check the request again straight away.",
+			"skip_warning_re_resolves": "Re-resolution is on for this consortium, so DCB will look for another supplier.",
+			"skip_warning_no_re_resolution": "Re-resolution is off for this consortium, so the whole request will be cancelled.",
+			"skip_warning_manual": "This item was chosen by hand, so DCB will not look for another supplier: the whole request will be cancelled.",
+			"skip_warning_unknown": "If re-resolution is off for this consortium, the whole request will be cancelled instead of moving to another supplier.",
+			"cancel": "Cancel supplier hold",
+			"cancel_title": "Cancel the hold at this supplier?",
+			"cancel_body": "DCB will cancel the hold at {{agency}} and, once the supplier confirms it, pause this supplier so the request is not moved on. Reactivate the supplier when the problem is fixed.",
+			"reactivate": "Reactivate supplier",
+			"reactivate_title": "Reactivate this supplier?",
+			"reactivate_body": "DCB will treat {{agency}} as this request's active supplier again, so tracking and re-resolution resume.",
+			"outcome": {
+				"skipped": "DCB cancelled the hold at {{agency}} and checked the request again. Its status on this page shows what happened.",
+				"cancelled": "The hold at {{agency}} is cancelled and the supplier is paused.",
+				"cancel_not_confirmed": "{{agency}} did not report the hold cancelled, so the supplier was not paused.",
+				"cancel_not_confirmed_status": "{{agency}} reports the hold as {{status}}, not cancelled, so the supplier was not paused.",
+				"reactivated": "The supplier is active again.",
+				"reactivate_not_applied": "dcb-service did not reactivate the supplier.",
+				"forbidden": "Only consortium administrators can change a supplier.",
+				"not_found": "This supplier request no longer exists. Reload the page.",
+				"failed": "That did not work. {{message}}"
+			}
+		},
+		"previous_suppliers": {
+			"title": "Previous suppliers",
+			"description": "Suppliers this request was moved off by re-resolution, newest first. Moved off is when DCB stopped using the supplier.",
+			"moved_off": "Moved off",
+			"agency": "Agency",
+			"host_lms": "Host LMS",
+			"item_barcode": "Item barcode",
+			"item_id": "Item ID",
+			"location": "Location",
+			"item_type": "Item type",
+			"canonical_type": "Canonical item type",
+			"bib_id": "Bib ID",
+			"none": "This request has not been moved off any supplier.",
+			"error": "The previous suppliers could not be loaded.",
+			"capped": "Showing the {{shown}} most recent of {{total}}."
+		},
+		"automatic_polls_in_status": "Automatic checks in status",
+		"manual_polls_in_status": "Manual checks in status",
+		"supplier_hold_count": "Holds queued at supplier",
+		"supplier_renewable": "Renewable at supplier",
+		"supplier_holding_id": "Supplier holding ID",
+		"borrower_holding_id": "Borrower holding ID",
+		"pickup_item_barcode": "Pickup item barcode",
+		"pickup_holding_id": "Pickup holding ID",
 		"previous_status": "Previous status",
 		"pickup": "Pickup",
 		"pickup_code_uuid": "Pickup location code UUID",
@@ -2889,6 +3006,13 @@
 		"cluster_audit_message": "Cluster audit message",
 		"cluster_bib_multiple_records": "One of the bib records in this cluster has multiple source records associated with it. Please review.",
 		"cluster_explainer_title": "Clustering explanation for {{record}}",
+		"export_members": {
+			"action": "Export member records",
+			"in_progress": "Exporting member records…",
+			"empty": "This cluster has no member records to export.",
+			"forbidden": "Only administrators can export a cluster's member records.",
+			"failed": "The member records could not be exported."
+		},
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",

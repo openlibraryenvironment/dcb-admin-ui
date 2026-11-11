@@ -35,6 +35,13 @@ export default function ChangesSummary({
 	context,
 }: ChangesSummaryType) {
 	const { t } = useTranslation();
+	// A field with no value before or after reads as such, not as an empty cell
+	const valueCell = (value: unknown) =>
+		value === null || value === undefined ? (
+			t("data_change_log.not_set")
+		) : (
+			<RenderAttribute attribute={value} />
+		);
 
 	const isUpdate = action === "UPDATE";
 	const isInsert = action === "INSERT";
@@ -105,30 +112,22 @@ export default function ChangesSummary({
 
 							{isUpdate && (
 								<TableCell>
-									<RenderAttribute
-										attribute={parsedChanges.old_values?.[field]}
-									/>
+									{valueCell(parsedChanges.old_values?.[field])}
 								</TableCell>
 							)}
 
 							{isInsert && (
-								<TableCell>
-									<RenderAttribute attribute={parsedChanges[field]} />
-								</TableCell>
+								<TableCell>{valueCell(parsedChanges[field])}</TableCell>
 							)}
 
 							{isUpdate && (
 								<TableCell>
-									<RenderAttribute
-										attribute={parsedChanges.new_values?.[field]}
-									/>
+									{valueCell(parsedChanges.new_values?.[field])}
 								</TableCell>
 							)}
 
 							{isDelete && (
-								<TableCell>
-									<RenderAttribute attribute={parsedChanges[field]} />
-								</TableCell>
+								<TableCell>{valueCell(parsedChanges[field])}</TableCell>
 							)}
 						</TableRow>
 					))}

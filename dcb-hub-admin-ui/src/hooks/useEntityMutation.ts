@@ -50,10 +50,10 @@ interface FormEditRequest {
 	/** Called with the server's response once the update has been persisted. */
 	onSuccess?: (updated: any) => void;
 	/**
-	 * What the confirmation dialog shows. Defaults to the raw changed fields;
-	 * pass a `formatChangedFields` result to get the old -> new comparison.
+	 * What the confirmation dialog shows, as `formatChangedFields` builds it. Required:
+	 * the dialog's old -> new table finds neither value in the bare changed fields.
 	 */
-	changeSummary?: string | Record<string, any>;
+	changeSummary: string | Record<string, any>;
 	/**
 	 * Replaces the generic "X has been updated" alert. For edits the user
 	 * initiated as a specific act rather than a field change - enabling pickup,
@@ -395,7 +395,7 @@ export function useEntityMutation(entity: EntityKey) {
 				pending?.kind === "gridEdit"
 					? pending.summary
 					: pending?.kind === "formEdit"
-						? (pending.changeSummary ?? pending.changedFields)
+						? pending.changeSummary
 						: undefined,
 			onConfirm: confirm,
 			onClose: cancel,

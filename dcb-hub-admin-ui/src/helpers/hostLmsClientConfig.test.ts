@@ -134,6 +134,7 @@ describe("hostLmsClientConfig", () => {
 				"default-agency-code": "EX",
 				"record-syntax": "oai_dc",
 				"metadata-prefix": "marc21_withholdings",
+				systemsLibrarianContactEmail: "systems@example.org",
 			};
 
 			expect(
@@ -669,9 +670,9 @@ describe("hostLmsClientConfig", () => {
 			"use-new-bib-chunk-ingest": true,
 		};
 
-		// Two keys in it are read by nothing in dcb-service. They get no field, are named
-		// as unmapped, and mergeClientConfigEdit keeps them on edit.
-		const UNREAD_KEYS = ["staff-ui", "use-new-bib-chunk-ingest"];
+		// Read by nothing in dcb-service. It gets no field, is named as unmapped, and
+		// mergeClientConfigEdit keeps it on edit.
+		const UNREAD_KEYS = ["staff-ui"];
 
 		it("has a field for every key dcb-service reads", () => {
 			const { unmappedKeys } = clientConfigToFields(
@@ -1014,7 +1015,6 @@ describe("hostLmsClientConfig", () => {
 			[HOST_LMS_CLASSES.folio, "folio-tenant"],
 			[HOST_LMS_CLASSES.folio, "user-base-url"],
 			[HOST_LMS_CLASSES.polaris, "staff-ui"],
-			[HOST_LMS_CLASSES.polaris, "use-new-bib-chunk-ingest"],
 		])(
 			"are not offered, and a stored %s %s is kept on edit",
 			(lmsClientClass, key) => {
@@ -1412,5 +1412,81 @@ describe("the ingest setting", () => {
 		expect(
 			buildClientConfig(HOST_LMS_CLASSES.sierra, { ingest: false }).ingest,
 		).toBe(false);
+	});
+});
+
+const pathsFor = (lmsClientClass: string) =>
+	clientConfigFieldsFor(lmsClientClass).map((configField) =>
+		configField.path.join("."),
+	);
+
+describe("settings dcb-service 8.71.0 reads", () => {
+	it.each(HOST_LMS_PROFILES.map((profile) => profile.lmsClientClass))(
+		"asks %s for a systems librarian email, without which an alarm is raised",
+		(lmsClientClass) => {
+			extendedConfig(true);
+			expect(
+				missingRecommendedClientConfig(lmsClientClass, {}).map(
+					(problem) => problem.name,
+				),
+			).toContain("systemsLibrarianContactEmail");
+		},
+	);
+
+	it.each([
+		[HOST_LMS_CLASSES.sierra, "holdPolicy"],
+		[HOST_LMS_CLASSES.folio, "oai-set"],
+	])("offers %s %s", (lmsClientClass, key) => {
+		expect(pathsFor(lmsClientClass)).toContain(key);
+	});
+
+	it("offers Polaris use-new-bib-chunk-ingest only before 9.0.0, which removed it", () => {
+		extendedConfig(false);
+		expect(pathsFor(HOST_LMS_CLASSES.polaris)).toContain(
+			"use-new-bib-chunk-ingest",
+		);
+		extendedConfig(true);
+		expect(pathsFor(HOST_LMS_CLASSES.polaris)).not.toContain(
+			"use-new-bib-chunk-ingest",
+		);
+	});
+
+	it("offers the Polaris AV renewal limit only from 9.2.0, the first release to read it", () => {
+		circulationSettings(false);
+		expect(pathsFor(HOST_LMS_CLASSES.polaris)).not.toContain(
+			"item.av-renewal-limit",
+		);
+		circulationSettings(true);
+		expect(pathsFor(HOST_LMS_CLASSES.polaris)).toContain(
+			"item.av-renewal-limit",
+		);
+	});
+});
+
+describe("settings dcb-service reads from more than one place", () => {
+	beforeEach(() => extendedConfig(true));
+
+	it("loads the copy dcb-service prefers", () => {
+		const { values, unmappedKeys } = clientConfigToFields(
+			HOST_LMS_CLASSES.orsAppliance,
+			{ ncipSystemId: "preferred", "ncip-system-id": "shadowed" },
+		);
+
+		expect(values["ncip-system-id"]).toBe("preferred");
+		expect(unmappedKeys).toEqual([]);
+	});
+
+	it("saves an edit where it is not shadowed, keeping the rest of the block", () => {
+		const stored = {
+			"base-protocol": "SIP2",
+			capabilities: { imperative: { "base-protocol": "NCIP", other: "kept" } },
+		};
+
+		const merged = mergeClientConfigEdit(stored, HOST_LMS_CLASSES.foundation, {
+			"base-protocol": "SIP2",
+		});
+
+		expect(merged["base-protocol"]).toBe("SIP2");
+		expect(merged.capabilities).toEqual({ imperative: { other: "kept" } });
 	});
 });

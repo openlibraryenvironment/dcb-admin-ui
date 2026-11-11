@@ -53,13 +53,7 @@ import {
 	verificationFrom,
 } from "@helpers/hostLmsVerification";
 import { HostLMS } from "@models/HostLMS";
-import FolioConfig from "@components/HostLmsConfig/FolioConfig";
-import SierraConfig from "@components/HostLmsConfig/SierraConfig";
-import AlmaConfig from "@components/HostLmsConfig/AlmaConfig";
-import PolarisConfig from "@components/HostLmsConfig/PolarisConfig";
-import KohaConfig from "@components/HostLmsConfig/KohaConfig";
-import FoundationConfig from "@components/HostLmsConfig/FoundationConfig";
-import OrsApplianceConfig from "@components/HostLmsConfig/OrsApplianceConfig";
+import ClientConfigView from "@components/HostLmsConfig/ClientConfigView";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import { isHostLmsProbesEnabled } from "@helpers/featureFlags";
 import { hostlmsParamsSchema } from "@schemas/routeParams/hostlmsParams";
@@ -504,58 +498,15 @@ function HostLMSDetails() {
 								<ClientConfigFields lmsClientClass={hostlms.lmsClientClass} />
 							</Stack>
 						) : (
-							<Grid
-								container
-								spacing={{ xs: 2, md: 3 }}
-								columns={{ xs: 3, sm: 6, md: 9, lg: 12 }}
-							>
-								<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-									<Typography variant="accordionSummary">
-										{t("hostlms.client_config.title")}
-									</Typography>
-								</Grid>
-
-								{/* Universal Client Configs */}
-								<ConfigItem
-									title={t("hostlms.client_config.ingest")}
-									value={String(hostlms.clientConfig?.ingest)}
+							<Stack spacing={3}>
+								<Typography variant="accordionSummary">
+									{t("hostlms.client_config.title")}
+								</Typography>
+								<ClientConfigView
+									lmsClientClass={hostlms.lmsClientClass}
+									config={hostlms.clientConfig}
 								/>
-								<ConfigItem
-									title={t("hostlms.client_config.default_agency_code")}
-									value={hostlms.clientConfig?.["default-agency-code"]}
-								/>
-								{/* Identifies a shared system: important for troubleshooters*/}
-								<ConfigItem
-									title={t("hostlms.client_config.shared_system")}
-									value={String(
-										hostlms.clientConfig?.["shared-system"] === true ||
-											hostlms.clientConfig?.["shared-system"] === "true",
-									)}
-								/>
-
-								{/* ILS Specific config Rendering */}
-								{ilsType === "Polaris" && (
-									<PolarisConfig config={hostlms.clientConfig} />
-								)}
-								{ilsType === "Alma" && (
-									<AlmaConfig config={hostlms.clientConfig} />
-								)}
-								{ilsType === "Sierra" && (
-									<SierraConfig config={hostlms.clientConfig} />
-								)}
-								{ilsType === "FOLIO" && (
-									<FolioConfig config={hostlms.clientConfig} />
-								)}
-								{ilsType === "Koha" && (
-									<KohaConfig config={hostlms.clientConfig} />
-								)}
-								{ilsType === "Foundation" && (
-									<FoundationConfig config={hostlms.clientConfig} />
-								)}
-								{ilsType === "OpenRS appliance" && (
-									<OrsApplianceConfig config={hostlms.clientConfig} />
-								)}
-							</Grid>
+							</Stack>
 						)}
 					</TabPanel>
 				</TabContext>

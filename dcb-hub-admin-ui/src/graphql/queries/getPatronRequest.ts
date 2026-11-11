@@ -38,12 +38,17 @@ export const getPatronRequest = (): string => gql`
 				previousStatus
 				isTooLong
 				pollCountForCurrentStatus
+				autoPollCountForCurrentStatus
+				manualPollCountForCurrentStatus
 				currentStatusTimestamp
 				nextExpectedStatus
 				outOfSequenceFlag
 				elapsedTimeInCurrentStatus
 				localItemHostlmsCode
 				localItemAgencyCode
+				localHoldingId
+				pickupItemBarcode
+				pickupHoldingId
 				isManuallySelectedItem
 				resolutionCount
 				renewalCount
@@ -126,6 +131,9 @@ export const getPatronRequest = (): string => gql`
 					localItemType
 					localId
 					localRenewalCount
+					localRenewable
+					localHoldCount
+					localHoldingId
 					localStatus
 					localAgency
 					rawLocalItemStatus

@@ -3,9 +3,11 @@ import { expect, test } from "./fixtures/test";
 import pkg from "../package.json";
 import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { useAllFeatures } from "./fixtures/flags";
+import { scanForViolations } from "./fixtures/axe";
 import {
 	LATEST_RELEASES_URL,
 	mockLatestReleases,
+	mockTrackingBacklog,
 } from "./fixtures/service-status-mocks";
 
 test.describe("Service Status versions", () => {
@@ -148,4 +150,51 @@ test.describe("Service Status versions", () => {
 		await expect(service).toContainText("9.1.0-SNAPSHOT");
 		await expect(service).toContainText("Cannot check");
 	});
+});
+
+test.describe("Tracking backlog", () => {
+	const sqlNames: string[] = [];
+
+	test.beforeEach(async ({ page }) => {
+		sqlNames.length = 0;
+		await useAllFeatures(page);
+		await page.route("**/info", (route) => route.fulfill({ json: {} }));
+		await mockLatestReleases(page);
+		await mockTrackingBacklog(page, sqlNames);
+	});
+
+	test("shows an ADMIN what is scheduled and what is due, by status", async ({
+		page,
+	}) => {
+		await seedAuth(page, { roles: ADMIN_ROLES });
+		await page.goto("/serviceInfo/serviceStatus");
+
+		const table = page.getByRole("table", { name: "Tracking backlog" });
+		await expect(table.getByRole("row", { name: "LOANED 40 7" })).toBeVisible();
+		await expect(table.getByRole("row", { name: "Total 52 7" })).toBeVisible();
+	});
+
+	test("is neither shown nor fetched without ADMIN", async ({ page }) => {
+		await seedAuth(page, { roles: ["CONSORTIUM_ADMIN"] });
+		await page.goto("/serviceInfo/serviceStatus");
+		await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+		await expect(
+			page.getByRole("heading", { name: "Tracking backlog" }),
+		).toHaveCount(0);
+		expect(sqlNames).toEqual([]);
+	});
+
+	for (const scheme of ["light", "dark"] as const) {
+		test(`passes axe, ${scheme}`, async ({ page }) => {
+			await page.emulateMedia({ colorScheme: scheme });
+			await seedAuth(page, { roles: ADMIN_ROLES });
+			await page.goto("/serviceInfo/serviceStatus");
+			await expect(
+				page.getByRole("table", { name: "Tracking backlog" }),
+			).toBeVisible();
+
+			await scanForViolations(page);
+		});
+	}
 });

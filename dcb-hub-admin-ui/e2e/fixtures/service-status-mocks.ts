@@ -22,3 +22,26 @@ export async function mockLatestReleases(page: Page) {
 		}),
 	);
 }
+
+/**
+ * dcb-service's trackingAwaiting and trackingNow named SQL: 52 requests scheduled across
+ * two statuses, 7 of them due. Every value is a string, as GenericSelectService sends it.
+ * Each name asked for is pushed onto `asked`.
+ */
+export async function mockTrackingBacklog(page: Page, asked: string[] = []) {
+	await page.route("**/sql?*", (route) => {
+		const name = new URL(route.request().url()).searchParams.get("name");
+		asked.push(String(name));
+		return route.fulfill({
+			json: {
+				hits:
+					name === "trackingNow"
+						? [{ Status: "LOANED", Total: "7" }]
+						: [
+								{ Status: "LOANED", Total: "40" },
+								{ Status: "PICKUP_TRANSIT", Total: "12" },
+							],
+			},
+		});
+	});
+}

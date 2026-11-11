@@ -112,6 +112,11 @@ export interface ClientConfigField {
 	 * the client is built or first needs it. Implied by type `number`.
 	 */
 	wholeNumber?: boolean;
+	/**
+	 * Every path dcb-service reads this setting from, in its order of precedence, where that
+	 * is not `path` alone. The view shows the first one set; the form writes `path` only.
+	 */
+	readFrom?: string[][];
 }
 
 export interface ClientConfigGroup {
@@ -207,6 +212,13 @@ const defaultAgencyCode = (): ClientConfigField => ({
 /** Foundation speaks NCIP unless told otherwise, as FoundationClient does. */
 const isSip2 = (values: any): boolean =>
 	String(values?.["base-protocol"] ?? "").toUpperCase() === "SIP2";
+
+/** ImperativeCapabilityConfig.setting reads this block before the top-level key. */
+const IMPERATIVE = (key: string): string[] => [
+	"capabilities",
+	"imperative",
+	key,
+];
 
 /** NcipPeerAuthProfile requires issuer, JWKS URL and audience only in this mode. */
 const isJwtRequired = (values: any): boolean =>
@@ -329,6 +341,14 @@ const SHARED_FIELDS: ClientConfigField[] = [
 		"optional",
 		"stringList",
 	),
+	// HouseKeepingService raises ILS.<CODE>.NO_SYSTEMS_EMAIL for every Host LMS without one
+	field(
+		["systemsLibrarianContactEmail"],
+		"hostlms.config_fields.systems_librarian_contact_email",
+		"hostlms.config_fields.systems_librarian_contact_email_description",
+		"recommended",
+		"email",
+	),
 ];
 
 const SIERRA: HostLmsProfile = {
@@ -420,6 +440,21 @@ const SIERRA: HostLmsProfile = {
 					"optional",
 					"number",
 				),
+				{
+					...field(
+						["holdPolicy"],
+						"hostlms.client_config.hold_policy",
+						"hostlms.config_fields.hold_policy_description",
+						"optional",
+						"select",
+					),
+					// SierraLmsClient.holdPolicyIs compares with equals, so case matters
+					options: ["item", "title"].map((value) => ({
+						value,
+						labelKey: `hostlms.config_fields.hold_policy_${value}`,
+					})),
+					defaultValue: "item",
+				},
 			],
 		},
 	],
@@ -663,6 +698,12 @@ const FOLIO: HostLmsProfile = {
 					"text",
 					"marc21_withholdings",
 				),
+				field(
+					["oai-set"],
+					"hostlms.config_fields.oai_set",
+					"hostlms.config_fields.folio_oai_set_description",
+					"optional",
+				),
 			],
 		},
 	],
@@ -803,6 +844,16 @@ const POLARIS: HostLmsProfile = {
 					"optional",
 					"number",
 				),
+				{
+					...field(
+						["use-new-bib-chunk-ingest"],
+						"hostlms.config_fields.use_new_bib_chunk_ingest",
+						"hostlms.config_fields.use_new_bib_chunk_ingest_description",
+						"optional",
+						"boolean",
+					),
+					defaultValue: "false",
+				},
 			],
 		},
 		{
@@ -1161,6 +1212,7 @@ const FOUNDATION: HostLmsProfile = {
 						{ value: "NCIP", labelKey: "hostlms.config_fields.protocol_ncip" },
 						{ value: "SIP2", labelKey: "hostlms.config_fields.protocol_sip2" },
 					],
+					readFrom: [IMPERATIVE("base-protocol"), ["base-protocol"]],
 				},
 				defaultAgencyCode(),
 				// Required on the NCIP branch, which is the default, and meaningless on SIP2
@@ -1174,6 +1226,21 @@ const FOUNDATION: HostLmsProfile = {
 					),
 					requiredUnless: isSip2,
 					shownWhen: (values: any) => !isSip2(values),
+					readFrom: [
+						IMPERATIVE("ncip-endpoint-url"),
+						["ncip-endpoint-url"],
+						["ncip", "endpoint"],
+					],
+				},
+				{
+					...field(
+						["overrides"],
+						"hostlms.config_fields.foundation_overrides",
+						"hostlms.config_fields.foundation_overrides_description",
+						"optional",
+						"jsonObject",
+					),
+					readFrom: [IMPERATIVE("overrides"), ["overrides"]],
 				},
 			],
 		},
@@ -1274,19 +1341,26 @@ const ORS_APPLIANCE: HostLmsProfile = {
 					"required",
 					"url",
 				),
-				field(
-					["ncip-system-id"],
-					"hostlms.config_fields.ncip_system_id",
-					"hostlms.config_fields.ncip_system_id_description",
-					"required",
-				),
+				// NcipHostLmsConfiguration tries camelCase first
+				{
+					...field(
+						["ncip-system-id"],
+						"hostlms.config_fields.ncip_system_id",
+						"hostlms.config_fields.ncip_system_id_description",
+						"required",
+					),
+					readFrom: [["ncipSystemId"], ["ncip-system-id"], ["ncipsystemid"]],
+				},
 				// Defaults to the system id, so absence is a warning not an error.
-				field(
-					["ncip-agency-id"],
-					"hostlms.config_fields.ncip_agency_id",
-					"hostlms.config_fields.ncip_agency_id_description",
-					"recommended",
-				),
+				{
+					...field(
+						["ncip-agency-id"],
+						"hostlms.config_fields.ncip_agency_id",
+						"hostlms.config_fields.ncip_agency_id_description",
+						"recommended",
+					),
+					readFrom: [["ncipAgencyId"], ["ncip-agency-id"], ["ncipagencyid"]],
+				},
 				// ORSApplianceOaiPmhIngestSource throws on construction without one
 				// of these two, which on 9.0.0 and 9.1.0 ends the harvest for every Host
 				// LMS. The URL, when set, wins; the tenant ID builds the standard path
@@ -1438,13 +1512,19 @@ const CLASSES_SINCE_9_0_0: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Settings no release before the flag's reads, by ILS ("*" is every ILS). Off, they are
- * not offered, required or written; a stored value is kept on edit.
+ * Settings only some releases read, by ILS ("*" is every ILS), and the gate that is true
+ * where they are read. Off, they are not offered, required or written; a stored value is
+ * kept on edit.
  */
 const SETTINGS_SINCE: ReadonlyArray<{
 	enabled: () => boolean;
 	keys: Readonly<Record<string, readonly string[]>>;
 }> = [
+	{
+		// Read by 8.71.0's PolarisLmsClient; 9.0.0 removed it
+		enabled: () => !isHostLmsExtendedConfigEnabled(),
+		keys: { [HOST_LMS_CLASSES.polaris]: ["use-new-bib-chunk-ingest"] },
+	},
 	{
 		// 8.71.0 also refuses a shared system's missing default agency
 		enabled: isHostLmsExtendedConfigEnabled,
@@ -1464,7 +1544,11 @@ const SETTINGS_SINCE: ReadonlyArray<{
 				"virtual-patron-barcode-prefix",
 			],
 			[HOST_LMS_CLASSES.sierra]: ["api-version", "virtual-patron-email"],
-			[HOST_LMS_CLASSES.polaris]: ["virtual-patron-email"],
+			// 8.71.0's getItemAvRenewalLimit reads renewal-limit
+			[HOST_LMS_CLASSES.polaris]: [
+				"virtual-patron-email",
+				"item.av-renewal-limit",
+			],
 			[HOST_LMS_CLASSES.koha]: [
 				"virtual-patron-email",
 				"virtual-patron-category",
@@ -1579,6 +1663,18 @@ const isBlank = (value: unknown): boolean =>
 	value === undefined ||
 	value === null ||
 	(typeof value === "string" && value.trim().length === 0);
+
+const readPathsOf = (configField: ClientConfigField): string[][] =>
+	configField.readFrom ?? [configField.path];
+
+/** The stored value dcb-service acts on for this setting, or undefined when none is set. */
+export const effectiveClientConfigValue = (
+	config: unknown,
+	configField: ClientConfigField,
+): unknown =>
+	readPathsOf(configField)
+		.map((path) => readPath(config, path))
+		.find((value) => !isBlank(value));
 
 /**
  * Turns the guided form's values into the client config object dcb-service
@@ -1787,9 +1883,9 @@ export const clientConfigToFields = (
 	const known = new Set<string>();
 
 	for (const configField of clientConfigFieldsFor(lmsClientClass)) {
-		known.add(configField.path.join("."));
-		const raw = readPath(config, configField.path);
-		if (raw === undefined || raw === null) continue;
+		for (const path of readPathsOf(configField)) known.add(path.join("."));
+		const raw = effectiveClientConfigValue(config, configField);
+		if (raw === undefined) continue;
 
 		if (configField.type === "boolean") {
 			writePath(values, configField.path, raw === true);
@@ -1864,8 +1960,9 @@ export const mergeClientConfigEdit = (
 		delete merged[key];
 	}
 
+	// Every path it is read from, or a copy dcb-service prefers would shadow the edit
 	for (const configField of clientConfigFieldsFor(lmsClientClass)) {
-		deletePath(merged, configField.path);
+		for (const path of readPathsOf(configField)) deletePath(merged, path);
 	}
 
 	const edited = buildClientConfig(lmsClientClass, values);

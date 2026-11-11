@@ -1581,6 +1581,31 @@ export type LoadHostLmsSelectionQuery = {
 	};
 };
 
+export type LoadInactiveSupplierRequestsQueryVariables = Exact<{
+	query: string;
+	pagesize: number;
+	order: string;
+	orderBy: string;
+}>;
+
+export type LoadInactiveSupplierRequestsQuery = {
+	inactiveSupplierRequests: {
+		totalSize: number | null;
+		content: Array<{
+			id: string;
+			dateCreated: string | null;
+			localAgency: string | null;
+			hostLmsCode: string | null;
+			localItemId: string | null;
+			localItemBarcode: string | null;
+			localItemLocationCode: string | null;
+			localItemType: string | null;
+			canonicalItemType: string | null;
+			localBibId: string | null;
+		} | null> | null;
+	};
+};
+
 export type LoadLibrariesQueryVariables = Exact<{
 	pageno: number;
 	pagesize: number;
@@ -2173,12 +2198,17 @@ export type LoadPatronRequestQuery = {
 			previousStatus: string | null;
 			isTooLong: boolean | null;
 			pollCountForCurrentStatus: number | null;
+			autoPollCountForCurrentStatus: number | null;
+			manualPollCountForCurrentStatus: number | null;
 			currentStatusTimestamp: string | null;
 			nextExpectedStatus: string | null;
 			outOfSequenceFlag: boolean | null;
 			elapsedTimeInCurrentStatus: number | null;
 			localItemHostlmsCode: string | null;
 			localItemAgencyCode: string | null;
+			localHoldingId: string | null;
+			pickupItemBarcode: string | null;
+			pickupHoldingId: string | null;
 			isManuallySelectedItem: boolean | null;
 			resolutionCount: number | null;
 			renewalCount: number | null;
@@ -2259,6 +2289,9 @@ export type LoadPatronRequestQuery = {
 				localItemType: string | null;
 				localId: string | null;
 				localRenewalCount: number | null;
+				localRenewable: boolean | null;
+				localHoldCount: number | null;
+				localHoldingId: string | null;
 				localStatus: string | null;
 				localAgency: string | null;
 				rawLocalItemStatus: string | null;
