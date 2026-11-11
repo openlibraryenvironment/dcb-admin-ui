@@ -3499,6 +3499,7 @@
 			"not_a_number": "Enter the {{field}} as a number.",
 			"out_of_range": "Enter the {{field}} as a number between {{min}} and {{max}}.",
 			"non_negative_integer": "Enter the {{field}} as a whole number of 0 or more, or leave it blank.",
+			"integer_too_large": "{{field}} can be at most {{max, number}}.",
 			"positive_integer": "Enter the {{field}} as a whole number of 1 or more, or leave it blank."
 		},
 		"visibility": {

@@ -50,6 +50,11 @@ const coordinate = (labelKey: string, limit: number) =>
 			},
 		);
 
+// GraphQL's Int is 32-bit signed: a larger value fails the whole mutation with a coercion error
+const GRAPHQL_INT_MAX = 2_147_483_647;
+const withinGraphQLInt = (value: string) =>
+	value === "" || Number(value) <= GRAPHQL_INT_MAX;
+
 export const newLibrarySchema = z
 	.object({
 		hostLmsCode: z.string().min(1, {
@@ -178,6 +183,13 @@ export const newLibrarySchema = z
 						}),
 				},
 			)
+			.refine(withinGraphQLInt, {
+				error: () =>
+					i18n.t("ui.validation.integer_too_large", {
+						field: i18n.t("libraries.max_consortial_loans"),
+						max: GRAPHQL_INT_MAX,
+					}),
+			})
 			.optional(),
 		// Text, as the loan cap is. Empty means DCB does not check the limit; dcb-service
 		// refuses 0, which would block every request from the agency
@@ -195,6 +207,13 @@ export const newLibrarySchema = z
 						}),
 				},
 			)
+			.refine(withinGraphQLInt, {
+				error: () =>
+					i18n.t("ui.validation.integer_too_large", {
+						field: i18n.t("libraries.max_local_holds"),
+						max: GRAPHQL_INT_MAX,
+					}),
+			})
 			.optional(),
 		supportHours: z.string().optional(),
 		patronWebsite: z

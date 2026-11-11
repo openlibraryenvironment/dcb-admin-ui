@@ -114,6 +114,22 @@ describe("newLibrarySchema", () => {
 			).toBe(true);
 		});
 
+		// GraphQL's Int is 32-bit: a larger value failed the mutation with a coercion error
+		it("rejects a cap larger than GraphQL's Int can carry", () => {
+			expect(
+				errorsFor({ ...validLibrary(), maxConsortialLoans: "2147483648" })
+					.maxConsortialLoans,
+			).toBeDefined();
+			expect(
+				errorsFor({ ...validLibrary(), maxLocalHolds: "99999999999" })
+					.maxLocalHolds,
+			).toBeDefined();
+			expect(
+				errorsFor({ ...validLibrary(), maxConsortialLoans: "2147483647" })
+					.maxConsortialLoans,
+			).toBeUndefined();
+		});
+
 		it("rejects a negative or fractional loan cap", () => {
 			expect(
 				errorsFor({ ...validLibrary(), maxConsortialLoans: "-1" })
