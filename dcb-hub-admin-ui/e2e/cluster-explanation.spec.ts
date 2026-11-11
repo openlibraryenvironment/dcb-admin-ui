@@ -203,3 +203,27 @@ test("each group names its bib by title and library", async ({ page }) => {
 			.first(),
 	).toContainText("(3)");
 });
+
+// A grid holding every row had no export: the toolbar drew one only for server grids
+test("the explanation downloads as CSV, with no request", async ({ page }) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+	await expect(
+		page.getByRole("row").filter({ hasText: "Merged clusters" }),
+	).toBeVisible();
+
+	const pending = page.waitForEvent("download");
+	await page.getByRole("button", { name: /export/i }).click();
+	await page
+		.getByRole("menuitem", { name: /^CSV \(comma separated\)$/ })
+		.click();
+	await page.getByRole("menuitem", { name: "Filtered results" }).click();
+	const file = await pending;
+
+	expect(file.suggestedFilename()).toMatch(/\.csv$/);
+	const chunks: Buffer[] = [];
+	for await (const chunk of await file.createReadStream())
+		chunks.push(Buffer.from(chunk));
+	const text = Buffer.concat(chunks).toString("utf8");
+	expect(text).toContain("2026-09-30");
+	expect(text.trim().split("\n").length).toBeGreaterThan(1);
+});

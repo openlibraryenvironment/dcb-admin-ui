@@ -36,6 +36,7 @@ import {
 	GridExportConfig,
 	useGridExport,
 } from "@hooks/useGridExport";
+import { exportClientGrid } from "@helpers/dataGrid/exportClientGrid";
 import { constrainToServerOperators } from "@filters/serverFilterOperators";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import type { DataGridType } from "@constants/dataGrid/types";
@@ -236,13 +237,18 @@ export default function DataGrid({
 		skipped: rollback.skippedCount,
 	});
 
+	// A grid that holds every row exports them itself; a server grid needs exportConfig
 	const handleExport = exportConfig
 		? (fileType: string, exportMode: string) =>
 				runExport({
 					mode: exportMode as ExportMode,
 					format: fileType as ExportFormat,
 				})
-		: onExport;
+		: (onExport ??
+			(paginationMode === "server"
+				? undefined
+				: (fileType: string, exportMode: string) =>
+						exportClientGrid(apiRef, fileType, exportMode, identifier)));
 
 	// During its render-phase state initialisation MUI clamps the controlled
 	// `paginationModel` page against `rowCount`. Callers pass a transient
