@@ -3657,6 +3657,7 @@
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
+			"cluster_export": "Exporting a cluster's member records",
 			"host_lms_probes": "Host LMS checks, the last connection check and ingest counts for chosen libraries",
 			"host_lms_circulation_settings": "Alma cancellation and renewal settings, visiting patron details for Sierra, Polaris and Koha, and the Sierra API version",
 			"settings_inheritance": "Settings inheritance",

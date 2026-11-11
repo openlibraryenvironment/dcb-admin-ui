@@ -1,5 +1,6 @@
 import {
 	isAuditExplorerEnabled,
+	isClusterExportEnabled,
 	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
 	isConfirmItemReturnedEnabled,
@@ -272,6 +273,15 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 				"resendLibraryUserInvite",
 			],
 		},
+	},
+	{
+		// A REST route older than 8.71.0; 9.1.0 is when it stopped building the zip on the
+		// R2DBC thread, so nothing to select or strip
+		id: "cluster_export",
+		flag: "VITE_FEATURE_CLUSTER_EXPORT",
+		enabled: isClusterExportEnabled,
+		since: "9.1.0",
+		fields: {},
 	},
 	{
 		// Shipped in 9.1.0, by V9_0_007__agency_max_local_holds.sql.

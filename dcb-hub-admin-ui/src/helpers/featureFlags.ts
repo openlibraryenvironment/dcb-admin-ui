@@ -194,6 +194,15 @@ export const isInsightsTrendsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_INSIGHTS_TRENDS");
 
 /**
+ * Exporting a cluster's member records - gated at dcb-service 9.1.0, although the route is
+ * older. Before 9.1.0 ClusterRecordController builds the zip on the thread that emitted the
+ * R2DBC result, with no bound on the member count, so one large cluster holds a database
+ * I/O thread while it is serialised.
+ */
+export const isClusterExportEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_CLUSTER_EXPORT");
+
+/**
  * Settings inheritance: `resolvedFunctionalSettings`, `settingsBearingGroupType` and the two
  * scoped write mutations, on no dcb-service release yet. Gates the DOCUMENT, not only the
  * render — an undeclared field fails the whole operation. Separate from

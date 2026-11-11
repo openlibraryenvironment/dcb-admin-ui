@@ -16,6 +16,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import RequestReference from "@components/RequestReference/RequestReference";
 import { exportClusterMembers } from "@helpers/exportClusterMembers";
+import { isClusterExportEnabled } from "@helpers/featureFlags";
 import { getClustersTitleOnly } from "@queries/getClustersTitlesOnly";
 import type { ClusterRecordsTitleOnlyQueryVariables } from "@generated/graphql";
 
@@ -87,7 +88,7 @@ function ClusterLayout() {
 		},
 	];
 	// dcb-service builds the zip in memory with no size bound: ADMIN alone, as it allows
-	if (userRoles.includes("ADMIN")) {
+	if (userRoles.includes("ADMIN") && isClusterExportEnabled()) {
 		pageActions.push({
 			key: "exportMembers",
 			onClick: () => exportMembers.mutate(),
