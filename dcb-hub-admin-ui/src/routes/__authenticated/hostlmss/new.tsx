@@ -34,6 +34,7 @@ import {
 	hasSharedSystemConflict,
 	missingRequiredClientConfig,
 	notWholeNumberClientConfig,
+	malformedClientConfig,
 	bibSuppressionDefault,
 } from "@helpers/hostLmsClientConfig";
 import {
@@ -135,6 +136,7 @@ function NewHostLms() {
 		lmsClientClass,
 		configValues ?? {},
 	);
+	const malformed = malformedClientConfig(lmsClientClass, configValues ?? {});
 
 	const { mutateAsync: create, isPending } = useMutation({
 		mutationFn: (input: CreateHostLmsInput) =>
@@ -209,6 +211,7 @@ function NewHostLms() {
 		!lmsClientClass ||
 		requiredGaps.length > 0 ||
 		numberGaps.length > 0 ||
+		malformed.length > 0 ||
 		sharedSystemConflict ||
 		isPending;
 
@@ -424,6 +427,14 @@ function NewHostLms() {
 						<Alert severity="error">
 							{t("hostlms.config_fields.not_whole_number", {
 								fields: numberGaps.map((gap) => t(gap.labelKey)).join(", "),
+							})}
+						</Alert>
+					)}
+
+					{malformed.length > 0 && lmsClientClass && (
+						<Alert severity="error">
+							{t("hostlms.config_fields.malformed", {
+								fields: malformed.map((gap) => t(gap.labelKey)).join(", "),
 							})}
 						</Alert>
 					)}

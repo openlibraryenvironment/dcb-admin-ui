@@ -1805,6 +1805,37 @@ export const notWholeNumberClientConfig = (
 			requirement: configField.requirement,
 		}));
 
+// dcb-service's VirtualPatronEmail.ADDRESS (9.2.0): one @, and a dot after it
+const EMAIL_ADDRESS = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+/**
+ * Settings dcb-service 9.2.0's HostLmsConfigValidator refuses with a 400: an email setting
+ * that is not an address (so "ops@localhost" is refused), and an Alma alternative sharing
+ * library that is the sharing library itself. Blocks submission, so the user is told by the
+ * field rather than by the server.
+ */
+export const malformedClientConfig = (
+	lmsClientClass: string | undefined | null,
+	values: any,
+): ClientConfigProblem[] =>
+	clientConfigFieldsFor(lmsClientClass)
+		.filter((configField) => {
+			const raw = readPath(values, configField.path);
+			if (isBlank(raw)) return false;
+			if (configField.type === "email")
+				return !EMAIL_ADDRESS.test(String(raw).trim());
+			return (
+				configField.path.join(".") === "alternative-sharing-library-code" &&
+				String(raw).trim() ===
+					String(readPath(values, ["sharing-library-code"]) ?? "").trim()
+			);
+		})
+		.map((configField) => ({
+			name: fieldName(configField),
+			labelKey: configField.labelKey,
+			requirement: configField.requirement,
+		}));
+
 /**
  * The one combination dcb-service refuses outright, checked here so the user is told
  * by the field they just filled in rather than by a 400 after submitting.

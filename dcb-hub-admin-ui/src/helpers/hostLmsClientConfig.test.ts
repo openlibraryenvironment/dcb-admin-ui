@@ -16,6 +16,7 @@ import {
 	missingRequiredClientConfig,
 	mergeClientConfigEdit,
 	notWholeNumberClientConfig,
+	malformedClientConfig,
 	originOf,
 } from "./hostLmsClientConfig";
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
@@ -1529,5 +1530,45 @@ describe("settings dcb-service reads from more than one place", () => {
 
 		expect(merged["base-protocol"]).toBe("SIP2");
 		expect(merged.capabilities).toEqual({ imperative: { other: "kept" } });
+	});
+});
+
+// HostLmsConfigValidator (9.2.0) answers 400 to both
+describe("malformedClientConfig", () => {
+	beforeEach(latestRelease);
+
+	it.each(["ops@localhost", "not an address", "a@b@c.org"])(
+		"refuses %s as a virtual patron email",
+		(email) => {
+			expect(
+				malformedClientConfig(HOST_LMS_CLASSES.sierra, {
+					"virtual-patron-email": email,
+				}).map((problem) => problem.name),
+			).toEqual(["virtual-patron-email"]);
+		},
+	);
+
+	it("accepts a full address, and a blank one", () => {
+		expect(
+			malformedClientConfig(HOST_LMS_CLASSES.sierra, {
+				"virtual-patron-email": "dcb-ops@library.example.org",
+			}),
+		).toEqual([]);
+		expect(malformedClientConfig(HOST_LMS_CLASSES.sierra, {})).toEqual([]);
+	});
+
+	it("refuses an Alma alternative sharing library that is the sharing library", () => {
+		expect(
+			malformedClientConfig(HOST_LMS_CLASSES.alma, {
+				"sharing-library-code": "RS",
+				"alternative-sharing-library-code": "RS",
+			}).map((problem) => problem.name),
+		).toEqual(["alternative-sharing-library-code"]);
+		expect(
+			malformedClientConfig(HOST_LMS_CLASSES.alma, {
+				"sharing-library-code": "RS",
+				"alternative-sharing-library-code": "RS2",
+			}),
+		).toEqual([]);
 	});
 });

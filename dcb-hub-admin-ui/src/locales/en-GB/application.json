@@ -934,6 +934,7 @@
 			"context_hierarchy_omits_code": "The context hierarchy does not include {{code}}, so DCB will not use mappings imported for {{code}}. Add it first, unless every mapping for this system is kept under a shared context.",
 			"missing_required": "The client configuration is missing: {{fields}}",
 			"not_whole_number": "These settings must be whole numbers of 0 or more: {{fields}}",
+			"malformed": "dcb-service will refuse these settings as they are: {{fields}}. An email setting needs a full address, and Alma's alternative sharing library must be a different library.",
 			"ingest": "Should DCB harvest records from this system?",
 			"ingest_description": "DCB harvests bibliographic records from a system unless told not to.",
 			"base_url": "Base URL",

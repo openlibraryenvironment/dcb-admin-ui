@@ -47,6 +47,7 @@ import {
 	mergeClientConfigEdit,
 	missingRequiredClientConfig,
 	notWholeNumberClientConfig,
+	malformedClientConfig,
 } from "@helpers/hostLmsClientConfig";
 import {
 	type HostLmsVerificationResult,
@@ -175,8 +176,15 @@ function HostLMSDetails() {
 		hostlms?.lmsClientClass,
 		configValues ?? {},
 	);
+	const malformed = malformedClientConfig(
+		hostlms?.lmsClientClass,
+		configValues ?? {},
+	);
 	const configBlocked =
-		requiredGaps.length > 0 || numberGaps.length > 0 || sharedSystemConflict;
+		requiredGaps.length > 0 ||
+		numberGaps.length > 0 ||
+		malformed.length > 0 ||
+		sharedSystemConflict;
 
 	const {
 		showUnsavedChangesModal,
@@ -481,6 +489,15 @@ function HostLMSDetails() {
 									<Alert severity="error">
 										{t("hostlms.config_fields.not_whole_number", {
 											fields: numberGaps
+												.map((gap) => t(gap.labelKey))
+												.join(", "),
+										})}
+									</Alert>
+								)}
+								{malformed.length > 0 && (
+									<Alert severity="error">
+										{t("hostlms.config_fields.malformed", {
+											fields: malformed
 												.map((gap) => t(gap.labelKey))
 												.join(", "),
 										})}
