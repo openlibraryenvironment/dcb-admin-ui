@@ -10,6 +10,9 @@ import {
 	AccordionDetails,
 	Stack,
 	Alert,
+	AlertTitle,
+	List,
+	ListItem,
 	Tooltip,
 } from "@mui/material";
 import { Bolt, ExpandMore, ManageSearch } from "@mui/icons-material";
@@ -59,6 +62,9 @@ export const Route = createFileRoute(
 	component: ItemsPageComponent,
 });
 
+/** A consortium has tens of Host LMS: more lines than this is one failure repeated. */
+const MAX_ERRORS_SHOWN = 10;
+
 function ItemsPageComponent() {
 	const { clusterId } = Route.useParams();
 	const { t } = useTranslation();
@@ -97,6 +103,18 @@ function ItemsPageComponent() {
 	const isLoading = offered.isLoading;
 
 	const items = offered.data?.itemList ?? [];
+	// One line per distinct failure: a Host LMS that is down reports it for every item
+	const availabilityErrors = useMemo(
+		() =>
+			[
+				...new Set(
+					(offered.data?.errors ?? []).map(
+						(error) => error.message || t("ui.error.something_wrong"),
+					),
+				),
+			].slice(0, MAX_ERRORS_SHOWN),
+		[offered.data, t],
+	);
 
 	// Base item columns + a row action that skips straight to a pre-filled Quick
 	// walk-up, but only for items that can actually be walked up (available,
@@ -242,9 +260,18 @@ function ItemsPageComponent() {
 				/>
 			)}
 			<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-				{(offered.data?.errors?.length ?? 0) > 0 && (
+				{availabilityErrors.length > 0 && (
 					<Alert severity="error" sx={{ mb: 2 }}>
-						{t("ui.error.something_wrong")}
+						<AlertTitle>
+							{t("requesting.shared_index.availability_errors")}
+						</AlertTitle>
+						<List dense disablePadding>
+							{availabilityErrors.map((message) => (
+								<ListItem key={message} disableGutters>
+									{message}
+								</ListItem>
+							))}
+						</List>
 					</Alert>
 				)}
 				{items.length === 0 && (

@@ -49,3 +49,31 @@ test("the unfiltered fan-out waits until someone asks what is not offered", asyn
 	).toBeVisible();
 	expect(asked).toEqual(["offered", "none"]);
 });
+
+// It said only "Something went wrong"
+test("a library that could not be asked is named in what went wrong", async ({
+	page,
+}) => {
+	await page.route("**/items/availability*", (route) =>
+		route.fulfill({
+			json: {
+				...availability,
+				errors: [
+					{ message: "Unable to reach Host LMS beta-lms" },
+					{ message: "Unable to reach Host LMS beta-lms" },
+				],
+			},
+		}),
+	);
+	await useAllFeatures(page);
+	await mockGraphQL(page, MOCKS);
+	await seedAuth(page);
+	await page.goto(`/search/${CLUSTER_ID}/items`);
+
+	const alert = page.getByRole("alert").filter({
+		hasText: "Some libraries' systems could not be asked",
+	});
+	await expect(alert.getByRole("listitem")).toHaveText([
+		"Unable to reach Host LMS beta-lms",
+	]);
+});
