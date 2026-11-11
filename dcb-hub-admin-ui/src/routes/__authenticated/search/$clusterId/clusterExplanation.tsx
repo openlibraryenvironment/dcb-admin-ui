@@ -214,7 +214,7 @@ function ClusterExplanation() {
 					listViewEnabled={false}
 					toolbarVisible
 					scrollbarVisible={false}
-					noResultsText={t("ui.data_grid.no_results")}
+					noResultsText={t("search.cluster_explanation_empty")}
 					searchText={t("ui.data_grid.search")}
 					rowModesModel={rowModesModel}
 					onRowModesModelChange={setRowModesModel}

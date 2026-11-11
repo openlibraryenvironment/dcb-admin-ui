@@ -3037,6 +3037,7 @@
 		"date_due": "Date due",
 		"event_type": "Event type",
 		"cluster_matched": "Cluster matched",
+		"cluster_explanation_empty": "No clustering events are held for this cluster. Only the most recent processing of each bib is kept, and only bibs that belong to the cluster now are shown.",
 		"clustering_event": {
 			"highConfidenceMatch": "Match: shared identifier",
 			"lowConfidenceCandidate": "Candidate: checking titles",

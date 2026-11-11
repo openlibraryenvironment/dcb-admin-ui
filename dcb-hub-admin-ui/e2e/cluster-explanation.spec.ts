@@ -161,3 +161,15 @@ test("a bib's events read from cause to outcome", async ({ page }) => {
 		"Merged clusters",
 	]);
 });
+
+// It said only "No results", which reads as a fault
+test("an empty explanation says why it can be empty", async ({ page }) => {
+	await page.route("**/clusters/*/audit-log", (route) =>
+		route.fulfill({ json: { ingest: {} } }),
+	);
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page.getByText(/Only the most recent processing of each bib is kept/),
+	).toBeVisible();
+});
