@@ -1583,6 +1583,17 @@ const unreadSettings = (lmsClientClass: string): Set<string> =>
  * The types the picker offers: the ones this deployment's dcb-service will create.
  * Read per call, because the flag is injected after this module loads.
  */
+/**
+ * Whether this deployment's dcb-service accepts this class's settings at all. 8.71.0's
+ * validator answers "Unsupported LMS Client Class" for the 9.0.0 classes, so an existing
+ * Koha there can be read but every save of it is refused.
+ */
+export const canSaveHostLmsClass = (
+	lmsClientClass: string | undefined | null,
+): boolean =>
+	isHostLmsExtendedConfigEnabled() ||
+	!CLASSES_SINCE_9_0_0.has(lmsClientClass ?? "");
+
 export const creatableHostLmsProfiles = (): HostLmsProfile[] =>
 	isHostLmsExtendedConfigEnabled()
 		? HOST_LMS_PROFILES

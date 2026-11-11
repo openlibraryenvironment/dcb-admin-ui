@@ -17,6 +17,7 @@ import {
 	mergeClientConfigEdit,
 	notWholeNumberClientConfig,
 	malformedClientConfig,
+	canSaveHostLmsClass,
 	originOf,
 } from "./hostLmsClientConfig";
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
@@ -1594,5 +1595,18 @@ describe("settings dcb-service 9.2.0 defaults", () => {
 		expect(missingNames(HOST_LMS_CLASSES.folio)).not.toContain(
 			"metadata-prefix",
 		);
+	});
+});
+
+// 8.71.0 answers "Unsupported LMS Client Class" to every save of a 9.0.0 class
+describe("canSaveHostLmsClass", () => {
+	it("refuses a Koha where the 9.0.0 settings are off", () => {
+		expect(canSaveHostLmsClass(HOST_LMS_CLASSES.koha)).toBe(false);
+		expect(canSaveHostLmsClass(HOST_LMS_CLASSES.sierra)).toBe(true);
+	});
+
+	it("allows every class from 9.0.0", () => {
+		extendedConfig(true);
+		expect(canSaveHostLmsClass(HOST_LMS_CLASSES.koha)).toBe(true);
 	});
 });

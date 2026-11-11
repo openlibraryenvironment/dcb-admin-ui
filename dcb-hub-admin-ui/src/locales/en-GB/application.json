@@ -1149,6 +1149,7 @@
 			"immutable_note": "The code and the client class cannot be changed. They identify this system to every mapping, location and record already pointing at it, so changing one is a new Host LMS rather than an edit.",
 			"no_profile": "There is no guided form for this client class, so the client configuration cannot be edited here.",
 			"config_preserved_title": "Some configuration is not shown here",
+			"unsupported_class": "This deployment's dcb-service does not accept {{ils}} settings, so this Host LMS cannot be edited here. It can be from dcb-service 9.0.0.",
 			"config_preserved_body": "These keys have no guided field. They are kept exactly as they are when you save: {{keys}}",
 			"changed": {
 				"name": "Name",

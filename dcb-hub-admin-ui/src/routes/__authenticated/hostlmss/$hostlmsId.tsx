@@ -48,6 +48,7 @@ import {
 	missingRequiredClientConfig,
 	notWholeNumberClientConfig,
 	malformedClientConfig,
+	canSaveHostLmsClass,
 } from "@helpers/hostLmsClientConfig";
 import {
 	type HostLmsVerificationResult,
@@ -287,12 +288,18 @@ function HostLMSDetails() {
 		);
 	}
 
+	const savable = canSaveHostLmsClass(hostlms.lmsClientClass);
 	const viewModeActions = [
 		{
 			key: "edit",
 			// eslint-disable-next-line react-hooks/refs -- handleEdit only reads the ref inside the returned click handler (via requestAnimationFrame), never during render
 			onClick: handleEdit(setEditMode, firstEditableFieldRef),
-			disabled: !isAnAdmin,
+			disabled: !isAnAdmin || !savable,
+			tooltip: savable
+				? undefined
+				: t("hostlms.edit.unsupported_class", {
+						ils: getILS(hostlms.lmsClientClass),
+					}),
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
