@@ -261,8 +261,16 @@ export default function FileUpload({
 			setImported(true);
 		} catch (error: any) {
 			if (error.response) {
-				setUploadErrorMessage(error.response.data);
-				const match = error.response.data.match(/line (\d+)/i);
+				// dcb-service answers a refused file in text, a failure in JSON: read either
+				const body = error.response.data;
+				const message =
+					typeof body === "string"
+						? body
+						: typeof body?.message === "string"
+							? body.message
+							: "";
+				setUploadErrorMessage(message);
+				const match = message.match(/line (\d+)/i);
 				if (match) setLineNumber(match[1]);
 			}
 			setErrorReference(requestReferenceOf(error));
