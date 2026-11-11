@@ -7,13 +7,10 @@ import { useAuth } from "react-oidc-context";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { serverAdmits } from "@constants/serverRoles";
+import { RULESET_STALE_TIME, rulesetKeys } from "@/queryOptions/rulesets";
 
 /** A consortium keeps tens of rulesets; one page of 100 holds them all. */
 const RULESET_PAGE_SIZE = 100;
-
-const rulesetKeys = {
-	names: () => ["objectRulesets", "names"] as const,
-};
 
 /**
  * A suppression ruleset name, picked from the rulesets dcb-service holds. A name that
@@ -57,8 +54,7 @@ export default function RulesetNameField({
 				.filter((rulesetName): rulesetName is string => !!rulesetName)
 				.sort();
 		},
-		// Rulesets change when an administrator edits one, not while a form is open
-		staleTime: 10 * 60 * 1000,
+		staleTime: RULESET_STALE_TIME,
 		enabled: canListRulesets,
 	});
 

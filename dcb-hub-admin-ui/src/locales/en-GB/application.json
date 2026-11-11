@@ -1751,6 +1751,8 @@
 		"principal_label": "Principal label",
 		"request_tooltip": "This is a {{ils}} library. The primary contact(s) are {{contact}}",
 		"ruleset_loading": "Loading ruleset information",
+		"ruleset_admin_only": "Only administrators can view a ruleset's rules.",
+		"ruleset_load_failed": "The rules for {{name}} could not be loaded.",
 		"search_placeholder": "Search by name",
 		"selected_libraries": "Selected libraries",
 		"settings_title": "Settings for {{name}}",
