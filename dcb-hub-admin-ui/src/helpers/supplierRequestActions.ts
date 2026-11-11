@@ -14,7 +14,13 @@ export type SupplierAction = "skip" | "cancel" | "reactivate";
 export type SupplierActionOutcome =
 	| { kind: "skipped" }
 	/** `paused` is false when the supplier did not report the hold cancelled. */
-	| { kind: "cancelled"; paused: boolean; supplierStatus?: string }
+	| {
+			kind: "cancelled";
+			paused: boolean;
+			supplierStatus?: string;
+			/** dcb-service's own account of what it did, where it gives one. */
+			message?: string;
+	  }
 	| { kind: "reactivated"; activeNow: boolean }
 	| { kind: "forbidden" }
 	| { kind: "notFound" }
@@ -68,6 +74,7 @@ export const runSupplierAction = async (
 				kind: "cancelled",
 				paused: data?.paused === true,
 				supplierStatus: data?.supplierStatus ?? undefined,
+				message: data?.message ?? undefined,
 			};
 		}
 		// A missing `active` is read as false, which would pause the supplier instead

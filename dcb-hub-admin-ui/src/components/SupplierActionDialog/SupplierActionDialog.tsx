@@ -11,6 +11,7 @@ import {
 	DialogContentText,
 	DialogTitle,
 	Stack,
+	Typography,
 } from "@mui/material";
 
 import RequestReference from "@components/RequestReference/RequestReference";
@@ -174,6 +175,11 @@ export default function SupplierActionDialog({
 									message:
 										outcome?.kind === "failed" ? (outcome.message ?? "") : "",
 								})}
+								{outcome?.kind === "cancelled" && outcome.message && (
+									<Typography variant="body2" sx={{ mt: 1 }}>
+										{outcome.message}
+									</Typography>
+								)}
 								{outcome?.kind === "failed" && outcome.reference && (
 									<RequestReference reference={outcome.reference} />
 								)}

@@ -81,6 +81,17 @@ describe("runSupplierAction", () => {
 		expect(post).toHaveBeenCalledWith(`/suppliers/requests/${ID}/skip`);
 	});
 
+	it("keeps the server's own account of a cancel", async () => {
+		const { client } = clientReturning({
+			paused: false,
+			message: "Hold cancellation requested; awaiting confirmation",
+		});
+
+		expect(await runSupplierAction(client, "cancel", ID)).toMatchObject({
+			message: "Hold cancellation requested; awaiting confirmation",
+		});
+	});
+
 	it("reports a cancel the supplier did not confirm as not paused", async () => {
 		const { client, post } = clientReturning({
 			paused: false,
