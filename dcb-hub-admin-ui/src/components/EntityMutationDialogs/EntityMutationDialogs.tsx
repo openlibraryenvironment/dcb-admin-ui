@@ -15,6 +15,7 @@ export default function EntityMutationDialogs({
 	editInformation,
 	onConfirm,
 	onClose,
+	busy,
 	alert,
 	onAlertClose,
 }: EntityMutationDialogProps) {
@@ -27,6 +28,7 @@ export default function EntityMutationDialogs({
 				editInformation={editInformation}
 				onConfirm={onConfirm}
 				onClose={onClose}
+				busy={busy}
 			/>
 			<TimedAlert
 				open={alert.open}

@@ -39,6 +39,8 @@ interface ConfirmationProps {
 	editInformation?: string | Record<string, any>;
 	customWarningText?: ReactNode;
 	onClose: () => void;
+	/** The confirmed action is running: nothing can be confirmed or dismissed again. */
+	busy?: boolean;
 	onConfirm: (reason: string, category: string, url: string) => void;
 }
 
@@ -50,6 +52,7 @@ export default function Confirmation({
 	customWarningText,
 	onClose,
 	onConfirm,
+	busy = false,
 }: ConfirmationProps) {
 	const { t } = useTranslation();
 
@@ -115,6 +118,7 @@ export default function Confirmation({
 		<Dialog
 			open={open}
 			onClose={(_event, reason) => {
+				if (busy) return;
 				// For the session warning, onClose IS "log me out" - it is wired to the
 				// destructive action. A stray Escape or a click on the backdrop must
 				// therefore not go through it; dismissing an "are you still there?"
@@ -241,7 +245,12 @@ export default function Confirmation({
 				</DialogContent>
 
 				<DialogActions sx={{ px: 3, pb: 2 }}>
-					<Button onClick={onClose} color="inherit" variant="text">
+					<Button
+						onClick={onClose}
+						color="inherit"
+						variant="text"
+						disabled={busy}
+					>
 						{isUnsaved
 							? t("ui.actions.keep_editing")
 							: isSessionWarning
@@ -261,6 +270,7 @@ export default function Confirmation({
 						}
 						variant="contained"
 						disabled={requiresAuditFields && !isValid}
+						loading={busy}
 						// eslint-disable-next-line jsx-a11y/no-autofocus -- deliberate focus management for the modal's primary action; intentionally skipped for delete to avoid accidental confirmation
 						autoFocus={!isDelete}
 					>

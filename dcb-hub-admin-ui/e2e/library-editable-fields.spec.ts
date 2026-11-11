@@ -168,6 +168,25 @@ test.describe("Library profile - editable fields", () => {
 	});
 });
 
+// The confirm button stayed live while the mutation ran, so a double click sent it twice
+test("a double-clicked confirmation saves once", async ({ page }) => {
+	const requests = await captureUpdateLibrary(page);
+	await page.goto(`/libraries/${LIBRARY_ID}`);
+	await startEditing(page);
+	await page
+		.getByRole("textbox", { name: "Principal label" })
+		.fill("Library card number");
+	await page.getByRole("button", { name: "Save" }).click();
+	const audit = page.getByRole("dialog");
+	await expect(audit.getByRole("textbox", { name: /reason/i })).toBeEnabled();
+	await audit.getByRole("textbox", { name: /reason/i }).fill("Patron wording");
+
+	await audit.getByRole("button", { name: "Save changes" }).dblclick();
+
+	await expect(audit).toBeHidden();
+	expect(requests).toHaveLength(1);
+});
+
 test.describe("Library service - editable fields", () => {
 	for (const name of ["Discovery system/PAC(s)", "Patron website"]) {
 		test(`${name} is editable`, async ({ page }) => {
