@@ -1,17 +1,10 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import dayjs from "dayjs";
 import {
 	AccordionSummary,
 	Alert,
 	CircularProgress,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
 	Typography,
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
@@ -22,6 +15,7 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { bibAuditLogQuery } from "@/queryOptions/bibAuditLog";
+import BibAuditTable from "./BibAuditTable";
 
 /** What the last ingest of this bib recorded, fetched when the section is opened. */
 export default function BibAuditLog({ bibId }: { bibId: string }) {
@@ -56,34 +50,7 @@ export default function BibAuditLog({ bibId }: { bibId: string }) {
 				) : !data?.length ? (
 					<Typography>{t("bibRecords.audit_log.none")}</Typography>
 				) : (
-					<TableContainer>
-						<Table size="small" aria-labelledby="bib-audit-log-summary">
-							<TableHead>
-								<TableRow>
-									<TableCell component="th" scope="col">
-										{t("bibRecords.audit_log.time")}
-									</TableCell>
-									<TableCell component="th" scope="col">
-										{t("bibRecords.audit_log.process")}
-									</TableCell>
-									<TableCell component="th" scope="col">
-										{t("bibRecords.audit_log.message")}
-									</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{data.map((entry) => (
-									<TableRow key={entry.id}>
-										<TableCell>
-											{dayjs(entry.timestamp).format("YYYY-MM-DD HH:mm:ss")}
-										</TableCell>
-										<TableCell>{entry.processType}</TableCell>
-										<TableCell>{entry.message}</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
-					</TableContainer>
+					<BibAuditTable entries={data} labelledBy="bib-audit-log-summary" />
 				)}
 			</StyledAccordionDetails>
 		</StyledAccordion>

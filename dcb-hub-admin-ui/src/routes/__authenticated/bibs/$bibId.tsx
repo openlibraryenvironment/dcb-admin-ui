@@ -9,6 +9,7 @@ import { useAuth } from "react-oidc-context";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import BibAuditLog from "@components/BibAuditLog/BibAuditLog";
+import DeletedBib from "@components/BibAuditLog/DeletedBib";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
 import Loading from "@components/Loading/Loading";
@@ -21,6 +22,8 @@ import {
 } from "@components/StyledAccordion/StyledAccordion";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { bibAuditLogQuery } from "@/queryOptions/bibAuditLog";
 import { getBibMainDetails } from "@queries/getBibMainDetails";
 import { getBibSourceRecord } from "@queries/getBibSourceRecord";
 import { getAgency } from "@queries/getAgency";
@@ -68,6 +71,17 @@ function SourceBibDetails() {
 	});
 
 	const bib: Bib = bibData?.sourceBibs?.content?.[0];
+
+	const restClient = useDcbRestClient();
+	const bibNotFound = !bibLoading && !bibError && !bib;
+	const askWhyMissing = isAdmin && bibNotFound;
+	const missingBibAudit = useQuery(
+		bibAuditLogQuery(restClient, bibId, askWhyMissing),
+	);
+	// Gated: this key is shared with the audit log section, and a disabled observer still
+	// reports isLoading while the section fetches - which unmounted the section.
+	const missingBibAuditLoading = askWhyMissing && missingBibAudit.isLoading;
+
 	const sourceSystemId = bib?.sourceSystemId;
 	const sourceSystemUrl = sourceSystemId ? `/hostlmss/${sourceSystemId}` : "";
 
@@ -106,7 +120,7 @@ function SourceBibDetails() {
 		setIsSourceRecordExpanded(targetState);
 	};
 
-	if (bibLoading) {
+	if (bibLoading || missingBibAuditLoading) {
 		return (
 			// The SAME chrome as the loaded branch, titled with the generic label for
 			// this kind of record. Withholding the breadcrumbs and the title box and
@@ -123,6 +137,10 @@ function SourceBibDetails() {
 				/>
 			</PageContainer>
 		);
+	}
+
+	if (askWhyMissing && missingBibAudit.data?.length) {
+		return <DeletedBib entries={missingBibAudit.data} />;
 	}
 
 	if (bibError || !bib) {

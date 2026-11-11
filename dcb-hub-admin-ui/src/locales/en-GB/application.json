@@ -112,6 +112,12 @@
 			"none": "Nothing was recorded the last time this record was ingested.",
 			"error": "The ingest audit log could not be loaded."
 		},
+		"deleted": {
+			"title": "This bib record no longer exists",
+			"explanation": "DCB last recorded this bib record on {{date}} and has deleted it since. DCB does not record when or why a bib record is deleted.",
+			"audit_log": "What DCB recorded the last time it ingested this record",
+			"back": "Back to bib records"
+		},
 		"bibs_one": "bib record",
 		"contributor_uuid": "Contributor UUID",
 		"edition": "Edition",

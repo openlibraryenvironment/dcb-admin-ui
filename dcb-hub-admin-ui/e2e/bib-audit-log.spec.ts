@@ -78,3 +78,87 @@ for (const scheme of ["light", "dark"] as const) {
 		await scanForViolations(page);
 	});
 }
+
+test.describe("A bib that no longer exists", () => {
+	const NO_SUCH_BIB = { sourceBibs: { totalSize: 0, content: [] } };
+
+	test.beforeEach(async ({ page }) => {
+		await overrideGraphQL(page, { LoadBibMainDetails: NO_SUCH_BIB });
+	});
+
+	test("an ADMIN is told it was deleted, and shown what DCB last recorded", async ({
+		page,
+	}) => {
+		await page.route(`**/bibs/${BIB_ID}/audit-log`, (route) =>
+			route.fulfill({ json: AUDIT_LOG }),
+		);
+		await seedAuth(page, { roles: ADMIN_ROLES });
+		await page.goto(`/bibs/${BIB_ID}`);
+
+		await expect(
+			page.getByRole("heading", {
+				level: 1,
+				name: "This bib record no longer exists",
+			}),
+		).toBeVisible();
+		await expect(
+			page.getByText(/last recorded this bib record on 2026-11-01/),
+		).toBeVisible();
+		await expect(
+			page.getByRole("cell", { name: "Matched on ISBN 9780000000001" }),
+		).toBeVisible();
+	});
+
+	test("an ADMIN is told it cannot be found when DCB recorded nothing for it", async ({
+		page,
+	}) => {
+		await page.route(`**/bibs/${BIB_ID}/audit-log`, (route) =>
+			route.fulfill({ json: {} }),
+		);
+		await seedAuth(page, { roles: ADMIN_ROLES });
+		await page.goto(`/bibs/${BIB_ID}`);
+
+		await expect(
+			page.getByRole("heading", {
+				level: 1,
+				name: "Unable to find the record",
+			}),
+		).toBeVisible();
+	});
+
+	test("without ADMIN it is not found, and the audit log is never asked for", async ({
+		page,
+	}) => {
+		let fetched = 0;
+		await page.route(`**/bibs/${BIB_ID}/audit-log`, (route) => {
+			fetched += 1;
+			return route.fulfill({ json: AUDIT_LOG });
+		});
+		await seedAuth(page, { roles: ["CONSORTIUM_ADMIN"] });
+		await page.goto(`/bibs/${BIB_ID}`);
+
+		await expect(
+			page.getByRole("heading", {
+				level: 1,
+				name: "Unable to find the record",
+			}),
+		).toBeVisible();
+		expect(fetched).toBe(0);
+	});
+
+	for (const scheme of ["light", "dark"] as const) {
+		test(`passes axe, ${scheme}`, async ({ page }) => {
+			await page.emulateMedia({ colorScheme: scheme });
+			await page.route(`**/bibs/${BIB_ID}/audit-log`, (route) =>
+				route.fulfill({ json: AUDIT_LOG }),
+			);
+			await seedAuth(page, { roles: ADMIN_ROLES });
+			await page.goto(`/bibs/${BIB_ID}`);
+			await expect(
+				page.getByRole("cell", { name: "Matched on ISBN 9780000000001" }),
+			).toBeVisible();
+
+			await scanForViolations(page);
+		});
+	}
+});
