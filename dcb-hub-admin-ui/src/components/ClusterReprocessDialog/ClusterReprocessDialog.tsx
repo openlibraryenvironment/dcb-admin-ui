@@ -82,6 +82,11 @@ export default function ClusterReprocessDialog({
 						{t("search.reprocess_cluster.body")}
 					</DialogContentText>
 					<div role="status" aria-live="polite">
+						{mutation.isError && (
+							<Alert severity="error">
+								{t("search.reprocess_cluster.interrupted")}
+							</Alert>
+						)}
 						{outcome && (
 							<Alert
 								severity={outcome.kind === "started" ? "success" : "error"}

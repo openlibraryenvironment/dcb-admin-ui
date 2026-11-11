@@ -117,6 +117,13 @@ describe("runSupplierAction", () => {
 		);
 	});
 
+	// The mutation cache renews the session on a 401, and shows maintenance on a 503
+	it.each([401, 503])("leaves a %i to the mutation cache", async (status) => {
+		await expect(
+			runSupplierAction(clientFailing(status), "skip", ID),
+		).rejects.toMatchObject({ response: { status } });
+	});
+
 	it("carries the server's message on any other failure", async () => {
 		const outcome = await runSupplierAction(
 			clientFailing(502, { message: "Supplier unreachable" }),

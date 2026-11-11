@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { isHandledGlobally } from "@helpers/globalHttpErrors";
 import { requestReferenceOf } from "@helpers/requestReference";
 
 /**
@@ -73,6 +74,7 @@ export const runSupplierAction = async (
 		const { data } = await client.patch(`${base}/active`, { active: true });
 		return { kind: "reactivated", activeNow: data?.activeNow === true };
 	} catch (error) {
+		if (isHandledGlobally(error)) throw error;
 		if (!axios.isAxiosError(error))
 			return { kind: "failed", reference: requestReferenceOf(error) };
 

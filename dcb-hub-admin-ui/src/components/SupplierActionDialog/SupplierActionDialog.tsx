@@ -161,6 +161,11 @@ export default function SupplierActionDialog({
 						</Alert>
 					)}
 					<div role="status" aria-live="polite">
+						{mutation.isError && (
+							<Alert severity="error">
+								{t("patron_request.supplier_actions.outcome.interrupted")}
+							</Alert>
+						)}
 						{alert && (
 							<Alert severity={alert.severity}>
 								{t(`patron_request.supplier_actions.outcome.${alert.key}`, {

@@ -2740,6 +2740,7 @@
 			"reactivate_title": "Reactivate this supplier?",
 			"reactivate_body": "DCB will treat {{agency}} as this request's active supplier again, so tracking and re-resolution resume.",
 			"outcome": {
+				"interrupted": "Your session was renewed or the service was unavailable, so nothing was changed. Try again.",
 				"skipped": "DCB cancelled the hold at {{agency}} and checked the request again. Its status on this page shows what happened.",
 				"cancelled": "The hold at {{agency}} is cancelled and the supplier is paused.",
 				"cancel_not_confirmed": "{{agency}} did not report the hold cancelled, so the supplier was not paused.",
@@ -3083,7 +3084,8 @@
 			"in_progress": "Exporting member records…",
 			"empty": "This cluster has no member records to export.",
 			"forbidden": "Only administrators can export a cluster's member records.",
-			"failed": "The member records could not be exported."
+			"failed": "The member records could not be exported.",
+			"interrupted": "Your session was renewed or the service was unavailable, so nothing was exported. Try again."
 		},
 		"reprocess_cluster": {
 			"action": "Reprocess cluster",
@@ -3092,6 +3094,7 @@
 			"confirm": "Reprocess",
 			"started": "Reprocessing has started. Members return or move as they are processed, so this page can change over the next few minutes.",
 			"forbidden": "Only administrators can reprocess a cluster.",
+			"interrupted": "Your session was renewed or the service was unavailable, so the cluster was not reprocessed. Try again.",
 			"failed": "The cluster could not be reprocessed."
 		},
 		"cluster_title": "Cluster details for {{record}}",

@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { isHandledGlobally } from "@helpers/globalHttpErrors";
 
 import { downloadBlob } from "@helpers/downloadBlob";
 import { requestReferenceOf } from "@helpers/requestReference";
@@ -32,6 +33,7 @@ export const exportClusterMembers = async (
 		);
 		return { kind: "downloaded" };
 	} catch (error) {
+		if (isHandledGlobally(error)) throw error;
 		if (axios.isAxiosError(error) && error.response?.status === 403)
 			return { kind: "forbidden" };
 		return { kind: "failed", reference: requestReferenceOf(error) };

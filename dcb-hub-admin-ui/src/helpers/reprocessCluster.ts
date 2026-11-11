@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import { isHandledGlobally } from "@helpers/globalHttpErrors";
 
 import { requestReferenceOf } from "@helpers/requestReference";
 
@@ -21,6 +22,7 @@ export const reprocessCluster = async (
 		await client.post(`/clusters/${encodeURIComponent(clusterId)}/reprocess`);
 		return { kind: "started" };
 	} catch (error) {
+		if (isHandledGlobally(error)) throw error;
 		if (axios.isAxiosError(error) && error.response?.status === 403)
 			return { kind: "forbidden" };
 		return { kind: "failed", reference: requestReferenceOf(error) };

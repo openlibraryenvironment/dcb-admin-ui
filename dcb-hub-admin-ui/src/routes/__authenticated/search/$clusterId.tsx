@@ -117,6 +117,11 @@ function ClusterLayout() {
 			pageActions={pageActions}
 		>
 			<div role="status" aria-live="polite">
+				{exportMembers.isError && (
+					<Alert severity="error" onClose={() => exportMembers.reset()}>
+						{t("search.export_members.interrupted")}
+					</Alert>
+				)}
 				{exportOutcome && exportOutcome.kind !== "downloaded" && (
 					<Alert
 						severity={exportOutcome.kind === "empty" ? "info" : "error"}

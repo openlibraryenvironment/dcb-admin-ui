@@ -31,6 +31,12 @@ describe("reprocessCluster", () => {
 		});
 	});
 
+	it.each([401, 503])("leaves a %i to the mutation cache", async (status) => {
+		await expect(reprocessCluster(failing(status), ID)).rejects.toMatchObject({
+			response: { status },
+		});
+	});
+
 	it("reports any other failure as failed", async () => {
 		expect(await reprocessCluster(failing(500), ID)).toMatchObject({
 			kind: "failed",
