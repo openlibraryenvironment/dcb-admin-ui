@@ -3037,6 +3037,12 @@
 		"date_due": "Date due",
 		"event_type": "Event type",
 		"cluster_matched": "Cluster matched",
+		"members": {
+			"selected": "Selected bib",
+			"selected_yes": "Selected",
+			"processing_state": "Processing state",
+			"last_processed": "Last processed"
+		},
 		"cluster_explanation_empty": "No clustering events are held for this cluster. Only the most recent processing of each bib is kept, and only bibs that belong to the cluster now are shown.",
 		"clustering_event": {
 			"highConfidenceMatch": "Match: shared identifier",
