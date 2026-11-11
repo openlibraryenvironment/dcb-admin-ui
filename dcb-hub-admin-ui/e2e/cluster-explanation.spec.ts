@@ -87,3 +87,20 @@ test("a merge is named as one, and links to the cluster it merged into", async (
 			.getByRole("link", { name: CLUSTER_ID }),
 	).toHaveAttribute("href", new RegExp(`/search/${CLUSTER_ID}/cluster$`));
 });
+
+// The query throws, so the tab's own error branch never rendered: the route's does
+test("a failure to load is reported inside the cluster page, which stays", async ({
+	page,
+}) => {
+	await page.route("**/clusters/*/audit-log", (route) =>
+		route.fulfill({ status: 500, json: {} }),
+	);
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page
+			.getByRole("tabpanel", { name: "Explain clustering" })
+			.getByRole("heading", { name: "500 Server error" }),
+	).toBeVisible();
+	await expect(page.getByRole("tab", { name: "Items" })).toBeVisible();
+});

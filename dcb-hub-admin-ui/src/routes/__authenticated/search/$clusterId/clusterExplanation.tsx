@@ -17,7 +17,6 @@ import { clusterExplanationView } from "@constants/dataGrid/gridViews";
 import DataGrid from "@components/DataGrid/DataGrid";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
-import Error from "@components/Error/Error";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import {
@@ -62,7 +61,8 @@ function ClusterExplanation() {
 	const [rowGroupingModel, setRowGroupingModel] =
 		useState<GridRowGroupingModel>(["subjectId"]);
 
-	const { data, isLoading, isError } = useQuery({
+	// A failure throws to the route's error component, inside the cluster page's tabs
+	const { data, isLoading } = useQuery({
 		queryKey: ["clusterAuditLog", clusterId],
 		queryFn: async () => {
 			const res = await client.get(`/clusters/${clusterId}/audit-log`);
@@ -141,15 +141,6 @@ function ClusterExplanation() {
 					document_type: t("nav.search.cluster_explainer").toLowerCase(),
 				})}
 				subtitle={t("ui.info.wait")}
-			/>
-		);
-	if (isError)
-		return (
-			<Error
-				title={t("search.items_error_title")}
-				message={t("ui.info.connection_issue")}
-				action={t("ui.actions.reload")}
-				onAction={() => location.reload()}
 			/>
 		);
 
