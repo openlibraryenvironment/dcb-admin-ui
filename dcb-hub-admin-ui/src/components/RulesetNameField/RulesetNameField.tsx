@@ -2,8 +2,11 @@ import { useTranslation } from "react-i18next";
 import { Controller, useFormContext } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import { Autocomplete, TextField } from "@mui/material";
+import { useAuth } from "react-oidc-context";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { serverAdmits } from "@constants/serverRoles";
 
 /** A consortium keeps tens of rulesets; one page of 100 holds them all. */
 const RULESET_PAGE_SIZE = 100;
@@ -34,8 +37,16 @@ export default function RulesetNameField({
 	const { t } = useTranslation();
 	const { control } = useFormContext();
 	const client = useDcbRestClient();
+	const auth = useAuth();
+	// Without the list the field is free entry; a consortium administrator may create a Host
+	// LMS, and a 403 here must not replace the page they are creating it on
+	const canListRulesets = serverAdmits(
+		"readRulesets",
+		auth?.user?.profile?.roles as string[] | undefined,
+	);
 
 	const { data: rulesetNames = [], isLoading } = useQuery({
+		...nonCriticalQuery,
 		queryKey: rulesetKeys.names(),
 		queryFn: async () => {
 			const response = await client.get("/object-rules", {
@@ -48,6 +59,7 @@ export default function RulesetNameField({
 		},
 		// Rulesets change when an administrator edits one, not while a form is open
 		staleTime: 10 * 60 * 1000,
+		enabled: canListRulesets,
 	});
 
 	return (
@@ -57,7 +69,10 @@ export default function RulesetNameField({
 			render={({ field }) => {
 				const value = field.value ?? "";
 				const unknown =
-					value !== "" && !isLoading && !rulesetNames.includes(value);
+					canListRulesets &&
+					value !== "" &&
+					!isLoading &&
+					!rulesetNames.includes(value);
 
 				return (
 					<Autocomplete
