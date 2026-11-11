@@ -66,7 +66,7 @@ export default function ScopeSelector({
 					helperText={failed ? t("insights.scope.failed") : undefined}
 				/>
 			)}
-			sx={{ minWidth: 320, maxWidth: 640 }}
+			sx={{ minWidth: { sm: 320 }, maxWidth: 640 }}
 		/>
 	);
 }

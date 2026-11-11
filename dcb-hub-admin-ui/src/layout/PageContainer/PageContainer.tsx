@@ -111,9 +111,13 @@ export default function PageContainer({
 				>
 					<Stack
 						direction="row"
+						useFlexGap
+						spacing={2}
 						sx={{
 							alignItems: "center",
 							justifyContent: "space-between",
+							// The actions drop below a long title rather than off the screen
+							flexWrap: "wrap",
 							p: 3,
 							pb: 0,
 						}}
@@ -124,6 +128,8 @@ export default function PageContainer({
 								spacing={1}
 								sx={{
 									alignItems: "baseline",
+									minWidth: 0,
+									overflowWrap: "anywhere",
 								}}
 							>
 								{renderTitle()}

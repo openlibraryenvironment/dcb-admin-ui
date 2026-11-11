@@ -65,7 +65,7 @@ export default function PageActionsMenu({
 
 	if (mode === "edit") {
 		return (
-			<Stack direction="row" spacing={1}>
+			<Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
 				{actions.map((action, index) => (
 					<React.Fragment key={index}>
 						{React.isValidElement(action) ? action : null}
@@ -127,7 +127,9 @@ export default function PageActionsMenu({
 							}}
 							disabled={disabled || Boolean(pending)}
 						>
-							{startIcon && <span style={{ marginInlineEnd: 8 }}>{startIcon}</span>}
+							{startIcon && (
+								<span style={{ marginInlineEnd: 8 }}>{startIcon}</span>
+							)}
 							{label}
 						</MenuItem>
 					);
