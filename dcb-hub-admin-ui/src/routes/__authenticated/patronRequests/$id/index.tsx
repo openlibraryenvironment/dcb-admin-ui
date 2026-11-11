@@ -669,7 +669,7 @@ function RouteComponent() {
 	// ADMIN as asked, and CONSORTIUM_ADMIN because dcb-service refuses anyone without it
 	const supplier = patronRequest?.suppliers?.[0];
 	if (isAdmin && roles.includes("CONSORTIUM_ADMIN") && supplier?.id) {
-		for (const action of availableSupplierActions(supplier)) {
+		for (const action of availableSupplierActions(supplier, patronRequest)) {
 			pageActions.push({
 				key: `supplier-${action}`,
 				label: t(`patron_request.supplier_actions.${action}`),

@@ -24,21 +24,50 @@ const clientFailing = (status: number, data: unknown = {}) => {
 };
 
 describe("availableSupplierActions", () => {
+	const placed = { status: "REQUEST_PLACED_AT_SUPPLYING_AGENCY" };
+
 	it("offers skip and cancel only while the supplier is active", () => {
-		expect(availableSupplierActions({ isActive: true })).toEqual([
+		expect(availableSupplierActions({ isActive: true }, placed)).toEqual([
 			"skip",
 			"cancel",
 		]);
 	});
 
 	it("offers reactivate only once it is not", () => {
-		expect(availableSupplierActions({ isActive: false })).toEqual([
+		expect(availableSupplierActions({ isActive: false }, placed)).toEqual([
 			"reactivate",
 		]);
 	});
 
 	it("offers nothing without a supplier", () => {
-		expect(availableSupplierActions(undefined)).toEqual([]);
+		expect(availableSupplierActions(undefined, placed)).toEqual([]);
+	});
+
+	it.each(["PICKUP_TRANSIT", "LOANED", "RETURN_TRANSIT", "FINALISED"])(
+		"offers nothing on an active supplier once the item has shipped (%s)",
+		(status) => {
+			expect(availableSupplierActions({ isActive: true }, { status })).toEqual(
+				[],
+			);
+		},
+	);
+
+	it("offers only cancel for an error raised before shipment", () => {
+		expect(
+			availableSupplierActions(
+				{ isActive: true },
+				{ status: "ERROR", previousStatus: "CONFIRMED" },
+			),
+		).toEqual(["cancel"]);
+	});
+
+	it("offers nothing for an error raised after shipment", () => {
+		expect(
+			availableSupplierActions(
+				{ isActive: true },
+				{ status: "ERROR", previousStatus: "LOANED" },
+			),
+		).toEqual([]);
 	});
 });
 

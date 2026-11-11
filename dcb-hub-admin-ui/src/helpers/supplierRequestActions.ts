@@ -19,11 +19,33 @@ export type SupplierActionOutcome =
 	| { kind: "notFound" }
 	| { kind: "failed"; message?: string; reference: string | null };
 
+// HandleSupplierRequestCancelled's statuses, 8.71.0-9.3.0. After them the item has shipped,
+// and cancelling its hold strands it (DCB-2193): 9.2.0 refuses skip outside them with 409
+// SR_NOT_SKIPPABLE, 8.71.0 does not, and no release guards cancel.
+const BEFORE_SHIPMENT: ReadonlySet<string> = new Set([
+	"REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+	"CONFIRMED",
+	"REQUEST_PLACED_AT_BORROWING_AGENCY",
+	"REQUEST_PLACED_AT_PICKUP_AGENCY",
+]);
+
 export const availableSupplierActions = (
 	supplier: { isActive?: boolean | null } | null | undefined,
+	request:
+		| { status?: string | null; previousStatus?: string | null }
+		| null
+		| undefined,
 ): SupplierAction[] => {
 	if (!supplier) return [];
-	return supplier.isActive ? ["skip", "cancel"] : ["reactivate"];
+	if (!supplier.isActive) return ["reactivate"];
+
+	const status = request?.status ?? "";
+	if (BEFORE_SHIPMENT.has(status)) return ["skip", "cancel"];
+	// An error raised before shipment can still have its hold cancelled; skipping it would
+	// need the status HandleSupplierRequestCancelled reads, which ERROR is not
+	if (status === "ERROR" && BEFORE_SHIPMENT.has(request?.previousStatus ?? ""))
+		return ["cancel"];
+	return [];
 };
 
 export const runSupplierAction = async (
