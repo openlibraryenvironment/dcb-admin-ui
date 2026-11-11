@@ -110,7 +110,14 @@
 			"source_value": "As read from the record",
 			"value": "Match value",
 			"none": "This bib has no match points, so it cannot cluster with another.",
-			"error": "The match points could not be worked out."
+			"error": "The match points could not be worked out.",
+			"compare": "Compare",
+			"compare_with": "Compare with bib UUID",
+			"compare_invalid": "Enter a bib's UUID.",
+			"compare_failed": "That bib's match points could not be worked out.",
+			"shared": "Shared with the other bib",
+			"shared_count_one": "{{count}} of this bib's {{total}} match points is shared with the other bib.",
+			"shared_count_other": "{{count}} of this bib's {{total}} match points are shared with the other bib."
 		},
 		"audit_log": {
 			"open_bib": "Open the matched bib",

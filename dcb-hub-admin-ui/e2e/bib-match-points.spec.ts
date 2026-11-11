@@ -58,3 +58,41 @@ test("is not offered without ADMIN", async ({ page }) => {
 		0,
 	);
 });
+
+// Two bibs side by side: the shared values are why they cluster, or the missing ones why not
+test("compares the bib's match points with another bib's", async ({ page }) => {
+	const OTHER = "0be00000-1111-5111-9111-0be0be0be0be";
+	await page.route(`**/bibs/*/matchpoints`, (route) =>
+		route.fulfill({
+			json: route.request().url().includes(OTHER)
+				? [POINTS[0]]
+				: [
+						...POINTS,
+						{
+							value: "7a1e0000-2222-5222-9222-7a1e7a1e7a1e",
+							domain: "TITLE",
+							sourceValueHint: "alpha and the art of clustering",
+						},
+					],
+		}),
+	);
+	await seedAuth(page, { roles: ADMIN_ROLES });
+	await page.goto(`/bibs/${BIB_ID}`);
+	await page.getByRole("button", { name: "Match points" }).click();
+
+	await page
+		.getByRole("textbox", { name: "Compare with bib UUID" })
+		.fill(OTHER);
+	await page.getByRole("button", { name: "Compare", exact: true }).click();
+
+	await expect(
+		page.getByRole("status").filter({ hasText: "shared" }),
+	).toHaveText("1 of this bib's 2 match points is shared with the other bib.");
+	await expect(page.getByRole("row").filter({ hasText: "ISBN" })).toContainText(
+		"Yes",
+	);
+	await expect(
+		page.getByRole("row").filter({ hasText: "TITLE" }),
+	).toContainText("No");
+	await scanForViolations(page);
+});
