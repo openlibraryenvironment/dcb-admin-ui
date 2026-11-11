@@ -13,12 +13,8 @@ import {
 	DialogContent,
 	DialogTitle,
 	Divider,
-	FormControl,
-	FormHelperText,
 	Grid,
-	InputLabel,
 	MenuItem,
-	Select,
 	Stack,
 	TextField,
 	Typography,
@@ -442,25 +438,22 @@ export default function NewMapping({
 								name="fromContext"
 								control={control}
 								render={({ field }) => (
-									<FormControl fullWidth error={!!errors.fromContext}>
-										<InputLabel>{t("mappings.new.from_context")}</InputLabel>
-										<Select
-											{...field}
-											label={t("mappings.new.from_context")}
-											onChange={(e) => handleFromContextChange(field, e)}
-										>
-											{contextOptions.map((opt) => (
-												<MenuItem key={opt} value={opt}>
-													{opt}
-												</MenuItem>
-											))}
-										</Select>
-										{errors.fromContext && (
-											<FormHelperText>
-												{errors.fromContext.message}
-											</FormHelperText>
-										)}
-									</FormControl>
+									<TextField
+										{...field}
+										select
+										fullWidth
+										id="new-mapping-from-context"
+										label={t("mappings.new.from_context")}
+										onChange={(e) => handleFromContextChange(field, e)}
+										error={!!errors.fromContext}
+										helperText={errors.fromContext?.message}
+									>
+										{contextOptions.map((opt) => (
+											<MenuItem key={opt} value={opt}>
+												{opt}
+											</MenuItem>
+										))}
+									</TextField>
 								)}
 							/>
 						)}
@@ -470,21 +463,21 @@ export default function NewMapping({
 							control={control}
 							render={({ field }) =>
 								fromValues ? (
-									<FormControl fullWidth error={!!errors.fromValue}>
-										<InputLabel>{t("mappings.new.from_value")}</InputLabel>
-										<Select {...field} label={t("mappings.new.from_value")}>
-											{fromValues.map((val) => (
-												<MenuItem key={val} value={val}>
-													{val}
-												</MenuItem>
-											))}
-										</Select>
-										{errors.fromValue && (
-											<FormHelperText>
-												{errors.fromValue.message}
-											</FormHelperText>
-										)}
-									</FormControl>
+									<TextField
+										{...field}
+										select
+										fullWidth
+										id="new-mapping-from-value"
+										label={t("mappings.new.from_value")}
+										error={!!errors.fromValue}
+										helperText={errors.fromValue?.message}
+									>
+										{fromValues.map((val) => (
+											<MenuItem key={val} value={val}>
+												{val}
+											</MenuItem>
+										))}
+									</TextField>
 								) : (
 									<TextField
 										{...field}
@@ -502,21 +495,21 @@ export default function NewMapping({
 								name="toContext"
 								control={control}
 								render={({ field }) => (
-									<FormControl fullWidth error={!!errors.toContext}>
-										<InputLabel>{t("mappings.new.to_context")}</InputLabel>
-										<Select {...field} label={t("mappings.new.to_context")}>
-											{contextOptions.map((opt) => (
-												<MenuItem key={opt} value={opt}>
-													{opt}
-												</MenuItem>
-											))}
-										</Select>
-										{errors.toContext && (
-											<FormHelperText>
-												{errors.toContext.message}
-											</FormHelperText>
-										)}
-									</FormControl>
+									<TextField
+										{...field}
+										select
+										fullWidth
+										id="new-mapping-to-context"
+										label={t("mappings.new.to_context")}
+										error={!!errors.toContext}
+										helperText={errors.toContext?.message}
+									>
+										{contextOptions.map((opt) => (
+											<MenuItem key={opt} value={opt}>
+												{opt}
+											</MenuItem>
+										))}
+									</TextField>
 								)}
 							/>
 						)}
@@ -526,19 +519,21 @@ export default function NewMapping({
 							control={control}
 							render={({ field }) =>
 								toValues ? (
-									<FormControl fullWidth error={!!errors.toValue}>
-										<InputLabel>{t("mappings.new.to_value")}</InputLabel>
-										<Select {...field} label={t("mappings.new.to_value")}>
-											{toValues.map((val) => (
-												<MenuItem key={val} value={val}>
-													{val}
-												</MenuItem>
-											))}
-										</Select>
-										{errors.toValue && (
-											<FormHelperText>{errors.toValue.message}</FormHelperText>
-										)}
-									</FormControl>
+									<TextField
+										{...field}
+										select
+										fullWidth
+										id="new-mapping-to-value"
+										label={t("mappings.new.to_value")}
+										error={!!errors.toValue}
+										helperText={errors.toValue?.message}
+									>
+										{toValues.map((val) => (
+											<MenuItem key={val} value={val}>
+												{val}
+											</MenuItem>
+										))}
+									</TextField>
 								) : (
 									<TextField
 										{...field}

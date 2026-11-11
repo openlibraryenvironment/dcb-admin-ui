@@ -276,6 +276,7 @@ function Settings() {
 									<FormControl fullWidth>
 										<Select
 											{...field}
+											labelId="label-borrowing-status"
 											value={field.value?.toString() ?? ""}
 											onChange={(e) =>
 												field.onChange(e.target.value === "true")
@@ -317,6 +318,7 @@ function Settings() {
 									<FormControl fullWidth>
 										<Select
 											{...field}
+											labelId="label-supplying-status"
 											value={field.value?.toString() ?? ""}
 											onChange={(e) =>
 												field.onChange(e.target.value === "true")
