@@ -869,8 +869,8 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							</Typography>
 							<Typography variant="attributeText" component="div">
 								<Link
-									component={RouterLink}
-									to={`/bibs/${row?.id}`}
+									to="/bibs/$bibId"
+									params={{ bibId: row?.subjectId }}
 									underline="hover"
 									onClick={(e: React.MouseEvent) => e.stopPropagation()}
 								>
@@ -885,14 +885,18 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 								{t("search.bib_matched_against")}
 							</Typography>
 							<Typography variant="attributeText" component="div">
-								<Link
-									component={RouterLink}
-									to={`/bibs/${row?.id}`}
-									underline="hover"
-									onClick={(e: React.MouseEvent) => e.stopPropagation()}
-								>
-									<RenderAttribute attribute={row?.id} />
-								</Link>
+								{row?.matchedBibId ? (
+									<Link
+										to="/bibs/$bibId"
+										params={{ bibId: row.matchedBibId }}
+										underline="hover"
+										onClick={(e: React.MouseEvent) => e.stopPropagation()}
+									>
+										<RenderAttribute attribute={row.matchedBibId} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={row?.matchedBibId} />
+								)}
 							</Typography>
 						</Stack>
 					</Grid>
