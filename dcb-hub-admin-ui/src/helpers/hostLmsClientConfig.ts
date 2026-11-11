@@ -184,8 +184,7 @@ const wholeNumber = (configField: ClientConfigField): ClientConfigField => ({
  * validator demands `default-agency-code` regardless.
  */
 const sharedSystemSet = (values: any): boolean =>
-	isHostLmsExtendedConfigEnabled() &&
-	(values?.["shared-system"] === true || values?.["shared-system"] === "true");
+	isHostLmsExtendedConfigEnabled() && readsAsTrue(values?.["shared-system"]);
 
 /**
  * `default-agency-code`, in the six profiles where it means "the agency to assume
@@ -1693,7 +1692,7 @@ export const buildClientConfig = (
 		if (isBlank(raw)) continue;
 
 		if (configField.type === "boolean") {
-			writePath(config, configField.path, raw === true || raw === "true");
+			writePath(config, configField.path, readsAsTrue(raw));
 			continue;
 		}
 		if (configField.type === "stringList") {
@@ -1871,6 +1870,13 @@ export const missingRecommendedClientConfig = (
 		}));
 
 /**
+ * A boolean setting as dcb-service reads it: Boolean.parseBoolean(String.valueOf(value)),
+ * so the string "true" stored through the JSON editor is true, in any case.
+ */
+export const readsAsTrue = (value: unknown): boolean =>
+	value === true || String(value ?? "").toLowerCase() === "true";
+
+/**
  * Hydrates the guided form from raw JSON, so switching out of the advanced
  * editor does not silently discard what was typed there. Keys the guided form
  * has no field for are reported rather than dropped in silence.
@@ -1888,7 +1894,7 @@ export const clientConfigToFields = (
 		if (raw === undefined) continue;
 
 		if (configField.type === "boolean") {
-			writePath(values, configField.path, raw === true);
+			writePath(values, configField.path, readsAsTrue(raw));
 			continue;
 		}
 		if (configField.type === "stringList") {

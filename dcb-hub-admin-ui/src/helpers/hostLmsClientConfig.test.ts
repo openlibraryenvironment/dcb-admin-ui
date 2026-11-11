@@ -779,6 +779,34 @@ describe("hostLmsClientConfig", () => {
 			);
 		});
 
+		it('reads a boolean stored as the string "true" as true, as dcb-service does', () => {
+			extendedConfig(true);
+			const stored = {
+				"base-url": "https://sierra.example.org",
+				key: "k",
+				secret: "s",
+				"page-size": "100",
+				ingest: "true",
+				"shared-system": "TRUE",
+			};
+
+			const { values } = clientConfigToFields(HOST_LMS_CLASSES.sierra, stored);
+
+			expect(values.ingest).toBe(true);
+			expect(values["shared-system"]).toBe(true);
+			const saved = buildClientConfig(HOST_LMS_CLASSES.sierra, values);
+			expect(saved.ingest).toBe(true);
+			expect(saved["shared-system"]).toBe(true);
+		});
+
+		it("still reads anything else as false", () => {
+			const { values } = clientConfigToFields(HOST_LMS_CLASSES.sierra, {
+				ingest: "false",
+			});
+
+			expect(values.ingest).toBe(false);
+		});
+
 		it("names keys the guided form has no field for", () => {
 			const { unmappedKeys } = clientConfigToFields(HOST_LMS_CLASSES.sierra, {
 				"base-url": "https://sierra.example.org",
