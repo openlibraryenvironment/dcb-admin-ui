@@ -21,6 +21,11 @@ import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { clusterMemberLabels } from "@helpers/clusterMemberLabels";
+import { clusterFullQuery } from "@/queryOptions/cluster";
+import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
 import {
 	CLUSTERING_EVENT_KINDS,
 	type ClusteringEventKind,
@@ -53,6 +58,7 @@ function ClusterExplanation() {
 	const { t } = useTranslation();
 	const { clusterId } = Route.useParams();
 	const client = useDcbRestClient();
+	const gqlClient = useGraphQLClient();
 
 	const gridId = clusterExplanationView.id;
 	const search = useSearch({
@@ -75,6 +81,21 @@ function ClusterExplanation() {
 
 	const rows = useMemo(() => parseClusteringAuditLog(data), [data]);
 
+	// Names for the group rows; without them a bib is its id, as before
+	const members = useQuery({
+		...clusterFullQuery(gqlClient, clusterId),
+		...nonCriticalQuery,
+	});
+	const hostLmss = useQuery(hostLmsSelectionQuery(gqlClient));
+	const memberLabels = useMemo(
+		() =>
+			clusterMemberLabels(
+				members.data?.instanceClusters?.content?.[0]?.members,
+				hostLmss.data?.hostLms?.content,
+			),
+		[members.data, hostLmss.data],
+	);
+
 	const columns: GridColDef[] = useMemo(
 		() => [
 			{
@@ -82,6 +103,7 @@ function ClusterExplanation() {
 				headerName: t("search.bib_record_id_and_number"),
 				minWidth: 200,
 				flex: 1,
+				valueFormatter: (value: string) => memberLabels.get(value) ?? value,
 			},
 			{
 				field: "eventType",
@@ -158,7 +180,7 @@ function ClusterExplanation() {
 				minWidth: 200,
 			},
 		],
-		[t],
+		[t, memberLabels],
 	);
 	const view = useGridView(clusterExplanationView, columns, search);
 

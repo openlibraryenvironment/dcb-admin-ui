@@ -1,6 +1,6 @@
 import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
-import { mockGraphQL } from "./fixtures/graphql-mocks";
+import { mockGraphQL, overrideGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import { CLUSTER_ID, mockClusterRest } from "./fixtures/cluster-mocks";
 import { MOCKS } from "./fixtures/routes";
@@ -62,7 +62,10 @@ test("events are grouped under the bib they explain, with how many there are", a
 	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
 
 	await expect(
-		page.getByRole("row").filter({ hasText: SUBJECT_BIB }).first(),
+		page
+			.getByRole("row")
+			.filter({ hasText: "Alpha and the art of clustering" })
+			.first(),
 	).toContainText("(3)");
 	await expect(
 		page.getByRole("row").filter({ hasText: "New cluster" }),
@@ -172,4 +175,31 @@ test("an empty explanation says why it can be empty", async ({ page }) => {
 	await expect(
 		page.getByText(/Only the most recent processing of each bib is kept/),
 	).toBeVisible();
+});
+
+// Each group row was a bare UUID
+test("each group names its bib by title and library", async ({ page }) => {
+	await overrideGraphQL(page, {
+		LoadHostLmsSelection: {
+			hostLms: {
+				totalSize: 1,
+				content: [
+					{
+						id: "cc330000-3333-5333-9333-cccccccccccc",
+						code: "alpha-lms",
+						name: "Alpha LMS",
+						lmsClientClass: null,
+					},
+				],
+			},
+		},
+	});
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page
+			.getByRole("row")
+			.filter({ hasText: "Alpha and the art of clustering · Alpha LMS" })
+			.first(),
+	).toContainText("(3)");
 });
