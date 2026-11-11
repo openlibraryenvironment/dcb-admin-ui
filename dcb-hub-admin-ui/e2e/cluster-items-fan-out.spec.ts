@@ -1,0 +1,51 @@
+import { test, expect } from "./fixtures/test";
+import { seedAuth } from "./fixtures/auth";
+import { mockGraphQL } from "./fixtures/graphql-mocks";
+import { useAllFeatures } from "./fixtures/flags";
+import { CLUSTER_ID } from "./fixtures/cluster-mocks";
+import { MOCKS } from "./fixtures/routes";
+import availability from "./fixtures-data/cluster-availability.json";
+
+const HELD_NOT_OFFERED = {
+	...availability.itemList[0],
+	id: "ee550000-5555-5555-9555-eeeeeeeeeeee",
+	barcode: "HELD-ONLY-1",
+};
+
+// Each call is one request per Host LMS to a system we do not own, and the tab made two on
+// every visit to count the items it was not showing
+test("the unfiltered fan-out waits until someone asks what is not offered", async ({
+	page,
+}) => {
+	const asked: string[] = [];
+	await page.route("**/items/availability*", (route) => {
+		const filters = new URL(route.request().url()).searchParams.get("filters");
+		asked.push(filters ?? "offered");
+		return route.fulfill({
+			json:
+				filters === "none"
+					? {
+							...availability,
+							itemList: [...availability.itemList, HELD_NOT_OFFERED],
+						}
+					: availability,
+		});
+	});
+	await useAllFeatures(page);
+	await mockGraphQL(page, MOCKS);
+	await seedAuth(page);
+	await page.goto(`/search/${CLUSTER_ID}/items`);
+
+	const notOffered = page.getByRole("button", {
+		name: "Items held but not offered for request",
+	});
+	await expect(notOffered).toBeVisible();
+	expect(asked).toEqual(["offered"]);
+
+	await notOffered.click();
+
+	await expect(
+		page.getByRole("button", { name: "1 item(s) unable to be shown" }),
+	).toBeVisible();
+	expect(asked).toEqual(["offered", "none"]);
+});

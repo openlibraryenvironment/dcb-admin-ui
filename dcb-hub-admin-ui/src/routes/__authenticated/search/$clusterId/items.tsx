@@ -34,7 +34,7 @@ import {
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { getItemColumns } from "@columns/itemColumns";
 import { Item } from "@models/Item";
-import { lmsFanOutQuery } from "@helpers/queryPolicy";
+import { clusterItemsQuery } from "@/queryOptions/clusterItems";
 import {
 	GridActionsCellItem,
 	GridColDef,
@@ -85,38 +85,18 @@ function ItemsPageComponent() {
 		from: "/__authenticated/search/$clusterId/items",
 	});
 
-	const { data, isLoading } = useQuery({
-		...lmsFanOutQuery,
-		queryKey: ["clusterItems", clusterId],
-		queryFn: async ({ signal }) => {
-			// Fetch Standard and No-Filter concurrently.
-			//
-			// `signal` on both: dcb-service turns ONE of these into one request per Host
-			// LMS to systems we do not own, and this fires two. Leaving a cluster before
-			// they land otherwise leaves both fan-outs running to completion against
-			// every member library, which is the amplification doctrine treats as a
-			// security bug rather than a performance one.
-			const [standardRes, noFilterRes] = await Promise.all([
-				client.get<any>("/items/availability", {
-					params: { clusteredBibId: clusterId },
-					signal,
-				}),
-				client.get<any>("/items/availability", {
-					params: { clusteredBibId: clusterId, filters: "none" },
-					signal,
-				}),
-			]);
-
-			return {
-				standard: standardRes.data?.itemList || [],
-				noFilter: noFilterRes.data?.itemList || [],
-				errors: standardRes.data?.errors || [], // Assuming backend attaches diagnostic errors here
-			};
-		},
+	const offered = useQuery({
+		...clusterItemsQuery(client, clusterId, "offered"),
 		enabled: !!clusterId,
 	});
+	// The second fan-out, to every member library again, only once someone asks what is missing
+	const unfiltered = useQuery({
+		...clusterItemsQuery(client, clusterId, "unfiltered"),
+		enabled: !!clusterId && isItemsAccordionExpanded,
+	});
+	const isLoading = offered.isLoading;
 
-	const items = data?.standard || [];
+	const items = offered.data?.itemList ?? [];
 
 	// Base item columns + a row action that skips straight to a pre-filled Quick
 	// walk-up, but only for items that can actually be walked up (available,
@@ -223,12 +203,12 @@ function ItemsPageComponent() {
 	);
 
 	const itemsNotShown = useMemo(() => {
-		if (!data) return [];
-		const standardIds = new Set(data.standard.map((i: Item) => i.id));
-		return data.noFilter.filter(
-			(comparisonItem: Item) => !standardIds.has(comparisonItem.id),
+		if (!offered.data || !unfiltered.data) return [];
+		const offeredIds = new Set(offered.data.itemList.map((i: Item) => i.id));
+		return unfiltered.data.itemList.filter(
+			(comparisonItem: Item) => !offeredIds.has(comparisonItem.id),
 		);
-	}, [data]);
+	}, [offered.data, unfiltered.data]);
 
 	if (isLoading)
 		return (
@@ -262,7 +242,7 @@ function ItemsPageComponent() {
 				/>
 			)}
 			<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-				{data?.errors?.length > 0 && (
+				{(offered.data?.errors?.length ?? 0) > 0 && (
 					<Alert severity="error" sx={{ mb: 2 }}>
 						{t("ui.error.something_wrong")}
 					</Alert>
@@ -327,7 +307,7 @@ function ItemsPageComponent() {
 				/>
 			</Grid>
 
-			{itemsNotShown.length > 0 && (
+			{offered.data && (
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Accordion
 						expanded={isItemsAccordionExpanded}
@@ -337,41 +317,66 @@ function ItemsPageComponent() {
 					>
 						<AccordionSummary expandIcon={<ExpandMore />}>
 							<Typography variant="h6">
-								{t("requesting.shared_index.items_not_shown", {
-									number: itemsNotShown.length,
-								})}
+								{unfiltered.data
+									? t("requesting.shared_index.items_not_shown", {
+											number: itemsNotShown.length,
+										})
+									: t("requesting.shared_index.items_not_shown_check")}
 							</Typography>
 						</AccordionSummary>
 						<AccordionDetails>
-							<Typography sx={{ mb: 2 }}>
-								{t("requesting.shared_index.items_not_shown_resolution")}
-							</Typography>
-							<DataGrid
-								identifier={itemsNotShownGridId}
-								type="Items"
-								columns={itemColumnsWithLookUp}
-								rows={itemsNotShown}
-								loading={isLoading}
-								paginationMode="client"
-								sortingMode="client"
-								filterMode="client"
-								pagination
-								paginationModel={notShownView.paginationModel}
-								onPaginationModelChange={notShownView.onPaginationModelChange}
-								sortModel={notShownView.sortModel}
-								onSortModelChange={notShownView.onSortModelChange}
-								getDetailPanelContent={({ row }: any) => (
-									<MasterDetail type="items" row={row} />
+							<div role="status" aria-live="polite">
+								{unfiltered.isPending && (
+									<Typography>
+										{t("requesting.shared_index.items_not_shown_loading")}
+									</Typography>
 								)}
-								disableHoverInteractions={false}
-								listViewEnabled={false}
-								toolbarVisible={false}
-								scrollbarVisible={false}
-								noResultsText={t("requesting.items_not_found")}
-								searchText={t("requesting.items_search")}
-								rowModesModel={rowModesModel}
-								onRowModesModelChange={setRowModesModel}
-							/>
+								{unfiltered.isError && (
+									<Alert severity="error">
+										{t("requesting.shared_index.items_not_shown_failed")}
+									</Alert>
+								)}
+								{unfiltered.data && itemsNotShown.length === 0 && (
+									<Typography>
+										{t("requesting.shared_index.items_not_shown_none")}
+									</Typography>
+								)}
+							</div>
+							{itemsNotShown.length > 0 && (
+								<>
+									<Typography sx={{ mb: 2 }}>
+										{t("requesting.shared_index.items_not_shown_resolution")}
+									</Typography>
+									<DataGrid
+										identifier={itemsNotShownGridId}
+										type="Items"
+										columns={itemColumnsWithLookUp}
+										rows={itemsNotShown}
+										loading={isLoading}
+										paginationMode="client"
+										sortingMode="client"
+										filterMode="client"
+										pagination
+										paginationModel={notShownView.paginationModel}
+										onPaginationModelChange={
+											notShownView.onPaginationModelChange
+										}
+										sortModel={notShownView.sortModel}
+										onSortModelChange={notShownView.onSortModelChange}
+										getDetailPanelContent={({ row }: any) => (
+											<MasterDetail type="items" row={row} />
+										)}
+										disableHoverInteractions={false}
+										listViewEnabled={false}
+										toolbarVisible={false}
+										scrollbarVisible={false}
+										noResultsText={t("requesting.items_not_found")}
+										searchText={t("requesting.items_search")}
+										rowModesModel={rowModesModel}
+										onRowModesModelChange={setRowModesModel}
+									/>
+								</>
+							)}
 						</AccordionDetails>
 					</Accordion>
 				</Grid>

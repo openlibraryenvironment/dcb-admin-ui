@@ -2953,6 +2953,10 @@
 			"items_not_shown_helper_item": "Items without an item type are usually the result of a missing or misconfigured item type mapping. Please review the item type mappings for this library.",
 			"items_not_shown_helper_location": "Items without an 'Agency' value are usually the result of a missing or misconfigured Location mapping, or a missing agency. Please review the Location mappings for this library and the agency configuration.",
 			"items_not_shown_long": "{{number}} item(s) unable to be shown. You may have missing mappings or other configuration issues.",
+			"items_not_shown_check": "Items held but not offered for request",
+			"items_not_shown_loading": "Asking each library's system for every item it holds…",
+			"items_not_shown_failed": "The items held could not all be read.",
+			"items_not_shown_none": "Every item held is offered for request.",
 			"items_not_shown_resolution": "If the item(s) below belong to your library and should be available to users, please review the mappings in the 'Mappings' section. There may be incorrect or missing mappings preventing DCB from showing the items below"
 		},
 		"staff_request": {
