@@ -1,8 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import type { AxiosInstance } from "axios";
 
-import { lmsFanOutQuery } from "@helpers/queryPolicy";
-
 /** HostLmsItem as HostLmssController serialises it; absent fields are omitted. */
 export interface LiveItem {
 	localId?: string;
@@ -29,7 +27,8 @@ export const canLookUpLive = (item: {
 
 /**
  * One click, two to four calls into the member's LMS depending on its type, and no
- * server-side rate limit: fetched only while the dialog is open, never retried on a 4xx.
+ * server-side rate limit: fetched only while the dialog is open, and never retried. A
+ * retried 5xx is another two to four calls; the user can ask again.
  */
 export const liveItemQuery = (
 	client: AxiosInstance,
@@ -37,7 +36,6 @@ export const liveItemQuery = (
 	barcode: string,
 ) =>
 	queryOptions({
-		...lmsFanOutQuery,
 		queryKey: ["liveItem", hostLmsCode, barcode],
 		queryFn: async ({ signal }) =>
 			(
@@ -50,4 +48,5 @@ export const liveItemQuery = (
 		staleTime: 30_000,
 		refetchOnWindowFocus: false,
 		throwOnError: false,
+		retry: false,
 	});
