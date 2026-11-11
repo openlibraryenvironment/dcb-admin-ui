@@ -373,7 +373,7 @@ function SourceBibDetails() {
 			>
 				<AccordionSummary
 					aria-controls="source-bibs-json-details"
-					id="source-bibs-json-details"
+					id="source-bibs-json-summary"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
@@ -392,7 +392,7 @@ function SourceBibDetails() {
 			>
 				<AccordionSummary
 					aria-controls="source-bibs-source-record-json-details"
-					id="source-bibs-source-record-json-details"
+					id="source-bibs-source-record-json-summary"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
 					<Typography variant="h3" sx={{ fontWeight: "bold" }}>

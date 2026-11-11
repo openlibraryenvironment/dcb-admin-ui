@@ -56,3 +56,18 @@ test("a bib in no cluster offers no cluster link", async ({ page }) => {
 
 	await expect(page.locator('a[href*="/search/undefined"]')).toHaveCount(0);
 });
+
+// MUI gives each region the id its summary names in aria-controls: a summary with that id too
+// made two elements share it
+test("every id on the bib page is used once", async ({ page }) => {
+	await page.goto(`/bibs/${BIB_ID}`);
+	await expect(page.getByText("Cluster UUID", { exact: true })).toBeVisible();
+
+	const duplicated = await page.evaluate(() => {
+		const seen = new Map<string, number>();
+		for (const element of Array.from(document.querySelectorAll("[id]")))
+			seen.set(element.id, (seen.get(element.id) ?? 0) + 1);
+		return [...seen].filter(([, count]) => count > 1).map(([id]) => id);
+	});
+	expect(duplicated).toEqual([]);
+});
