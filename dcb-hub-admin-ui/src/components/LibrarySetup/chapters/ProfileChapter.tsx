@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";
 import { Alert, Skeleton } from "@mui/material";
+import { useAuth } from "react-oidc-context";
 
 import SetupFooter from "@components/Setup/SetupFooter";
 import { ProfileStep } from "@forms/NewLibrary/steps/ProfileStep";
@@ -18,6 +19,7 @@ import {
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
+import { serverAdmits } from "@constants/serverRoles";
 import {
 	consortiumBasicsQuery,
 	readConsortiumPresence,
@@ -41,6 +43,16 @@ const PROFILE_FIELDS: (keyof NewLibraryFormValues)[] = [
 	"maxConsortialLoans",
 	"maxLocalHolds",
 ];
+
+/** What buildAgencyUpdateInput carries besides the code: the agency's, not the library's. */
+const AGENCY_FIELDS = [
+	"isBorrowingAgency",
+	"isSupplyingAgency",
+	"latitude",
+	"longitude",
+	"maxConsortialLoans",
+	"maxLocalHolds",
+] as const satisfies readonly (keyof NewLibraryFormValues)[];
 
 type ProfileChapterProps =
 	| { kind: "new"; search: NewLibrarySearch }
@@ -113,7 +125,12 @@ function ProfileForm({
 	const navigate = useNavigate();
 	const gqlClient = useGraphQLClient();
 	const queryClient = useQueryClient();
+	const auth = useAuth();
 	const writes = useLibrarySetupWrites();
+	const canUpdateAgency = serverAdmits(
+		"updateAgency",
+		auth?.user?.profile?.roles as string[] | undefined,
+	);
 	const [error, setError] = useState<string | null>(null);
 	const { consortiumGroup } = readConsortiumPresence(
 		useQuery(consortiumBasicsQuery(gqlClient)),
@@ -137,7 +154,11 @@ function ProfileForm({
 					);
 					// Participation and the loan cap are the agency's, not the library's. Its code
 					// is the stored one: updateAgency writes to whichever agency the code names
-					if (defaults.agencyCode) {
+					const agencyChanged = AGENCY_FIELDS.some(
+						(field) =>
+							String(formData[field] ?? "") !== String(defaults[field] ?? ""),
+					);
+					if (defaults.agencyCode && agencyChanged && canUpdateAgency) {
 						await writes.updateAgency.mutateAsync(
 							buildAgencyUpdateInput({
 								...formData,
@@ -202,7 +223,10 @@ function ProfileForm({
 		<>
 			<FormProvider {...methods}>
 				<form noValidate aria-busy={writes.busy}>
-					<ProfileStep existing={!!libraryId} />
+					<ProfileStep
+						existing={!!libraryId}
+						agencyLocked={!!libraryId && !canUpdateAgency}
+					/>
 				</form>
 			</FormProvider>
 

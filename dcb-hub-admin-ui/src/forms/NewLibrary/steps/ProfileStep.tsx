@@ -63,9 +63,12 @@ const Section = ({
 
 export function ProfileStep({
 	existing = false,
+	agencyLocked = false,
 }: {
 	/** An existing library: updateLibrary cannot move it to another agency or auth profile. */
 	existing?: boolean;
+	/** dcb-service would refuse this user's updateAgency, so its fields are shown, not asked. */
+	agencyLocked?: boolean;
 } = {}) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
@@ -489,11 +492,15 @@ export function ProfileStep({
 			 * a library with no traffic and no answer as dormant.
 			 */}
 			<Section title={t("libraries.new.section_participation")}>
+				{agencyLocked && (
+					<Alert severity="info">{t("libraries.new.agency_locked")}</Alert>
+				)}
 				<Controller
 					name="isBorrowingAgency"
 					control={control}
 					render={({ field }) => (
 						<FormControlLabel
+							disabled={agencyLocked}
 							control={
 								<Switch
 									{...field}
@@ -521,6 +528,7 @@ export function ProfileStep({
 					control={control}
 					render={({ field }) => (
 						<FormControlLabel
+							disabled={agencyLocked}
 							control={
 								<Switch
 									{...field}
@@ -551,6 +559,7 @@ export function ProfileStep({
 							{...field}
 							inputRef={ref}
 							id="library-max-consortial-loans"
+							disabled={agencyLocked}
 							label={t("libraries.max_consortial_loans")}
 							variant="outlined"
 							fullWidth
@@ -575,6 +584,7 @@ export function ProfileStep({
 								inputRef={ref}
 								value={field.value ?? ""}
 								id="library-max-local-holds"
+								disabled={agencyLocked}
 								label={t("libraries.max_local_holds")}
 								variant="outlined"
 								fullWidth

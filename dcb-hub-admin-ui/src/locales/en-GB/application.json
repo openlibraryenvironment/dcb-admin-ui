@@ -1712,6 +1712,7 @@
 			"agency_will_be_created": "No agency matches “{{code}}”, so a new agency will be created with this code when the library is saved.",
 			"agency_has_library": "{{code}} already belongs to a library. Choose another agency, or finish that library's setup from its own page.",
 			"agency_fixed": "A library's agency is fixed once the library exists.",
+			"agency_locked": "Participation and limits belong to the library's agency, and only a consortium administrator can change them.",
 			"latitude_helper": "Decimal degrees between -90 and 90.",
 			"longitude_helper": "Decimal degrees between -180 and 180.",
 			"coordinates_from_agency": "Taken from agency {{code}}. DCB uses the agency's location for every library that shares it.",
