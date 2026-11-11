@@ -103,6 +103,15 @@
 		"audit_to_status": "toStatus"
 	},
 	"bibRecords": {
+		"match_points": {
+			"title": "Match points",
+			"explanation": "What this bib can cluster on. Two bibs that share a value in the last column are a match on that point.",
+			"domain": "Identifier",
+			"source_value": "As read from the record",
+			"value": "Match value",
+			"none": "This bib has no match points, so it cannot cluster with another.",
+			"error": "The match points could not be worked out."
+		},
 		"audit_log": {
 			"open_bib": "Open the matched bib",
 			"open_cluster": "Open the cluster",

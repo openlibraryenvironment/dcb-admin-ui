@@ -9,6 +9,7 @@ import { useAuth } from "react-oidc-context";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import BibAuditLog from "@components/BibAuditLog/BibAuditLog";
+import BibMatchPoints from "@components/BibMatchPoints/BibMatchPoints";
 import DeletedBib from "@components/BibAuditLog/DeletedBib";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
@@ -418,6 +419,7 @@ function SourceBibDetails() {
 					)}
 				</StyledAccordionDetails>
 			</StyledAccordion>
+			{isAdmin && <BibMatchPoints bibId={bibId} />}
 			{isAdmin && <BibAuditLog bibId={bibId} />}
 		</PageContainer>
 	);
