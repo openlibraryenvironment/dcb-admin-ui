@@ -819,8 +819,8 @@ const POLARIS: HostLmsProfile = {
 					})),
 				},
 				// No virtual-patron-branch-id or enableDoubleDelete: PolarisConfig declares
-				// both and nothing calls either getter. No borrower-lending-flow: 8.71.0
-				// compares it with == and never matches, and 9.2.0 refuses it.
+				// both and nothing calls either getter. No borrower-lending-flow: 8.71.0-9.1.0
+				// return placeholder bibs and items for "ILL", and 9.2.0 refuses it.
 				VIRTUAL_PATRON_EMAIL,
 				field(
 					["hold-fetching-delay"],
@@ -1948,8 +1948,10 @@ export const clientConfigToFields = (
  * what makes clearing a field clear it), then overlay the form's answers.
  */
 /**
- * Keys dcb-service 9.2.0 refuses outright and no release acts on. Kept, they block every
- * config save of a record written before; dropped, the Host LMS behaves exactly as it did.
+ * Keys dcb-service 9.2.0 refuses outright, so kept they block every config save of a
+ * record written before. Dropped only where 9.2.0 runs: 8.71.0-9.1.0 still act on
+ * borrower-lending-flow ("ILL" makes createBib and createItem return placeholders), and
+ * dropping it there would change how that Host LMS circulates.
  */
 const REFUSED_KEYS: Readonly<Record<string, readonly string[]>> = {
 	[HOST_LMS_CLASSES.polaris]: ["borrower-lending-flow"],
@@ -1962,7 +1964,10 @@ export const mergeClientConfigEdit = (
 ): Record<string, unknown> => {
 	const merged = structuredClone(existing ?? {}) as Record<string, unknown>;
 
-	for (const key of REFUSED_KEYS[lmsClientClass ?? ""] ?? []) {
+	const refused = isHostLmsCirculationSettingsEnabled()
+		? (REFUSED_KEYS[lmsClientClass ?? ""] ?? [])
+		: [];
+	for (const key of refused) {
 		delete merged[key];
 	}
 

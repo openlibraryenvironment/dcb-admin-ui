@@ -1083,8 +1083,9 @@ describe("hostLmsClientConfig", () => {
 			expect(merged.nested).toEqual({ "also-bespoke": 7 });
 		});
 
-		// 8.71.0 never acted on it and 9.2.0 refuses it, so keeping it blocked every save
-		it("drops a Polaris borrower-lending-flow, and keeps other unmapped keys", () => {
+		// 9.2.0 refuses it, so keeping it there blocked every save
+		it("drops a Polaris borrower-lending-flow where 9.2.0 runs, and keeps other unmapped keys", () => {
+			circulationSettings(true);
 			const merged = mergeClientConfigEdit(
 				{ "borrower-lending-flow": "ILL", "some-bespoke-flag": "keep me" },
 				HOST_LMS_CLASSES.polaris,
@@ -1093,6 +1094,18 @@ describe("hostLmsClientConfig", () => {
 
 			expect(merged).not.toHaveProperty("borrower-lending-flow");
 			expect(merged["some-bespoke-flag"]).toBe("keep me");
+		});
+
+		// 8.71.0-9.1.0 return placeholder bibs and items when it is "ILL"
+		it("keeps a Polaris borrower-lending-flow before 9.2.0", () => {
+			circulationSettings(false);
+			const merged = mergeClientConfigEdit(
+				{ "borrower-lending-flow": "ILL" },
+				HOST_LMS_CLASSES.polaris,
+				{},
+			);
+
+			expect(merged["borrower-lending-flow"]).toBe("ILL");
 		});
 
 		it("clears a guided field the user emptied", () => {
