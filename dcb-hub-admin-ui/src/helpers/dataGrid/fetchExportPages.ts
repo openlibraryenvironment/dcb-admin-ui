@@ -25,7 +25,20 @@ export interface FetchExportPagesOptions {
 	/** Called with each page's rows; the caller must not retain them. */
 	onPage: (rows: any[]) => void;
 	onProgress: (fetched: number, totalSize: number) => void;
+	/** Refuse, after page 0, a result set larger than this: offset paging costs grow with its square. */
+	maxRows: number;
 	signal: AbortSignal;
+}
+
+/** The result set is larger than an export is allowed to page through. */
+export class ExportTooLargeError extends Error {
+	constructor(
+		readonly totalSize: number,
+		readonly maxRows: number,
+	) {
+		super(`Export of ${totalSize} rows exceeds the limit of ${maxRows}`);
+		this.name = "ExportTooLargeError";
+	}
 }
 
 const abortError = (signal: AbortSignal): unknown =>
@@ -67,6 +80,7 @@ export const fetchExportPages = async ({
 	renewSession,
 	onPage,
 	onProgress,
+	maxRows,
 	signal,
 }: FetchExportPagesOptions): Promise<number> => {
 	const pageSize = variables.pagesize;
@@ -107,6 +121,7 @@ export const fetchExportPages = async ({
 	const initial = await fetchPage(0);
 	const totalSize: number = initial?.[coreType]?.totalSize || 0;
 	const firstPage: any[] = initial?.[coreType]?.content ?? [];
+	if (totalSize > maxRows) throw new ExportTooLargeError(totalSize, maxRows);
 
 	onPage(firstPage);
 	let fetched = firstPage.length;

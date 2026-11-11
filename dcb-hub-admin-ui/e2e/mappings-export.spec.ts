@@ -110,3 +110,37 @@ test.describe("a mappings export can be imported again", () => {
 		expect(text).not.toContain("2026-09-30");
 	});
 });
+
+// "All" on /bibs is 20 million rows: about 20,000 offset pages with a COUNT(*) each
+test("an export larger than the limit is refused after one request, and says why", async ({
+	page,
+}) => {
+	const huge = {
+		referenceValueMappings: {
+			...mappings.referenceValueMappings,
+			totalSize: 20_000_000,
+		},
+	};
+	let requests = 0;
+	await mockGraphQL(page, {
+		...MOCKS,
+		LoadMappings: () => {
+			requests++;
+			return huge;
+		},
+	});
+	await page.reload();
+	await expect(page.getByText("loanable-item")).toBeVisible();
+	const before = requests;
+
+	await page.getByRole("button", { name: /export/i }).click();
+	await page.getByRole("menuitem", { name: "All (whole dataset)" }).click();
+
+	await expect(
+		page.getByText(
+			"This export would have 20,000,000 rows, more than the 300,000 an export can hold.",
+			{ exact: false },
+		),
+	).toBeVisible();
+	expect(requests - before).toBe(1);
+});

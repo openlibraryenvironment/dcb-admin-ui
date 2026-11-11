@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fetchExportPages } from "./fetchExportPages";
+import { ExportTooLargeError, fetchExportPages } from "./fetchExportPages";
 import { ServerGridQueryVars } from "@helpers/dataGrid/utilities";
 
 const { request } = vi.hoisted(() => ({ request: vi.fn() }));
@@ -42,6 +42,7 @@ const run = (
 			renewSession: async () => undefined,
 			onPage: (rows) => pages.push(rows),
 			onProgress: (fetched, total) => progress.push([fetched, total]),
+			maxRows: 1_000_000,
 			signal: new AbortController().signal,
 			...overrides,
 		}),
@@ -53,6 +54,28 @@ beforeEach(() => {
 });
 
 describe("fetchExportPages", () => {
+	it("refuses a result set over the limit after the first page, handing nothing on", async () => {
+		request.mockResolvedValue(page(PAGE_SIZE, 20_000_000));
+
+		const { pages, result } = run({ maxRows: 300_000 });
+
+		await expect(result).rejects.toBeInstanceOf(ExportTooLargeError);
+		await expect(result).rejects.toMatchObject({
+			totalSize: 20_000_000,
+			maxRows: 300_000,
+		});
+		expect(request).toHaveBeenCalledTimes(1);
+		expect(pages).toEqual([]);
+	});
+
+	it("exports a result set exactly at the limit", async () => {
+		request
+			.mockResolvedValueOnce(page(PAGE_SIZE, 2000))
+			.mockResolvedValueOnce(page(PAGE_SIZE, 2000));
+
+		await expect(run({ maxRows: 2000 }).result).resolves.toBe(2000);
+	});
+
 	it("pages through the whole result set and reports progress", async () => {
 		request
 			.mockResolvedValueOnce(page(PAGE_SIZE, 2500))

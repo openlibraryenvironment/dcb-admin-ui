@@ -3214,6 +3214,7 @@
 			"edit_url": "Enter a valid URL",
 			"edit_url_required": "A valid URL is required.",
 			"export_failed": "The data grid export has failed. Please try again.",
+			"export_too_large": "This export would have {{count, number}} rows, more than the {{max, number}} an export can hold. Filter the grid to fewer rows and export again.",
 			"export_success": "Successfully exported {{count}} records from the data grid.",
 			"export_modal_title": "Exporting data",
 			"exporting_records": "Exporting {{count}} records from the data grid.",
