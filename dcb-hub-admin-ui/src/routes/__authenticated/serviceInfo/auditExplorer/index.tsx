@@ -11,19 +11,13 @@ import dayjs from "dayjs";
 import {
 	Box,
 	Chip,
-	FormControlLabel,
 	InputAdornment,
 	Stack,
-	Switch,
 	TextField,
 	Typography,
 } from "@mui/material";
 import { Search } from "@mui/icons-material";
-import {
-	GridColDef,
-	GridRowGroupingModel,
-	type GridRowModesModel,
-} from "@mui/x-data-grid-premium";
+import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
 import {
 	AUDIT_SEARCH_MAX,
 	auditSearchTerm,
@@ -107,11 +101,6 @@ function AuditExplorer() {
 	});
 	const term = search.search;
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
-
-	// Group by owning patron request by default - the primary ask. Controlled so
-	// the toolbar's grouping panel and the header toggle stay in sync.
-	const [rowGroupingModel, setRowGroupingModel] =
-		useState<GridRowGroupingModel>(["patronRequestId"]);
 
 	// The box is owned here for lag-free typing, and follows the address only when
 	// something else changes it (Back, a link): its own writes are trimmed copies
@@ -354,19 +343,6 @@ function AuditExplorer() {
 					<Typography variant="subtitle1">
 						{t("audit_explorer.incidence", { count: totalSize })}
 					</Typography>
-					<FormControlLabel
-						control={
-							<Switch
-								checked={rowGroupingModel.includes("patronRequestId")}
-								onChange={(e) =>
-									setRowGroupingModel(
-										e.target.checked ? ["patronRequestId"] : [],
-									)
-								}
-							/>
-						}
-						label={t("audit_explorer.group_by_request")}
-					/>
 				</Stack>
 				<AuditIncidenceChart query={incidenceQuery} />
 				<Box>
@@ -391,12 +367,9 @@ function AuditExplorer() {
 						columnVisibilityModel={view.columnVisibilityModel}
 						onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
 						columnLayout={view.columnLayout}
-						rowGroupingModel={rowGroupingModel}
-						onRowGroupingModelChange={setRowGroupingModel}
-						groupingColDef={{
-							headerName: t("audit_explorer.patron_request"),
-							minWidth: 340,
-						}}
+						// Grouping is client-side and these rows are one server page: groups split
+						// across pages with partial counts. The request column links instead
+						disableRowGrouping
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="audits" />
 						)}

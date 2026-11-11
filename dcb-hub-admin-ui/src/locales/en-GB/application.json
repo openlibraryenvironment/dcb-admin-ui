@@ -59,7 +59,6 @@
 		},
 		"incidence_one": "{{count}} matching audit event",
 		"incidence_other": "{{count}} matching audit events",
-		"group_by_request": "Group by patron request",
 		"patron_request": "Patron request",
 		"request_status": "Request status",
 		"no_request": "No request",
