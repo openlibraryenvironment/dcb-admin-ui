@@ -14,6 +14,7 @@ import type {
 	UpdateLibraryMutationVariables,
 } from "@generated/graphql";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { errorForLog } from "@helpers/safeErrorLog";
 
 /**
  * Writing the rows the user selected — W-10.
@@ -190,7 +191,10 @@ export async function applyLibraryImport(
 		} catch (failure: any) {
 			// Reported, never swallowed. A bulk import that says "12 of 14 succeeded"
 			// and cannot say which two is not a result, it is a rumour.
-			console.error(`Library import failed on line ${row.line}:`, failure);
+			console.error(
+				`Library import failed on line ${row.line}:`,
+				errorForLog(failure),
+			);
 			return {
 				line: row.line,
 				agencyCode,

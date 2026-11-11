@@ -40,6 +40,7 @@ import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { getILS } from "@helpers/getILS";
+import { errorForLog } from "@helpers/safeErrorLog";
 import { handleEdit } from "@helpers/actions/editAndDeleteActions";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 
@@ -175,7 +176,10 @@ function Service() {
 			const response = await client.get(`/object-rules/${rulesetName}`);
 			setter(response.data);
 		} catch (fetchError) {
-			console.error(`Error fetching ruleset ${rulesetName}:`, fetchError);
+			console.error(
+				`Error fetching ruleset ${rulesetName}:`,
+				errorForLog(fetchError),
+			);
 			setter({ error: `Failed to load details for ${rulesetName}.` });
 		}
 	};

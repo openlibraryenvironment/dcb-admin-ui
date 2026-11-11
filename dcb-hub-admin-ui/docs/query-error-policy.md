@@ -186,6 +186,14 @@ in a server log, with no identifier in it. The response body is excluded too:
 dcb-service's `failedChecks` carry a `description` written for a human, and what a
 member LMS puts in one is not ours to predict.
 
+`errorForLog` in the same file applies that to anything thrown: a request error becomes its
+summary, so neither an `AxiosError`'s `config.headers` (the bearer token) nor a GraphQL
+`ClientError`'s variables reach the console. ESLint refuses the three shapes a raw error
+has been logged in: a console argument named `e`, `err`, `error` or `reason`; any bare
+identifier handed to console inside a `catch`; and `.catch(console.error)`. The second
+and third were added in November 2026 after seven call sites got past the first, one of
+them on the silent token renewal.
+
 ## Gate
 
 `e2e/degraded-data.spec.ts` mocks only a route's primary operations and asserts the page's

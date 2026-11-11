@@ -273,6 +273,19 @@ export default [
 					message:
 						"Do not log a raw error: an AxiosError carries the bearer token, a GraphQL error the request's variables. Log errorForLog(error) from @helpers/safeErrorLog.",
 				},
+				// The name rule above missed `failure` and `fetchError`: inside a catch, any bare
+				// identifier handed to console is the caught value until shown otherwise
+				{
+					selector:
+						"CatchClause CallExpression[callee.object.name='console'] > Identifier",
+					message:
+						"Do not log a raw error: an AxiosError carries the bearer token, a GraphQL error the request's variables. Log errorForLog(error) from @helpers/safeErrorLog.",
+				},
+				{
+					selector: "CallExpression[arguments.0.object.name='console']",
+					message:
+						"`.catch(console.error)` logs the raw error. Pass (error) => console.error(…, errorForLog(error)).",
+				},
 				{
 					selector: "CallExpression[callee.property.name='waitForTimeout']",
 					message:
