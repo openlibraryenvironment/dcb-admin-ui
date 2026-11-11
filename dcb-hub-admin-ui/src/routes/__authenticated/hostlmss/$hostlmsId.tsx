@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { FormProvider, useForm, Controller, useWatch } from "react-hook-form";
 import isEmpty from "lodash/isEmpty";
+import isEqual from "lodash/isEqual";
 import {
 	Alert,
 	AlertTitle,
@@ -39,6 +40,7 @@ import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { getHostLms } from "@queries/getHostLms";
 import { getILS } from "@helpers/getILS";
+import { formatChangedFields } from "@helpers/formatChangedFields";
 import { handleEdit } from "@helpers/actions/editAndDeleteActions";
 import {
 	clientConfigToFields,
@@ -214,12 +216,9 @@ function HostLMSDetails() {
 			hostlms.lmsClientClass,
 			formData.clientConfigFields ?? {},
 		);
-		// Compared as JSON because the config is a free-form object: there is no
-		// field list to walk, and sending it unchanged would re-run the ping and
-		// ingest probes against the LMS for nothing.
-		if (
-			JSON.stringify(nextConfig) !== JSON.stringify(hostlms.clientConfig ?? {})
-		)
+		// Deep-compared, whatever the key order: sending it unchanged re-runs the ping
+		// and ingest probes against the LMS for nothing
+		if (!isEqual(nextConfig, hostlms.clientConfig ?? {}))
 			changedFields.clientConfig = nextConfig;
 
 		if (Object.keys(changedFields).length === 0) {
@@ -231,12 +230,21 @@ function HostLMSDetails() {
 			id: hostlms.id,
 			name: hostlms.name ?? hostlms.code,
 			changedFields,
-			// NOT formatChangedFields: that renders old -> new for every key, and for
-			// clientConfig both sides are an object holding this system's credentials.
-			// The dialog names what changed; the values stay out of it.
-			changeSummary: Object.keys(changedFields)
-				.map((key) => t(`hostlms.edit.changed.${key}`, { defaultValue: key }))
-				.join(", "),
+			// clientConfig holds this system's credentials: the dialog says it changed, never
+			// what it held. ChangesSummary reads the old_values/new_values shape, and threw on
+			// the plain list that was here before, so every Host LMS save crashed the page
+			changeSummary: formatChangedFields(
+				changedFields.clientConfig
+					? {
+							...changedFields,
+							clientConfig: t("hostlms.edit.settings_changed"),
+						}
+					: changedFields,
+				{
+					...hostlms,
+					clientConfig: t("hostlms.edit.settings_before"),
+				},
+			),
 			onSuccess: (result) => {
 				setEditMode(false);
 				// The update re-probes the system, so a credential change that broke the
