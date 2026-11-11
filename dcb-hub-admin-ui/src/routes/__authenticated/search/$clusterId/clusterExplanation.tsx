@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
@@ -111,9 +112,14 @@ function ClusterExplanation() {
 				flex: 0.75,
 			},
 			{
-				field: "formattedTimestamp",
+				// A date, to the second, so a bib's run sorts from the matches to their outcome
+				field: "timestamp",
 				headerName: t("search.formatted_timestamp"),
-				minWidth: 150,
+				minWidth: 170,
+				type: "dateTime",
+				valueGetter: (value: string | null) => (value ? new Date(value) : null),
+				valueFormatter: (value: Date | null) =>
+					value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "",
 			},
 			{
 				field: "matchedBibId",

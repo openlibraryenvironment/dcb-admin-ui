@@ -138,3 +138,26 @@ test("the bib and cluster an event matched are whole, and links", async ({
 		new RegExp(`/search/${CLUSTER_ID}/cluster$`),
 	);
 });
+
+// Sorted newest first on a minute-precision string, a bib's outcome sat above its causes
+test("a bib's events read from cause to outcome", async ({ page }) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+	const rows = page.getByRole("row");
+	await expect(rows.filter({ hasText: "Merged clusters" })).toBeVisible();
+
+	const order = await rows.evaluateAll((all) =>
+		all
+			.map((row) => row.textContent ?? "")
+			.map((text) =>
+				["New cluster", "Match: shared identifier", "Merged clusters"].find(
+					(label) => text.includes(label),
+				),
+			)
+			.filter(Boolean),
+	);
+	expect(order).toEqual([
+		"New cluster",
+		"Match: shared identifier",
+		"Merged clusters",
+	]);
+});

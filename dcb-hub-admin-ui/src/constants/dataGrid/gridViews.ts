@@ -255,7 +255,8 @@ const recordView = (
 // Holds every row client-side, so the reader's aggregates total the whole list: in the URL as agg
 export const clusterExplanationView = recordView(
 	"ClusterExplainer",
-	[{ field: "formattedTimestamp", sort: "desc" }],
+	// Oldest first: within each bib, its matches come before the outcome they caused
+	[{ field: "timestamp", sort: "asc" }],
 	25,
 	defaultClusterExplanationVisibility,
 );
