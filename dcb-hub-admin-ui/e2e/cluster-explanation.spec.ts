@@ -53,3 +53,18 @@ test("an event that matched no bib offers no matched-against link", async ({
 	await expect(page.getByRole("link", { name: SUBJECT_BIB })).toBeVisible();
 	await expect(page.locator('a[href*="/bibs/"]')).toHaveCount(1);
 });
+
+// Until 46daf41b the grid opened grouped by incoming bib, and the group row's count was the
+// "number of events" the column's own header still promises
+test("events are grouped under the bib they explain, with how many there are", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page.getByRole("row").filter({ hasText: SUBJECT_BIB }).first(),
+	).toContainText("(2)");
+	await expect(
+		page.getByRole("row").filter({ hasText: "New Cluster" }),
+	).toBeVisible();
+});

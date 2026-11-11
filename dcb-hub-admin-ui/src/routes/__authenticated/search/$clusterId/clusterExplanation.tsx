@@ -4,7 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { Grid, Chip } from "@mui/material";
 import { CheckCircle, Warning, Info } from "@mui/icons-material";
-import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import {
+	GridColDef,
+	type GridRowGroupingModel,
+	type GridRowModesModel,
+} from "@mui/x-data-grid-premium";
 import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
 import { useGridView } from "@hooks/useGridView";
 import { validateGridSearch } from "@helpers/viewState/gridSearch";
@@ -49,6 +53,9 @@ function ClusterExplanation() {
 		from: "/__authenticated/search/$clusterId/clusterExplanation",
 	});
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	// Events grouped under the bib they explain: a group row's "(n)" is that bib's event count
+	const [rowGroupingModel, setRowGroupingModel] =
+		useState<GridRowGroupingModel>(["subjectId"]);
 
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ["clusterAuditLog", clusterId],
@@ -75,6 +82,8 @@ function ClusterExplanation() {
 				minWidth: 200,
 				flex: 0.75,
 				renderCell: (params) => {
+					// A group row has no event of its own
+					if (!params.value) return null;
 					let color: "success" | "warning" | "info" | "default" = "default";
 					let icon = <Info fontSize="small" />;
 
@@ -181,9 +190,16 @@ function ClusterExplanation() {
 					columnVisibilityModel={view.columnVisibilityModel}
 					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
 					columnLayout={view.columnLayout}
-					getDetailPanelContent={({ row }: any) => (
-						<MasterDetail row={row} type="ClusterExplainer" />
-					)}
+					getDetailPanelContent={({ row }: any) =>
+						row?.eventType ? (
+							<MasterDetail row={row} type="ClusterExplainer" />
+						) : null
+					}
+					rowGroupingModel={rowGroupingModel}
+					onRowGroupingModelChange={setRowGroupingModel}
+					groupingColDef={{ minWidth: 350 }}
+					// Open, so every event shows without a click per bib
+					defaultGroupingExpansionDepth={-1}
 					disableAggregation={false}
 					aggregationModel={view.aggregationModel}
 					onAggregationModelChange={view.onAggregationModelChange}
