@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -115,10 +116,26 @@ export default function SupplierActionDialog({
 	const outcome = mutation.data;
 	const alert = outcome && outcomeAlert(outcome);
 	// Escape or the backdrop mid-flight would hide the outcome and re-offer the action, and on
-	// 8.71.0 a second skip acts on whichever supplier is active by then
-	const close = () => {
-		if (!mutation.isPending) onClose();
+	// 8.71.0 a second skip acts on whichever supplier is active by then. A ref, set in the
+	// click, because the request leaves before isPending reaches a render
+	const running = useRef(false);
+	const confirm = () => {
+		if (running.current) return;
+		running.current = true;
+		mutation.mutate(undefined, {
+			onSettled: () => {
+				running.current = false;
+			},
+		});
 	};
+	const close = () => {
+		if (!running.current && !mutation.isPending) onClose();
+	};
+	// The focused confirm button unmounts when the outcome replaces it (WCAG 2.4.3)
+	const closeButton = useRef<HTMLButtonElement>(null);
+	useEffect(() => {
+		if (outcome) closeButton.current?.focus();
+	}, [outcome]);
 	// Confirming before the setting loads would skip on the "unknown" warning; an errored
 	// query is no longer pending, so the button comes back with that warning in place
 	const awaitingWarning = action === "skip" && settings.isPending;
@@ -162,12 +179,7 @@ export default function SupplierActionDialog({
 			</DialogContent>
 			<DialogActions>
 				{outcome ? (
-					<Button
-						onClick={onClose}
-						variant="contained"
-						// eslint-disable-next-line jsx-a11y/no-autofocus -- the focused confirm button has just unmounted, so focus would fall to the dialog container (WCAG 2.4.3)
-						autoFocus
-					>
+					<Button ref={closeButton} onClick={onClose} variant="contained">
 						{t("ui.actions.close")}
 					</Button>
 				) : (
@@ -176,7 +188,7 @@ export default function SupplierActionDialog({
 							{t("ui.actions.cancel")}
 						</Button>
 						<Button
-							onClick={() => mutation.mutate()}
+							onClick={confirm}
 							variant="contained"
 							color={action === "reactivate" ? "primary" : "error"}
 							disabled={mutation.isPending || awaitingWarning}
