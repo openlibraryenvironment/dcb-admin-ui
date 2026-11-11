@@ -228,12 +228,8 @@ function GroupDetails() {
 						paginationMode="client"
 						sortingMode="client"
 						filterMode="client"
-						disableAggregation
 						disableHoverInteractions={false}
-						disableRowGrouping
-						disablePivoting
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
 						paginationModel={paginationModel}

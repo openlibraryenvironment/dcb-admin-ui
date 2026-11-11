@@ -149,14 +149,10 @@ function ClusterDetails() {
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"
-					disableAggregation
-					disableRowGrouping
 					disableHoverInteractions={false}
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible={false}
 					pagination
-					disablePivoting
 					scrollbarVisible={false}
 					noResultsText={t("ui.data_grid.no_results")}
 					searchText=""

@@ -316,12 +316,8 @@ function ItemsPageComponent() {
 					getDetailPanelContent={({ row }: any) => (
 						<MasterDetail type="items" row={row} />
 					)}
-					disableAggregation
-					disableRowGrouping
 					disableHoverInteractions={false}
 					listViewEnabled={false}
-					pivotingEnabled={false}
-					disablePivoting
 					toolbarVisible
 					scrollbarVisible={false}
 					noResultsText={t("requesting.items_not_found")}
@@ -356,7 +352,6 @@ function ItemsPageComponent() {
 								columns={itemColumnsWithLookUp}
 								rows={itemsNotShown}
 								loading={isLoading}
-								disablePivoting
 								paginationMode="client"
 								sortingMode="client"
 								filterMode="client"
@@ -368,11 +363,8 @@ function ItemsPageComponent() {
 								getDetailPanelContent={({ row }: any) => (
 									<MasterDetail type="items" row={row} />
 								)}
-								disableAggregation
-								disableRowGrouping
 								disableHoverInteractions={false}
 								listViewEnabled={false}
-								pivotingEnabled={false}
 								toolbarVisible={false}
 								scrollbarVisible={false}
 								noResultsText={t("requesting.items_not_found")}

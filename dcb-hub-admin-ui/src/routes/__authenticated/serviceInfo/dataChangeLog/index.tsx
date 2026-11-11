@@ -117,12 +117,8 @@ function DataChangeLogsGrid() {
 					query: getDataChangeLog,
 					coreType: "dataChangeLog",
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("data_change_log.no_results")}

@@ -148,12 +148,8 @@ function AgenciesRouteComponent() {
 					query: getAgencies,
 					coreType: "agencies",
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("agencies.no_results")}

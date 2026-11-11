@@ -225,14 +225,10 @@ function SupplierRequestsAll() {
 							quickFilterFields: ["status", "description"],
 							wizard: true,
 						}}
-						disableAggregation
-						disableRowGrouping
 						disableHoverInteractions={false}
-						disablePivoting={true}
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible
 						noResultsText={t("patron_requests.no_results")}

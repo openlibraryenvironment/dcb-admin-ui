@@ -2377,7 +2377,6 @@ function RouteComponent() {
 						{t("audit_log.title")}
 					</Typography>
 					<DataGrid
-						disablePivoting
 						rows={patronRequest?.audit ?? []}
 						columns={AUDIT_COLUMNS}
 						columnVisibilityModel={audit.columnVisibilityModel}
@@ -2392,9 +2391,7 @@ function RouteComponent() {
 						filterMode="client"
 						filterModel={audit.filterModel}
 						onFilterModelChange={audit.onFilterModelChange}
-						disableAggregation={true}
 						disableHoverInteractions={true}
-						disableRowGrouping={true}
 						loading={patronRequestLoading}
 						listViewEnabled={false}
 						noResultsText={t("ui.data_grid.no_results")}
@@ -2402,7 +2399,6 @@ function RouteComponent() {
 						paginationMode="client"
 						paginationModel={audit.paginationModel}
 						onPaginationModelChange={audit.onPaginationModelChange}
-						pivotingEnabled={false}
 						toolbarVisible
 						searchText={t("ui.data_grid.search_by_audit")}
 						scrollbarVisible={false}

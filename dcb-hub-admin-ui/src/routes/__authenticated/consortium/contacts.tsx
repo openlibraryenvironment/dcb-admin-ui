@@ -166,12 +166,8 @@ function Contacts() {
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						processRowUpdate={contactMutation.requestGridEdit}
-						disableAggregation
 						disableHoverInteractions={false}
-						disableRowGrouping
-						disablePivoting
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
 						paginationModel={paginationModel}

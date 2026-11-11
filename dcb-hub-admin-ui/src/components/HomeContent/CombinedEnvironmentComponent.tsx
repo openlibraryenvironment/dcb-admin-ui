@@ -162,12 +162,8 @@ export default function CombinedEnvironmentComponent() {
 				initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
 				sortingMode="client"
 				filterMode="client"
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible={false}
 				scrollbarVisible={false}
 				pagination

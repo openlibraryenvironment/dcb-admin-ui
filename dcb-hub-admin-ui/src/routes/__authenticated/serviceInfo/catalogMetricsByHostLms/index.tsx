@@ -283,10 +283,7 @@ function CatalogMetricsByHostLms() {
 					aggregationModel={view.aggregationModel}
 					onAggregationModelChange={view.onAggregationModelChange}
 					disableHoverInteractions={false}
-					disableRowGrouping
-					disablePivoting
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible
 					scrollbarVisible={false}
 					noResultsText={t("catalogMetricsByHostLms.no_results")}

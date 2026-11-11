@@ -117,12 +117,8 @@ function BibsRouteComponent() {
 					query: getBibs,
 					coreType: "sourceBibs",
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("ui.data_grid.no_results")}

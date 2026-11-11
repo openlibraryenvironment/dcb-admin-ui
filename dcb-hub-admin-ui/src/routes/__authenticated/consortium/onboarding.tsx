@@ -889,12 +889,8 @@ function Onboarding() {
 						filterMode="client"
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
-						disableAggregation
 						disableHoverInteractions={false}
-						disableRowGrouping
-						disablePivoting
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
 						paginationModel={paginationModel}

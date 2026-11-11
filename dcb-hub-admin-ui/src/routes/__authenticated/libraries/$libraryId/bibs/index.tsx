@@ -291,13 +291,9 @@ function LibraryBibs() {
 							coreType: "sourceBibs",
 							baseQuery: presetQueryVariables,
 						}}
-						disableAggregation
-						disableRowGrouping
 						disableHoverInteractions={false}
-						disablePivoting={true}
 						rowModesModel={NO_ROW_MODES} // No inline editing on bibs (stable ref)
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible={false}
 						noResultsText={t("bibRecords.no_results")}

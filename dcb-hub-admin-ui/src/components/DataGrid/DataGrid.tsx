@@ -93,7 +93,7 @@ interface CustomDataGridProps extends Omit<
 	identifier: string;
 	listViewEnabled: boolean;
 	noResultsText: string;
-	pivotingEnabled: boolean;
+	pivotingEnabled?: boolean;
 	scrollbarVisible: boolean;
 	toolbarVisible: boolean;
 	searchText: string;
@@ -136,7 +136,7 @@ export default function DataGrid({
 	noResultsText,
 	onExport,
 	parentApiRef,
-	pivotingEnabled,
+	pivotingEnabled = false,
 	scrollbarVisible,
 	searchText,
 	styleOverrides,
@@ -154,6 +154,9 @@ export default function DataGrid({
 	viewNotice,
 	rowSelection = false,
 	columnLayout,
+	disableAggregation = true,
+	disableRowGrouping = true,
+	disablePivoting = true,
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
@@ -342,6 +345,11 @@ export default function DataGrid({
 				rows={stableRows}
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
+				// Off unless a grid opts in, and always off on a server-paged grid: they would
+				// aggregate or group only the one page of rows the grid holds
+				disableAggregation={paginationMode === "server" || disableAggregation}
+				disableRowGrouping={paginationMode === "server" || disableRowGrouping}
+				disablePivoting={paginationMode === "server" || disablePivoting}
 				loading={loading}
 				pageSizeOptions={PAGE_SIZE_OPTIONS}
 				// Nothing to page through yet. Shown, the bar moves when the grid resizes to the

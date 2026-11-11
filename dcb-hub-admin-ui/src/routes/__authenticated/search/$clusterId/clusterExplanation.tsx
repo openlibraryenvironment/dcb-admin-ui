@@ -171,7 +171,6 @@ function ClusterExplanation() {
 					sortingMode="client"
 					filterMode="client"
 					pagination
-					disablePivoting
 					paginationModel={view.paginationModel}
 					onPaginationModelChange={view.onPaginationModelChange}
 					sortModel={view.sortModel}
@@ -197,7 +196,6 @@ function ClusterExplanation() {
 					disableRowGrouping={false}
 					disableHoverInteractions={false}
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible
 					scrollbarVisible={false}
 					noResultsText={t("ui.data_grid.no_results")}

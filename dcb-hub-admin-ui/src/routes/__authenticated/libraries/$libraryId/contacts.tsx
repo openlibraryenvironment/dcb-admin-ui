@@ -210,18 +210,14 @@ function LibraryContacts() {
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						processRowUpdate={contactMutation.requestGridEdit}
-						disableAggregation
-						disableRowGrouping
 						toolbarVisible={false}
 						pagination
 						scrollbarVisible={false}
 						noResultsText="No contacts found for this library."
 						searchText=""
 						disableHoverInteractions
-						disablePivoting
 						listViewEnabled={false}
 						initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
-						pivotingEnabled={false}
 					/>
 				</Grid>
 			</Grid>

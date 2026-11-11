@@ -238,17 +238,13 @@ function PatronRequestsCompleted() {
 							quickFilterFields: ["status", "description"],
 							wizard: true,
 						}}
-						disableAggregation
-						disableRowGrouping
 						disableHoverInteractions={false}
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible
 						noResultsText={t("patron_requests.no_results")}
 						searchText={t("patron_requests.search_placeholder_status")}
 						rowModesModel={rowModesModel}
-						disablePivoting
 						onRowModesModelChange={setRowModesModel}
 					/>
 				</Grid>

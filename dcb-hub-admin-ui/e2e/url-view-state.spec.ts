@@ -635,3 +635,21 @@ test.describe("A view's link through sign-in", () => {
 		await backOnTheView(page, asked);
 	});
 });
+
+// A server-paged grid holds one page: grouping or aggregating it would describe that page alone
+test("a server-paged grid offers no grouping or aggregation", async ({
+	page,
+}) => {
+	await seedAuth(page);
+	await useAllFeatures(page);
+	await mockGraphQL(page, MOCKS);
+	await page.goto("/patronRequests/all");
+	const menu = await openColumnMenu(page, "Status");
+
+	await expect(menu.getByRole("combobox", { name: "Aggregation" })).toHaveCount(
+		0,
+	);
+	await expect(menu.getByRole("menuitem", { name: /^Group by/ })).toHaveCount(
+		0,
+	);
+});

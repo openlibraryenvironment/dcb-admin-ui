@@ -175,12 +175,8 @@ function GroupsRouteComponent() {
 					query: getLibraryGroups,
 					coreType: "libraryGroups",
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("groups.no_results")}

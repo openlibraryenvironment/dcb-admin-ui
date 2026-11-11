@@ -238,14 +238,10 @@ function PatronRequestsActive() {
 							quickFilterFields: ["status", "description"],
 							wizard: true,
 						}}
-						disableAggregation
-						disableRowGrouping
 						disableHoverInteractions={false}
-						disablePivoting={true} // REQUIRED PROP ADDED
 						rowModesModel={rowModesModel} // REQUIRED PROP ADDED
 						onRowModesModelChange={setRowModesModel}
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible
 						noResultsText={t("patron_requests.no_results")}

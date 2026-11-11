@@ -180,12 +180,8 @@ function RequestErrors() {
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("error_overview.no_results")}

@@ -129,9 +129,6 @@ export const CleanupProgressDialog = ({
 										columnVisibilityModel={cleanupPatronRequestVisibility}
 										rows={successRows}
 										loading={false}
-										disableAggregation
-										disableRowGrouping
-										disablePivoting
 										disableHoverInteractions={false}
 										pagination={true}
 										paginationMode="client"
@@ -142,7 +139,6 @@ export const CleanupProgressDialog = ({
 										filterMode="client"
 										rowModesModel={{}}
 										listViewEnabled={false}
-										pivotingEnabled={false}
 										toolbarVisible={false}
 										scrollbarVisible={true}
 										noResultsText=""
@@ -185,9 +181,6 @@ export const CleanupProgressDialog = ({
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={errorRows}
 									loading={false}
-									disableAggregation
-									disableRowGrouping
-									disablePivoting
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
@@ -198,7 +191,6 @@ export const CleanupProgressDialog = ({
 									filterMode="client"
 									rowModesModel={{}}
 									listViewEnabled={false}
-									pivotingEnabled={false}
 									toolbarVisible={false}
 									scrollbarVisible={true}
 									noResultsText=""
@@ -241,9 +233,6 @@ export const CleanupProgressDialog = ({
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={refusedRows}
 									loading={false}
-									disableAggregation
-									disableRowGrouping
-									disablePivoting
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
@@ -254,7 +243,6 @@ export const CleanupProgressDialog = ({
 									filterMode="client"
 									rowModesModel={{}}
 									listViewEnabled={false}
-									pivotingEnabled={false}
 									toolbarVisible={false}
 									scrollbarVisible={true}
 									noResultsText=""
@@ -296,9 +284,6 @@ export const CleanupProgressDialog = ({
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={skippedRows}
 									loading={false}
-									disableAggregation
-									disableRowGrouping
-									disablePivoting
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
@@ -309,7 +294,6 @@ export const CleanupProgressDialog = ({
 									filterMode="client"
 									rowModesModel={{}}
 									listViewEnabled={false}
-									pivotingEnabled={false}
 									toolbarVisible={false}
 									scrollbarVisible={true}
 									noResultsText=""

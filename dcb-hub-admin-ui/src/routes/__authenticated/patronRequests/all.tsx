@@ -217,10 +217,7 @@ function All() {
 						columnVisibilityModel={view.columnVisibilityModel}
 						onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
 						columnLayout={view.columnLayout}
-						disableAggregation={true}
 						disableHoverInteractions={false}
-						disablePivoting={true}
-						disableRowGrouping={true}
 						exportConfig={{
 							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
@@ -244,7 +241,6 @@ function All() {
 						pagination={true}
 						paginationMode="server"
 						paginationModel={view.paginationModel}
-						pivotingEnabled={false}
 						rowCount={dashboard?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
 						rows={dashboard?.rows ?? []}

@@ -377,7 +377,6 @@ function AuditExplorer() {
 						columnLayout={view.columnLayout}
 						// Grouping is client-side and these rows are one server page: groups split
 						// across pages with partial counts. The request column links instead
-						disableRowGrouping
 						getDetailPanelContent={({ row }: any) => (
 							<MasterDetail row={row} type="audits" />
 						)}
@@ -387,11 +386,8 @@ function AuditExplorer() {
 							baseQuery: searchScope,
 							quickFilterFields: ["briefDescription"],
 						}}
-						disableAggregation
 						disableHoverInteractions={false}
-						disablePivoting
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible={false}
 						noResultsText={t("audit_log.audit_log_no_rows")}

@@ -151,12 +151,8 @@ function FunctionalSettings() {
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						processRowUpdate={settingMutation.requestGridEdit}
-						disableAggregation
 						disableHoverInteractions={false}
-						disableRowGrouping
-						disablePivoting
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
 						initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}

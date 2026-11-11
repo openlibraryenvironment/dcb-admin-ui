@@ -173,7 +173,6 @@ function Identifiers() {
 			<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 				<DataGrid
 					identifier={gridId}
-					disablePivoting
 					type="Identifiers"
 					columns={columns}
 					viewNotice={<GridViewNotice view={view} />}
@@ -192,11 +191,8 @@ function Identifiers() {
 					columnVisibilityModel={view.columnVisibilityModel}
 					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
 					columnLayout={view.columnLayout}
-					disableAggregation
-					disableRowGrouping
 					disableHoverInteractions={false}
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible
 					scrollbarVisible={false}
 					noResultsText={t("ui.data_grid.no_results")}

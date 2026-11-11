@@ -192,12 +192,8 @@ function AlarmsRouteComponent() {
 					coreType: "alarms",
 					baseQuery,
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("ui.data_grid.no_results")}

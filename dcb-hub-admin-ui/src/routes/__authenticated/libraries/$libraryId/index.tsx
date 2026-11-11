@@ -940,15 +940,11 @@ function LibraryProfile() {
 						paginationMode="client"
 						sortingMode="client"
 						filterMode="client"
-						disableAggregation
-						disableRowGrouping
 						toolbarVisible={false}
 						scrollbarVisible={false}
 						noResultsText={t("groups.none_for_library")}
 						searchText=""
 						disableHoverInteractions
-						disablePivoting
-						pivotingEnabled={false}
 						listViewEnabled={false}
 					/>
 				</Grid>

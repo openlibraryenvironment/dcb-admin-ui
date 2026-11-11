@@ -191,9 +191,6 @@ export default function ConsortiumDetails() {
 			columns={columns}
 			rows={rows}
 			loading={false}
-			disableAggregation
-			disableRowGrouping
-			disablePivoting
 			disableHoverInteractions={true}
 			pagination={false}
 			paginationMode="client"
@@ -202,7 +199,6 @@ export default function ConsortiumDetails() {
 			filterMode="client"
 			rowModesModel={{}}
 			listViewEnabled={false}
-			pivotingEnabled={false}
 			toolbarVisible={false}
 			scrollbarVisible={true}
 			noResultsText=""

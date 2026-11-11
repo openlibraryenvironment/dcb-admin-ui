@@ -150,12 +150,8 @@ export default function MappingsGrid({
 					wizard: true,
 					roundTrip: MAPPING_IMPORT_COLUMNS[dataKey],
 				}}
-				disableAggregation
-				disableRowGrouping
 				disableHoverInteractions={false}
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("mappings.no_results")}
