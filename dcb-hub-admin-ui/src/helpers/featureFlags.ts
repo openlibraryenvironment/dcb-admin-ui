@@ -77,9 +77,9 @@ export const isConfirmItemReturnedEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_CONFIRM_ITEM_RETURNED");
 
 /**
- * Insights depends on the /insights endpoints, first released in dcb-service 9.0.0.
- * Enable with VITE_FEATURE_INSIGHTS=true once the environment's dcb-service is new
- * enough; an older one answers 404 to all of them.
+ * Insights depends on the /insights endpoints. dcb-service serves them from 9.0.0 but
+ * answers them correctly from 9.2.0 (FEATURE_AVAILABILITY): enable
+ * VITE_FEATURE_INSIGHTS=true on 9.2.0 or later. Before 9.0.0 every one answers 404.
  */
 export const isInsightsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_INSIGHTS");

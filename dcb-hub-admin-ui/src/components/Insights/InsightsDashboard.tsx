@@ -573,7 +573,7 @@ export default function InsightsDashboard({
 					)}
 
 					{/* The three durations over time. Behind its own flag as well:
-				    /insights/trend is on no dcb-service release, and a 404 through the
+				    /insights/trend is first in dcb-service 9.1.0, and a 404 through the
 				    panel contract reads as a fault rather than as a server that is older. */}
 					<PanelRow minHeight={360}>
 						{shown("trends.durationTrend") && (
