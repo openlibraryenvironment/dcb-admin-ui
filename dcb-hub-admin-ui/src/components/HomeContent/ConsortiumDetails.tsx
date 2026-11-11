@@ -197,7 +197,7 @@ export default function ConsortiumDetails() {
 			disableHoverInteractions={true}
 			pagination={false}
 			paginationMode="client"
-			paginationModel={{ page: 0, pageSize: 25 }}
+			initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
 			sortingMode="client"
 			filterMode="client"
 			rowModesModel={{}}

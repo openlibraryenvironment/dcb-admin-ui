@@ -135,7 +135,9 @@ export const CleanupProgressDialog = ({
 										disableHoverInteractions={false}
 										pagination={true}
 										paginationMode="client"
-										paginationModel={{ page: 0, pageSize: 5 }}
+										initialState={{
+											pagination: { paginationModel: { pageSize: 5 } },
+										}}
 										sortingMode="client"
 										filterMode="client"
 										rowModesModel={{}}
@@ -189,7 +191,9 @@ export const CleanupProgressDialog = ({
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
-									paginationModel={{ page: 0, pageSize: 5 }}
+									initialState={{
+										pagination: { paginationModel: { pageSize: 5 } },
+									}}
 									sortingMode="client"
 									filterMode="client"
 									rowModesModel={{}}
@@ -243,7 +247,9 @@ export const CleanupProgressDialog = ({
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
-									paginationModel={{ page: 0, pageSize: 5 }}
+									initialState={{
+										pagination: { paginationModel: { pageSize: 5 } },
+									}}
 									sortingMode="client"
 									filterMode="client"
 									rowModesModel={{}}
@@ -296,7 +302,9 @@ export const CleanupProgressDialog = ({
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
-									paginationModel={{ page: 0, pageSize: 5 }}
+									initialState={{
+										pagination: { paginationModel: { pageSize: 5 } },
+									}}
 									sortingMode="client"
 									filterMode="client"
 									rowModesModel={{}}

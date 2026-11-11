@@ -340,7 +340,9 @@ function LibraryAccounts() {
 							disableHoverInteractions
 							disablePivoting
 							listViewEnabled={false}
-							paginationModel={{ page: 0, pageSize: 25 }}
+							initialState={{
+								pagination: { paginationModel: { pageSize: 25 } },
+							}}
 							pivotingEnabled={false}
 						/>
 					</Grid>

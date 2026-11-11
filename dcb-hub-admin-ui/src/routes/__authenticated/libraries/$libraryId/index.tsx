@@ -911,7 +911,7 @@ function LibraryProfile() {
 					<DataGrid
 						identifier="libraryGroups"
 						pagination
-						paginationModel={{ page: 0, pageSize: 20 }}
+						initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						type="groups"

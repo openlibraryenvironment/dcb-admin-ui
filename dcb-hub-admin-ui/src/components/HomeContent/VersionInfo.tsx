@@ -174,7 +174,7 @@ export default function VersionInfo({ serviceInfo }: VersionInfoProps) {
 			scrollbarVisible={true}
 			noResultsText={t("ui.data_grid.no_results")}
 			searchText=""
-			paginationModel={{ page: 0, pageSize: 20 }}
+			initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
 			getDetailPanelContent={({ row }: { row: VersionRow }) => (
 				<MasterDetail row={row} type="versionInfo" />
 			)}

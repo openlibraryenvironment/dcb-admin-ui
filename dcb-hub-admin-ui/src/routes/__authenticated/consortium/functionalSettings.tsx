@@ -159,7 +159,7 @@ function FunctionalSettings() {
 						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
-						paginationModel={{ page: 0, pageSize: 20 }}
+						initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
 						scrollbarVisible={false}
 						noResultsText={t("consortium.settings.not_available")}
 						searchText=""

@@ -159,7 +159,7 @@ export default function CombinedEnvironmentComponent() {
 				paginationMode="client"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
-				paginationModel={{ page: 0, pageSize: 20 }}
+				initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
 				sortingMode="client"
 				filterMode="client"
 				disableAggregation

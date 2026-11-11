@@ -249,3 +249,26 @@ test.describe("Request tags on a deployment without them", () => {
 		await expect(page).toHaveURL(/\/consortium$/);
 	});
 });
+
+// A fixed paginationModel with no handler held the grid on its first 25 tags
+test("the tag list pages past its first 25 tags", async ({ page }) => {
+	await seedAuth(page);
+	await useAllFeatures(page);
+	await mockGraphQL(page, {
+		...MOCKS,
+		LoadRequestTags: {
+			requestTags: Array.from({ length: 30 }, (_, index) => ({
+				code: `TAG_${String(index + 1).padStart(2, "0")}`,
+				label: `Tag ${String(index + 1).padStart(2, "0")}`,
+				description: null,
+				active: true,
+			})),
+		},
+	});
+	await page.goto("/consortium/requestTags");
+	await expect(page.getByText("1–25 of 30")).toBeVisible();
+
+	await page.getByRole("button", { name: "Go to next page" }).click();
+
+	await expect(page.getByText("26–30 of 30")).toBeVisible();
+});
