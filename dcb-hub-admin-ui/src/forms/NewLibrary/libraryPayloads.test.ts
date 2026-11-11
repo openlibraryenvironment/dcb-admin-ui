@@ -182,14 +182,15 @@ describe("buildAgencyUpdateInput", () => {
 		expect(input.isSupplyingAgency).toBe(true);
 	});
 
-	it("sends no loan cap as null, never as zero", () => {
-		// A 0 would stop the library borrowing anything at all, which is the
-		// opposite of "no cap".
-		expect(buildAgencyUpdateInput(values()).maxConsortialLoans).toBeNull();
+	it("leaves out a blank loan cap, never null and never zero", () => {
+		// null fails updateAgency with a NullPointerException; 0 would stop the library
+		// borrowing anything at all
+		expect(buildAgencyUpdateInput(values())).not.toHaveProperty(
+			"maxConsortialLoans",
+		);
 		expect(
-			buildAgencyUpdateInput(values({ maxConsortialLoans: "   " }))
-				.maxConsortialLoans,
-		).toBeNull();
+			buildAgencyUpdateInput(values({ maxConsortialLoans: "   " })),
+		).not.toHaveProperty("maxConsortialLoans");
 	});
 
 	it("sends a stated loan cap as a number", () => {

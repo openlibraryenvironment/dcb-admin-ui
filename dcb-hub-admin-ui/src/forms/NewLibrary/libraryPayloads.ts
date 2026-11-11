@@ -167,9 +167,10 @@ const localHoldsInput = (formData: NewLibraryFormValues) =>
 		: {};
 
 /**
- * Blank is absent, never null: before dcb-service 9.1.0 CreateLibraryDataFetcher
- * checks containsKey and then calls toString() on the value, so a null loan cap
- * is a NullPointerException that fails the whole createLibrary.
+ * Blank is absent, never null. CreateLibraryDataFetcher before 9.1.0, and
+ * UpdateAgencyDataFetcher on every release to 9.3.0, check containsKey and then call
+ * toString() on the value, so a null loan cap is a NullPointerException that fails the
+ * whole mutation. Absent leaves an existing cap as it is: updateAgency cannot clear one.
  */
 const loanCapInput = (value: string | undefined) => {
 	const cap = loanCap(value);
@@ -262,7 +263,7 @@ export const buildAgencyUpdateInput = (formData: NewLibraryFormValues) =>
 		isSupplyingAgency: formData.isSupplyingAgency,
 		latitude: Number(formData.latitude),
 		longitude: Number(formData.longitude),
-		maxConsortialLoans: loanCap(formData.maxConsortialLoans),
+		...loanCapInput(formData.maxConsortialLoans),
 		...localHoldsInput(formData),
 		reason: formData.reason,
 		changeReferenceUrl: formData.changeReferenceUrl,
