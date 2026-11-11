@@ -166,9 +166,30 @@ export async function waitForDialogToSettle(page: Page) {
 		.toBe("settled");
 }
 
+/**
+ * Let every finite CSS transition and animation finish. A colour sampled mid-transition (a
+ * scheme switched after load, a button enabled a moment ago, a menu growing out) is a
+ * contrast failure in no state the user ever sees still. Infinite ones, spinners and
+ * skeleton pulses, never finish and are left alone.
+ */
+async function waitForTransitions(page: Page) {
+	await page.evaluate(() =>
+		Promise.all(
+			document
+				.getAnimations()
+				.filter(
+					(animation) =>
+						animation.effect?.getComputedTiming().iterations !== Infinity,
+				)
+				.map((animation) => animation.finished.catch(() => undefined)),
+		),
+	);
+}
+
 export async function scanForViolations(page: Page) {
 	await expectNoHorizontalScroll(page);
 	await tagLicenceWatermarks(page);
+	await waitForTransitions(page);
 
 	const results = await new AxeBuilder({ page })
 		.withTags(WCAG_TAGS)
