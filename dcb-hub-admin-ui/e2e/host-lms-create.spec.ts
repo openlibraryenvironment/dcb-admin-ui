@@ -68,6 +68,9 @@ test.describe("New Host LMS", () => {
 		});
 		await expect(shared.getByRole("radio", { name: "No" })).toBeChecked();
 
+		// The client class menu stays mounted, aria-hidden, while it grows out: scanned
+		// then, axe composites its options against the page and reports their contrast
+		await expect(page.locator(".MuiMenu-root")).toHaveCount(0);
 		await scanForViolations(page);
 	});
 

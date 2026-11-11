@@ -82,6 +82,15 @@ test.describe("Library setup: map every DCB type", () => {
 			.getByLabel(/item type for items borrowed from other libraries/i)
 			.fill("BOOK");
 		await expect(dialog.getByRole("table")).toBeVisible();
+		// Typing enables Create, and its colours fade in from the disabled grey. Scanned
+		// during that fade it is an enabled button at about 2.9:1
+		const create = dialog.getByRole("button", { name: /^Create \d+ mapping/ });
+		await expect(create).toBeEnabled();
+		await create.evaluate((button) =>
+			Promise.all(
+				button.getAnimations().map((animation) => animation.finished),
+			),
+		);
 
 		await scanForViolations(page);
 	});
