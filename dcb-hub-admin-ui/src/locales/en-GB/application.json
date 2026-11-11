@@ -3017,6 +3017,15 @@
 			"forbidden": "Only administrators can export a cluster's member records.",
 			"failed": "The member records could not be exported."
 		},
+		"reprocess_cluster": {
+			"action": "Reprocess cluster",
+			"title": "Reprocess this cluster?",
+			"body": "Every member except the selected bib leaves this cluster and is queued to be clustered again. At the next processing run each one rejoins this cluster, joins another, or starts a new one. Requests already placed are not changed.",
+			"confirm": "Reprocess",
+			"started": "Reprocessing has started. Members return or move as they are processed, so this page can change over the next few minutes.",
+			"forbidden": "Only administrators can reprocess a cluster.",
+			"failed": "The cluster could not be reprocessed."
+		},
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
 		"cluster_id": "Cluster UUID",

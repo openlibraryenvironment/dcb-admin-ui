@@ -11,6 +11,7 @@ import TabPanel from "@mui/lab/TabPanel";
 import { TabLink } from "@components/TabLink/TabLink";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
+import ClusterReprocessDialog from "@components/ClusterReprocessDialog/ClusterReprocessDialog";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
@@ -36,6 +37,7 @@ function ClusterLayout() {
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const [showRequestModal, setShowRequestModal] = useState(false);
+	const [showReprocess, setShowReprocess] = useState(false);
 	const restClient = useDcbRestClient();
 	const exportMembers = useMutation({
 		mutationFn: () => exportClusterMembers(restClient, clusterId),
@@ -98,6 +100,15 @@ function ClusterLayout() {
 				: t("search.export_members.action"),
 		});
 	}
+	// POST /clusters/{id}/reprocess is @Secured(ADMINISTRATOR), 8.71.0-9.3.0
+	if (userRoles.includes("ADMIN")) {
+		pageActions.push({
+			key: "reprocessCluster",
+			onClick: () => setShowReprocess(true),
+			disabled: false,
+			label: t("search.reprocess_cluster.action"),
+		});
+	}
 	const exportOutcome = exportMembers.data;
 
 	return (
@@ -118,6 +129,12 @@ function ClusterLayout() {
 					</Alert>
 				)}
 			</div>
+			{showReprocess && (
+				<ClusterReprocessDialog
+					clusterId={clusterId}
+					onClose={() => setShowReprocess(false)}
+				/>
+			)}
 			{/* Single entry point: the user picks the request type inside the modal */}
 			{showRequestModal && (
 				<CombinedRequestingModal
