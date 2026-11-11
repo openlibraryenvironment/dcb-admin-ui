@@ -118,7 +118,8 @@
 			"back": "Back to bib records"
 		},
 		"bibs_one": "bib record",
-		"contributor_uuid": "Contributor UUID",
+		"cluster_title": "Cluster title",
+		"cluster_uuid": "Cluster UUID",
 		"edition": "Edition",
 		"large_print": "Large print?",
 		"metadata_score": "Metadata score",

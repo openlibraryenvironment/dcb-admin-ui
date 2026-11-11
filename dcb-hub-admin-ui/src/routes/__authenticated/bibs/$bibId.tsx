@@ -258,7 +258,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("bibRecords.contributor_uuid")}
+							{t("bibRecords.cluster_uuid")}
 						</Typography>
 						{cfg?.VITE_DCB_SEARCH_BASE ? (
 							<Typography variant="attributeText" component="div">
@@ -278,7 +278,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("requesting.contributors")}
+							{t("bibRecords.cluster_title")}
 						</Typography>
 						<RenderAttribute attribute={bib?.contributesTo?.title} />
 					</Stack>
