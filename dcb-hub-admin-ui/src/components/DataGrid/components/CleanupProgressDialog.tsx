@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Accordion,
@@ -21,7 +21,7 @@ import {
 } from "@mui/icons-material";
 
 import DataGrid from "@components/DataGrid/DataGrid";
-import { standardPatronRequestColumns } from "@columns/getPatronRequestColumns";
+import { getPatronRequestColumns } from "@columns/getPatronRequestColumns";
 import { cleanupPatronRequestVisibility } from "@columns/columnVisibility/cleanupPatronRequestVisibility";
 interface CleanupProgressDialogProps {
 	open: boolean;
@@ -52,6 +52,10 @@ export const CleanupProgressDialog = ({
 	onClose,
 }: CleanupProgressDialogProps) => {
 	const { t } = useTranslation();
+	const requestColumns = useMemo(
+		() => getPatronRequestColumns("standard", t),
+		[t],
+	);
 
 	const [isSuccessRowsExpanded, setIsSuccessRowsExpanded] = useState(false);
 	const [isErrorRowsExpanded, setIsErrorRowsExpanded] = useState(false);
@@ -125,7 +129,7 @@ export const CleanupProgressDialog = ({
 									<DataGrid
 										identifier="cleanupSuccessGrid"
 										type="successCleanupRequests"
-										columns={standardPatronRequestColumns}
+										columns={requestColumns}
 										columnVisibilityModel={cleanupPatronRequestVisibility}
 										rows={successRows}
 										loading={false}
@@ -177,7 +181,7 @@ export const CleanupProgressDialog = ({
 								<DataGrid
 									identifier="cleanupErrorGrid"
 									type="errorCleanupRequests"
-									columns={standardPatronRequestColumns}
+									columns={requestColumns}
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={errorRows}
 									loading={false}
@@ -229,7 +233,7 @@ export const CleanupProgressDialog = ({
 								<DataGrid
 									identifier="cleanupRefusedGrid"
 									type="refusedCleanupRequests"
-									columns={standardPatronRequestColumns}
+									columns={requestColumns}
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={refusedRows}
 									loading={false}
@@ -280,7 +284,7 @@ export const CleanupProgressDialog = ({
 								<DataGrid
 									identifier="cleanupSkippedGrid"
 									type="skippedCleanupRequests"
-									columns={standardPatronRequestColumns}
+									columns={requestColumns}
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={skippedRows}
 									loading={false}

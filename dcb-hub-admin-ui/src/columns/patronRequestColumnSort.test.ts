@@ -9,10 +9,15 @@ import {
 	type GraphQLObjectType,
 } from "graphql";
 
-import {
-	patronRequestColumnsNoStatusFilter,
-	standardPatronRequestColumns,
-} from "./getPatronRequestColumns";
+import type { TFunction } from "i18next";
+import { getPatronRequestColumns } from "./getPatronRequestColumns";
+
+const t = ((key: string) => key) as unknown as TFunction;
+const standardPatronRequestColumns = getPatronRequestColumns("standard", t);
+const patronRequestColumnsNoStatusFilter = getPatronRequestColumns(
+	"noStatus",
+	t,
+);
 
 // patronRequests passes the sort field straight to Pageable.order (DataFetchers, 8.71.0-9.3.0):
 // a field PatronRequest does not have fails the query, and the remembered view repeats it
@@ -52,4 +57,14 @@ it("shows the request's own local item type, which is what it filters and sorts 
 		(each) => each.field === "localItemType",
 	);
 	expect(column?.valueGetter).toBeUndefined();
+});
+
+// The 36 headers were English literals, so no other language could reach them
+it("takes every header from the translation catalogue", () => {
+	const marked = ((key: string) => `«${key}»`) as unknown as TFunction;
+	expect(
+		getPatronRequestColumns("standard", marked)
+			.map((column) => column.headerName ?? "«»")
+			.filter((header) => !header.startsWith("«")),
+	).toEqual([]);
 });
