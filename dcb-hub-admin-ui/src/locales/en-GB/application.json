@@ -104,6 +104,8 @@
 	},
 	"bibRecords": {
 		"audit_log": {
+			"open_bib": "Open the matched bib",
+			"open_cluster": "Open the cluster",
 			"title": "Ingest audit log",
 			"time": "Time",
 			"process": "Process",
