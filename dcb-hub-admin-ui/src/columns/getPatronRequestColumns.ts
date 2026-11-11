@@ -31,7 +31,8 @@ const getPatronRequestColumns = (
 			field: "supplyingAgencyCode",
 			headerName: "Supplying library",
 			filterable: true,
-			sortable: true,
+			// Filter-only: dcb-service resolves it through a join, and cannot ORDER BY it
+			sortable: false,
 			flex: 1,
 			type: "singleSelect",
 			filterOperators: isOnly,
