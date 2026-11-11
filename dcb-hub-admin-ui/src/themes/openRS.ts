@@ -867,6 +867,12 @@ const components: ThemeOptions["components"] = {
 		},
 	},
 	MuiTabs: {
+		// A row of tabs wider than the screen scrolls, with arrows, instead of running off it
+		defaultProps: {
+			variant: "scrollable",
+			scrollButtons: "auto",
+			allowScrollButtonsMobile: true,
+		},
 		styleOverrides: {
 			root: ({ theme }) => ({
 				backgroundColor: theme.palette.primary.tabsBackground,
