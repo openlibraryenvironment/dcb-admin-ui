@@ -5,6 +5,10 @@ import { TFunction } from "i18next";
 import dayjs from "dayjs";
 import { useAuth } from "react-oidc-context";
 
+import i18n from "@/i18n";
+
+const STATUS_ID = "progress-bar-checkout";
+
 // The align items on the stack is to prevent the button taking up full width of the container.
 interface CheckoutStep {
 	checkoutCompleted: boolean;
@@ -32,16 +36,21 @@ export const CheckoutStep = ({
 	const auth = useAuth();
 	const roles = auth?.user?.profile?.roles ? auth?.user?.profile?.roles : [];
 	const isReadOnly = roles.includes("LIBRARY_READ_ONLY");
-	const displayDueDate = dueDate
-		? dayjs(dueDate).format("dddd, MMMM D, YYYY h:mm A")
-		: t(
-				"requesting.expedited_checkout.steps.due_date_loading",
-				"Loading due date...",
-			);
+	const displayDueDate =
+		dueDate && dayjs(dueDate).isValid()
+			? new Intl.DateTimeFormat(i18n.resolvedLanguage ?? i18n.language, {
+					dateStyle: "full",
+					timeStyle: "short",
+				}).format(new Date(dueDate))
+			: t(
+					"requesting.expedited_checkout.steps.due_date_loading",
+					"Loading due date...",
+				);
 
 	return (
 		<Stack direction="column" spacing={2}>
-			<Typography>
+			{/* The outcome is announced, and names the progress bar */}
+			<Typography id={STATUS_ID} role="status" aria-live="polite">
 				{checkoutCompleted &&
 					t("requesting.expedited_checkout.steps.checkout_success", {
 						dueDate: displayDueDate,
@@ -62,16 +71,8 @@ export const CheckoutStep = ({
 				variant={isButtonEnabled ? "determinate" : "indeterminate"}
 				color={getProgressColor()}
 				value={checkoutCompleted ? 100 : undefined}
-				aria-labelledby="progress-bar-checkout"
-				sx={{
-					mb: 3,
-					mt: 1,
-					"& .MuiLinearProgress-bar": {
-						backgroundColor: checkoutCompleted
-							? "success.main"
-							: "primary.main",
-					},
-				}}
+				aria-labelledby={STATUS_ID}
+				sx={{ mb: 3, mt: 1 }}
 			/>
 
 			<Box
