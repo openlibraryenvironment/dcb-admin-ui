@@ -97,9 +97,10 @@ export default function ContactsStep() {
 							<Controller
 								name={`contacts.${index}.firstName`}
 								control={control}
-								render={({ field }) => (
+								render={({ field: { ref, ...field } }) => (
 									<TextField
 										{...field}
+										inputRef={ref}
 										id={`contact-${index}-first-name`}
 										label={t("libraries.contacts.first_name")}
 										required
@@ -113,9 +114,10 @@ export default function ContactsStep() {
 							<Controller
 								name={`contacts.${index}.lastName`}
 								control={control}
-								render={({ field }) => (
+								render={({ field: { ref, ...field } }) => (
 									<TextField
 										{...field}
+										inputRef={ref}
 										id={`contact-${index}-last-name`}
 										label={t("libraries.contacts.last_name")}
 										required
@@ -130,9 +132,10 @@ export default function ContactsStep() {
 						<Controller
 							name={`contacts.${index}.email`}
 							control={control}
-							render={({ field }) => (
+							render={({ field: { ref, ...field } }) => (
 								<TextField
 									{...field}
+									inputRef={ref}
 									id={`contact-${index}-email`}
 									label={t("libraries.contacts.email")}
 									type="email"
@@ -158,6 +161,7 @@ export default function ContactsStep() {
 									renderInput={(params) => (
 										<TextField
 											{...params}
+											inputRef={field.ref}
 											id={`contact-${index}-role`}
 											required
 											label={t("libraries.contacts.role")}

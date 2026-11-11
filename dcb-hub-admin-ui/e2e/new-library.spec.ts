@@ -108,6 +108,7 @@ test.describe("New library", () => {
 		await expect(systems).toHaveAccessibleDescription(
 			"Choose the system this library uses.",
 		);
+		await expect(main(page).getByRole("radio").first()).toBeFocused();
 	});
 
 	test("a link to a later question without its answers starts at the first", async ({
@@ -408,6 +409,18 @@ test.describe("New library", () => {
 			).toBe(0);
 		});
 
+		test("an empty answer moves focus to the first field it needs", async ({
+			page,
+		}) => {
+			await openProfile(page);
+
+			await main(page)
+				.getByRole("button", { name: /add the library/i })
+				.click();
+
+			await expect(main(page).getByLabel("Full name")).toBeFocused();
+		});
+
 		test("passes axe", async ({ page }) => {
 			await openProfile(page);
 			await scanForViolations(page);
@@ -459,5 +472,12 @@ test.describe("New library", () => {
 		// Contacts are asked next, once there is a library to hold them
 		expect(createdInput.contacts).toEqual([]);
 		expect(createdInput.hostLmsCode).toBe("SIERRA1");
+
+		await main(page)
+			.getByRole("button", { name: /continue/i })
+			.click();
+		await expect(
+			main(page).getByRole("textbox", { name: /first name/i }),
+		).toBeFocused();
 	});
 });

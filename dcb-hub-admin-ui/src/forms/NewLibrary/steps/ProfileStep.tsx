@@ -131,9 +131,10 @@ export function ProfileStep() {
 				<Controller
 					name="fullName"
 					control={control}
-					render={({ field }) => (
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							onChange={(event) => {
 								const updates = valuesFollowing(
 									LIBRARY_NAMES,
@@ -163,9 +164,10 @@ export function ProfileStep() {
 					<Controller
 						name="shortName"
 						control={control}
-						render={({ field }) => (
+						render={({ field: { ref, ...field } }) => (
 							<TextField
 								{...field}
+								inputRef={ref}
 								id="library-short-name"
 								label={t("libraries.short_name")}
 								variant="outlined"
@@ -179,9 +181,10 @@ export function ProfileStep() {
 					<Controller
 						name="abbreviatedName"
 						control={control}
-						render={({ field }) => (
+						render={({ field: { ref, ...field } }) => (
 							<TextField
 								{...field}
+								inputRef={ref}
 								id="library-abbreviated-name"
 								label={t("libraries.abbreviated_name")}
 								variant="outlined"
@@ -196,9 +199,10 @@ export function ProfileStep() {
 				<Controller
 					name="type"
 					control={control}
-					render={({ field }) => (
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							id="library-type"
 							select
 							label={t("libraries.type")}
@@ -225,7 +229,7 @@ export function ProfileStep() {
 				<Controller
 					name="agencyCode"
 					control={control}
-					render={({ field }) => (
+					render={({ field: { ref, ...field } }) => (
 						<Autocomplete
 							freeSolo
 							options={agencyOptions}
@@ -305,6 +309,7 @@ export function ProfileStep() {
 							renderInput={(params) => (
 								<TextField
 									{...params}
+									inputRef={ref}
 									id="library-agency-code"
 									required
 									label={t("libraries.new.agency")}
@@ -327,10 +332,11 @@ export function ProfileStep() {
 					<Controller
 						name={"authProfile"}
 						control={control}
-						render={({ field }) =>
+						render={({ field: { ref, ...field } }) =>
 							authProfileChoices ? (
 								<TextField
 									{...field}
+									inputRef={ref}
 									value={resolveAuthProfile(lmsClientClass, field.value)}
 									id="library-auth-profile"
 									select
@@ -356,6 +362,7 @@ export function ProfileStep() {
 							) : (
 								<TextField
 									{...field}
+									inputRef={ref}
 									id="library-auth-profile"
 									label={t("libraries.config.patronAuth.auth_profile")}
 									variant="outlined"
@@ -374,9 +381,10 @@ export function ProfileStep() {
 				<Controller
 					name={"address"}
 					control={control}
-					render={({ field }) => (
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							id="library-address"
 							label={t("libraries.primaryLocation.address")}
 							variant="outlined"
@@ -399,9 +407,10 @@ export function ProfileStep() {
 					<Controller
 						name={"latitude"}
 						control={control}
-						render={({ field }) => (
+						render={({ field: { ref, ...field } }) => (
 							<TextField
 								{...field}
+								inputRef={ref}
 								id="library-latitude"
 								label={t("libraries.primaryLocation.latitude")}
 								variant="outlined"
@@ -431,9 +440,10 @@ export function ProfileStep() {
 					<Controller
 						name={"longitude"}
 						control={control}
-						render={({ field }) => (
+						render={({ field: { ref, ...field } }) => (
 							<TextField
 								{...field}
+								inputRef={ref}
 								id="library-longitude"
 								label={t("libraries.primaryLocation.longitude")}
 								variant="outlined"
@@ -526,9 +536,10 @@ export function ProfileStep() {
 				<Controller
 					name="maxConsortialLoans"
 					control={control}
-					render={({ field }) => (
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							id="library-max-consortial-loans"
 							label={t("libraries.max_consortial_loans")}
 							variant="outlined"
@@ -548,9 +559,10 @@ export function ProfileStep() {
 					<Controller
 						name="maxLocalHolds"
 						control={control}
-						render={({ field }) => (
+						render={({ field: { ref, ...field } }) => (
 							<TextField
 								{...field}
+								inputRef={ref}
 								value={field.value ?? ""}
 								id="library-max-local-holds"
 								label={t("libraries.max_local_holds")}
@@ -577,9 +589,10 @@ export function ProfileStep() {
 				<Controller
 					name={"hostLmsConfiguration"}
 					control={control}
-					render={({ field }) => (
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							id="library-host-lms-configuration"
 							label={t("hostlms.configuration")}
 							variant="outlined"
@@ -597,9 +610,10 @@ export function ProfileStep() {
 				<Controller
 					name={"changeReferenceUrl"}
 					control={control}
-					render={({ field }) => (
+					render={({ field: { ref, ...field } }) => (
 						<TextField
 							{...field}
+							inputRef={ref}
 							id="library-change-reference-url"
 							fullWidth
 							variant="outlined"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Alert,
@@ -37,6 +37,7 @@ export default function SystemChapter({
 	const navigate = useNavigate();
 	const [ils, setIls] = useState<IlsKey | undefined>(search.ils);
 	const [showError, setShowError] = useState(false);
+	const firstOption = useRef<HTMLInputElement>(null);
 	const { hasConsortium } = readConsortiumPresence(
 		useQuery(consortiumBasicsQuery(useGraphQLClient())),
 	);
@@ -55,6 +56,7 @@ export default function SystemChapter({
 	const onContinue = () => {
 		if (!ils) {
 			setShowError(true);
+			firstOption.current?.focus();
 			return;
 		}
 		navigate({
@@ -103,11 +105,17 @@ export default function SystemChapter({
 						setShowError(false);
 					}}
 				>
-					{options.map((option) => (
+					{options.map((option, index) => (
 						<FormControlLabel
 							key={option.key}
 							value={option.key}
-							control={<Radio />}
+							control={
+								<Radio
+									slotProps={
+										index === 0 ? { input: { ref: firstOption } } : undefined
+									}
+								/>
+							}
 							label={t(option.labelKey)}
 						/>
 					))}
