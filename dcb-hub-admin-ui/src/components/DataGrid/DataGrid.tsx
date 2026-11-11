@@ -384,6 +384,9 @@ export default function DataGrid({
 				localeText={{
 					toolbarQuickFilterPlaceholder: searchText ?? t("ui.data_grid.search"),
 					columnsManagementSearchTitle: t("ui.data_grid.find_column"),
+					// A group row's toggle: MUI's own are "see children" and "hide children"
+					treeDataExpand: t("ui.data_grid.expand_group"),
+					treeDataCollapse: t("ui.data_grid.collapse_group"),
 					toolbarExportCSV: t("ui.data_grid.export.current"),
 					toolbarExportPrint: t("ui.data_grid.print_current_page"),
 					filterOperatorDoesNotEqual: t("ui.data_grid.filters.not_equal"),

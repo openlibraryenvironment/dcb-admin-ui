@@ -83,7 +83,11 @@ export default function LiveItemDialog({
 											<TableCell component="th" scope="row">
 												{t(`items.live_lookup.fields.${field}`)}
 											</TableCell>
-											<TableCell>{String(data?.[field])}</TableCell>
+											<TableCell>
+												{typeof data?.[field] === "boolean"
+													? t(data[field] ? "ui.actions.yes" : "ui.actions.no")
+													: String(data?.[field])}
+											</TableCell>
 										</TableRow>
 									),
 								)}

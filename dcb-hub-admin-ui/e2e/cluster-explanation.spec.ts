@@ -227,3 +227,17 @@ test("the explanation downloads as CSV, with no request", async ({ page }) => {
 	expect(text).toContain("2026-09-30");
 	expect(text.trim().split("\n").length).toBeGreaterThan(1);
 });
+
+// MUI's own label for a group's toggle is "hide children"
+test("a group's toggle says what it does, in the application's words", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page.getByRole("button", { name: "Hide this group's rows" }).first(),
+	).toBeVisible();
+	await expect(page.getByRole("button", { name: "hide children" })).toHaveCount(
+		0,
+	);
+});
