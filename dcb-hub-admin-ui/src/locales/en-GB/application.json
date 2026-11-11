@@ -2829,7 +2829,7 @@
 		},
 		"tags": {
 			"title": "Tags",
-			"explanation": "Tags come from the consortium's tag list. Removing a tag takes off only the consortium's: a library that applied the same tag keeps it.",
+			"explanation": "Tags come from the consortium's tag list; add one from Actions. Removing a tag takes off only the consortium's: a library that applied the same tag keeps it.",
 			"tag": "Tag",
 			"add": "Add tag",
 			"added": "Tag {{label}} added.",
@@ -2839,7 +2839,8 @@
 			"none": "No tags on this request.",
 			"none_short": "None",
 			"manage": "Manage tags",
-			"add_first": "Add a tag",
+			"add_action": "Add a tag",
+			"add_title": "Add a tag to this request",
 			"applied_by": "Applied by {{who}}",
 			"consortium": "the consortium",
 			"all_applied": "Every active tag is already on this request.",

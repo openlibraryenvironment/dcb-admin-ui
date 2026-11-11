@@ -61,20 +61,21 @@ async function mockRequestService(
 		notes = [libraryNote(1)],
 		placedByStaff = true as boolean | null,
 		notesFail = false,
+		tags = [
+			{
+				code: "DAMAGED",
+				label: "Damaged",
+				agencyCodes: ["AG1"],
+				consortium: false,
+			},
+		],
 	}: {
 		notes?: Note[];
 		placedByStaff?: boolean | null;
 		notesFail?: boolean;
+		tags?: AppliedTag[];
 	} = {},
 ) {
-	const tags: AppliedTag[] = [
-		{
-			code: "DAMAGED",
-			label: "Damaged",
-			agencyCodes: ["AG1"],
-			consortium: false,
-		},
-	];
 	const notePage = (pageno: number, pagesize: number) => ({
 		totalSize: notes.length,
 		content: notes.slice(pageno * pagesize, (pageno + 1) * pagesize),
@@ -347,58 +348,100 @@ test.describe("Tags on a patron request", () => {
 		const sent: Sent[] = [];
 		await mockRequestService(page, sent);
 		await openRequest(page);
+		await page.getByRole("tab", { name: "Tags" }).click();
+		const panel = page.getByRole("tabpanel", { name: "Tags" });
 
-		await expect(page.getByRole("heading", { name: "Tags" })).toBeVisible();
-		await expect(page.getByText("Applied by AG1")).toBeVisible();
+		await expect(panel.getByRole("heading", { name: "Tags" })).toBeVisible();
+		await expect(panel.getByText("Applied by AG1")).toBeVisible();
 		// A library's application is that library's to remove
 		await expect(
-			page.getByRole("button", { name: "Remove the consortium's tag Damaged" }),
+			panel.getByRole("button", {
+				name: "Remove the consortium's tag Damaged",
+			}),
 		).toHaveCount(0);
 
-		await page.getByRole("combobox", { name: "Tag" }).click();
+		await page.getByRole("button", { name: "Actions" }).click();
+		await page.getByRole("menuitem", { name: "Add a tag" }).click();
+		const dialog = page.getByRole("dialog", {
+			name: "Add a tag to this request",
+		});
+		await dialog.getByRole("combobox", { name: "Tag" }).click();
 		await expect(page.getByRole("option", { name: "Retired tag" })).toHaveCount(
 			0,
 		);
 		await page.getByRole("option", { name: "Patron contacted" }).click();
-		await page.getByRole("button", { name: "Add tag" }).click();
+		await dialog.getByRole("button", { name: "Add tag" }).click();
 
-		await expect(page.getByRole("status")).toHaveText(
+		await expect(dialog.getByRole("status")).toHaveText(
 			"Tag Patron contacted added.",
 		);
+		await expect(dialog.getByRole("button", { name: "Close" })).toBeFocused();
+		await dialog.getByRole("button", { name: "Close" }).click();
 		expect(sent.at(-1)).toEqual({
 			operationName: "TagPatronRequest",
 			variables: { patronRequestId: TRACKED_REQUEST.id, tagCode: "CONTACTED" },
 		});
-		await expect(page.getByText("Applied by the consortium")).toBeVisible();
+		await expect(panel.getByText("Applied by the consortium")).toBeVisible();
 
-		await page
+		await panel
 			.getByRole("button", {
 				name: "Remove the consortium's tag Patron contacted",
 			})
 			.click();
 
-		await expect(page.getByRole("status")).toHaveText(
+		await expect(panel.getByRole("status")).toHaveText(
 			"Tag Patron contacted removed.",
 		);
 		expect(sent.at(-1)).toEqual({
 			operationName: "UntagPatronRequest",
 			variables: { patronRequestId: TRACKED_REQUEST.id, tagCode: "CONTACTED" },
 		});
-		await expect(page.getByText("Applied by the consortium")).toHaveCount(0);
+		await expect(panel.getByText("Applied by the consortium")).toHaveCount(0);
+	});
+
+	test("a request with no tags shows none on General, and says so on Tags", async ({
+		page,
+	}) => {
+		await mockRequestService(page, [], { tags: [] });
+		await openRequest(page);
+		await expect(page.getByRole("tab", { name: "General" })).toBeVisible();
+
+		await expect(page.getByRole("list", { name: "Tags" })).toHaveCount(0);
+		await expect(page.getByRole("button", { name: "Manage tags" })).toHaveCount(
+			0,
+		);
+
+		await page.getByRole("tab", { name: "Tags" }).click();
+		await expect(page.getByText("No tags on this request.")).toBeVisible();
 	});
 
 	for (const scheme of ["light", "dark"] as const) {
 		test.describe(scheme, () => {
 			test.use({ colorScheme: scheme });
 
-			test("the tags on the General tab have no violations", async ({
-				page,
-			}) => {
+			test("the Tags tab has no violations", async ({ page }) => {
 				await mockRequestService(page, []);
 				await openRequest(page);
+				await page.getByRole("tab", { name: "Tags" }).click();
 
 				await expect(page.getByText("Applied by AG1")).toBeVisible();
 				await expectPaintedScheme(page, scheme);
+				await scanForViolations(page);
+			});
+
+			test("the Add a tag dialog has no violations", async ({ page }) => {
+				await mockRequestService(page, []);
+				await openRequest(page);
+				await page.getByRole("button", { name: "Actions" }).click();
+				await page.getByRole("menuitem", { name: "Add a tag" }).click();
+				const dialog = page.getByRole("dialog", {
+					name: "Add a tag to this request",
+				});
+				await expect(
+					dialog.getByRole("combobox", { name: "Tag" }),
+				).toBeVisible();
+				await waitForDialogToSettle(page);
+
 				await scanForViolations(page);
 			});
 		});
@@ -474,7 +517,14 @@ test.describe("Finding a request's tags and notes", () => {
 		).toBeVisible();
 
 		await page.getByRole("button", { name: "Manage tags" }).click();
+		await expect(page.getByRole("tab", { name: "Tags" })).toHaveAttribute(
+			"aria-selected",
+			"true",
+		);
 		await expect(page.getByRole("heading", { name: "Tags" })).toBeFocused();
+		await expect
+			.poll(() => new URL(page.url()).searchParams.get("tab"))
+			.toBe("tags");
 	});
 
 	test("the Notes tab counts them, and its address opens on them", async ({

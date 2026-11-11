@@ -23,7 +23,6 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import {
 	Accordion,
-	Box,
 	AccordionDetails,
 	AccordionSummary,
 	CircularProgress,
@@ -84,6 +83,8 @@ import { placedBy } from "@helpers/placedBy";
 import PatronRequestNotes from "@components/PatronRequestNotes/PatronRequestNotes";
 import PatronRequestTags from "@components/PatronRequestTags/PatronRequestTags";
 import PatronRequestTagSummary from "@components/PatronRequestTags/PatronRequestTagSummary";
+import AddRequestTagDialog from "@components/PatronRequestTags/AddRequestTagDialog";
+import { REQUEST_TAGS_SECTION_ID } from "@helpers/requestTags";
 import {
 	confirmItemReturned,
 	isConfirmReturnEligible,
@@ -126,6 +127,7 @@ const REQUEST_TABS = [
 	"audit",
 	"notes",
 	"previousSuppliers",
+	"tags",
 ] as const;
 type RequestTab = (typeof REQUEST_TABS)[number];
 const requestTabSchema = z.object({
@@ -221,6 +223,7 @@ function RouteComponent() {
 		useState(false);
 	// The supplier as it was when the action was chosen: the refetch after a skip can bring
 	// back a different suppliers[0], and the dialog must act on and name the one it opened for
+	const [addingTag, setAddingTag] = useState(false);
 	const [supplierAction, setSupplierAction] = useState<{
 		action: SupplierAction;
 		supplier: { id: string; localAgency?: string | null };
@@ -240,6 +243,7 @@ function RouteComponent() {
 	// A shared link to a tab this user or deployment does not have opens on General
 	const tabName: RequestTab =
 		(requestedTab === "notes" && !isRequestNotesEnabled()) ||
+		(requestedTab === "tags" && !isRequestTagsEnabled()) ||
 		(requestedTab === "previousSuppliers" && !canSeePreviousSuppliers)
 			? "general"
 			: (requestedTab ?? "general");
@@ -546,6 +550,14 @@ function RouteComponent() {
 		? "/search/" + patronRequest?.bibClusterId + "/cluster"
 		: "";
 
+	const openTab = (next: RequestTab) =>
+		navigate({
+			search: (previous: Record<string, unknown>) => ({
+				...previous,
+				tab: next === "general" ? undefined : next,
+			}),
+			replace: true,
+		});
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
 		const next = REQUEST_TABS[newValue];
 		navigate({
@@ -676,6 +688,14 @@ function RouteComponent() {
 		});
 	}
 
+	if (isRequestTagsEnabled()) {
+		pageActions.push({
+			key: "add-tag",
+			label: t("patron_request.tags.add_action"),
+			onClick: () => setAddingTag(true),
+		});
+	}
+
 	const supplier = patronRequest?.suppliers?.[0];
 	const supplierId = supplier?.id;
 	if (serverAdmits("supplierActions", roles) && supplier && supplierId) {
@@ -698,6 +718,12 @@ function RouteComponent() {
 			<Stack direction="row" sx={{ justifyContent: "flex-end", mb: 2 }}>
 				<PageActionsMenu actions={pageActions} pending={actionProgress} />
 			</Stack>
+			{addingTag && (
+				<AddRequestTagDialog
+					patronRequestId={id}
+					onClose={() => setAddingTag(false)}
+				/>
+			)}
 			{supplierAction && (
 				<SupplierActionDialog
 					action={supplierAction.action}
@@ -742,6 +768,9 @@ function RouteComponent() {
 							value={6}
 						/>
 					)}
+					{isRequestTagsEnabled() && (
+						<Tab label={t("patron_request.tags.title")} value={8} />
+					)}
 				</TabList>
 
 				<TabPanel value={0}>
@@ -757,7 +786,14 @@ function RouteComponent() {
 						</Grid>
 						{isRequestTagsEnabled() && (
 							<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-								<PatronRequestTagSummary patronRequestId={id} />
+								<PatronRequestTagSummary
+									patronRequestId={id}
+									onManage={() =>
+										openTab("tags").then(() =>
+											document.getElementById(REQUEST_TAGS_SECTION_ID)?.focus(),
+										)
+									}
+								/>
 							</Grid>
 						)}
 						{patronLibrary?.fullName ? (
@@ -1379,11 +1415,6 @@ function RouteComponent() {
 							</Grid>
 						)}
 					</Grid>
-					{isRequestTagsEnabled() && (
-						<Box sx={{ mt: 4 }}>
-							<PatronRequestTags patronRequestId={id} />
-						</Box>
-					)}
 				</TabPanel>
 
 				<TabPanel value={1}>
@@ -2390,6 +2421,12 @@ function RouteComponent() {
 				{isRequestNotesEnabled() && (
 					<TabPanel value={6}>
 						<PatronRequestNotes patronRequestId={id} />
+					</TabPanel>
+				)}
+
+				{isRequestTagsEnabled() && (
+					<TabPanel value={8}>
+						<PatronRequestTags patronRequestId={id} />
 					</TabPanel>
 				)}
 			</TabContext>
