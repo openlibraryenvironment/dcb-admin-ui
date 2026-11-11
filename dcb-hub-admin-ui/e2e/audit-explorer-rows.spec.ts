@@ -54,3 +54,38 @@ test("each event is its own row, linked to its request, with no grouping to offe
 		page.getByRole("checkbox", { name: "Group by patron request" }),
 	).toHaveCount(0);
 });
+
+// The description search reached the grid and the chart, and not the export
+test("a filtered export keeps the description search", async ({ page }) => {
+	const asked: { query: string; pagesize: number }[] = [];
+	await seedAuth(page);
+	await useAllFeatures(page);
+	await mockGraphQL(page, {
+		LoadConsortiumHeader: consortiumBasics,
+		LoadAudits: (variables: { query: string; pagesize: number }) => {
+			asked.push(variables);
+			return {
+				audits: {
+					totalSize: 1,
+					content: [
+						event("e1e10000-1111-5111-9111-e1e1e1e1e1e1", "Read timeout one"),
+					],
+				},
+			};
+		},
+		LoadAuditIncidence: {
+			auditIncidence: { interval: "day", totalSize: 1, buckets: [] },
+		},
+	});
+	await page.goto("/serviceInfo/auditExplorer?search=Read+timeout");
+	await expect(page.getByText("Read timeout one")).toBeVisible();
+
+	const download = page.waitForEvent("download");
+	await page.getByRole("button", { name: /export/i }).click();
+	await page.getByRole("menuitem", { name: "Filtered results" }).click();
+	await download;
+
+	const exported = asked.filter((variables) => variables.pagesize === 1000);
+	expect(exported.length).toBeGreaterThan(0);
+	expect(exported[0].query).toContain("briefDescription:*Read?timeout*");
+});

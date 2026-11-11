@@ -288,6 +288,14 @@ function AuditExplorer() {
 			),
 		[appliedFilterModel, term],
 	);
+	// The description search scopes the page, so every export keeps it as its base
+	const searchScope = useMemo(
+		() =>
+			processGridFilterModel(withAuditDescription({ items: [] }, term), "", [
+				"briefDescription",
+			]),
+		[term],
+	);
 
 	return (
 		<PageContainer title={t("nav.serviceInfo.auditExplorer")}>
@@ -376,6 +384,7 @@ function AuditExplorer() {
 						exportConfig={{
 							query: getAudits,
 							coreType: "audits",
+							baseQuery: searchScope,
 							quickFilterFields: ["briefDescription"],
 						}}
 						disableAggregation
