@@ -15,8 +15,7 @@ import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { getClusters } from "@queries/getClusters";
-import type { ClusterRecordsQueryVariables } from "@generated/graphql";
+import { clusterFullQuery } from "@/queryOptions/cluster";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/identifiers",
@@ -49,14 +48,9 @@ function Identifiers() {
 	});
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ["cluster", "full", clusterId],
-		queryFn: () =>
-			gqlClient.request<any, ClusterRecordsQueryVariables>(getClusters, {
-				query: `id: ${clusterId}`,
-			}),
-		enabled: !!clusterId,
-	});
+	const { data, isLoading, error } = useQuery(
+		clusterFullQuery(gqlClient, clusterId),
+	);
 
 	const { rows, namespaces } = useMemo(() => {
 		const cluster = data?.instanceClusters?.content?.[0];

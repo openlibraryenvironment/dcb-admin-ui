@@ -17,9 +17,8 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { getClusters } from "@queries/getClusters";
+import { clusterFullQuery } from "@/queryOptions/cluster";
 import { useState } from "react";
-import type { ClusterRecordsQueryVariables } from "@generated/graphql";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/cluster",
@@ -33,14 +32,9 @@ function ClusterDetails() {
 	const gqlClient = useGraphQLClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ["cluster", "full", clusterId],
-		queryFn: () =>
-			gqlClient.request<any, ClusterRecordsQueryVariables>(getClusters, {
-				query: `id: ${clusterId}`,
-			}),
-		enabled: !!clusterId,
-	});
+	const { data, isLoading, error } = useQuery(
+		clusterFullQuery(gqlClient, clusterId),
+	);
 
 	const cluster = data?.instanceClusters?.content?.[0];
 	// No toolbar, so nothing to share: the page lives here. It needs a change handler -
