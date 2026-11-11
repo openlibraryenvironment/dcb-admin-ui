@@ -3315,6 +3315,7 @@
 			}
 		},
 		"error": {
+			"access_denied": "Your account does not have the role this action needs.",
 			"401": {
 				"name": "401 Unauthorised",
 				"summary": "Sorry, you do not have access to this page",

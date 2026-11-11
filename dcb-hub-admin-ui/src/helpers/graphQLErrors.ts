@@ -12,6 +12,8 @@
  * rejected.
  */
 
+import i18n from "@/i18n";
+
 export interface GraphQLErrorEntry {
 	message: string;
 	path?: (string | number)[];
@@ -42,6 +44,18 @@ export const graphQLErrorsIn = (response: unknown): GraphQLErrorEntry[] => {
 	return Array.isArray(response.errors) ? response.errors : [];
 };
 
+// graphql-java's default handler wraps whatever a fetcher threw in this, path and all
+const FETCH_EXCEPTION_PREFIX = /^Exception while fetching data \([^)]*\) : /;
+// GraphQLRoles and every older role check (8.71.0-9.3.0) begin their refusal with this
+const ACCESS_DENIED = /^Access denied\b/;
+
+const readable = (message: string): string => {
+	const unwrapped = message.replace(FETCH_EXCEPTION_PREFIX, "");
+	return ACCESS_DENIED.test(unwrapped)
+		? i18n.t("ui.error.access_denied")
+		: unwrapped;
+};
+
 /**
  * One line per problem, in the server's own words. dcb-service's messages are
  * written for humans ("Invalid role: 'x'. The roles currently available
@@ -54,7 +68,9 @@ export const describeGraphQLError = (
 ): string => {
 	const errors = graphQLErrorsOf(error);
 	if (errors.length > 0) {
-		return errors.map((entry) => entry.message).join("\n");
+		return [...new Set(errors.map((entry) => readable(entry.message)))].join(
+			"\n",
+		);
 	}
 
 	// A network failure has a usable message; a ClientError does not, because
