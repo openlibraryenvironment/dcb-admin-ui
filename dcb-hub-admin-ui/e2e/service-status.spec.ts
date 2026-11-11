@@ -7,6 +7,7 @@ import { scanForViolations } from "./fixtures/axe";
 import {
 	LATEST_RELEASES_URL,
 	mockLatestReleases,
+	mockTrackingBacklog,
 } from "./fixtures/service-status-mocks";
 
 test.describe("Service Status versions", () => {
@@ -159,21 +160,7 @@ test.describe("Tracking backlog", () => {
 		await useAllFeatures(page);
 		await page.route("**/info", (route) => route.fulfill({ json: {} }));
 		await mockLatestReleases(page);
-		await page.route("**/sql?*", (route) => {
-			const name = new URL(route.request().url()).searchParams.get("name");
-			sqlNames.push(String(name));
-			return route.fulfill({
-				json: {
-					hits:
-						name === "trackingNow"
-							? [{ Status: "LOANED", Total: "7" }]
-							: [
-									{ Status: "LOANED", Total: "40" },
-									{ Status: "PICKUP_TRANSIT", Total: "12" },
-								],
-				},
-			});
-		});
+		await mockTrackingBacklog(page, sqlNames);
 	});
 
 	test("shows an ADMIN what is scheduled and what is due, by status", async ({

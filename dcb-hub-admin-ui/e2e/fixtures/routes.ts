@@ -4,7 +4,10 @@ import {
 	patronRequestDetailMocks,
 	TRACKED_REQUEST,
 } from "./patron-request-detail";
-import { mockLatestReleases } from "./service-status-mocks";
+import {
+	mockLatestReleases,
+	mockTrackingBacklog,
+} from "./service-status-mocks";
 import { overrideGraphQL } from "./graphql-mocks";
 import consortiumBasics from "../fixtures-data/consortium-basics.json";
 import consortium from "../fixtures-data/consortium.json";
@@ -219,14 +222,19 @@ export const ROUTES: ScannedRoute[] = [
 		},
 	},
 	{
-		// Service Status: the environment and version grids. GitHub is mocked so the
-		// Latest version column is painted, not left at "Checking…".
+		// Service Status: the environment and version grids, and for ADMIN the tracking
+		// backlog. GitHub is mocked so the Latest version column is painted, not left at
+		// "Checking…".
 		path: "/serviceInfo/serviceStatus",
-		setup: mockLatestReleases,
+		setup: async (page) => {
+			await mockLatestReleases(page);
+			await mockTrackingBacklog(page);
+		},
 		ready: async (page) => {
 			await expect(
 				page.getByRole("row").filter({ hasText: "dcb-admin-ui" }),
 			).toContainText("Up to date");
+			await expect(page.getByRole("row", { name: "Total 52 7" })).toBeVisible();
 		},
 	},
 	{
