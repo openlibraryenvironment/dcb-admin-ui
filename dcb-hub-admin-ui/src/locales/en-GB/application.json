@@ -3219,6 +3219,11 @@
 			"export_success": "Successfully exported {{count}} records from the data grid.",
 			"export_modal_title": "Exporting data",
 			"exporting_records": "Exporting {{count}} records from the data grid.",
+			"server_operators": {
+				"does_not_contain": "does not contain (blank left out)",
+				"does_not_equal": "does not equal (blank left out)",
+				"is_not": "is not (blank left out)"
+			},
 			"export": {
 				"current": "Current page",
 				"filtered": "Filtered results",
