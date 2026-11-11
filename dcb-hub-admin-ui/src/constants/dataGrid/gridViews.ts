@@ -146,9 +146,10 @@ export const catalogMetricsByHostLmsView: GridViewSpec = {
 const lastImportedFirst: GridSortModel = [
 	{ field: "lastImported", sort: "desc" },
 ];
+// Not lastImported: dcb-service sorts every mapping by it in memory, unpaged (8.71.0-9.3.0)
 export const referenceValueMappingsView = listView(
 	"referenceValueMappings",
-	lastImportedFirst,
+	[{ field: "fromCategory", sort: "asc" }],
 	20,
 	{ lastImported: false, toCategory: false },
 );
