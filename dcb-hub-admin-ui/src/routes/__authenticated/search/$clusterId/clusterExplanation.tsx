@@ -2,8 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
-import { Grid, Chip } from "@mui/material";
-import { CheckCircle, Warning, Info } from "@mui/icons-material";
+import { Grid } from "@mui/material";
 import {
 	GridColDef,
 	type GridRowGroupingModel,
@@ -21,7 +20,13 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
-import { parseClusteringAuditLog } from "@helpers/parseClusteringAuditLog";
+import {
+	CLUSTERING_EVENT_KINDS,
+	type ClusteringEventKind,
+	clusteringEventLabelKey,
+	parseClusteringAuditLog,
+} from "@helpers/parseClusteringAuditLog";
+import ClusteringEventChip from "@components/ClusteringEventChip/ClusteringEventChip";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/clusterExplanation",
@@ -81,35 +86,16 @@ function ClusterExplanation() {
 				headerName: t("search.event_type"),
 				minWidth: 200,
 				flex: 0.75,
-				renderCell: (params) => {
-					// A group row has no event of its own
-					if (!params.value) return null;
-					let color: "success" | "warning" | "info" | "default" = "default";
-					let icon = <Info fontSize="small" />;
-
-					if (
-						params.value === "Match - high confidence" ||
-						params.value === "low confidence matches"
-					) {
-						color = "success";
-						icon = <CheckCircle fontSize="small" />;
-					} else if (params.value === "Warning") {
-						color = "warning";
-						icon = <Warning fontSize="small" />;
-					} else if (params.value === "Existing Cluster") {
-						color = "info";
-					}
-
-					return (
-						<Chip
-							label={params.value}
-							color={color}
-							icon={icon}
-							size="small"
-							variant="outlined"
-						/>
-					);
-				},
+				type: "singleSelect",
+				valueOptions: CLUSTERING_EVENT_KINDS.map((kind) => ({
+					value: kind,
+					label: t(clusteringEventLabelKey(kind)),
+				})),
+				// A group row has no event of its own
+				renderCell: (params) =>
+					params.value ? (
+						<ClusteringEventChip kind={params.value as ClusteringEventKind} />
+					) : null,
 			},
 			{
 				field: "matchCriteria",
@@ -132,6 +118,11 @@ function ClusterExplanation() {
 				field: "matchedBibId",
 				headerName: t("search.bib_matched_against"),
 				width: 100,
+			},
+			{
+				field: "matchedClusterId",
+				headerName: t("search.cluster_matched"),
+				minWidth: 150,
 			},
 			{
 				field: "message",

@@ -16,6 +16,14 @@
 				"subjectId": "bb220000-2222-5222-9222-bbbbbbbbbbbb",
 				"message": "No existing cluster found, creating one",
 				"timestamp": "2026-09-30T13:59:00Z"
+			},
+			{
+				"id": "33990000-9999-5999-9999-333333333333",
+				"processType": "BIB_INGEST",
+				"processId": "11770000-7777-5777-9777-111111111111",
+				"subjectId": "bb220000-2222-5222-9222-bbbbbbbbbbbb",
+				"message": "Matched cluster [aa110000-1111-5111-9111-aaaaaaaaaaaa] (merging with [1] other clusters)",
+				"timestamp": "2026-09-30T14:01:00Z"
 			}
 		]
 	}

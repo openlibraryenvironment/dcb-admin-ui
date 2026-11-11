@@ -5,7 +5,7 @@ import { useAllFeatures } from "./fixtures/flags";
 import { CLUSTER_ID, mockClusterRest } from "./fixtures/cluster-mocks";
 import { MOCKS } from "./fixtures/routes";
 
-// From e2e/fixtures-data/cluster-audit-log.json: one match event, one new-cluster event.
+// From e2e/fixtures-data/cluster-audit-log.json: a match, a merge and a new-cluster event.
 const SUBJECT_BIB = "bb220000-2222-5222-9222-bbbbbbbbbbbb";
 const MATCHED_BIB = "99aa0000-9999-5999-9999-aaaaaaaaaaaa";
 const MATCH_EVENT = "ff660000-6666-5666-9666-ffffffffffff";
@@ -24,7 +24,7 @@ test("a match event links to the incoming bib and to the bib it matched, not to 
 
 	await page
 		.getByRole("row")
-		.filter({ hasText: "Match - high confidence" })
+		.filter({ hasText: "Match: shared identifier" })
 		.getByRole("button", { name: "Expand", exact: true })
 		.click();
 
@@ -46,7 +46,7 @@ test("an event that matched no bib offers no matched-against link", async ({
 
 	await page
 		.getByRole("row")
-		.filter({ hasText: "New Cluster" })
+		.filter({ hasText: "New cluster" })
 		.getByRole("button", { name: "Expand", exact: true })
 		.click();
 
@@ -63,8 +63,27 @@ test("events are grouped under the bib they explain, with how many there are", a
 
 	await expect(
 		page.getByRole("row").filter({ hasText: SUBJECT_BIB }).first(),
-	).toContainText("(2)");
+	).toContainText("(3)");
 	await expect(
-		page.getByRole("row").filter({ hasText: "New Cluster" }),
+		page.getByRole("row").filter({ hasText: "New cluster" }),
 	).toBeVisible();
+});
+
+// "Matched cluster … (merging with [n] …)" read as "Info" until every message format was parsed
+test("a merge is named as one, and links to the cluster it merged into", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await page
+		.getByRole("row")
+		.filter({ hasText: "Merged clusters" })
+		.getByRole("button", { name: "Expand", exact: true })
+		.click();
+
+	await expect(
+		page
+			.getByRole("tabpanel", { name: "Explain clustering" })
+			.getByRole("link", { name: CLUSTER_ID }),
+	).toHaveAttribute("href", new RegExp(`/search/${CLUSTER_ID}/cluster$`));
 });
