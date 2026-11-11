@@ -109,4 +109,20 @@ export const getItemColumns = (t: TFunction): GridColDef[] => [
 		sortable: true,
 		flex: 0.5,
 	},
+	// Hidden by default (itemColumnVisibility.ts): what identifies an item at the library holding it
+	{ field: "barcode", headerName: t("search.barcode"), minWidth: 140 },
+	{
+		field: "location",
+		headerName: t("patron_request.previous_suppliers.location"),
+		minWidth: 160,
+		valueGetter: (value: { name?: string; code?: string } | null) =>
+			value?.name ?? value?.code ?? "",
+	},
+	{ field: "callNumber", headerName: t("search.call_no"), minWidth: 140 },
+	{
+		field: "localItemType",
+		headerName: t("patron_request.local_item_type"),
+		minWidth: 140,
+	},
+	{ field: "hostLmsCode", headerName: t("hostlms.code"), minWidth: 140 },
 ];

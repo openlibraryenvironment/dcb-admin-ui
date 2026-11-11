@@ -107,3 +107,21 @@ test("an item not offered says why", async ({ page }) => {
 		}),
 	).toBeVisible();
 });
+
+// Barcode, location, call number, local type and Host LMS were in the data and in no column
+test("an item's own identifiers can be shown as columns", async ({ page }) => {
+	await page.route("**/items/availability*", (route) =>
+		route.fulfill({ json: availability }),
+	);
+	await useAllFeatures(page);
+	await mockGraphQL(page, MOCKS);
+	await seedAuth(page);
+	await page.goto(
+		`/search/${CLUSTER_ID}/items?show=barcode,location,hostLmsCode`,
+	);
+
+	const first = availability.itemList[0];
+	const row = page.getByRole("row").filter({ hasText: first.barcode });
+	await expect(row).toContainText(first.location.name);
+	await expect(row).toContainText(first.hostLmsCode);
+});

@@ -1,5 +1,6 @@
 import type { GridSortModel } from "@mui/x-data-grid-premium";
 
+import { itemColumnVisibility } from "@columns/columnVisibility/itemColumnVisibility";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibility/exceptionPatronRequestColumnVisibility";
 import { finishedPatronRequestColumnVisibility } from "@columns/columnVisibility/finishedPatronRequestColumnVisibility";
@@ -278,6 +279,7 @@ export const clusterItemsView = recordView(
 	"ClusterRecordItems",
 	soonestAvailable,
 	25,
+	itemColumnVisibility,
 );
 /** The items the standard availability check left out: the page's second grid. */
 export const NOT_SHOWN_NAMESPACE = "notShown";
@@ -285,7 +287,7 @@ export const clusterItemsNotShownView = recordView(
 	"ClusterRecordItemsNotShown",
 	soonestAvailable,
 	25,
-	{},
+	itemColumnVisibility,
 	NOT_SHOWN_NAMESPACE,
 );
 /** A request's audit log, on the request's own page: its parameters carry this namespace. */
