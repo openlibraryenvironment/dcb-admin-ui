@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 
@@ -49,7 +49,6 @@ function SourceBibDetails() {
 	const gqlClient = useGraphQLClient();
 	// Runtime config (not build-time import.meta.env, which is undefined in the
 	// runtime-configured production image - see search/index.tsx).
-	const { cfg } = useRouter().options.context as { cfg: any };
 
 	const [isCanonicalExpanded, setIsCanonicalExpanded] = useState(true);
 	const [isSourceRecordExpanded, setIsSourceRecordExpanded] = useState(false);
@@ -260,14 +259,16 @@ function SourceBibDetails() {
 						<Typography variant="attributeTitle">
 							{t("bibRecords.cluster_uuid")}
 						</Typography>
-						{cfg?.VITE_DCB_SEARCH_BASE ? (
+						{/* The cluster page is part of this application: it needs no search base */}
+						{bib?.contributesTo?.id ? (
 							<Typography variant="attributeText" component="div">
 								<Link
-									to={`/search/${bib?.contributesTo?.id}/cluster`}
+									to="/search/$clusterId/cluster"
+									params={{ clusterId: bib.contributesTo.id }}
 									underline="hover"
-									onClick={(e: any) => e.stopPropagation()}
+									onClick={(e: React.MouseEvent) => e.stopPropagation()}
 								>
-									<RenderAttribute attribute={bib?.contributesTo?.id} />
+									<RenderAttribute attribute={bib.contributesTo.id} />
 								</Link>
 							</Typography>
 						) : (
