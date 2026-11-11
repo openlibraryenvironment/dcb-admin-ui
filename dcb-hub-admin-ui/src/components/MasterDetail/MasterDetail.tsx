@@ -693,7 +693,17 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 										</Typography>
 									</StyledDataGridAccordionSummary>
 									<AccordionDetails id="item_decision_log">
-										{JSON.stringify(row?.decisionLogEntries, null, 2)}
+										{row?.decisionLogEntries?.length ? (
+											<List dense disablePadding>
+												{row.decisionLogEntries.map((entry: string) => (
+													<ListItem key={entry} disableGutters>
+														{entry}
+													</ListItem>
+												))}
+											</List>
+										) : (
+											t("items.no_decisions")
+										)}
 									</AccordionDetails>
 								</StyledDataGridAccordion>
 							</Grid>

@@ -469,6 +469,8 @@
 		"reason_completing_setup": "Completing library setup"
 	},
 	"items": {
+		"not_offered_reason": "Why it is not offered",
+		"no_decisions": "The library's system recorded no decisions about this item.",
 		"live_lookup": {
 			"action": "Ask the library's system about item {{barcode}}",
 			"title": "Item {{barcode}} in {{hostLms}}",

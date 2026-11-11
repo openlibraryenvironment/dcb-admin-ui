@@ -10,6 +10,7 @@ const HELD_NOT_OFFERED = {
 	...availability.itemList[0],
 	id: "ee550000-5555-5555-9555-eeeeeeeeeeee",
 	barcode: "HELD-ONLY-1",
+	decisionLogEntries: ["Shelf location REF is not requestable"],
 };
 
 // Each call is one request per Host LMS to a system we do not own, and the tab made two on
@@ -76,4 +77,33 @@ test("a library that could not be asked is named in what went wrong", async ({
 	await expect(alert.getByRole("listitem")).toHaveText([
 		"Unable to reach Host LMS beta-lms",
 	]);
+});
+
+// The grid of items not offered gave no reason; the detail panel had it as JSON
+test("an item not offered says why", async ({ page }) => {
+	await page.route("**/items/availability*", (route) => {
+		const filters = new URL(route.request().url()).searchParams.get("filters");
+		return route.fulfill({
+			json:
+				filters === "none"
+					? {
+							...availability,
+							itemList: [...availability.itemList, HELD_NOT_OFFERED],
+						}
+					: availability,
+		});
+	});
+	await useAllFeatures(page);
+	await mockGraphQL(page, MOCKS);
+	await seedAuth(page);
+	await page.goto(`/search/${CLUSTER_ID}/items`);
+	await page
+		.getByRole("button", { name: "Items held but not offered for request" })
+		.click();
+
+	await expect(
+		page.getByRole("gridcell", {
+			name: "Shelf location REF is not requestable",
+		}),
+	).toBeVisible();
 });

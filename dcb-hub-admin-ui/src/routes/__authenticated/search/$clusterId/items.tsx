@@ -149,10 +149,23 @@ function ItemsPageComponent() {
 				: [],
 		[isAdmin, t],
 	);
+	// The adapter's decision log: the reason an item held is not offered
+	const reasonColumn: GridColDef = useMemo(
+		() => ({
+			field: "reason",
+			headerName: t("items.not_offered_reason"),
+			minWidth: 260,
+			flex: 1,
+			valueGetter: (_value, row: Item) =>
+				(row.decisionLogEntries ?? []).join("; "),
+		}),
+		[t],
+	);
 	const itemColumnsWithLookUp: GridColDef[] = useMemo(
 		() =>
 			isAdmin
 				? [
+						reasonColumn,
 						...itemColumns,
 						{
 							field: "lookUpAction",
@@ -163,8 +176,8 @@ function ItemsPageComponent() {
 								lookUpAction(params.row),
 						},
 					]
-				: itemColumns,
-		[isAdmin, itemColumns, lookUpAction, t],
+				: [reasonColumn, ...itemColumns],
+		[isAdmin, itemColumns, lookUpAction, reasonColumn, t],
 	);
 	const itemColumnsWithWalkUp: GridColDef[] = useMemo(
 		() => [
