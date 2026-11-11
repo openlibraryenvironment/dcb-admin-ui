@@ -114,9 +114,17 @@ export default function SupplierActionDialog({
 	const titleId = `supplier-action-${action}-title`;
 	const outcome = mutation.data;
 	const alert = outcome && outcomeAlert(outcome);
+	// Escape or the backdrop mid-flight would hide the outcome and re-offer the action, and on
+	// 8.71.0 a second skip acts on whichever supplier is active by then
+	const close = () => {
+		if (!mutation.isPending) onClose();
+	};
+	// Confirming before the setting loads would skip on the "unknown" warning; an errored
+	// query is no longer pending, so the button comes back with that warning in place
+	const awaitingWarning = action === "skip" && settings.isPending;
 
 	return (
-		<Dialog open onClose={onClose} aria-labelledby={titleId}>
+		<Dialog open onClose={close} aria-labelledby={titleId}>
 			<DialogTitle id={titleId}>
 				{t(`patron_request.supplier_actions.${action}_title`)}
 			</DialogTitle>
@@ -154,7 +162,12 @@ export default function SupplierActionDialog({
 			</DialogContent>
 			<DialogActions>
 				{outcome ? (
-					<Button onClick={onClose} variant="contained">
+					<Button
+						onClick={onClose}
+						variant="contained"
+						// eslint-disable-next-line jsx-a11y/no-autofocus -- the focused confirm button has just unmounted, so focus would fall to the dialog container (WCAG 2.4.3)
+						autoFocus
+					>
 						{t("ui.actions.close")}
 					</Button>
 				) : (
@@ -166,7 +179,7 @@ export default function SupplierActionDialog({
 							onClick={() => mutation.mutate()}
 							variant="contained"
 							color={action === "reactivate" ? "primary" : "error"}
-							disabled={mutation.isPending}
+							disabled={mutation.isPending || awaitingWarning}
 							startIcon={
 								mutation.isPending ? (
 									<CircularProgress size="1rem" aria-hidden />

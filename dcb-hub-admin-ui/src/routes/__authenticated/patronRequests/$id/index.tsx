@@ -218,9 +218,13 @@ function RouteComponent() {
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
-	const [supplierAction, setSupplierAction] = useState<SupplierAction | null>(
-		null,
-	);
+	// The supplier as it was when the action was chosen: the refetch after a skip can bring
+	// back a different suppliers[0], and the dialog must act on and name the one it opened for
+	const [supplierAction, setSupplierAction] = useState<{
+		action: SupplierAction;
+		supplier: { id: string; localAgency?: string | null };
+		isManuallySelectedItem?: boolean | null;
+	} | null>(null);
 	const navigate = useNavigate({ from: "/patronRequests/$id/" });
 	const requestedTab = useSearch({
 		from: "/__authenticated/patronRequests/$id/",
@@ -668,12 +672,18 @@ function RouteComponent() {
 
 	// ADMIN as asked, and CONSORTIUM_ADMIN because dcb-service refuses anyone without it
 	const supplier = patronRequest?.suppliers?.[0];
-	if (isAdmin && roles.includes("CONSORTIUM_ADMIN") && supplier?.id) {
+	const supplierId = supplier?.id;
+	if (isAdmin && roles.includes("CONSORTIUM_ADMIN") && supplier && supplierId) {
 		for (const action of availableSupplierActions(supplier, patronRequest)) {
 			pageActions.push({
 				key: `supplier-${action}`,
 				label: t(`patron_request.supplier_actions.${action}`),
-				onClick: () => setSupplierAction(action),
+				onClick: () =>
+					setSupplierAction({
+						action,
+						supplier: { id: supplierId, localAgency: supplier.localAgency },
+						isManuallySelectedItem: patronRequest?.isManuallySelectedItem,
+					}),
 			});
 		}
 	}
@@ -683,11 +693,11 @@ function RouteComponent() {
 			<Stack direction="row" sx={{ justifyContent: "flex-end", mb: 2 }}>
 				<PageActionsMenu actions={pageActions} pending={actionProgress} />
 			</Stack>
-			{supplierAction && supplier?.id && (
+			{supplierAction && (
 				<SupplierActionDialog
-					action={supplierAction}
-					supplier={{ id: supplier.id, localAgency: supplier.localAgency }}
-					isManuallySelectedItem={patronRequest?.isManuallySelectedItem}
+					action={supplierAction.action}
+					supplier={supplierAction.supplier}
+					isManuallySelectedItem={supplierAction.isManuallySelectedItem}
 					onClose={() => setSupplierAction(null)}
 				/>
 			)}

@@ -267,6 +267,74 @@ test.describe("supplier fix-ups", () => {
 		);
 	});
 
+	test("the dialog cannot be dismissed while the skip is running, and focuses Close after", async ({
+		page,
+	}) => {
+		let release = () => {};
+		const held = new Promise<void>((resolve) => (release = resolve));
+		const posts: string[] = [];
+		await page.route("**/suppliers/requests/**", async (route) => {
+			posts.push(route.request().url());
+			await held;
+			await route.fulfill({ json: { message: "re-resolution triggered" } });
+		});
+		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], {
+			...requestIs(AT_SUPPLIER),
+			LoadConsortiumFS: settings(true),
+		});
+
+		await (await menuItem(page, "Skip supplier")).click();
+		const dialog = page.getByRole("dialog", { name: "Skip this supplier?" });
+		await dialog.getByRole("button", { name: "Skip supplier" }).click();
+		await expect.poll(() => posts.length).toBe(1);
+		await page.keyboard.press("Escape");
+
+		await expect(dialog).toBeVisible();
+		release();
+		await expect(dialog.getByRole("status")).toContainText(
+			"DCB cancelled the hold at beta",
+		);
+		await expect(dialog.getByRole("button", { name: "Close" })).toBeFocused();
+		expect(posts).toHaveLength(1);
+	});
+
+	test("the outcome names the supplier the dialog was opened for", async ({
+		page,
+	}) => {
+		let skipped = false;
+		await page.route("**/suppliers/requests/**", async (route) => {
+			skipped = true;
+			await route.fulfill({ json: { message: "re-resolution triggered" } });
+		});
+		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], {
+			LoadConsortiumFS: settings(true),
+			// Re-resolution has moved the request on to gamma by the time it is refetched
+			LoadPatronRequest: () =>
+				requestIs(
+					skipped
+						? {
+								...AT_SUPPLIER,
+								suppliers: [
+									{
+										...SUPPLIER,
+										id: "6b6b6b6b-2222-5222-9222-222222222222",
+										localAgency: "gamma",
+									},
+								],
+							}
+						: AT_SUPPLIER,
+				).LoadPatronRequest,
+		});
+
+		await (await menuItem(page, "Skip supplier")).click();
+		const dialog = page.getByRole("dialog", { name: "Skip this supplier?" });
+		await dialog.getByRole("button", { name: "Skip supplier" }).click();
+
+		await expect(dialog.getByRole("status")).toContainText(
+			"DCB cancelled the hold at beta",
+		);
+	});
+
 	test("cancel says when the supplier did not confirm, and nothing was paused", async ({
 		page,
 	}) => {
