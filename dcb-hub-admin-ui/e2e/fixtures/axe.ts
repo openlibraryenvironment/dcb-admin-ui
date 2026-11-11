@@ -60,6 +60,12 @@ async function tagLicenceWatermarks(page: Page): Promise<number> {
  * `overflow-x: auto` container is correct and expected — the criterion is about the page,
  * and a container that scrolls itself does not widen the document.
  *
+ * Nor anything past the viewport's right edge. The content column is a scroll container
+ * of its own, so a page wider than the screen scrolls inside it and never widens the
+ * document, and a header that overflows is clipped rather than scrolled. Both escaped a
+ * document-only check. The one exemption is content inside a component that scrolls
+ * itself and fits on screen: a grid or a code block, not the column holding <main>.
+ *
  * One pixel of tolerance: sub-pixel layout rounding puts scrollWidth a fraction over
  * clientWidth on pages that are visually fine, and a gate that fires on 0.5px is a gate
  * somebody disables.
@@ -67,18 +73,38 @@ async function tagLicenceWatermarks(page: Page): Promise<number> {
 async function expectNoHorizontalScroll(page: Page) {
 	const overflow = await page.evaluate(() => {
 		const root = document.documentElement;
-		const offenders = [];
+		const edge = root.clientWidth + 1;
+		const main = document.querySelector("main");
+		const offenders: string[] = [];
 
-		if (root.scrollWidth > root.clientWidth + 1) {
-			for (const element of Array.from(document.body.querySelectorAll("*"))) {
-				const box = element.getBoundingClientRect();
-				if (box.width > 0 && box.right > root.clientWidth + 1) {
-					offenders.push(
-						`${element.tagName.toLowerCase()}.${String(element.className).split(" ").slice(0, 2).join(".")} right=${Math.round(box.right)}`,
-					);
-				}
-				if (offenders.length >= 5) break;
+		const scrollsItselfOnScreen = (element: Element): boolean => {
+			for (
+				let node = element.parentElement;
+				node && node !== document.body;
+				node = node.parentElement
+			) {
+				const { overflowX } = getComputedStyle(node);
+				if (overflowX !== "auto" && overflowX !== "scroll") continue;
+				if (main && node.contains(main)) return false;
+				return node.getBoundingClientRect().right <= edge;
 			}
+			return false;
+		};
+
+		for (const element of Array.from(document.body.querySelectorAll("*"))) {
+			const box = element.getBoundingClientRect();
+			if (box.width === 0 || box.right <= edge) continue;
+			const style = getComputedStyle(element);
+			if (style.visibility === "hidden" || style.position === "fixed") continue;
+			if (element.closest("[aria-hidden='true'], [inert]")) continue;
+			// MUI X scrolls its own columns, by scrollbar and by arrow key, but reads
+			// overflow-x: hidden until it has measured them and added --hasScrollX
+			if (element.closest(".MuiDataGrid-virtualScroller")) continue;
+			if (scrollsItselfOnScreen(element)) continue;
+			offenders.push(
+				`${element.tagName.toLowerCase()}.${String(element.className).split(" ").slice(0, 2).join(".")} right=${Math.round(box.right)}`,
+			);
+			if (offenders.length >= 5) break;
 		}
 
 		return {
@@ -90,7 +116,7 @@ async function expectNoHorizontalScroll(page: Page) {
 
 	expect(
 		overflow,
-		`document scrolls horizontally at ${overflow.viewport}px`,
+		`content reaches past the viewport at ${overflow.viewport}px`,
 	).toMatchObject({ offenders: [] });
 	expect(overflow.overshoot).toBeLessThanOrEqual(1);
 }

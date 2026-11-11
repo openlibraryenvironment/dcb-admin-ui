@@ -165,6 +165,16 @@ that page.
 
 ## 320px finds what a desktop hides
 
+**The check looks past the document.** Until November 2026 it asked only whether the
+document scrolled sideways. The content column is a scroll container of its own, so a page
+wider than the screen scrolls inside it and never widens the document; and the header clips
+what does not fit rather than scrolling it. Both passed while Logout sat off-screen on
+every page at 320px. `expectNoHorizontalScroll` now fails on any element past the
+viewport's right edge, unless it is inside a component that scrolls itself and fits on
+screen (a grid's virtual scroller, a code block). Its first run failed 387 of the 477
+narrow scans: the header, non-scrollable tab bars, the title row's actions, the language
+picker and the Host LMS scope picker.
+
 The `narrow` Playwright project scans `accessibility.spec.ts` at 320px (WCAG 1.4.10
 Reflow). Expanding the route table from 9 routes to 21 put eleven more pages in front
 of it, and two defects fell out that no desktop scan could see. Both were already in
