@@ -104,3 +104,18 @@ test("a failure to load is reported inside the cluster page, which stays", async
 	).toBeVisible();
 	await expect(page.getByRole("tab", { name: "Items" })).toBeVisible();
 });
+
+// Every column is text, so aggregation could only ever count rows, which grouping already does
+test("the explanation offers no aggregation", async ({ page }) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+	const header = page
+		.getByRole("columnheader")
+		.filter({ hasText: "Event type" })
+		.first();
+	await header.hover();
+	await header.getByRole("button", { name: "Event type column menu" }).click();
+
+	await expect(
+		page.getByRole("menu").getByRole("combobox", { name: "Aggregation" }),
+	).toHaveCount(0);
+});

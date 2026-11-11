@@ -253,15 +253,12 @@ const recordView = (
 });
 
 // Holds every row client-side, so the reader's aggregates total the whole list: in the URL as agg
-export const clusterExplanationView: GridViewSpec = {
-	...recordView(
-		"ClusterExplainer",
-		[{ field: "formattedTimestamp", sort: "desc" }],
-		25,
-		defaultClusterExplanationVisibility,
-	),
-	aggregation: true,
-};
+export const clusterExplanationView = recordView(
+	"ClusterExplainer",
+	[{ field: "formattedTimestamp", sort: "desc" }],
+	25,
+	defaultClusterExplanationVisibility,
+);
 export const clusterIdentifiersView = recordView(
 	"ClusterIdentifiers",
 	[{ field: "title", sort: "asc" }],

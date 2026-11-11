@@ -181,9 +181,6 @@ function ClusterExplanation() {
 					groupingColDef={{ minWidth: 350 }}
 					// Open, so every event shows without a click per bib
 					defaultGroupingExpansionDepth={-1}
-					disableAggregation={false}
-					aggregationModel={view.aggregationModel}
-					onAggregationModelChange={view.onAggregationModelChange}
 					disableRowGrouping={false}
 					disableHoverInteractions={false}
 					listViewEnabled={false}
