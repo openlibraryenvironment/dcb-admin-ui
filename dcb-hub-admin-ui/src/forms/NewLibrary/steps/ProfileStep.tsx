@@ -61,7 +61,12 @@ const Section = ({
 	</Stack>
 );
 
-export function ProfileStep() {
+export function ProfileStep({
+	existing = false,
+}: {
+	/** An existing library: updateLibrary cannot move it to another agency or auth profile. */
+	existing?: boolean;
+} = {}) {
 	const { t } = useTranslation();
 	const gqlClient = useGraphQLClient();
 	const {
@@ -306,6 +311,7 @@ export function ProfileStep() {
 									</li>
 								);
 							}}
+							readOnly={existing}
 							renderInput={(params) => (
 								<TextField
 									{...params}
@@ -316,7 +322,9 @@ export function ProfileStep() {
 									error={!!errors.agencyCode}
 									helperText={
 										(errors.agencyCode?.message as string) ??
-										t("libraries.new.agency_helper")
+										(existing
+											? t("libraries.new.agency_fixed")
+											: t("libraries.new.agency_helper"))
 									}
 								/>
 							)}
@@ -337,6 +345,7 @@ export function ProfileStep() {
 								<TextField
 									{...field}
 									inputRef={ref}
+									disabled={existing}
 									value={resolveAuthProfile(lmsClientClass, field.value)}
 									id="library-auth-profile"
 									select
@@ -363,6 +372,7 @@ export function ProfileStep() {
 								<TextField
 									{...field}
 									inputRef={ref}
+									disabled={existing}
 									id="library-auth-profile"
 									label={t("libraries.config.patronAuth.auth_profile")}
 									variant="outlined"

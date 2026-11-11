@@ -135,10 +135,14 @@ function ProfileForm({
 					await writes.updateLibrary.mutateAsync(
 						buildLibraryUpdateInput(formData, libraryId),
 					);
-					// Participation and the loan cap are the agency's, not the library's
-					if (formData.agencyCode) {
+					// Participation and the loan cap are the agency's, not the library's. Its code
+					// is the stored one: updateAgency writes to whichever agency the code names
+					if (defaults.agencyCode) {
 						await writes.updateAgency.mutateAsync(
-							buildAgencyUpdateInput(formData),
+							buildAgencyUpdateInput({
+								...formData,
+								agencyCode: defaults.agencyCode as string,
+							}),
 						);
 					}
 					markSaved(formData);
@@ -198,7 +202,7 @@ function ProfileForm({
 		<>
 			<FormProvider {...methods}>
 				<form noValidate aria-busy={writes.busy}>
-					<ProfileStep />
+					<ProfileStep existing={!!libraryId} />
 				</form>
 			</FormProvider>
 
