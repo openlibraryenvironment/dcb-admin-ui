@@ -183,23 +183,24 @@ test.describe("previous suppliers", () => {
 		expect(query).toBe(`patronRequest:"${REQUEST.id}"`);
 	});
 
-	test("is not offered without ADMIN, even from a shared link", async ({
+	test("opens from a shared link for a consortium administrator without ADMIN", async ({
 		page,
 	}) => {
 		await open(
 			page,
-			["CONSORTIUM_ADMIN"],
-			{},
+			["CONSORTIUM_ADMIN", "LIBRARY_ADMIN"],
+			{ LoadInactiveSupplierRequests: PREVIOUS },
 			`/patronRequests/${REQUEST.id}?tab=previousSuppliers`,
 		);
 
-		await expect(page.getByRole("tab", { name: "General" })).toHaveAttribute(
-			"aria-selected",
-			"true",
-		);
 		await expect(
 			page.getByRole("tab", { name: "Previous suppliers" }),
-		).toHaveCount(0);
+		).toHaveAttribute("aria-selected", "true");
+		await expect(
+			page
+				.getByRole("table", { name: "Previous suppliers" })
+				.getByRole("cell", { name: "GAMMA-BC-1" }),
+		).toBeVisible();
 	});
 });
 
@@ -213,16 +214,31 @@ test.describe("supplier fix-ups", () => {
 		return page.getByRole("menuitem", { name });
 	};
 
-	for (const roles of [["CONSORTIUM_ADMIN"], ["ADMIN"]]) {
-		test(`are not offered to ${roles.join(" ")} alone`, async ({ page }) => {
-			await open(page, roles, requestIs(AT_SUPPLIER));
-			await page.getByRole("button", { name: "Actions" }).click();
+	test("are offered to a consortium administrator without ADMIN, whom dcb-service admits", async ({
+		page,
+	}) => {
+		await open(
+			page,
+			["CONSORTIUM_ADMIN", "LIBRARY_ADMIN"],
+			requestIs(AT_SUPPLIER),
+		);
+		await page.getByRole("button", { name: "Actions" }).click();
 
-			await expect(
-				page.getByRole("menuitem", { name: "Skip supplier" }),
-			).toHaveCount(0);
-		});
-	}
+		await expect(
+			page.getByRole("menuitem", { name: "Skip supplier" }),
+		).toBeVisible();
+	});
+
+	test("are not offered to ADMIN alone, whom dcb-service refuses", async ({
+		page,
+	}) => {
+		await open(page, ["ADMIN"], requestIs(AT_SUPPLIER));
+		await page.getByRole("button", { name: "Actions" }).click();
+
+		await expect(
+			page.getByRole("menuitem", { name: "Skip supplier" }),
+		).toHaveCount(0);
+	});
 
 	test("are not offered once the item has left the supplier", async ({
 		page,

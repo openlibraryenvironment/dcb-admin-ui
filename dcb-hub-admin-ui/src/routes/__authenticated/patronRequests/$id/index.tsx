@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
+import { serverAdmits } from "@constants/serverRoles";
 import {
 	useInfiniteQuery,
 	useMutation,
@@ -231,10 +232,15 @@ function RouteComponent() {
 		select: (search) => search.tab,
 	});
 	const isAdmin = auth?.user?.profile?.roles?.includes("ADMIN") ?? false;
+	// Read-only, and the only record of what a supplier fix-up did, which consortium
+	// administrators run: inactiveSupplierRequests admits any staff role
+	const canSeePreviousSuppliers = isConsortiumStaff(
+		(auth?.user?.profile?.roles as string[] | undefined) ?? [],
+	);
 	// A shared link to a tab this user or deployment does not have opens on General
 	const tabName: RequestTab =
 		(requestedTab === "notes" && !isRequestNotesEnabled()) ||
-		(requestedTab === "previousSuppliers" && !isAdmin)
+		(requestedTab === "previousSuppliers" && !canSeePreviousSuppliers)
 			? "general"
 			: (requestedTab ?? "general");
 	const activeTab = REQUEST_TABS.indexOf(tabName);
@@ -670,10 +676,9 @@ function RouteComponent() {
 		});
 	}
 
-	// ADMIN as asked, and CONSORTIUM_ADMIN because dcb-service refuses anyone without it
 	const supplier = patronRequest?.suppliers?.[0];
 	const supplierId = supplier?.id;
-	if (isAdmin && roles.includes("CONSORTIUM_ADMIN") && supplier && supplierId) {
+	if (serverAdmits("supplierActions", roles) && supplier && supplierId) {
 		for (const action of availableSupplierActions(supplier, patronRequest)) {
 			pageActions.push({
 				key: `supplier-${action}`,
@@ -718,7 +723,7 @@ function RouteComponent() {
 					<Tab label={t("patron_request.general")} value={0} />
 					<Tab label={t("requesting.bib_record")} value={1} />
 					<Tab label={t("patron_request.supplying")} value={2} />
-					{isAdmin && (
+					{canSeePreviousSuppliers && (
 						<Tab
 							label={t("patron_request.previous_suppliers.title")}
 							value={7}
@@ -2376,7 +2381,7 @@ function RouteComponent() {
 					/>
 				</TabPanel>
 
-				{isAdmin && (
+				{canSeePreviousSuppliers && (
 					<TabPanel value={7}>
 						<PreviousSuppliers patronRequestId={id} />
 					</TabPanel>
