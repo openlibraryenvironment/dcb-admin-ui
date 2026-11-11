@@ -59,7 +59,9 @@ export const isGuardedCleanupEnabled = (): boolean =>
  * `default-agency-code`, so a Host LMS marked shared cannot be saved there at all.
  */
 export const isHostLmsExtendedConfigEnabled = (): boolean =>
-	readFlag("VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG");
+	readFlag("VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG") ||
+	// A deployment on 9.2.0 is past 9.0.0: one flag set without the other is a mistake
+	isHostLmsCirculationSettingsEnabled();
 
 /**
  * Host LMS settings no release before dcb-service 9.2.0 reads: Alma's cancellation and

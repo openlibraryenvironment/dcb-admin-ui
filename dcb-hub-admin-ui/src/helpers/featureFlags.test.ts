@@ -5,6 +5,7 @@ import path from "node:path";
 import {
 	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
+	isHostLmsExtendedConfigEnabled,
 	isInsightsEnabled,
 	isAuditExplorerEnabled,
 	isShelfBrowseEnabled,
@@ -189,5 +190,22 @@ describe("the surfaces Symposia gates", () => {
 		withFlags({ VITE_FEATURE_CONSORTIUM_BRANDING: "true" });
 
 		expect(isConsortiumBrandingEnabled()).toBe(true);
+	});
+});
+
+describe("the Host LMS settings flags", () => {
+	afterEach(() => vi.unstubAllGlobals());
+
+	// Circulation settings are 9.2.0; a deployment there has 9.0.0's settings too
+	it("offers 9.0.0's settings wherever 9.2.0's are on", () => {
+		vi.stubGlobal("window", {
+			__APP_ENV__: { VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS: "true" },
+		});
+		expect(isHostLmsExtendedConfigEnabled()).toBe(true);
+	});
+
+	it("offers neither on a deployment with neither", () => {
+		vi.stubGlobal("window", { __APP_ENV__: {} });
+		expect(isHostLmsExtendedConfigEnabled()).toBe(false);
 	});
 });
