@@ -80,3 +80,50 @@ test("asks for no library's oldest request and reads no change log", async ({
 	expect(requests.filter((s) => s.variables?.orderBy === "ASC")).toEqual([]);
 	expect(sent.map((s) => s.operation)).not.toContain("LoadLibraryCreations");
 });
+
+test("leaving the page cancels the counts still in flight", async ({
+	page,
+}) => {
+	const many = {
+		libraries: {
+			totalSize: 30,
+			content: Array.from({ length: 30 }, (_, i) =>
+				library(String(i + 1), `LIB${i + 1}`),
+			),
+		},
+	};
+	await mockGraphQL(page, {
+		LoadConsortiumHeader: consortiumBasics,
+		LoadLibraries: many,
+		LoadPatronRequests: none("patronRequests"),
+		LoadLocations: none("locations"),
+		LoadBibs: none("sourceBibs"),
+		LoadNumericRangeMappings: none("numericRangeMappings"),
+	});
+	// Mapping counts that never answer, so some are always in flight
+	let asked = 0;
+	await page.route("**/graphql", async (route) => {
+		if (route.request().postDataJSON()?.operationName !== "LoadMappings")
+			return route.fallback();
+		asked++;
+		await new Promise(() => undefined);
+	});
+	const aborted: string[] = [];
+	page.on("requestfailed", (request) => {
+		if (request.failure()?.errorText === "net::ERR_ABORTED")
+			aborted.push(request.postDataJSON()?.operationName);
+	});
+
+	await page.goto("/consortium/onboarding");
+	await expect.poll(() => asked).toBeGreaterThan(0);
+
+	// In the app, so the query loses its last observer rather than the page being torn down
+	await page.evaluate(() => {
+		history.pushState({}, "", "/");
+		dispatchEvent(new PopStateEvent("popstate"));
+	});
+
+	await expect
+		.poll(() => aborted.filter((op) => op === "LoadMappings").length)
+		.toBeGreaterThan(0);
+});

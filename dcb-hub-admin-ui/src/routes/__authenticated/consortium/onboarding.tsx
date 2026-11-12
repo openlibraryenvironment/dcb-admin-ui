@@ -2,6 +2,7 @@ import { ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { useQuery } from "@tanstack/react-query";
+import type { RequestOptions, Variables } from "graphql-request";
 import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { Grid, Stack, Typography, Box, Tooltip } from "@mui/material";
@@ -180,17 +181,26 @@ function Onboarding() {
 	// Fetch libraries and then batch-fetch the individual totalSize counts for each
 	const { data: librariesWithCounts, isLoading } = useQuery({
 		queryKey: ["LoadLibrariesForOnboardingWithCounts"],
-		queryFn: async () => {
-			const libRes = await gqlClient.request<any, LoadLibrariesQueryVariables>(
-				getLibraries,
-				{
-					order: "fullName",
-					orderBy: "ASC",
-					pageno: 0,
-					pagesize: 500,
-					query: "",
-				},
-			);
+		queryFn: async ({ signal }) => {
+			// Every request carries the query's signal: leaving the page cancels the
+			// counts still in flight, and no library still waiting starts
+			const ask = <T, V extends Variables>(
+				document: string,
+				variables: V,
+			): Promise<T> =>
+				gqlClient.request<T, V>({
+					document,
+					variables,
+					signal,
+				} as unknown as RequestOptions<V, T>);
+
+			const libRes = await ask<any, LoadLibrariesQueryVariables>(getLibraries, {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 500,
+				query: "",
+			});
 
 			const libs = libRes?.libraries?.content ?? [];
 
@@ -199,6 +209,7 @@ function Onboarding() {
 			// connection limit, so this is the point past which extra parallelism
 			// only buys queueing.
 			const enriched = await mapWithConcurrency(libs, 6, async (lib: any) => {
+				signal.throwIfAborted();
 				const hostLmsCode = lib?.agency?.hostLms?.code;
 				const hostLmsId = lib?.agency?.hostLms?.id;
 				const agencyCode = lib?.agencyCode;
@@ -231,58 +242,52 @@ function Onboarding() {
 						supplyingRes,
 						bibRes,
 					] = await Promise.all([
-						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+						ask<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`,
 							order: "id",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+						ask<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"patronType" OR fromCategory:"patronType") AND NOT deleted:true`,
 							order: "id",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+						ask<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`,
 							order: "id",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadLocationsQueryVariables>(getLocations, {
+						ask<any, LoadLocationsQueryVariables>(getLocations, {
 							query: `hostSystem: ${hostLmsId} AND isPickup: true`,
 							order: "code",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `patronHostlmsCode: "${hostLmsCode}"`,
-								order: "dateCreated",
-								orderBy: "DESC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `supplyingAgencyCode: "${agencyCode}"`,
-								order: "dateCreated",
-								orderBy: "DESC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
+						ask<any, LoadPatronRequestsQueryVariables>(getPatronRequests(), {
+							query: `patronHostlmsCode: "${hostLmsCode}"`,
+							order: "dateCreated",
+							orderBy: "DESC",
+							pageno: 0,
+							pagesize: 1,
+						}),
+						ask<any, LoadPatronRequestsQueryVariables>(getPatronRequests(), {
+							query: `supplyingAgencyCode: "${agencyCode}"`,
+							order: "dateCreated",
+							orderBy: "DESC",
+							pageno: 0,
+							pagesize: 1,
+						}),
 						// Ingest health: bibs live under the Host LMS, and zero of them
 						// means the library cannot supply anything however well the
 						// rest is configured.
-						gqlClient.request<any, LoadBibsQueryVariables>(getBibs, {
+						ask<any, LoadBibsQueryVariables>(getBibs, {
 							query: `sourceSystemId: ${hostLmsId}`,
 							order: "dateCreated",
 							pageno: 0,
@@ -292,7 +297,7 @@ function Onboarding() {
 
 					let numericRangePromise = null;
 					if (requiresNumeric) {
-						numericRangePromise = gqlClient.request<
+						numericRangePromise = ask<
 							any,
 							LoadNumericRangeMappingsQueryVariables
 						>(getNumericRangeMappings, {
@@ -330,6 +335,7 @@ function Onboarding() {
 							: null,
 					};
 				} catch (e) {
+					if (signal.aborted) throw e;
 					console.error(
 						"Failed fetching counts for",
 						lib.fullName,
