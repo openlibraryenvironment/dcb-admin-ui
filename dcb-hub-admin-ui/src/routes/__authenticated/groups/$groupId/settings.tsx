@@ -28,6 +28,11 @@ import FunctionalSettingInheritance from "@components/FunctionalSettingInheritan
 import { getLibraryGroupById } from "@queries/getGroupById";
 import { updateAgencyParticipationStatus } from "@mutations/updateAgencyParticipation";
 import { CONFIRMATION_TEXT_MAP } from "@helpers/getConfirmationText";
+import {
+	participationChanges,
+	type Participation,
+} from "@helpers/groupParticipation";
+import { invalidateLibraryCaches } from "@forms/NewLibrary/libraryCaches";
 import { Group } from "@models/Group";
 import { LibraryGroupMember } from "@models/LibraryGroupMember";
 import type {
@@ -54,8 +59,11 @@ function GroupSettings() {
 	const isAnAdmin =
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
-	const [showConfirmationBorrowing, setConfirmationBorrowing] = useState(false);
-	const [showConfirmationSupplying, setConfirmationSupplying] = useState(false);
+	// The group-wide change waiting on its confirmation
+	const [pending, setPending] = useState<{
+		type: Participation;
+		enable: boolean;
+	} | null>(null);
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [alert, setAlert] = useState<{
 		open: boolean;
@@ -133,8 +141,8 @@ function GroupSettings() {
 	}, [group]);
 
 	const handleGroupParticipation = async (
-		type: "borrowing" | "supplying",
-		action: "enable" | "disable",
+		type: Participation,
+		enable: boolean,
 		reason: string,
 		changeCategory: string,
 		changeReferenceUrl: string,
@@ -142,37 +150,33 @@ function GroupSettings() {
 		if (!group?.members) return;
 
 		setIsUpdating(true);
-		const isEnabled = action === "enable";
-
-		const updates = group.members.map((member: LibraryGroupMember) => {
-			const agencyCode = member.library?.agencyCode;
-			if (!agencyCode) return Promise.resolve(null);
-
-			const input = {
-				code: agencyCode,
-				[type === "borrowing" ? "isBorrowingAgency" : "isSupplyingAgency"]:
-					isEnabled,
-				reason,
-				changeCategory,
-				changeReferenceUrl,
-			};
-
-			return updateParticipation({ input });
-		});
-
-		const results = await Promise.allSettled(updates);
+		const codes = participationChanges(group.members, type, enable);
+		const results = await Promise.allSettled(
+			codes.map((code) =>
+				updateParticipation({
+					input: {
+						code,
+						[type === "borrowing" ? "isBorrowingAgency" : "isSupplyingAgency"]:
+							enable,
+						reason,
+						changeCategory,
+						changeReferenceUrl,
+					},
+				}),
+			),
+		);
 		const successCount = results.filter((r) => r.status === "fulfilled").length;
 		const failures = results.filter(
 			(r): r is PromiseRejectedResult => r.status === "rejected",
 		);
-		const failCount = failures.length;
 
 		setIsUpdating(false);
-		if (type === "borrowing") setConfirmationBorrowing(false);
-		else setConfirmationSupplying(false);
-		queryClient.invalidateQueries({ queryKey: ["group", groupId] });
+		setPending(null);
+		// The group, and every library and agency page that shows participation
+		void queryClient.invalidateQueries({ queryKey: ["group", groupId] });
+		void invalidateLibraryCaches(queryClient);
 
-		if (failCount === 0) {
+		if (failures.length === 0) {
 			setAlert({
 				open: true,
 				severity: "success",
@@ -187,7 +191,7 @@ function GroupSettings() {
 				reference: requestReferenceOf(failures[0]?.reason),
 				text: t("groups.settings.bulk_update_partial", {
 					success: successCount,
-					total: group.members.length,
+					total: codes.length,
 				}),
 			});
 		}
@@ -221,12 +225,17 @@ function GroupSettings() {
 		);
 	}
 
-	const borrowingAction = groupStats.hasBorrowing
-		? "disableBorrowing"
-		: "enableBorrowing";
-	const supplyingAction = groupStats.hasSupplying
-		? "disableSupplying"
-		: "enableSupplying";
+	const pendingText =
+		pending &&
+		CONFIRMATION_TEXT_MAP[
+			`${pending.enable ? "enable" : "disable"}${pending.type === "borrowing" ? "Borrowing" : "Supplying"}`
+		];
+	// Disable while any member takes part, enable while any does not: a mixed group has both
+	const offers = (type: Participation) =>
+		[false, true].filter(
+			(enable) =>
+				participationChanges(group.members ?? [], type, enable).length > 0,
+		);
 
 	return (
 		<PageContainer title={group.name}>
@@ -275,25 +284,38 @@ function GroupSettings() {
 							{t("groups.borrow_count", { count: groupStats.borrowingCount })}
 						</Typography>
 					</Stack>
-					<Tooltip
-						title={
-							!isAnAdmin ? t("ui.confirmation.admin_required_supplying") : ""
-						}
+					<Stack
+						direction="row"
+						spacing={1}
+						useFlexGap
+						sx={{ mt: 1, flexWrap: "wrap" }}
 					>
-						<span>
-							<Button
-								color="primary"
-								variant="outlined"
-								sx={{ mt: 1 }}
-								disabled={!isAnAdmin || isUpdating}
-								onClick={() => setConfirmationBorrowing(true)}
+						{offers("borrowing").map((enable) => (
+							<Tooltip
+								key={String(enable)}
+								title={
+									!isAnAdmin
+										? t("ui.confirmation.admin_required_supplying")
+										: ""
+								}
 							>
-								{groupStats.hasBorrowing
-									? t("groups.settings.disable_all_borrowing")
-									: t("groups.settings.enable_all_borrowing")}
-							</Button>
-						</span>
-					</Tooltip>
+								<span>
+									<Button
+										color="primary"
+										variant="outlined"
+										disabled={!isAnAdmin || isUpdating}
+										onClick={() => setPending({ type: "borrowing", enable })}
+									>
+										{t(
+											enable
+												? "groups.settings.enable_all_borrowing"
+												: "groups.settings.disable_all_borrowing",
+										)}
+									</Button>
+								</span>
+							</Tooltip>
+						))}
+					</Stack>
 				</Grid>
 
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -305,17 +327,28 @@ function GroupSettings() {
 							{t("groups.supply_count", { count: groupStats.supplyingCount })}
 						</Typography>
 					</Stack>
-					<Button
-						disabled={!isAnAdmin || isUpdating}
-						onClick={() => setConfirmationSupplying(true)}
-						color="primary"
-						variant="outlined"
-						sx={{ mt: 1 }}
+					<Stack
+						direction="row"
+						spacing={1}
+						useFlexGap
+						sx={{ mt: 1, flexWrap: "wrap" }}
 					>
-						{groupStats.hasSupplying
-							? t("groups.settings.disable_all_supplying")
-							: t("groups.settings.enable_all_supplying")}
-					</Button>
+						{offers("supplying").map((enable) => (
+							<Button
+								key={String(enable)}
+								disabled={!isAnAdmin || isUpdating}
+								onClick={() => setPending({ type: "supplying", enable })}
+								color="primary"
+								variant="outlined"
+							>
+								{t(
+									enable
+										? "groups.settings.enable_all_supplying"
+										: "groups.settings.disable_all_supplying",
+								)}
+							</Button>
+						))}
+					</Stack>
 				</Grid>
 			</Grid>
 			{/* §V-22.6. A group is a level of the settings chain, but only if its type is the
@@ -341,12 +374,13 @@ function GroupSettings() {
 				))}
 
 			<Confirmation
-				open={showConfirmationBorrowing}
-				onClose={() => setConfirmationBorrowing(false)}
+				open={!!pending}
+				onClose={() => setPending(null)}
 				onConfirm={(reason, category, url) =>
+					pending &&
 					handleGroupParticipation(
-						"borrowing",
-						groupStats.hasBorrowing ? "disable" : "enable",
+						pending.type,
+						pending.enable,
 						reason,
 						category,
 						url,
@@ -355,53 +389,21 @@ function GroupSettings() {
 				action="gridEdit"
 				entityName={group.name}
 				customWarningText={
-					<Box>
-						<Typography variant="h6" gutterBottom>
-							{t(CONFIRMATION_TEXT_MAP[borrowingAction].header)}
-						</Typography>
-						<Typography
-							sx={{
-								marginBottom: "16px",
-							}}
-						>
-							{t(CONFIRMATION_TEXT_MAP[borrowingAction].para1)}
-						</Typography>
-						<Typography variant="body2">
-							{t(CONFIRMATION_TEXT_MAP[borrowingAction].select)}
-						</Typography>
-					</Box>
-				}
-			/>
-			<Confirmation
-				open={showConfirmationSupplying}
-				onClose={() => setConfirmationSupplying(false)}
-				onConfirm={(reason, category, url) =>
-					handleGroupParticipation(
-						"supplying",
-						groupStats.hasSupplying ? "disable" : "enable",
-						reason,
-						category,
-						url,
+					pendingText && (
+						<Box>
+							<Typography variant="h6" gutterBottom>
+								{t(pendingText.header)}
+							</Typography>
+							<Typography
+								sx={{
+									marginBottom: "16px",
+								}}
+							>
+								{t(pendingText.para1)}
+							</Typography>
+							<Typography variant="body2">{t(pendingText.select)}</Typography>
+						</Box>
 					)
-				}
-				action="gridEdit"
-				entityName={group.name}
-				customWarningText={
-					<Box>
-						<Typography variant="h6" gutterBottom>
-							{t(CONFIRMATION_TEXT_MAP[supplyingAction].header)}
-						</Typography>
-						<Typography
-							sx={{
-								marginBottom: "16px",
-							}}
-						>
-							{t(CONFIRMATION_TEXT_MAP[supplyingAction].para1)}
-						</Typography>
-						<Typography variant="body2">
-							{t(CONFIRMATION_TEXT_MAP[supplyingAction].select)}
-						</Typography>
-					</Box>
 				}
 			/>
 			<TimedAlert
