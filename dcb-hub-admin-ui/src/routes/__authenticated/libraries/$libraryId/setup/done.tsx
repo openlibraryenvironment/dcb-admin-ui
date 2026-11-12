@@ -1,4 +1,10 @@
-import { createFileRoute, redirect, useParams } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	redirect,
+	retainSearchParams,
+	useParams,
+	useSearch,
+} from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
 	Alert,
@@ -36,7 +42,10 @@ import {
 	ingestMessageKey,
 	libraryFlowState,
 } from "@helpers/librarySetup";
-import { isLibrarySetupStepId } from "@helpers/librarySetupFlow";
+import {
+	isLibrarySetupStepId,
+	librarySetupSearchSchema,
+} from "@helpers/librarySetupFlow";
 import { adminOrConsortiumAdmin } from "@constants/roles";
 import i18n from "@/i18n";
 import { errorForDisplay } from "@helpers/safeErrorLog";
@@ -46,6 +55,8 @@ const FROM = "/__authenticated/libraries/$libraryId/setup/done";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/setup/done",
 )({
+	validateSearch: librarySetupSearchSchema,
+	search: { middlewares: [retainSearchParams(["from"])] },
 	beforeLoad: ({ context: { auth } }) => {
 		if (!auth?.isAuthenticated) return;
 		const roles = (auth.user?.profile?.roles as string[]) || [];
@@ -92,6 +103,7 @@ function DoneSkeleton() {
 function LibrarySetupDone() {
 	const { t } = useTranslation();
 	const { libraryId } = useParams({ from: FROM });
+	const { from } = useSearch({ from: FROM });
 	const gqlClient = useGraphQLClient();
 	const isAdmin = useIsConsortiumAdmin();
 
@@ -221,6 +233,15 @@ function LibrarySetupDone() {
 					>
 						{t("libraries.new.add_another")}
 					</CustomLinkButton>
+					{from === "setup" && (
+						<CustomLinkButton
+							to="/setup/$step"
+							params={{ step: "libraries" }}
+							variant="outlined"
+						>
+							{t("libraries.setup.done.back_to_consortium_setup")}
+						</CustomLinkButton>
+					)}
 				</Stack>
 			</Stack>
 		</PageContainer>

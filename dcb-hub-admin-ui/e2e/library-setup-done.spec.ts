@@ -113,3 +113,31 @@ test("a set-up, harvested library is set up", async ({ page }) => {
 		}),
 	).toBeVisible();
 });
+
+test("a library added from consortium setup offers the way back, through every chapter", async ({
+	page,
+}) => {
+	await mockSetup(page, { harvested: 12 });
+	// The redirect to a chapter, then a chapter link, must both keep where it came from
+	await page.goto(`/libraries/${LIBRARY.id}/setup?from=setup`);
+	await expect(page).toHaveURL(/\/setup\/done\?from=setup$/);
+
+	await page.getByRole("link", { name: "Change this: Contacts" }).click();
+	await expect(page).toHaveURL(/\/setup\/contacts\?from=setup$/);
+
+	await page.goto(`/libraries/${LIBRARY.id}/setup/done?from=setup`);
+	const back = page.getByRole("link", { name: "Back to consortium setup" });
+	await expect(back).toHaveAttribute("href", /\/setup\/libraries$/);
+});
+
+test("a library set up on its own does not offer consortium setup", async ({
+	page,
+}) => {
+	await mockSetup(page, { harvested: 12 });
+	await page.goto(`/libraries/${LIBRARY.id}/setup/done`);
+
+	await expect(page.getByRole("link", { name: "Go to library" })).toBeVisible();
+	await expect(
+		page.getByRole("link", { name: "Back to consortium setup" }),
+	).toHaveCount(0);
+});

@@ -1,4 +1,9 @@
-import { Navigate, createFileRoute, useParams } from "@tanstack/react-router";
+import {
+	Navigate,
+	createFileRoute,
+	retainSearchParams,
+	useParams,
+} from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -8,7 +13,10 @@ import Error from "@components/Error/Error";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { libraryQuery } from "@/queryOptions/library";
 import { librarySetupCountsQuery } from "@/queryOptions/librarySetup";
-import { isLibrarySetupStepId } from "@helpers/librarySetupFlow";
+import {
+	isLibrarySetupStepId,
+	librarySetupSearchSchema,
+} from "@helpers/librarySetupFlow";
 import { libraryFlowState } from "@helpers/librarySetup";
 import i18n from "@/i18n";
 import { errorForDisplay } from "@helpers/safeErrorLog";
@@ -17,6 +25,8 @@ import { errorForDisplay } from "@helpers/safeErrorLog";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/setup/",
 )({
+	validateSearch: librarySetupSearchSchema,
+	search: { middlewares: [retainSearchParams(["from"])] },
 	errorComponent: ({ error }) => (
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error

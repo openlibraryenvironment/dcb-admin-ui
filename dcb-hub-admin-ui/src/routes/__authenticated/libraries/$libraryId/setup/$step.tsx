@@ -2,6 +2,7 @@ import {
 	Navigate,
 	createFileRoute,
 	redirect,
+	retainSearchParams,
 	useNavigate,
 	useParams,
 } from "@tanstack/react-router";
@@ -33,6 +34,7 @@ import { librarySetupCountsQuery } from "@/queryOptions/librarySetup";
 import { createGraphQLClient } from "@helpers/createGraphQLClient";
 import {
 	isLibrarySetupStepId,
+	librarySetupSearchSchema,
 	type LibraryFlowStepId,
 } from "@helpers/librarySetupFlow";
 import { libraryFlowState } from "@helpers/librarySetup";
@@ -45,6 +47,8 @@ const FROM = "/__authenticated/libraries/$libraryId/setup/$step";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/setup/$step",
 )({
+	validateSearch: librarySetupSearchSchema,
+	search: { middlewares: [retainSearchParams(["from"])] },
 	beforeLoad: ({ params: { libraryId, step }, context: { auth } }) => {
 		if (!isLibrarySetupStepId(step)) {
 			throw redirect({

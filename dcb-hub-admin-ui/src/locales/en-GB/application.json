@@ -2005,7 +2005,8 @@
 				"page_title": "Library setup",
 				"title": "{{library}} is set up",
 				"title_unharvested": "{{library}} is set up, but nothing has been harvested yet",
-				"title_partial": "{{library}} still has setup to finish"
+				"title_partial": "{{library}} still has setup to finish",
+				"back_to_consortium_setup": "Back to consortium setup"
 			},
 			"harvest": {
 				"harvested_one": "DCB has harvested {{count}} record from this library's system.",

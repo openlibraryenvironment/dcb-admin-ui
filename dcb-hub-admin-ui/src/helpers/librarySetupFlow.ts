@@ -49,6 +49,15 @@ export const newLibrarySearchSchema = z.object({
 	ils: z.enum(ILS_KEYS).optional().catch(undefined),
 	hostLms: z.string().trim().min(1).max(64).optional().catch(undefined),
 	agency: z.string().trim().min(1).max(64).optional().catch(undefined),
+	from: z.enum(["setup"]).optional().catch(undefined),
+});
+
+/**
+ * "setup" when the library was added from consortium setup, so its Done page can offer the
+ * way back. Every library setup route retains it (`retainSearchParams`), so it is set once.
+ */
+export const librarySetupSearchSchema = newLibrarySearchSchema.pick({
+	from: true,
 });
 export type NewLibrarySearch = z.infer<typeof newLibrarySearchSchema>;
 
