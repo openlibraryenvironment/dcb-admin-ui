@@ -44,7 +44,16 @@ function LibrarySetupStart() {
 	const library = useQuery(libraryQuery(gqlClient, libraryId));
 	const counts = useQuery(librarySetupCountsQuery(gqlClient, library.data));
 
-	if (library.isError) {
+	// The counts query is disabled until the library is found, so it stays pending for an
+	// unknown id: wait on it only once there is a library
+	if (library.isPending || (library.data && counts.isPending)) {
+		return (
+			<PageContainer hideTitleBox hideBreadcrumbs>
+				<Skeleton variant="rounded" height={480} />
+			</PageContainer>
+		);
+	}
+	if (library.isError || !library.data) {
 		return (
 			<PageContainer hideTitleBox hideBreadcrumbs>
 				<Error
@@ -53,13 +62,6 @@ function LibrarySetupStart() {
 					action={t("ui.actions.reload")}
 					onAction={() => location.reload()}
 				/>
-			</PageContainer>
-		);
-	}
-	if (library.isPending || counts.isPending) {
-		return (
-			<PageContainer hideTitleBox hideBreadcrumbs>
-				<Skeleton variant="rounded" height={480} />
 			</PageContainer>
 		);
 	}
