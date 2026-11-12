@@ -119,7 +119,8 @@ function LibrarySetupDone() {
 		);
 	}
 	if (isPending || (library && counts.isPending)) return <DoneSkeleton />;
-	if (isError || !library) {
+	// A failed count is not a zero: read as one, it reports done work as not started
+	if (isError || !library || !counts.data) {
 		return (
 			<PageContainer hideTitleBox hideBreadcrumbs>
 				<Error
@@ -132,7 +133,7 @@ function LibrarySetupDone() {
 		);
 	}
 
-	const state = libraryFlowState(library, counts.data ?? {});
+	const state = libraryFlowState(library, counts.data);
 	const steps = state.steps.filter((step) => isLibrarySetupStepId(step.id));
 	const complete = steps.every((step) => step.complete);
 	const ingest = harvest.data

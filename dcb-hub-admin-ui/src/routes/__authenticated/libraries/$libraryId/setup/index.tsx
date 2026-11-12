@@ -53,7 +53,7 @@ function LibrarySetupStart() {
 			</PageContainer>
 		);
 	}
-	if (library.isError || !library.data) {
+	if (library.isError || !library.data || !counts.data) {
 		return (
 			<PageContainer hideTitleBox hideBreadcrumbs>
 				<Error
@@ -66,10 +66,7 @@ function LibrarySetupStart() {
 		);
 	}
 
-	const first = libraryFlowState(
-		library.data,
-		counts.data ?? {},
-	).firstIncompleteStep;
+	const first = libraryFlowState(library.data, counts.data).firstIncompleteStep;
 	return first && isLibrarySetupStepId(first) ? (
 		<Navigate
 			to="/libraries/$libraryId/setup/$step"

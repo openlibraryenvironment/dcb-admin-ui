@@ -141,7 +141,8 @@ function LibrarySetupPage() {
 
 	if (isPending || (library && counts.isPending)) return <SetupSkeleton />;
 
-	if (isError || !library) {
+	// A failed count is not a zero: read as one, it reports done work as not started
+	if (isError || !library || !counts.data) {
 		return (
 			<PageContainer hideTitleBox hideBreadcrumbs>
 				<Error
@@ -154,8 +155,7 @@ function LibrarySetupPage() {
 		);
 	}
 
-	// A failed count is not a zero; read as one it reported work missing that was done
-	const state = libraryFlowState(library, counts.data ?? {});
+	const state = libraryFlowState(library, counts.data);
 	const flow = existingLibraryFlow(
 		state,
 		libraryId,

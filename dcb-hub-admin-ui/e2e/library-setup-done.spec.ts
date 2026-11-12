@@ -64,3 +64,25 @@ test("an unknown library's setup says it could not be loaded instead of loading 
 		page.getByText("This library could not be loaded"),
 	).toBeVisible();
 });
+
+test("a failed count is reported as a failure, not as setup not started", async ({
+	page,
+}) => {
+	await mockSetup(page);
+	await page.route("**/graphql", async (route) => {
+		if (route.request().postDataJSON()?.operationName === "LoadMappings") {
+			await route.fulfill({
+				json: { errors: [{ message: "Temporarily unavailable" }] },
+			});
+			return;
+		}
+		await route.fallback();
+	});
+	await page.goto(`/libraries/${LIBRARY.id}/setup/done`);
+
+	await expect(
+		page.getByText("This library could not be loaded"),
+	).toBeVisible();
+	await expect(page.getByText("Not started")).toHaveCount(0);
+	await expect(page.getByText(/still has setup to finish/)).toHaveCount(0);
+});
