@@ -191,18 +191,14 @@ export default function ConsortiumDetails() {
 			columns={columns}
 			rows={rows}
 			loading={false}
-			disableAggregation
-			disableRowGrouping
-			disablePivoting
 			disableHoverInteractions={true}
 			pagination={false}
 			paginationMode="client"
-			paginationModel={{ page: 0, pageSize: 25 }}
+			initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
 			sortingMode="client"
 			filterMode="client"
 			rowModesModel={{}}
 			listViewEnabled={false}
-			pivotingEnabled={false}
 			toolbarVisible={false}
 			scrollbarVisible={true}
 			noResultsText=""

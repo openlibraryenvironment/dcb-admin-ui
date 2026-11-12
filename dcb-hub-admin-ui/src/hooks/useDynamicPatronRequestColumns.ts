@@ -5,9 +5,8 @@ import { Location } from "@models/Location";
 import { Library } from "@models/Library";
 import { PatronRequest } from "@models/PatronRequest";
 import {
-	patronRequestColumnsNoStatusFilter,
 	placedByStaffColumn,
-	standardPatronRequestColumns,
+	getPatronRequestColumns,
 } from "@columns/getPatronRequestColumns";
 import {
 	isPlacedByStaffEnabled,
@@ -118,10 +117,14 @@ export const useDynamicPatronRequestColumns = ({
 		[vocabulary.data],
 	);
 
-	const baseColumns =
-		variant === "noStatus"
-			? patronRequestColumnsNoStatusFilter
-			: standardPatronRequestColumns;
+	const baseColumns = useMemo(
+		() =>
+			getPatronRequestColumns(
+				variant === "noStatus" ? "noStatus" : "standard",
+				t,
+			),
+		[variant, t],
+	);
 
 	const columns = useMemo(() => {
 		const withFlagged = [

@@ -10,6 +10,7 @@ import { useSetupNavigation } from "@hooks/useSetupNavigation";
 import { useConsortiumSetup } from "@hooks/useConsortiumSetup";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { errorForLog } from "@helpers/safeErrorLog";
 import { addFunctionalSettingMutation } from "@mutations/addFunctionalSetting";
 import { updateFunctionalSettingQuery } from "@mutations/updateFunctionalSetting";
 import {
@@ -155,7 +156,7 @@ export default function HowItWorksChapter() {
 			methods.reset(methods.getValues());
 			goNext();
 		} catch (failure: any) {
-			console.error("Functional settings save failed:", failure);
+			console.error("Functional settings save failed:", errorForLog(failure));
 			setError(describeGraphQLError(failure, t("setup.how_it_works.error")));
 		} finally {
 			setBusy(false);

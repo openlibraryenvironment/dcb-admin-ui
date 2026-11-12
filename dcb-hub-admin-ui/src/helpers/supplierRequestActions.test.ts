@@ -24,21 +24,50 @@ const clientFailing = (status: number, data: unknown = {}) => {
 };
 
 describe("availableSupplierActions", () => {
+	const placed = { status: "REQUEST_PLACED_AT_SUPPLYING_AGENCY" };
+
 	it("offers skip and cancel only while the supplier is active", () => {
-		expect(availableSupplierActions({ isActive: true })).toEqual([
+		expect(availableSupplierActions({ isActive: true }, placed)).toEqual([
 			"skip",
 			"cancel",
 		]);
 	});
 
 	it("offers reactivate only once it is not", () => {
-		expect(availableSupplierActions({ isActive: false })).toEqual([
+		expect(availableSupplierActions({ isActive: false }, placed)).toEqual([
 			"reactivate",
 		]);
 	});
 
 	it("offers nothing without a supplier", () => {
-		expect(availableSupplierActions(undefined)).toEqual([]);
+		expect(availableSupplierActions(undefined, placed)).toEqual([]);
+	});
+
+	it.each(["PICKUP_TRANSIT", "LOANED", "RETURN_TRANSIT", "FINALISED"])(
+		"offers nothing on an active supplier once the item has shipped (%s)",
+		(status) => {
+			expect(availableSupplierActions({ isActive: true }, { status })).toEqual(
+				[],
+			);
+		},
+	);
+
+	it("offers only cancel for an error raised before shipment", () => {
+		expect(
+			availableSupplierActions(
+				{ isActive: true },
+				{ status: "ERROR", previousStatus: "CONFIRMED" },
+			),
+		).toEqual(["cancel"]);
+	});
+
+	it("offers nothing for an error raised after shipment", () => {
+		expect(
+			availableSupplierActions(
+				{ isActive: true },
+				{ status: "ERROR", previousStatus: "LOANED" },
+			),
+		).toEqual([]);
 	});
 });
 
@@ -50,6 +79,17 @@ describe("runSupplierAction", () => {
 			kind: "skipped",
 		});
 		expect(post).toHaveBeenCalledWith(`/suppliers/requests/${ID}/skip`);
+	});
+
+	it("keeps the server's own account of a cancel", async () => {
+		const { client } = clientReturning({
+			paused: false,
+			message: "Hold cancellation requested; awaiting confirmation",
+		});
+
+		expect(await runSupplierAction(client, "cancel", ID)).toMatchObject({
+			message: "Hold cancellation requested; awaiting confirmation",
+		});
 	});
 
 	it("reports a cancel the supplier did not confirm as not paused", async () => {
@@ -86,6 +126,13 @@ describe("runSupplierAction", () => {
 		expect(await runSupplierAction(clientFailing(status), "skip", ID)).toEqual(
 			outcome,
 		);
+	});
+
+	// The mutation cache renews the session on a 401, and shows maintenance on a 503
+	it.each([401, 503])("leaves a %i to the mutation cache", async (status) => {
+		await expect(
+			runSupplierAction(clientFailing(status), "skip", ID),
+		).rejects.toMatchObject({ response: { status } });
 	});
 
 	it("carries the server's message on any other failure", async () => {

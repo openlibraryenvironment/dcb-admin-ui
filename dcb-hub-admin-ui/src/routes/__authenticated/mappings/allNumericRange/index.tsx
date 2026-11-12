@@ -178,12 +178,8 @@ function NumericRangeMappingsRoute() {
 					baseQuery: NUMERIC_RANGE_MAPPINGS_BASE_QUERY,
 					wizard: true,
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("mappings.no_results")}

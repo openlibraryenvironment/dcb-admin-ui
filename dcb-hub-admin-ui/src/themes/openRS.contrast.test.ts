@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getAppTheme, THEME_NAMES, THEME_MODES } from "./openRS";
 import { inkOn } from "../hooks/useChartPalette";
+import { stepConnectorColours } from "../helpers/stepConnectorColours";
 
 // Guards WCAG contrast across every brand x mode. This exists because the tokens
 // are authored per brand and spread from a shared base: a light-mode value copied
@@ -103,6 +104,9 @@ describe("theme contrast", () => {
 				// would notice by looking at the token list.
 				["headerText / headerHover", p.headerText, p.headerHover],
 				["headerText / headerActive", p.headerText, p.headerActive],
+				// A primary text or outlined button's label, while hovered and pressed
+				["buttonHoverText / buttonHover", p.buttonHoverText, p.buttonHover],
+				["buttonActiveText / buttonActive", p.buttonActiveText, p.buttonActive],
 				[
 					"linkedFooterText / linkedFooterBackground",
 					p.linkedFooterText,
@@ -199,6 +203,22 @@ describe("theme contrast", () => {
 				ratio,
 				`${p.tabIndicator} on ${bar} is ${ratio.toFixed(2)}:1`,
 			).toBeGreaterThanOrEqual(NON_TEXT);
+		},
+	);
+});
+
+describe("stepper connector lines", () => {
+	it.each(THEME_NAMES.flatMap((n) => THEME_MODES.map((m) => [n, m] as const)))(
+		"%s/%s draws every state visible against the page",
+		(name, mode) => {
+			const theme = getAppTheme(name, mode);
+			const ground = theme.palette.background.default;
+			const failing = Object.entries(stepConnectorColours(theme))
+				.map(([state, colour]) => [state, contrast(colour, ground)] as const)
+				.filter(([, ratio]) => ratio < NON_TEXT)
+				.map(([state, ratio]) => `${state} ${ratio.toFixed(2)}:1`);
+
+			expect(failing).toEqual([]);
 		},
 	);
 });

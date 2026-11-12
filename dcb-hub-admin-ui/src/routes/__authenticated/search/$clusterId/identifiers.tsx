@@ -15,8 +15,7 @@ import Loading from "@components/Loading/Loading";
 import ErrorComponent from "@components/Error/Error";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { getClusters } from "@queries/getClusters";
-import type { ClusterRecordsQueryVariables } from "@generated/graphql";
+import { clusterFullQuery } from "@/queryOptions/cluster";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/identifiers",
@@ -49,14 +48,9 @@ function Identifiers() {
 	});
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ["cluster", "full", clusterId],
-		queryFn: () =>
-			gqlClient.request<any, ClusterRecordsQueryVariables>(getClusters, {
-				query: `id: ${clusterId}`,
-			}),
-		enabled: !!clusterId,
-	});
+	const { data, isLoading, error } = useQuery(
+		clusterFullQuery(gqlClient, clusterId),
+	);
 
 	const { rows, namespaces } = useMemo(() => {
 		const cluster = data?.instanceClusters?.content?.[0];
@@ -173,7 +167,6 @@ function Identifiers() {
 			<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 				<DataGrid
 					identifier={gridId}
-					disablePivoting
 					type="Identifiers"
 					columns={columns}
 					viewNotice={<GridViewNotice view={view} />}
@@ -192,11 +185,8 @@ function Identifiers() {
 					columnVisibilityModel={view.columnVisibilityModel}
 					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
 					columnLayout={view.columnLayout}
-					disableAggregation
-					disableRowGrouping
 					disableHoverInteractions={false}
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible
 					scrollbarVisible={false}
 					noResultsText={t("ui.data_grid.no_results")}

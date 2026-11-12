@@ -120,7 +120,7 @@ const capabilitiesAt = (version: string) =>
  * One pass per release we hold a schema for. A list, not four copied blocks: adding the
  * next release is a row here, and the "not vacuous" assertion below then covers it too.
  */
-const RELEASE_PASSES = ["9.0.0", "9.1.0", "9.2.0"].map((version) => {
+const RELEASE_PASSES = ["9.0.0", "9.1.0", "9.2.0", "9.3.0"].map((version) => {
 	const capabilities = capabilitiesAt(version);
 	return {
 		version,

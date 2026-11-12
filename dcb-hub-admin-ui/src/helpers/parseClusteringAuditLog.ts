@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 
-// This is what a Cluster Audit Log entry looks like
 interface ClusterAuditLogEntry {
 	id: string;
 	processType: string;
@@ -14,76 +13,156 @@ interface ClusterAuditLogResponse {
 	ingest: Record<string, ClusterAuditLogEntry[]>;
 }
 
+export const CLUSTERING_EVENT_KINDS = [
+	"highConfidenceMatch",
+	"lowConfidenceCandidate",
+	"exactTitleMatch",
+	"titleSimilarityMatch",
+	"titleSimilarityNoMatch",
+	"matchedCluster",
+	"mergedClusters",
+	"outdatedCluster",
+	"newCluster",
+	"other",
+] as const;
+
+export type ClusteringEventKind = (typeof CLUSTERING_EVENT_KINDS)[number];
+
+export const clusteringEventLabelKey = (kind: ClusteringEventKind) =>
+	`search.clustering_event.${kind}`;
+
+export interface ClusteringEventRow {
+	id: string;
+	/** The incoming bib the event explains. */
+	subjectId: string;
+	timestamp: string;
+	formattedTimestamp: string;
+	eventType: ClusteringEventKind;
+	message: string;
+	matchedBibId: string | null;
+	matchedClusterId: string | null;
+	matchCriteria: string | null;
+	matchValue: string | null;
+	processType: string;
+	processId: string;
+}
+
+type Parsed = Partial<
+	Pick<
+		ClusteringEventRow,
+		"matchedBibId" | "matchedClusterId" | "matchCriteria" | "matchValue"
+	>
+>;
+
+const ID = "\\[([^\\]]+)\\]";
+// dcb-service spells it "threashold"; either spelling is read, so a correction there does not
+// turn every title comparison back into "other"
+const THRESHOLD = "(?:threashold|threshold)";
+
+/**
+ * The messages dcb-service writes while clustering a bib: ImprovedRecordClusteringService at
+ * 8.71.0, DefaultRecordClusteringService at 9.3.0, same strings.
+ */
+const FORMATS: ReadonlyArray<{
+	kind: ClusteringEventKind;
+	pattern: RegExp;
+	read: (match: RegExpExecArray) => Parsed;
+}> = [
+	{
+		kind: "highConfidenceMatch",
+		pattern: new RegExp(
+			`^High confidence match with Bib ${ID} on ${ID} = \\[(.*)\\]`,
+		),
+		read: ([, bib, criteria, value]) => ({
+			matchedBibId: bib,
+			matchCriteria: criteria,
+			matchValue: value.trim(),
+		}),
+	},
+	{
+		kind: "lowConfidenceCandidate",
+		pattern: new RegExp(`^One or more low confidence matches with bib ${ID}`),
+		read: ([, bib]) => ({ matchedBibId: bib }),
+	},
+	{
+		kind: "exactTitleMatch",
+		pattern: new RegExp(
+			`^Exact match on at least one title-type property with bib ${ID}`,
+		),
+		read: ([, bib]) => ({ matchedBibId: bib }),
+	},
+	{
+		kind: "titleSimilarityMatch",
+		pattern: new RegExp(
+			`^Blocking title similarity ${ID} with bib ${ID} greater or equal to ${THRESHOLD} ${ID}`,
+		),
+		read: ([, score, bib]) => ({ matchedBibId: bib, matchValue: score }),
+	},
+	{
+		// The score is left out: dcb-service prints the raw fraction with a % sign here
+		kind: "titleSimilarityNoMatch",
+		pattern: new RegExp(
+			`^Blocking title similarity ${ID} with bib ${ID} less than ${THRESHOLD}`,
+		),
+		read: ([, , bib]) => ({ matchedBibId: bib }),
+	},
+	{
+		kind: "matchedCluster",
+		pattern: new RegExp(`^Matched single cluster ${ID}`),
+		read: ([, cluster]) => ({ matchedClusterId: cluster }),
+	},
+	{
+		kind: "mergedClusters",
+		pattern: new RegExp(`^Matched cluster ${ID} \\(merging with \\[(\\d+)\\]`),
+		read: ([, cluster, others]) => ({
+			matchedClusterId: cluster,
+			matchValue: others,
+		}),
+	},
+	{
+		kind: "outdatedCluster",
+		pattern: new RegExp(`^Cluster ${ID} contains outdated bibs`),
+		read: ([, cluster]) => ({ matchedClusterId: cluster }),
+	},
+	{
+		kind: "newCluster",
+		pattern: /^No existing cluster/,
+		read: () => ({}),
+	},
+];
+
+export const classifyClusteringMessage = (
+	message: string,
+): { kind: ClusteringEventKind } & Parsed => {
+	for (const { kind, pattern, read } of FORMATS) {
+		const match = pattern.exec(message);
+		if (match) return { kind, ...read(match) };
+	}
+	return { kind: "other" };
+};
+
 export const parseClusteringAuditLog = (
-	data: ClusterAuditLogResponse | null,
-): any[] => {
-	if (!data || !data.ingest) return [];
+	data: ClusterAuditLogResponse | null | undefined,
+): ClusteringEventRow[] => {
+	if (!data?.ingest) return [];
 
-	const rows: any[] = [];
-
-	Object.keys(data.ingest).forEach((subjectId) => {
-		const events = data.ingest[subjectId];
-
-		events.forEach((event) => {
-			let eventType = "Info";
-			let matchedBibId = "";
-			let matchCriteria = "";
-			let matchValue = "";
-
-			const msg = event.message;
-
-			if (msg.includes("High confidence match")) {
-				eventType = "Match - high confidence";
-
-				// Format: ... match with Bib [UUID] on [CRITERIA] = [VALUE]
-				const bibSplit = msg.split("match with Bib [");
-				if (bibSplit.length > 1) {
-					const afterBib = bibSplit[1];
-					matchedBibId = afterBib.split("]")[0];
-					const criteriaSplit = afterBib.split("] on [");
-					if (criteriaSplit.length > 1) {
-						const afterCriteria = criteriaSplit[1];
-						matchCriteria = afterCriteria.split("]")[0];
-
-						const valueSplit = afterCriteria.split("] = [");
-						if (valueSplit.length > 1) {
-							matchValue = valueSplit[1].split("]")[0].trim();
-						}
-					}
-				}
-			} else if (msg.includes("low confidence matches")) {
-				eventType = "Match - Low Confidence";
-			} else if (msg.includes("outdated bibs")) {
-				eventType = "Warning";
-			} else if (msg.includes("No existing cluster")) {
-				eventType = "New Cluster";
-			} else if (msg.includes("Matched single cluster")) {
-				eventType = "Existing Cluster";
-				// Extract the cluster ID if needed
-				const clusterSplit = msg.split("Matched single cluster [");
-				if (clusterSplit.length > 1) {
-					matchValue = clusterSplit[1].split("]")[0];
-				}
-			}
-
-			rows.push({
+	return Object.entries(data.ingest).flatMap(([subjectId, events]) =>
+		events.map((event) => {
+			const { kind, ...parsed } = classifyClusteringMessage(event.message);
+			return {
 				id: event.id,
-				subjectId: subjectId, // The Incoming Bib
+				subjectId,
 				timestamp: event.timestamp,
 				formattedTimestamp: dayjs(event.timestamp).format("YYYY-MM-DD HH:mm"),
-				eventType: eventType,
-				message: msg,
-				matchedBibId: matchedBibId || null,
-				matchCriteria: matchCriteria || null,
-				matchValue: matchValue || null,
+				eventType: kind,
+				message: event.message,
+				matchedBibId: parsed.matchedBibId ?? null,
+				matchedClusterId: parsed.matchedClusterId ?? null,
+				matchCriteria: parsed.matchCriteria ?? null,
+				matchValue: parsed.matchValue ?? null,
 				processType: event.processType,
 				processId: event.processId,
-			});
-		});
-	});
-
-	// Return flat array, DataGrid will handle grouping/sorting
-	return rows.sort(
-		(a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+			};
+		}),
 	);
 };

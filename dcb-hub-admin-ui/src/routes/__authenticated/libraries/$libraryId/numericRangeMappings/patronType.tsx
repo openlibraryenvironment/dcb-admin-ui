@@ -142,6 +142,7 @@ function AllNumericMappings() {
 
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 							mb: 2,
@@ -166,6 +167,7 @@ function AllNumericMappings() {
 						<>
 							<Typography
 								variant="h3"
+								component="h2"
 								sx={{
 									fontWeight: "bold",
 									mt: 4,

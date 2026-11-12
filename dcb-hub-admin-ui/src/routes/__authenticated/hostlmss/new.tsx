@@ -1,7 +1,7 @@
 import { useState } from "react";
 import RulesetNameField from "@components/RulesetNameField/RulesetNameField";
 import { useTranslation } from "react-i18next";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { FormProvider, useForm, Controller, useWatch } from "react-hook-form";
@@ -34,6 +34,7 @@ import {
 	hasSharedSystemConflict,
 	missingRequiredClientConfig,
 	notWholeNumberClientConfig,
+	malformedClientConfig,
 	bibSuppressionDefault,
 } from "@helpers/hostLmsClientConfig";
 import {
@@ -135,10 +136,19 @@ function NewHostLms() {
 		lmsClientClass,
 		configValues ?? {},
 	);
+	const malformed = malformedClientConfig(lmsClientClass, configValues ?? {});
 
+	const queryClient = useQueryClient();
 	const { mutateAsync: create, isPending } = useMutation({
 		mutationFn: (input: CreateHostLmsInput) =>
 			createHostLmsRecord(gqlClient, input),
+		// Every list of Host LMS, New Library's and the import's among them: without it they
+		// held the old list for their five-minute stale time
+		onSuccess: () =>
+			Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
+				queryClient.invalidateQueries({ queryKey: ["LoadHostLmsCodes"] }),
+			]),
 	});
 
 	/**
@@ -209,6 +219,7 @@ function NewHostLms() {
 		!lmsClientClass ||
 		requiredGaps.length > 0 ||
 		numberGaps.length > 0 ||
+		malformed.length > 0 ||
 		sharedSystemConflict ||
 		isPending;
 
@@ -424,6 +435,14 @@ function NewHostLms() {
 						<Alert severity="error">
 							{t("hostlms.config_fields.not_whole_number", {
 								fields: numberGaps.map((gap) => t(gap.labelKey)).join(", "),
+							})}
+						</Alert>
+					)}
+
+					{malformed.length > 0 && lmsClientClass && (
+						<Alert severity="error">
+							{t("hostlms.config_fields.malformed", {
+								fields: malformed.map((gap) => t(gap.labelKey)).join(", "),
 							})}
 						</Alert>
 					)}

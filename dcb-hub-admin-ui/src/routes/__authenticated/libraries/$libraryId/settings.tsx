@@ -40,6 +40,7 @@ import { stripUnsupportedAgencyInput } from "@fragments/localHolds";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { formatChangedFields } from "@helpers/formatChangedFields";
 import { handleEdit } from "@helpers/actions/editAndDeleteActions";
+import { serverAdmits } from "@constants/serverRoles";
 
 import { libraryBasicsQuery } from "@/queryOptions/library";
 
@@ -196,7 +197,11 @@ function Settings() {
 			key: "edit",
 			// eslint-disable-next-line react-hooks/refs -- handleEdit only reads the ref inside the returned click handler (via requestAnimationFrame), never during render
 			onClick: handleEdit(setEditMode, firstEditableFieldRef),
-			disabled: !isAnAdmin,
+			// Every field here is saved by updateAgency
+			disabled: !serverAdmits("updateAgency", userRoles),
+			tooltip: serverAdmits("updateAgency", userRoles)
+				? undefined
+				: t("libraries.new.agency_locked"),
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
@@ -271,6 +276,7 @@ function Settings() {
 									<FormControl fullWidth>
 										<Select
 											{...field}
+											labelId="label-borrowing-status"
 											value={field.value?.toString() ?? ""}
 											onChange={(e) =>
 												field.onChange(e.target.value === "true")
@@ -312,6 +318,7 @@ function Settings() {
 									<FormControl fullWidth>
 										<Select
 											{...field}
+											labelId="label-supplying-status"
 											value={field.value?.toString() ?? ""}
 											onChange={(e) =>
 												field.onChange(e.target.value === "true")

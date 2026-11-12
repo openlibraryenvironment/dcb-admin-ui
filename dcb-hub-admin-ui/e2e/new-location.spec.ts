@@ -204,3 +204,16 @@ test.describe("New location from a library's own Locations tab", () => {
 		).toBeVisible();
 	});
 });
+
+// Their labels were not linked: each combobox was named by its current value alone
+test("the pickup questions are named by their labels", async ({ page }) => {
+	await mockGraphQL(page, baseMocks(libraries));
+	const dialog = await openDialog(page);
+
+	await expect(
+		dialog.getByRole("combobox", { name: /^Pickup status/ }),
+	).toBeVisible();
+	await expect(
+		dialog.getByRole("combobox", { name: /^Pickup anywhere status/ }),
+	).toBeVisible();
+});

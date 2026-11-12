@@ -12,6 +12,7 @@ import { useSetupNavigation } from "@hooks/useSetupNavigation";
 import { useConsortiumSetup } from "@hooks/useConsortiumSetup";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { errorForLog } from "@helpers/safeErrorLog";
 import { defaultFunctionalSettingSelection } from "@constants/functionalSettings";
 import {
 	newConsortiumSchema,
@@ -173,7 +174,7 @@ export default function ConsortiumChapter() {
 			methods.reset(methods.getValues());
 			goNext();
 		} catch (failure: any) {
-			console.error("Consortium creation failed:", failure);
+			console.error("Consortium creation failed:", errorForLog(failure));
 			setError(describeGraphQLError(failure, t("consortium.new.error")));
 			// Cleared on failure only. On success the chapter is navigating away, and
 			// clearing it here would show the "already set up" view as it goes.

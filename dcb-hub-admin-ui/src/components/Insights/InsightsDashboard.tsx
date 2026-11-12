@@ -573,7 +573,7 @@ export default function InsightsDashboard({
 					)}
 
 					{/* The three durations over time. Behind its own flag as well:
-				    /insights/trend is on no dcb-service release, and a 404 through the
+				    /insights/trend is first in dcb-service 9.1.0, and a 404 through the
 				    panel contract reads as a fault rather than as a server that is older. */}
 					<PanelRow minHeight={360}>
 						{shown("trends.durationTrend") && (
@@ -693,6 +693,7 @@ export default function InsightsDashboard({
 								titleKey="insights.charts.demand_by_pickup.title"
 								subtitleKey="insights.charts.demand_by_pickup.subtitle"
 								seriesLabelKey="insights.charts.demand_by_pickup.series"
+								categoryLabelKey="ui.chart_table.pickup_location"
 								queryOptions={demandByPickupLocationQueryOptions(
 									client,
 									params,
@@ -708,6 +709,7 @@ export default function InsightsDashboard({
 								titleKey="insights.charts.demand_by_patron_group.title"
 								subtitleKey="insights.charts.demand_by_patron_group.subtitle"
 								seriesLabelKey="insights.charts.demand_by_patron_group.series"
+								categoryLabelKey="ui.chart_table.patron_group"
 								queryOptions={demandByPatronGroupQueryOptions(client, params)}
 								getLabel={(r) => r.patronGroup}
 								getValue={(r) => r.requestCount}

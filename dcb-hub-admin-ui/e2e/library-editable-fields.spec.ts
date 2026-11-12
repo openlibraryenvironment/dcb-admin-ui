@@ -168,6 +168,25 @@ test.describe("Library profile - editable fields", () => {
 	});
 });
 
+// The confirm button stayed live while the mutation ran, so a double click sent it twice
+test("a double-clicked confirmation saves once", async ({ page }) => {
+	const requests = await captureUpdateLibrary(page);
+	await page.goto(`/libraries/${LIBRARY_ID}`);
+	await startEditing(page);
+	await page
+		.getByRole("textbox", { name: "Principal label" })
+		.fill("Library card number");
+	await page.getByRole("button", { name: "Save" }).click();
+	const audit = page.getByRole("dialog");
+	await expect(audit.getByRole("textbox", { name: /reason/i })).toBeEnabled();
+	await audit.getByRole("textbox", { name: /reason/i }).fill("Patron wording");
+
+	await audit.getByRole("button", { name: "Save changes" }).dblclick();
+
+	await expect(audit).toBeHidden();
+	expect(requests).toHaveLength(1);
+});
+
 test.describe("Library service - editable fields", () => {
 	for (const name of ["Discovery system/PAC(s)", "Patron website"]) {
 		test(`${name} is editable`, async ({ page }) => {
@@ -250,4 +269,39 @@ test.describe("a background refetch while editing", () => {
 		// discarded the answer would still cost the request.
 		expect(loads).toBe(1);
 	});
+});
+
+// The visible label had an id the Select never pointed at
+test("the circulation status dropdowns are named by their labels", async ({
+	page,
+}) => {
+	await mockGraphQL(page, {
+		...MOCKS,
+		LoadLibraryBasics: libraryDetail,
+		LoadResolvedFunctionalSettings: resolvedSettings,
+		LoadSettingsBearingGroupType: { settingsBearingGroupType: null },
+	});
+	await page.goto(`/libraries/${LIBRARY_ID}/settings`);
+	await startEditing(page);
+
+	await expect(
+		page.getByRole("combobox", { name: /^Patron borrowing status/ }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("combobox", { name: /^Library supplying status/ }),
+	).toBeVisible();
+});
+
+test("New mapping's dropdowns are named by their labels", async ({ page }) => {
+	await mockGraphQL(page, { ...MOCKS, LoadLibraryBasics: libraryDetail });
+	await page.goto(`/libraries/${LIBRARY_ID}/referenceValueMappings/all`);
+	await page.getByRole("button", { name: "New mapping" }).click();
+	const dialog = page.getByRole("dialog");
+
+	await expect(
+		dialog.getByRole("combobox", { name: /^From context/ }),
+	).toBeVisible();
+	await expect(
+		dialog.getByRole("combobox", { name: /^To context/ }),
+	).toBeVisible();
 });

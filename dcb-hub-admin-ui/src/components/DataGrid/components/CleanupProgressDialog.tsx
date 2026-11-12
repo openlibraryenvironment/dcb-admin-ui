@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Accordion,
@@ -21,7 +21,7 @@ import {
 } from "@mui/icons-material";
 
 import DataGrid from "@components/DataGrid/DataGrid";
-import { standardPatronRequestColumns } from "@columns/getPatronRequestColumns";
+import { getPatronRequestColumns } from "@columns/getPatronRequestColumns";
 import { cleanupPatronRequestVisibility } from "@columns/columnVisibility/cleanupPatronRequestVisibility";
 interface CleanupProgressDialogProps {
 	open: boolean;
@@ -52,6 +52,10 @@ export const CleanupProgressDialog = ({
 	onClose,
 }: CleanupProgressDialogProps) => {
 	const { t } = useTranslation();
+	const requestColumns = useMemo(
+		() => getPatronRequestColumns("standard", t),
+		[t],
+	);
 
 	const [isSuccessRowsExpanded, setIsSuccessRowsExpanded] = useState(false);
 	const [isErrorRowsExpanded, setIsErrorRowsExpanded] = useState(false);
@@ -116,7 +120,11 @@ export const CleanupProgressDialog = ({
 										}}
 									>
 										<CheckCircleOutlined color="success" />
-										<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+										<Typography
+											variant="h3"
+											component="span"
+											sx={{ fontWeight: "bold" }}
+										>
 											{t("ui.data_grid.success_count")} {successRows.length}
 										</Typography>
 									</Stack>
@@ -125,22 +133,20 @@ export const CleanupProgressDialog = ({
 									<DataGrid
 										identifier="cleanupSuccessGrid"
 										type="successCleanupRequests"
-										columns={standardPatronRequestColumns}
+										columns={requestColumns}
 										columnVisibilityModel={cleanupPatronRequestVisibility}
 										rows={successRows}
 										loading={false}
-										disableAggregation
-										disableRowGrouping
-										disablePivoting
 										disableHoverInteractions={false}
 										pagination={true}
 										paginationMode="client"
-										paginationModel={{ page: 0, pageSize: 5 }}
+										initialState={{
+											pagination: { paginationModel: { pageSize: 5 } },
+										}}
 										sortingMode="client"
 										filterMode="client"
 										rowModesModel={{}}
 										listViewEnabled={false}
-										pivotingEnabled={false}
 										toolbarVisible={false}
 										scrollbarVisible={true}
 										noResultsText=""
@@ -170,7 +176,11 @@ export const CleanupProgressDialog = ({
 									}}
 								>
 									<ErrorOutlined color="error" />
-									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									<Typography
+										variant="h3"
+										component="span"
+										sx={{ fontWeight: "bold" }}
+									>
 										{t("ui.data_grid.error_count")} {errorRows.length}
 									</Typography>
 								</Stack>
@@ -179,22 +189,20 @@ export const CleanupProgressDialog = ({
 								<DataGrid
 									identifier="cleanupErrorGrid"
 									type="errorCleanupRequests"
-									columns={standardPatronRequestColumns}
+									columns={requestColumns}
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={errorRows}
 									loading={false}
-									disableAggregation
-									disableRowGrouping
-									disablePivoting
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
-									paginationModel={{ page: 0, pageSize: 5 }}
+									initialState={{
+										pagination: { paginationModel: { pageSize: 5 } },
+									}}
 									sortingMode="client"
 									filterMode="client"
 									rowModesModel={{}}
 									listViewEnabled={false}
-									pivotingEnabled={false}
 									toolbarVisible={false}
 									scrollbarVisible={true}
 									noResultsText=""
@@ -223,7 +231,11 @@ export const CleanupProgressDialog = ({
 									}}
 								>
 									<WarningAmber color="warning" />
-									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									<Typography
+										variant="h3"
+										component="span"
+										sx={{ fontWeight: "bold" }}
+									>
 										{t("patron_requests.cleanup_refused_count")}{" "}
 										{refusedRows.length}
 									</Typography>
@@ -233,22 +245,20 @@ export const CleanupProgressDialog = ({
 								<DataGrid
 									identifier="cleanupRefusedGrid"
 									type="refusedCleanupRequests"
-									columns={standardPatronRequestColumns}
+									columns={requestColumns}
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={refusedRows}
 									loading={false}
-									disableAggregation
-									disableRowGrouping
-									disablePivoting
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
-									paginationModel={{ page: 0, pageSize: 5 }}
+									initialState={{
+										pagination: { paginationModel: { pageSize: 5 } },
+									}}
 									sortingMode="client"
 									filterMode="client"
 									rowModesModel={{}}
 									listViewEnabled={false}
-									pivotingEnabled={false}
 									toolbarVisible={false}
 									scrollbarVisible={true}
 									noResultsText=""
@@ -277,7 +287,11 @@ export const CleanupProgressDialog = ({
 									}}
 								>
 									<WarningAmber color="warning" />
-									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									<Typography
+										variant="h3"
+										component="span"
+										sx={{ fontWeight: "bold" }}
+									>
 										{t("ui.data_grid.skipped_count")} {skippedRows.length}
 									</Typography>
 								</Stack>
@@ -286,22 +300,20 @@ export const CleanupProgressDialog = ({
 								<DataGrid
 									identifier="cleanupSkippedGrid"
 									type="skippedCleanupRequests"
-									columns={standardPatronRequestColumns}
+									columns={requestColumns}
 									columnVisibilityModel={cleanupPatronRequestVisibility}
 									rows={skippedRows}
 									loading={false}
-									disableAggregation
-									disableRowGrouping
-									disablePivoting
 									disableHoverInteractions={false}
 									pagination={true}
 									paginationMode="client"
-									paginationModel={{ page: 0, pageSize: 5 }}
+									initialState={{
+										pagination: { paginationModel: { pageSize: 5 } },
+									}}
 									sortingMode="client"
 									filterMode="client"
 									rowModesModel={{}}
 									listViewEnabled={false}
-									pivotingEnabled={false}
 									toolbarVisible={false}
 									scrollbarVisible={true}
 									noResultsText=""

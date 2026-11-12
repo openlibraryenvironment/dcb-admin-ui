@@ -1,6 +1,7 @@
 import {
 	createFileRoute,
 	redirect,
+	retainSearchParams,
 	useParams,
 	useSearch,
 } from "@tanstack/react-router";
@@ -27,6 +28,7 @@ import { errorForDisplay } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute("/__authenticated/libraries/new/$step")({
 	validateSearch: newLibrarySearchSchema,
+	search: { middlewares: [retainSearchParams(["from"])] },
 	beforeLoad: ({ params: { step }, search, context: { auth } }) => {
 		const state = newLibraryFlowState(search);
 		// A hand-typed step, or one whose earlier answers are missing, goes to the first

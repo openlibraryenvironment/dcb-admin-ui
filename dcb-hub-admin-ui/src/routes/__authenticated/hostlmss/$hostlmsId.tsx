@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
 import { FormProvider, useForm, Controller, useWatch } from "react-hook-form";
 import isEmpty from "lodash/isEmpty";
+import isEqual from "lodash/isEqual";
 import {
 	Alert,
 	AlertTitle,
@@ -39,6 +40,7 @@ import { useEntityMutation } from "@hooks/useEntityMutation";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { getHostLms } from "@queries/getHostLms";
 import { getILS } from "@helpers/getILS";
+import { formatChangedFields } from "@helpers/formatChangedFields";
 import { handleEdit } from "@helpers/actions/editAndDeleteActions";
 import {
 	clientConfigToFields,
@@ -47,6 +49,8 @@ import {
 	mergeClientConfigEdit,
 	missingRequiredClientConfig,
 	notWholeNumberClientConfig,
+	malformedClientConfig,
+	canSaveHostLmsClass,
 } from "@helpers/hostLmsClientConfig";
 import {
 	type HostLmsVerificationResult,
@@ -175,8 +179,15 @@ function HostLMSDetails() {
 		hostlms?.lmsClientClass,
 		configValues ?? {},
 	);
+	const malformed = malformedClientConfig(
+		hostlms?.lmsClientClass,
+		configValues ?? {},
+	);
 	const configBlocked =
-		requiredGaps.length > 0 || numberGaps.length > 0 || sharedSystemConflict;
+		requiredGaps.length > 0 ||
+		numberGaps.length > 0 ||
+		malformed.length > 0 ||
+		sharedSystemConflict;
 
 	const {
 		showUnsavedChangesModal,
@@ -205,12 +216,9 @@ function HostLMSDetails() {
 			hostlms.lmsClientClass,
 			formData.clientConfigFields ?? {},
 		);
-		// Compared as JSON because the config is a free-form object: there is no
-		// field list to walk, and sending it unchanged would re-run the ping and
-		// ingest probes against the LMS for nothing.
-		if (
-			JSON.stringify(nextConfig) !== JSON.stringify(hostlms.clientConfig ?? {})
-		)
+		// Deep-compared, whatever the key order: sending it unchanged re-runs the ping
+		// and ingest probes against the LMS for nothing
+		if (!isEqual(nextConfig, hostlms.clientConfig ?? {}))
 			changedFields.clientConfig = nextConfig;
 
 		if (Object.keys(changedFields).length === 0) {
@@ -222,12 +230,21 @@ function HostLMSDetails() {
 			id: hostlms.id,
 			name: hostlms.name ?? hostlms.code,
 			changedFields,
-			// NOT formatChangedFields: that renders old -> new for every key, and for
-			// clientConfig both sides are an object holding this system's credentials.
-			// The dialog names what changed; the values stay out of it.
-			changeSummary: Object.keys(changedFields)
-				.map((key) => t(`hostlms.edit.changed.${key}`, { defaultValue: key }))
-				.join(", "),
+			// clientConfig holds this system's credentials: the dialog says it changed, never
+			// what it held. ChangesSummary reads the old_values/new_values shape, and threw on
+			// the plain list that was here before, so every Host LMS save crashed the page
+			changeSummary: formatChangedFields(
+				changedFields.clientConfig
+					? {
+							...changedFields,
+							clientConfig: t("hostlms.edit.settings_changed"),
+						}
+					: changedFields,
+				{
+					...hostlms,
+					clientConfig: t("hostlms.edit.settings_before"),
+				},
+			),
 			onSuccess: (result) => {
 				setEditMode(false);
 				// The update re-probes the system, so a credential change that broke the
@@ -279,12 +296,18 @@ function HostLMSDetails() {
 		);
 	}
 
+	const savable = canSaveHostLmsClass(hostlms.lmsClientClass);
 	const viewModeActions = [
 		{
 			key: "edit",
 			// eslint-disable-next-line react-hooks/refs -- handleEdit only reads the ref inside the returned click handler (via requestAnimationFrame), never during render
 			onClick: handleEdit(setEditMode, firstEditableFieldRef),
-			disabled: !isAnAdmin,
+			disabled: !isAnAdmin || !savable,
+			tooltip: savable
+				? undefined
+				: t("hostlms.edit.unsupported_class", {
+						ils: getILS(hostlms.lmsClientClass),
+					}),
 			label: t("ui.data_grid.edit"),
 			startIcon: <Edit htmlColor={theme.palette.primary.exclamationIcon} />,
 		},
@@ -481,6 +504,15 @@ function HostLMSDetails() {
 									<Alert severity="error">
 										{t("hostlms.config_fields.not_whole_number", {
 											fields: numberGaps
+												.map((gap) => t(gap.labelKey))
+												.join(", "),
+										})}
+									</Alert>
+								)}
+								{malformed.length > 0 && (
+									<Alert severity="error">
+										{t("hostlms.config_fields.malformed", {
+											fields: malformed
 												.map((gap) => t(gap.labelKey))
 												.join(", "),
 										})}

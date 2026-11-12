@@ -25,6 +25,7 @@ import NewGroup from "@forms/NewGroup/NewGroup";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useCustomColumns } from "@hooks/useCustomColumns";
 import { standardFilters } from "@filters/standardFilters";
+import { equalsOnly } from "@filters/equalsOnly";
 
 import { getLibraryGroups } from "@queries/getLibraryGroups";
 
@@ -94,7 +95,7 @@ function GroupsRouteComponent() {
 				headerName: t("groups.id"),
 				minWidth: 100,
 				flex: 0.8,
-				filterOperators: standardFilters,
+				filterOperators: equalsOnly,
 			},
 		],
 		[customColumns, t],
@@ -174,12 +175,8 @@ function GroupsRouteComponent() {
 					query: getLibraryGroups,
 					coreType: "libraryGroups",
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("groups.no_results")}

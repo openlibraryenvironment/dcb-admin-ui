@@ -25,7 +25,7 @@ export default function RefValueMappingStep({
 			direction="column"
 			sx={{ mt: 1, alignItems: "flex-start" }}
 		>
-			<Typography variant="h6">
+			<Typography variant="h6" component="h2">
 				{t("nav.mappings.allReferenceValue")}
 			</Typography>
 			<Typography>

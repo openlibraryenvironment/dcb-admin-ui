@@ -11,11 +11,13 @@ import TabPanel from "@mui/lab/TabPanel";
 import { TabLink } from "@components/TabLink/TabLink";
 import PageContainer from "@layout/PageContainer/PageContainer";
 import CombinedRequestingModal from "@forms/CombinedRequestingModal/CombinedRequestingModal";
+import ClusterReprocessDialog from "@components/ClusterReprocessDialog/ClusterReprocessDialog";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import RequestReference from "@components/RequestReference/RequestReference";
 import { exportClusterMembers } from "@helpers/exportClusterMembers";
+import { isClusterExportEnabled } from "@helpers/featureFlags";
 import { getClustersTitleOnly } from "@queries/getClustersTitlesOnly";
 import type { ClusterRecordsTitleOnlyQueryVariables } from "@generated/graphql";
 
@@ -35,6 +37,7 @@ function ClusterLayout() {
 		userRoles.includes("ADMIN") || userRoles.includes("CONSORTIUM_ADMIN");
 
 	const [showRequestModal, setShowRequestModal] = useState(false);
+	const [showReprocess, setShowReprocess] = useState(false);
 	const restClient = useDcbRestClient();
 	const exportMembers = useMutation({
 		mutationFn: () => exportClusterMembers(restClient, clusterId),
@@ -87,7 +90,7 @@ function ClusterLayout() {
 		},
 	];
 	// dcb-service builds the zip in memory with no size bound: ADMIN alone, as it allows
-	if (userRoles.includes("ADMIN")) {
+	if (userRoles.includes("ADMIN") && isClusterExportEnabled()) {
 		pageActions.push({
 			key: "exportMembers",
 			onClick: () => exportMembers.mutate(),
@@ -95,6 +98,15 @@ function ClusterLayout() {
 			label: exportMembers.isPending
 				? t("search.export_members.in_progress")
 				: t("search.export_members.action"),
+		});
+	}
+	// POST /clusters/{id}/reprocess is @Secured(ADMINISTRATOR), 8.71.0-9.3.0
+	if (userRoles.includes("ADMIN")) {
+		pageActions.push({
+			key: "reprocessCluster",
+			onClick: () => setShowReprocess(true),
+			disabled: false,
+			label: t("search.reprocess_cluster.action"),
 		});
 	}
 	const exportOutcome = exportMembers.data;
@@ -105,6 +117,11 @@ function ClusterLayout() {
 			pageActions={pageActions}
 		>
 			<div role="status" aria-live="polite">
+				{exportMembers.isError && (
+					<Alert severity="error" onClose={() => exportMembers.reset()}>
+						{t("search.export_members.interrupted")}
+					</Alert>
+				)}
 				{exportOutcome && exportOutcome.kind !== "downloaded" && (
 					<Alert
 						severity={exportOutcome.kind === "empty" ? "info" : "error"}
@@ -117,6 +134,12 @@ function ClusterLayout() {
 					</Alert>
 				)}
 			</div>
+			{showReprocess && (
+				<ClusterReprocessDialog
+					clusterId={clusterId}
+					onClose={() => setShowReprocess(false)}
+				/>
+			)}
 			{/* Single entry point: the user picks the request type inside the modal */}
 			{showRequestModal && (
 				<CombinedRequestingModal

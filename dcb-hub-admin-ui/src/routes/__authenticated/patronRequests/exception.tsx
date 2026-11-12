@@ -208,6 +208,7 @@ function Exception() {
 				>
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 						}}
@@ -223,10 +224,7 @@ function Exception() {
 						columnVisibilityModel={view.columnVisibilityModel}
 						onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
 						columnLayout={view.columnLayout}
-						disableAggregation={true}
 						disableHoverInteractions={false}
-						disablePivoting={true}
-						disableRowGrouping={true}
 						exportConfig={{
 							query: getPatronRequestsForExport(),
 							coreType: "patronRequests",
@@ -250,7 +248,6 @@ function Exception() {
 						pagination={true}
 						paginationMode="server"
 						paginationModel={view.paginationModel}
-						pivotingEnabled={false}
 						rowCount={dashboard?.totalSize ?? 0}
 						rowModesModel={rowModesModel}
 						rows={dashboard?.rows ?? []}

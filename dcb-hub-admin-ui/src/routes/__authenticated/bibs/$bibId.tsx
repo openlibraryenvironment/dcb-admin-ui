@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AccordionSummary, Grid, Stack, Typography } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 
@@ -9,6 +9,7 @@ import { useAuth } from "react-oidc-context";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import BibAuditLog from "@components/BibAuditLog/BibAuditLog";
+import BibMatchPoints from "@components/BibMatchPoints/BibMatchPoints";
 import DeletedBib from "@components/BibAuditLog/DeletedBib";
 import Link from "@components/Link/Link";
 import RenderAttribute from "@components/RenderAttribute/RenderAttribute";
@@ -33,6 +34,8 @@ import { Bib } from "@models/Bib";
 import { Agency } from "@models/Agency";
 import { Library } from "@models/Library";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { isConsortiumMatchPointsEnabled } from "@helpers/featureFlags";
+import { serverAdmits } from "@constants/serverRoles";
 import type {
 	LoadAgencyQueryVariables,
 	LoadBibMainDetailsQueryVariables,
@@ -49,12 +52,18 @@ function SourceBibDetails() {
 	const gqlClient = useGraphQLClient();
 	// Runtime config (not build-time import.meta.env, which is undefined in the
 	// runtime-configured production image - see search/index.tsx).
-	const { cfg } = useRouter().options.context as { cfg: any };
 
 	const [isCanonicalExpanded, setIsCanonicalExpanded] = useState(true);
 	const [isSourceRecordExpanded, setIsSourceRecordExpanded] = useState(false);
+	const roles = useAuth()?.user?.profile?.roles as string[] | undefined;
 	// dcb-service serves the audit log to ADMIN alone
-	const isAdmin = useAuth()?.user?.profile?.roles?.includes("ADMIN") ?? false;
+	const isAdmin = roles?.includes("ADMIN") ?? false;
+	const canReadMatchPoints = serverAdmits(
+		isConsortiumMatchPointsEnabled()
+			? "readMatchPointsSince940"
+			: "readMatchPoints",
+		roles,
+	);
 
 	const {
 		data: bibData,
@@ -258,16 +267,18 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("bibRecords.contributor_uuid")}
+							{t("bibRecords.cluster_uuid")}
 						</Typography>
-						{cfg?.VITE_DCB_SEARCH_BASE ? (
+						{/* The cluster page is part of this application: it needs no search base */}
+						{bib?.contributesTo?.id ? (
 							<Typography variant="attributeText" component="div">
 								<Link
-									to={`/search/${bib?.contributesTo?.id}/cluster`}
+									to="/search/$clusterId/cluster"
+									params={{ clusterId: bib.contributesTo.id }}
 									underline="hover"
-									onClick={(e: any) => e.stopPropagation()}
+									onClick={(e: React.MouseEvent) => e.stopPropagation()}
 								>
-									<RenderAttribute attribute={bib?.contributesTo?.id} />
+									<RenderAttribute attribute={bib.contributesTo.id} />
 								</Link>
 							</Typography>
 						) : (
@@ -278,7 +289,7 @@ function SourceBibDetails() {
 				<Grid size={{ xs: 2, sm: 4, md: 4 }}>
 					<Stack direction="column">
 						<Typography variant="attributeTitle">
-							{t("requesting.contributors")}
+							{t("bibRecords.cluster_title")}
 						</Typography>
 						<RenderAttribute attribute={bib?.contributesTo?.title} />
 					</Stack>
@@ -372,10 +383,10 @@ function SourceBibDetails() {
 			>
 				<AccordionSummary
 					aria-controls="source-bibs-json-details"
-					id="source-bibs-json-details"
+					id="source-bibs-json-summary"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
-					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+					<Typography variant="h3" component="span" sx={{ fontWeight: "bold" }}>
 						{t("patron_request.canonical_metadata")}
 					</Typography>
 				</AccordionSummary>
@@ -391,10 +402,10 @@ function SourceBibDetails() {
 			>
 				<AccordionSummary
 					aria-controls="source-bibs-source-record-json-details"
-					id="source-bibs-source-record-json-details"
+					id="source-bibs-source-record-json-summary"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
-					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+					<Typography variant="h3" component="span" sx={{ fontWeight: "bold" }}>
 						{t("bibRecords.source_record")}
 					</Typography>
 				</AccordionSummary>
@@ -417,6 +428,7 @@ function SourceBibDetails() {
 					)}
 				</StyledAccordionDetails>
 			</StyledAccordion>
+			{canReadMatchPoints && <BibMatchPoints bibId={bibId} />}
 			{isAdmin && <BibAuditLog bibId={bibId} />}
 		</PageContainer>
 	);

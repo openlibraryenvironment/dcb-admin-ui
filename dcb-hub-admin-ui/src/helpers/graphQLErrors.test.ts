@@ -23,6 +23,42 @@ const clientError = (messages: string[], paths?: (string | number)[][]) => {
 	return error;
 };
 
+describe("describeGraphQLError on a refusal", () => {
+	it("says the role is missing, in the user's language, not graphql-java's wrapper", () => {
+		expect(
+			describeGraphQLError(
+				clientError([
+					"Exception while fetching data (/updateAgency) : Access denied: you do not have the required role to perform this action.",
+				]),
+				"fallback",
+			),
+		).toBe("Your account does not have the role this action needs.");
+	});
+
+	it("unwraps any other fetcher exception to the server's own words", () => {
+		expect(
+			describeGraphQLError(
+				clientError([
+					"Exception while fetching data (/createLibrary) : Please provide a valid Host LMS code.",
+				]),
+				"fallback",
+			),
+		).toBe("Please provide a valid Host LMS code.");
+	});
+
+	it("says it once when several fields were refused", () => {
+		expect(
+			describeGraphQLError(
+				clientError([
+					"Exception while fetching data (/a) : Access denied: x",
+					"Exception while fetching data (/b) : Access denied: y",
+				]),
+				"fallback",
+			),
+		).toBe("Your account does not have the role this action needs.");
+	});
+});
+
 describe("graphQLErrorsOf", () => {
 	it("pulls out every error the server reported", () => {
 		expect(graphQLErrorsOf(clientError(["a", "b"]))).toHaveLength(2);

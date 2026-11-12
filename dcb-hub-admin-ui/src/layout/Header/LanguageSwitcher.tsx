@@ -72,6 +72,7 @@ export default function LanguageSwitcher({
 			size="small"
 			sx={{
 				minWidth: 120,
+				maxWidth: "100%",
 				...headerStyles,
 			}}
 		>

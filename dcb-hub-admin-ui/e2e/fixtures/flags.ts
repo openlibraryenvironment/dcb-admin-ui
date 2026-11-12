@@ -36,6 +36,8 @@ const ALL_FEATURES: Record<string, string> = {
 	// Was missing: this fixture says "everything on", and a flag left out of it
 	// silently tests the legacy path in every spec that asks for the new one.
 	VITE_FEATURE_LOCAL_HOLDS: "true",
+	VITE_FEATURE_CLUSTER_EXPORT: "true",
+	VITE_FEATURE_CONSORTIUM_MATCH_POINTS: "true",
 	VITE_FEATURE_HOST_LMS_PROBES: "true",
 	VITE_FEATURE_HOST_LMS_CIRCULATION_SETTINGS: "true",
 	VITE_FEATURE_SETTINGS_INHERITANCE: "true",

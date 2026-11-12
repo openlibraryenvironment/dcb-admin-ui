@@ -94,13 +94,13 @@
 		"upload_title": "Subir {{entityName}}"
 	},
 	"consortium": {
-		"about": "Acerca de {{consorcio}}",
+		"about": "Acerca de {{consortium}}",
 		"about_generic": "Acerca de los consorcios",
 		"contacts": {
 			"entity": "Contacto del consorcio",
 			"no_contacts": "No hay contactos disponibles para este consorcio"
 		},
-		"description_generic": "Los consorcios que utilizan OpenRS DCB pueden incluir cualquier combinación de bibliotecas y colecciones públicas, académicas y especializadas. <párrafo/>DCB conecta bibliotecas a través de productos ILS, LMS y de descubrimiento para gestionar el intercambio de recursos a gran escala, independientemente de si optan por utilizar la misma interfaz o una combinación de interfaces comerciales o de código abierto e índices centrales.<párrafo/>",
+		"description_generic": "Los consorcios que utilizan OpenRS DCB pueden incluir cualquier combinación de bibliotecas y colecciones públicas, académicas y especializadas. <paragraph/>DCB conecta bibliotecas a través de productos ILS, LMS y de descubrimiento para gestionar el intercambio de recursos a gran escala, independientemente de si optan por utilizar la misma interfaz o una combinación de interfaces comerciales o de código abierto e índices centrales.<paragraph/>",
 		"description_title": "Descripción",
 		"display_name": "Nombre para mostrar",
 		"id": "UUID del consorcio",
@@ -123,7 +123,7 @@
 		"new_contact": {
 			"consortium": "Nuevo contacto del consorcio",
 			"library": "Nuevo contacto de la biblioteca",
-			"error": "Se ha producido un error al crear el nuevo contacto para el consorcio {{consorcio}}.",
+			"error": "Se ha producido un error al crear el nuevo contacto para el consorcio {{consortium}}.",
 			"title": "Nuevo contacto",
 			"success": "Se ha creado correctamente el nuevo contacto del consorcio {{consortium}}."
 		},
@@ -135,11 +135,11 @@
 		"no_file_uploaded": "No se ha subido ningún archivo",
 		"onboarding": "Incorporación de tu consorcio",
 		"remove_image": "Eliminar imagen",
-		"search": "Buscar {{consorcio}}",
+		"search": "Buscar {{consortium}}",
 		"search_url": "URL de búsqueda del catálogo del DCB",
 		"select_image": "Seleccionar imagen",
 		"settings": {
-			"enable": "Habilitar {{configuración}}",
+			"enable": "Habilitar {{setting}}",
 			"enabled": "Habilitado",
 			"enabled_header": "¿Activado?",
 			"enable_body": "La funcionalidad {{setting}} se habilitará para el consorcio {{consortium}}.",
@@ -529,12 +529,12 @@
 		"longitude": "Longitud",
 		"import": {
 			"button": "Importar",
-			"confirmation_body": "<párrafo> <negrita>{{existingMappingCount}}</negrita> puntos de recogida de {{libraryName}} serán <negrita>eliminados</negrita> y sustituidos por los puntos de recogida del archivo «{{fileName}}».</párrafo>",
-			"confirmation_warning": "<párrafo> No será posible deshacer la importación. Por favor, haz una copia de seguridad de tus puntos de recogida antes de continuar.</párrafo> <párrafo> Se puede exportar una copia de seguridad desde la cuadrícula <linkComponent>{{type}}</linkComponent> </párrafo>",
+			"confirmation_body": "<paragraph> <bold>{{existingMappingCount}}</bold> puntos de recogida de {{libraryName}} serán <bold>eliminados</bold> y sustituidos por los puntos de recogida del archivo «{{fileName}}».</paragraph>",
+			"confirmation_warning": "<paragraph> No será posible deshacer la importación. Por favor, haz una copia de seguridad de tus puntos de recogida antes de continuar.</paragraph> <paragraph> Se puede exportar una copia de seguridad desde la cuadrícula <linkComponent>{{type}}</linkComponent> </paragraph>",
 			"confirmation_replace": "Para continuar, selecciona «Reemplazar ubicaciones».",
 			"error": {
 				"column_numbers": "El archivo que has proporcionado no tiene el número correcto de columnas. Comprueba los encabezados de columna esperados, corrígelos y vuelve a intentarlo.",
-				"expected_headers": "<párrafo>Los encabezados de columna en <negrita>{{fileName}}</negrita> no coinciden con los encabezados esperados. Las tres primeras columnas deben llamarse <negrita>«Código de agencia»</negrita>, <negrita>«Código de ubicación»</negrita> y <negrita>«Nombre para mostrar»</negrita>. Corrige los encabezados de columna y vuelve a intentarlo.</párrafo>",
+				"expected_headers": "<paragraph>Los encabezados de columna en <bold>{{fileName}}</bold> no coinciden con los encabezados esperados. Las tres primeras columnas deben llamarse <bold>«Código de agencia»</bold>, <bold>«Código de ubicación»</bold> y <bold>«Nombre para mostrar»</bold>. Corrige los encabezados de columna y vuelve a intentarlo.</paragraph>",
 				"generic": "Se ha producido un error al importar ubicaciones. Inténtalo de nuevo.",
 				"local_id": "Ya existe una ubicación para este sistema anfitrión con el valor de localId especificado en su archivo. Corríjalo e inténtelo de nuevo.",
 				"no_agency": "Uno o más <bold>códigos de agencia</bold> no son válidos. Corrígelos y vuelve a intentarlo."
@@ -604,8 +604,8 @@
 		"import_more": "Importar más",
 		"new_library": "Sube las asignaciones para tu nueva biblioteca aquí",
 		"new_library_num": "Sube las asignaciones de rangos numéricos para tu nueva biblioteca aquí",
-		"import_body": "<párrafo> Si existen datos para la categoría y el LMS de acogida seleccionados, estos se sobrescribirán. Asegúrate de descargar una copia de seguridad antes de continuar con la importación. </párrafo>",
-		"import_body_warning": "<párrafo>El archivo debe cumplir con las directrices descritas en la <linkComponent>guía de usuario de importación</linkComponent> </párrafo>",
+		"import_body": "<paragraph> Si existen datos para la categoría y el LMS de acogida seleccionados, estos se sobrescribirán. Asegúrate de descargar una copia de seguridad antes de continuar con la importación. </paragraph>",
+		"import_body_warning": "<paragraph>El archivo debe cumplir con las directrices descritas en la <linkComponent>guía de usuario de importación</linkComponent> </paragraph>",
 		"import_disabled": "Debe tener un rol de administrador para importar asignaciones.",
 		"import_mappings": "Importar {{category}} para un LMS de acogida",
 		"import_file": "Importar asignaciones",
@@ -656,7 +656,7 @@
 			"to_context": "A contexto",
 			"to_value": "A valor",
 			"title": "Nueva asignación",
-			"title_modal": "Añadir nueva asignación de {{categoría}} para {{código}}"
+			"title_modal": "Añadir nueva asignación de {{category}} para {{code}}"
 		},
 		"no_file_selected": "No se ha seleccionado ningún archivo",
 		"no_results": "No se han encontrado resultados",
@@ -664,8 +664,8 @@
 		"upload_failure": "La importación no se ha completado porque se ha producido un problema. No se ha creado ninguna asignación. Selecciona «Cerrar», actualiza la página e intenta importar de nuevo",
 		"wrong_file_type": "{{fileName}} tiene un formato no compatible. Los formatos válidos son {{allowedFiles}}. Selecciona otro archivo.",
 		"confirmation_header": "Confirma la sustitución de {{category}}",
-		"confirmation_body": "<párrafo> <negrita>{{existingMappingCount}}</negrita> {{category}} para <negrita>{{code}}</negrita> se <negrita>eliminarán</negrita> y se sustituirán por las asignaciones del archivo «{{fileName}}».</párrafo>",
-		"confirmation_warning": "<párrafo> No será posible deshacer la importación. Por favor, haz una copia de seguridad de las asignaciones antes de continuar.</párrafo> <párrafo> Se puede exportar una copia de seguridad desde la cuadrícula <linkComponent>{{type}}</linkComponent> </párrafo>",
+		"confirmation_body": "<paragraph> <bold>{{existingMappingCount}}</bold> {{category}} para <bold>{{code}}</bold> se <bold>eliminarán</bold> y se sustituirán por las asignaciones del archivo «{{fileName}}».</paragraph>",
+		"confirmation_warning": "<paragraph> No será posible deshacer la importación. Por favor, haz una copia de seguridad de las asignaciones antes de continuar.</paragraph> <paragraph> Se puede exportar una copia de seguridad desde la cuadrícula <linkComponent>{{type}}</linkComponent> </paragraph>",
 		"confirmation_replace": "Para continuar, selecciona «Reemplazar asignaciones».",
 		"cancel": "Cancelar",
 		"category": "Categoría",
@@ -680,8 +680,8 @@
 		"search_placeholder_cs": "Búsqueda por LMS del anfitrión",
 		"confirmation_replace_mappings": "Reemplazar asignaciones",
 		"unknown_error": "Se ha producido un error al cargar las asignaciones. Inténtalo de nuevo.",
-		"validation_expected_headers_nrm": "<párrafo>Los encabezados de columna en <negrita>{{fileName}}</negrita> no coinciden con los encabezados esperados. Las tres primeras columnas deben llamarse <negrita>«context»</negrita>, <negrita>«domain»</negrita> y <negrita>«lowerBound»</negrita>. Corrige los encabezados de columna y vuelve a intentarlo.</párrafo>",
-		"validation_expected_headers": "<párrafo>Los encabezados de columna en <bold>{{fileName}}</bold> no coinciden con los esperados. Las tres primeras columnas deben llamarse <bold>«fromContext»</bold>, <bold>«fromCategory»</bold> y <bold>«fromValue»</bold>. Corrige los encabezados de columna e inténtalo de nuevo.</párrafo>",
+		"validation_expected_headers_nrm": "<paragraph>Los encabezados de columna en <bold>{{fileName}}</bold> no coinciden con los encabezados esperados. Las tres primeras columnas deben llamarse <bold>«context»</bold>, <bold>«domain»</bold> y <bold>«lowerBound»</bold>. Corrige los encabezados de columna y vuelve a intentarlo.</paragraph>",
+		"validation_expected_headers": "<paragraph>Los encabezados de columna en <bold>{{fileName}}</bold> no coinciden con los esperados. Las tres primeras columnas deben llamarse <bold>«fromContext»</bold>, <bold>«fromCategory»</bold> y <bold>«fromValue»</bold>. Corrige los encabezados de columna e inténtalo de nuevo.</paragraph>",
 		"validation_no_hostlms": "Debe proporcionar un código de LMS de origen para importar las asignaciones. Seleccione un LMS de origen e inténtelo de nuevo.",
 		"validation_missing_values": "Las columnas <bold>«Código local»</bold> y <bold>«Significado local»</bold> deben contener datos. Una o más celdas de estas columnas están vacías. Corrígelo e inténtalo de nuevo."
 	},
@@ -801,7 +801,7 @@
 		"about": "$t(common.about) $t(openrs.name)",
 		"dcb": {
 			"about": "$t(common.about) $t(app.dcb)",
-			"description": "$t(app.dcb) es un producto de $t(openrs.name) que permite a las bibliotecas ofrecer servicios de préstamo consorciado directo a sus usuarios a través de diversos sistemas de gestión de bibliotecas (LMS) y de búsqueda. <párrafo/> Desarrollado por <linkComponent>$t(openrs.who.kint_full)</linkComponent>, $t(app.dcb) ayuda a los consorcios a atender las solicitudes de préstamo de sus usuarios en todo el consorcio de forma más rápida y económica que los métodos tradicionales de intercambio de recursos.<párrafo/>",
+			"description": "$t(app.dcb) es un producto de $t(openrs.name) que permite a las bibliotecas ofrecer servicios de préstamo consorciado directo a sus usuarios a través de diversos sistemas de gestión de bibliotecas (LMS) y de búsqueda. <paragraph/> Desarrollado por <linkComponent>$t(openrs.who.kint_full)</linkComponent>, $t(app.dcb) ayuda a los consorcios a atender las solicitudes de préstamo de sus usuarios en todo el consorcio de forma más rápida y económica que los métodos tradicionales de intercambio de recursos.<paragraph/>",
 			"project": "Proyecto $t(app.dcb)",
 			"release_notes": "Notas de la versión",
 			"roadmap": "Hoja de ruta del producto"
@@ -1225,7 +1225,7 @@
 			"collapse": "Ocultar",
 			"complete": "{{percentage}} completado",
 			"delete": "Eliminar",
-			"delete_body": "Para eliminar esta {{entidad}}, facilite los siguientes datos.",
+			"delete_body": "Para eliminar esta {{entity}}, facilite los siguientes datos.",
 			"delete_location_with_requests": "No puede eliminar esta ubicación porque está asociada a las siguientes solicitudes de usuarios que aún no se han completado.",
 			"delete_location_with_completed": "Tenga en cuenta que la ubicación {{entity}} tiene solicitudes de usuarios asociadas, pero estas se encuentran en estado COMPLETADO. Si aún así desea eliminar esta ubicación, facilite los siguientes datos.",
 			"delete_body_library": "Los datos de la biblioteca, así como todos sus contactos y afiliaciones a grupos, se eliminarán de forma permanente.",
@@ -1243,7 +1243,7 @@
 			"edit_int": "Introduce un número entero",
 			"edit_lat": "Introduce un número entre -90 y 90",
 			"edit_long": "Introduce un número entre -180 y 180",
-			"edit_success": "La {{entidad}} {{nombre}} se ha actualizado.",
+			"edit_success": "La {{entity}} {{name}} se ha actualizado.",
 			"edit_summary": "Editar {{entity}}",
 			"edit_url": "Introduce una URL válida",
 			"edit_url_required": "Se requiere una URL válida.",

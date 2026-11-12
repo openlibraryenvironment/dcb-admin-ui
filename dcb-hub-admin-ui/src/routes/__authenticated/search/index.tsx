@@ -287,12 +287,8 @@ function SearchPage() {
 					// The SearchQueryBuilder is the sole (advanced) filter surface, no need for MUI filter model
 					disableColumnFilter
 					disableColumnSorting
-					disableAggregation
-					disableRowGrouping
 					disableHoverInteractions={false}
-					disablePivoting
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible={true}
 					scrollbarVisible={false}
 					noResultsText={t("search.no_data")}

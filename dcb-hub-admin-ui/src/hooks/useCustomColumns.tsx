@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
@@ -8,18 +9,22 @@ import DetailPanelHeader from "@components/MasterDetail/components/DetailPanelHe
 import { DetailPanelToggle } from "@components/MasterDetail/components/DetailPanelToggle/DetailPanelToggle";
 
 // Use this if you want to introduce the master detail and checkbox selection columns together.
+// Stable across renders: callers spread it into a grid's columns, which MUI rebuilds on a new array
 export const useCustomColumns = (): GridColDef[] => {
 	const { t } = useTranslation();
 
-	return [
-		{
-			...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
-			headerName: t("ui.data_grid.master_detail"),
-			renderCell: (params) => <DetailPanelToggle id={params.id} />,
-			renderHeader: () => <DetailPanelHeader />,
-		},
-		{
-			...GRID_CHECKBOX_SELECTION_COL_DEF,
-		},
-	];
+	return useMemo(
+		() => [
+			{
+				...GRID_DETAIL_PANEL_TOGGLE_COL_DEF,
+				headerName: t("ui.data_grid.master_detail"),
+				renderCell: (params) => <DetailPanelToggle id={params.id} />,
+				renderHeader: () => <DetailPanelHeader />,
+			},
+			{
+				...GRID_CHECKBOX_SELECTION_COL_DEF,
+			},
+		],
+		[t],
+	);
 };

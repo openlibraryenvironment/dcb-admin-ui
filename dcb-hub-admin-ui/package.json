@@ -110,5 +110,8 @@
 		"vite": "8.3.5",
 		"vitest": "5.0.5",
 		"yaml": "2.9.1"
+	},
+	"allowScripts": {
+		"@mui/x-telemetry": false
 	}
 }

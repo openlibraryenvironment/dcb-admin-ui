@@ -162,3 +162,36 @@ test.describe("A bib that no longer exists", () => {
 		});
 	}
 });
+
+// The log printed dcb-service's messages and nothing else: no event, no way to the bib matched
+test("a clustering message says what happened and links to the bib it matched", async ({
+	page,
+}) => {
+	const matched = "99aa0000-9999-5999-9999-aaaaaaaaaaaa";
+	await page.route(`**/bibs/${BIB_ID}/audit-log`, (route) =>
+		route.fulfill({
+			json: {
+				BIB_INGEST: [
+					{
+						id: "a1",
+						processType: "BIB_INGEST",
+						subjectId: BIB_ID,
+						message: `High confidence match with Bib [${matched}] on [ISBN] = [9780000000001]`,
+						timestamp: "2026-09-30T14:00:00Z",
+					},
+				],
+			},
+		}),
+	);
+	await seedAuth(page, { roles: ADMIN_ROLES });
+	await page.goto(`/bibs/${BIB_ID}`);
+	await page.getByRole("button", { name: "Ingest audit log" }).click();
+
+	const row = page
+		.getByRole("row")
+		.filter({ hasText: "High confidence match" });
+	await expect(row).toContainText("Match: shared identifier");
+	await expect(
+		row.getByRole("link", { name: "Open the matched bib" }),
+	).toHaveAttribute("href", new RegExp(`/bibs/${matched}$`));
+});

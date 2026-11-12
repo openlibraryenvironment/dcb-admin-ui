@@ -27,18 +27,34 @@ describe("constrainToServerOperators", () => {
 		);
 	});
 
-	it("leaves a singleSelect status column alone - is / not / isAnyOf are all supported now", () => {
+	it("keeps every singleSelect operator - is / not / isAnyOf are all supported now", () => {
 		const column: GridColDef = {
 			field: "status",
 			type: "singleSelect",
 			valueOptions: dcbStatusValueOptions,
 		};
 
-		// Nothing to strip, so the column keeps MUI's defaults by reference.
-		expect(constrainToServerOperators([column])[0]).toBe(column);
+		expect(operatorsFor(column)).toEqual(["is", "not", "isAnyOf"]);
 		expect(
 			getGridSingleSelectOperators().map((operator) => operator.value),
 		).toEqual(["is", "not", "isAnyOf"]);
+	});
+
+	// SQL NOT (field = x) is NULL where the field is blank, so those rows are not returned
+	it("says a negative operator leaves blank values out", () => {
+		const labels = Object.fromEntries(
+			constrainToServerOperators([
+				{ field: "errorMessage", filterOperators: standardFilters },
+			])[0].filterOperators!.map((operator) => [
+				operator.value,
+				operator.label,
+			]),
+		);
+
+		expect(labels).toMatchObject({
+			"does not equal": "does not equal (blank left out)",
+			"does not contain": "does not contain (blank left out)",
+		});
 	});
 
 	it("strips isEmpty / isNotEmpty from a number column", () => {
@@ -49,14 +65,23 @@ describe("constrainToServerOperators", () => {
 		expect(operators).toEqual(expect.arrayContaining(["=", "!=", ">", "<"]));
 	});
 
-	it("leaves a column that already declares a supported-only set untouched", () => {
+	it("leaves a column with a supported-only set and no negative operator untouched", () => {
 		const column: GridColDef = {
 			field: "errorMessage",
-			filterOperators: standardFilters,
+			filterOperators: standardFilters.filter(
+				(operator) => !operator.value.toLowerCase().includes("not"),
+			),
 		};
 
 		// Same reference: nothing to constrain, so nothing is rebuilt.
 		expect(constrainToServerOperators([column])[0]).toBe(column);
+	});
+
+	// dcb-service ILIKEs "contains", and Postgres has no ILIKE for uuid: the query fails
+	it("offers an id column only the operators that compare it whole", () => {
+		expect(
+			operatorsFor({ field: "id", filterOperators: standardFilters }),
+		).toEqual(["equals", "does not equal"]);
 	});
 
 	it("does not touch columns that are not filterable", () => {

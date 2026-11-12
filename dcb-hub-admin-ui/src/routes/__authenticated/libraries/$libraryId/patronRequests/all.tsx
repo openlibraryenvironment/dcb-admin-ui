@@ -196,6 +196,7 @@ function PatronRequestsAll() {
 
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 							mb: 2,
@@ -238,14 +239,10 @@ function PatronRequestsAll() {
 							quickFilterFields: ["status", "description"],
 							wizard: true,
 						}}
-						disableAggregation
-						disableRowGrouping
 						disableHoverInteractions={false}
-						disablePivoting={true} // REQUIRED PROP ADDED
 						rowModesModel={rowModesModel} // REQUIRED PROP ADDED
 						onRowModesModelChange={setRowModesModel}
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible
 						noResultsText={t("patron_requests.no_results")}

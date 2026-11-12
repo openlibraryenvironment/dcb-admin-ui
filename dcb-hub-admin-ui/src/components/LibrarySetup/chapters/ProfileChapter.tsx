@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { FormProvider } from "react-hook-form";
 import { Alert, Skeleton } from "@mui/material";
+import { useAuth } from "react-oidc-context";
 
 import SetupFooter from "@components/Setup/SetupFooter";
 import { ProfileStep } from "@forms/NewLibrary/steps/ProfileStep";
@@ -16,12 +17,16 @@ import {
 	type LibraryFormDefaults,
 } from "@forms/NewLibrary/libraryPayloads";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useSingleFlight } from "@hooks/useSingleFlight";
 import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
+import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
+import { serverAdmits } from "@constants/serverRoles";
 import {
 	consortiumBasicsQuery,
 	readConsortiumPresence,
 } from "@/queryOptions/consortium";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { HOST_LMS_CLASSES } from "@helpers/hostLmsClientConfig";
 import type { NewLibrarySearch } from "@helpers/librarySetupFlow";
 import type { NewLibraryFormValues } from "@schemas/newLibrarySchema";
 import { useLibraryChapterForm } from "../useLibraryChapterForm";
@@ -40,6 +45,16 @@ const PROFILE_FIELDS: (keyof NewLibraryFormValues)[] = [
 	"maxConsortialLoans",
 	"maxLocalHolds",
 ];
+
+/** What buildAgencyUpdateInput carries besides the code: the agency's, not the library's. */
+const AGENCY_FIELDS = [
+	"isBorrowingAgency",
+	"isSupplyingAgency",
+	"latitude",
+	"longitude",
+	"maxConsortialLoans",
+	"maxLocalHolds",
+] as const satisfies readonly (keyof NewLibraryFormValues)[];
 
 type ProfileChapterProps =
 	| { kind: "new"; search: NewLibrarySearch }
@@ -67,8 +82,13 @@ export default function ProfileChapter(props: ProfileChapterProps) {
 
 	if (isLoading) return <Skeleton variant="rounded" height={480} />;
 
+	const wanted = props.search.ils
+		? HOST_LMS_CLASSES[props.search.ils]
+		: undefined;
 	const hostLms = (data?.hostLms?.content ?? []).find(
-		(candidate: any) => candidate.code === props.search.hostLms,
+		(candidate: any) =>
+			candidate.code === props.search.hostLms &&
+			candidate.lmsClientClass === wanted,
 	);
 	if (!hostLms) {
 		return (
@@ -111,7 +131,16 @@ function ProfileForm({
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const gqlClient = useGraphQLClient();
+	const queryClient = useQueryClient();
+	const auth = useAuth();
 	const writes = useLibrarySetupWrites();
+	// Validation and the agency check run before any write is pending
+	const submit = useSingleFlight();
+	const busy = writes.busy || submit.running;
+	const canUpdateAgency = serverAdmits(
+		"updateAgency",
+		auth?.user?.profile?.roles as string[] | undefined,
+	);
 	const [error, setError] = useState<string | null>(null);
 	const { consortiumGroup } = readConsortiumPresence(
 		useQuery(consortiumBasicsQuery(gqlClient)),
@@ -133,15 +162,41 @@ function ProfileForm({
 					await writes.updateLibrary.mutateAsync(
 						buildLibraryUpdateInput(formData, libraryId),
 					);
-					// Participation and the loan cap are the agency's, not the library's
-					if (formData.agencyCode) {
+					// Participation and the loan cap are the agency's, not the library's. Its code
+					// is the stored one: updateAgency writes to whichever agency the code names
+					const agencyChanged = AGENCY_FIELDS.some(
+						(field) =>
+							String(formData[field] ?? "") !== String(defaults[field] ?? ""),
+					);
+					if (defaults.agencyCode && agencyChanged && canUpdateAgency) {
 						await writes.updateAgency.mutateAsync(
-							buildAgencyUpdateInput(formData),
+							buildAgencyUpdateInput({
+								...formData,
+								agencyCode: defaults.agencyCode as string,
+							}),
 						);
 					}
 					markSaved(formData);
 				}
 				onNext?.();
+				return;
+			}
+
+			// createLibrary ids a library by its agency code and saves over one that exists
+			const taken = await queryClient.fetchQuery(
+				libraryBasicsByAgencyCodeQuery(
+					gqlClient,
+					formData.agencyCode,
+					"newLibraryAgencyCheck",
+				),
+			);
+			if (taken?.libraries?.content?.length) {
+				methods.setError("agencyCode", {
+					message: t("libraries.new.agency_has_library", {
+						code: formData.agencyCode,
+					}),
+				});
+				methods.setFocus("agencyCode");
 				return;
 			}
 
@@ -177,8 +232,11 @@ function ProfileForm({
 	return (
 		<>
 			<FormProvider {...methods}>
-				<form noValidate aria-busy={writes.busy}>
-					<ProfileStep />
+				<form noValidate aria-busy={busy}>
+					<ProfileStep
+						existing={!!libraryId}
+						agencyLocked={!!libraryId && !canUpdateAgency}
+					/>
 				</form>
 			</FormProvider>
 
@@ -198,8 +256,8 @@ function ProfileForm({
 							search,
 						}))
 				}
-				onContinue={() => void onContinue()}
-				busy={writes.busy}
+				onContinue={() => void submit.run(onContinue)}
+				busy={busy}
 				continueLabel={
 					libraryId ? undefined : t("libraries.setup.profile.create")
 				}

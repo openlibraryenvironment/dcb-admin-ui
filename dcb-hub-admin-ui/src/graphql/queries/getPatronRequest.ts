@@ -68,14 +68,6 @@ export const getPatronRequest = (): string => gql`
 					localHomeLibraryCode
 					lastValidated
 				}
-				audit {
-					id
-					auditDate
-					briefDescription
-					fromStatus
-					toStatus
-					auditData
-				}
 				clusterRecord {
 					id
 					title
@@ -83,35 +75,6 @@ export const getPatronRequest = (): string => gql`
 					isDeleted
 					dateCreated
 					dateUpdated
-					members {
-						id
-						dateCreated
-						dateUpdated
-						title
-						author
-						placeOfPublication
-						publisher
-						dateOfPublication
-						edition
-						isLargePrint
-						clusterReason
-						typeOfRecord
-						canonicalMetadata
-						metadataScore
-						processVersion
-						sourceSystemId
-						sourceRecordId
-						sourceRecord {
-							id
-							hostLmsId
-							remoteId
-							lastFetched
-							lastProcessed
-							processingState
-							processingInformation
-							sourceRecordData
-						}
-					}
 				}
 				dateCreated
 				activeWorkflow

@@ -12,8 +12,9 @@ import type { TFunction } from "i18next";
 import { placedBy } from "@helpers/placedBy";
 import dayjs from "dayjs";
 
-const getPatronRequestColumns = (
+export const getPatronRequestColumns = (
 	variant: "standard" | "noStatus",
+	t: TFunction,
 ): GridColDef[] => {
 	const isStandard = variant === "standard";
 
@@ -23,15 +24,16 @@ const getPatronRequestColumns = (
 		// takes its order from this array) rather than buried mid-list.
 		{
 			field: "patronHostlmsCode",
-			headerName: "Patron library",
+			headerName: t("patron_request.columns.patronHostlmsCode"),
 			filterOperators: isOnly,
 			sortable: false,
 		},
 		{
 			field: "supplyingAgencyCode",
-			headerName: "Supplying library",
+			headerName: t("patron_request.columns.supplyingAgencyCode"),
 			filterable: true,
-			sortable: true,
+			// Filter-only: dcb-service resolves it through a join, and cannot ORDER BY it
+			sortable: false,
 			flex: 1,
 			type: "singleSelect",
 			filterOperators: isOnly,
@@ -45,7 +47,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "pickupLocationCode",
-			headerName: "Pickup location",
+			headerName: t("patron_request.columns.pickupLocationCode"),
 			type: "singleSelect",
 			filterOperators: isOnly,
 			sortable: false,
@@ -58,7 +60,7 @@ const getPatronRequestColumns = (
 			// (which supplies valueOptions/valueGetter) and buildFilterQuery (which
 			// expands a chosen library into an OR over its location ids).
 			field: "pickupLibrary",
-			headerName: "Pickup library",
+			headerName: t("patron_request.columns.pickupLibrary"),
 			type: "singleSelect",
 			filterOperators: isOnly,
 			sortable: false,
@@ -66,7 +68,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "dateCreated",
-			headerName: "Request created",
+			headerName: t("patron_request.columns.dateCreated"),
 			minWidth: 150,
 			filterOperators: luceneDateRangeOperators,
 			type: "dateTime",
@@ -79,7 +81,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "patronBarcode",
-			headerName: "Patron barcode",
+			headerName: t("patron_request.columns.patronBarcode"),
 			filterable: true,
 			filterOperators: equalsOnly,
 			sortable: false,
@@ -88,7 +90,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "clusterRecordTitle",
-			headerName: "Title",
+			headerName: t("patron_request.columns.clusterRecordTitle"),
 			minWidth: 100,
 			flex: 1.25,
 			filterable: false,
@@ -98,14 +100,14 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "pickupRequestId",
-			headerName: "Pickup request UUID",
+			headerName: t("patron_request.columns.pickupRequestId"),
 			minWidth: 100,
 			sortable: true,
 			filterable: true,
 		},
 		{
 			field: "pickupRequestStatus",
-			headerName: "Pickup request status",
+			headerName: t("patron_request.columns.pickupRequestStatus"),
 			minWidth: 100,
 			sortable: true,
 			filterable: true,
@@ -114,14 +116,14 @@ const getPatronRequestColumns = (
 			// Export-only column (hidden by default) so the export wizard can
 			// offer every field the export query returns.
 			field: "pickupItemId",
-			headerName: "Pickup item ID",
+			headerName: t("patron_request.columns.pickupItemId"),
 			minWidth: 100,
 			sortable: false,
 			filterable: false,
 		},
 		{
 			field: "canonicalPtype",
-			headerName: "DCB canonical patron type",
+			headerName: t("patron_request.columns.canonicalPtype"),
 			minWidth: 100,
 			flex: 0.5,
 			filterable: false,
@@ -133,7 +135,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "canonicalItemType",
-			headerName: "DCB canonical item type",
+			headerName: t("patron_request.columns.canonicalItemType"),
 			minWidth: 100,
 			flex: 0.5,
 			filterable: false,
@@ -151,7 +153,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "previousStatus",
-			headerName: "Previous status",
+			headerName: t("patron_request.columns.previousStatus"),
 			minWidth: 100,
 			flex: 1.5,
 			type: "singleSelect", // Note - may need to support IS and IS NOT, but not is any of as we have a different way of doing that
@@ -160,7 +162,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "status",
-			headerName: "Status",
+			headerName: t("patron_request.columns.status"),
 			minWidth: 100,
 			flex: 1.0,
 			type: "singleSelect", // Note - may need to support IS and IS NOT, but not is any of as we have a different way of doing that
@@ -170,7 +172,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "nextExpectedStatus",
-			headerName: "Next status",
+			headerName: t("patron_request.columns.nextExpectedStatus"),
 			minWidth: 100,
 			flex: 1.5,
 			type: "singleSelect", // Note - may need to support IS and IS NOT, but not is any of as we have a different way of doing that
@@ -179,26 +181,26 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "errorMessage",
-			headerName: "Error message",
+			headerName: t("patron_request.columns.errorMessage"),
 			minWidth: 100,
 			flex: 1.5,
 			filterOperators: containsOnly,
 		},
 		{
 			field: "outOfSequenceFlag",
-			headerName: "Out of sequence",
+			headerName: t("patron_request.columns.outOfSequenceFlag"),
 			flex: 0.75,
 			filterOperators: equalsOnly,
 		},
 		{
 			field: "pollCountForCurrentStatus",
-			headerName: "Polling count",
+			headerName: t("patron_request.columns.pollCountForCurrentStatus"),
 			flex: 0.25,
 			filterOperators: equalsOnly,
 		},
 		{
 			field: "elapsedTimeInCurrentStatus",
-			headerName: "Time in state (days)",
+			headerName: t("patron_request.columns.elapsedTimeInCurrentStatus"),
 			description:
 				"The time the request has been in its current status, in the format dd:hh:mm:ss",
 			minWidth: 50,
@@ -213,13 +215,13 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "isManuallySelectedItem",
-			headerName: "Manually selected?",
+			headerName: t("patron_request.columns.isManuallySelectedItem"),
 			flex: 0.75,
 			filterOperators: equalsOnly,
 		},
 		{
 			field: "dateUpdated",
-			headerName: "Request updated",
+			headerName: t("patron_request.columns.dateUpdated"),
 			minWidth: 150,
 			filterOperators: luceneDateRangeOperators,
 			type: "dateTime",
@@ -232,19 +234,19 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "description",
-			headerName: "Description",
+			headerName: t("patron_request.columns.description"),
 			filterOperators: standardFilters,
 			flex: 0.5,
 		},
 		{
 			field: "requesterNote",
-			headerName: "Requester note",
+			headerName: t("patron_request.columns.requesterNote"),
 			filterOperators: standardFilters,
 			flex: 0.5,
 		},
 		{
 			field: "id",
-			headerName: "Request UUID",
+			headerName: t("patron_request.columns.id"),
 			minWidth: 100,
 			flex: 0.5,
 			filterOperators: equalsOnly,
@@ -254,7 +256,7 @@ const getPatronRequestColumns = (
 			// the readable names rather than asking the user to type "RET-PUA".
 			// useDynamicPatronRequestColumns supplies the translated valueOptions.
 			field: "activeWorkflow",
-			headerName: "Active workflow",
+			headerName: t("patron_request.columns.activeWorkflow"),
 			minWidth: 100,
 			sortable: true,
 			filterable: true,
@@ -263,7 +265,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "isExpeditedCheckout",
-			headerName: "On-site borrowing request?",
+			headerName: t("patron_request.columns.isExpeditedCheckout"),
 			flex: 0.5,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -271,7 +273,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "renewalCount",
-			headerName: "Renewal count",
+			headerName: t("patron_request.columns.renewalCount"),
 			flex: 0.5,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -279,7 +281,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "resolutionCount",
-			headerName: "Resolution count",
+			headerName: t("patron_request.columns.resolutionCount"),
 			flex: 0.5,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -288,7 +290,7 @@ const getPatronRequestColumns = (
 		// Item values
 		{
 			field: "itemBarcode",
-			headerName: "Item barcode",
+			headerName: t("patron_request.columns.itemBarcode"),
 			filterable: false,
 			sortable: false,
 			flex: 0.3,
@@ -302,7 +304,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "localItemStatus",
-			headerName: "Local item status",
+			headerName: t("patron_request.columns.localItemStatus"),
 			flex: 0.3,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -310,7 +312,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "rawLocalItemStatus",
-			headerName: "Raw local item status",
+			headerName: t("patron_request.columns.rawLocalItemStatus"),
 			flex: 0.3,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -318,18 +320,15 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "localItemType",
-			headerName: "Local item type",
+			headerName: t("patron_request.columns.localItemType"),
 			flex: 0.3,
 			filterOperators: equalsOnly,
 			filterable: true,
 			sortable: true,
-			valueGetter: (value: any, row: PatronRequest) => {
-				return row?.suppliers?.length > 0 ? row.suppliers[0].localItemType : "";
-			},
 		},
 		{
 			field: "localItemId",
-			headerName: "Local item ID",
+			headerName: t("patron_request.columns.localItemId"),
 			flex: 0.3,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -338,7 +337,7 @@ const getPatronRequestColumns = (
 		// Local requests
 		{
 			field: "localRequestStatus",
-			headerName: "Local request status",
+			headerName: t("patron_request.columns.localRequestStatus"),
 			flex: 0.5,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -346,7 +345,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "rawLocalRequestStatus",
-			headerName: "Raw local request status",
+			headerName: t("patron_request.columns.rawLocalRequestStatus"),
 			flex: 0.5,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -354,7 +353,7 @@ const getPatronRequestColumns = (
 		},
 		{
 			field: "localRequestId",
-			headerName: "Local request ID",
+			headerName: t("patron_request.columns.localRequestId"),
 			flex: 0.3,
 			filterOperators: equalsOnly,
 			filterable: true,
@@ -364,10 +363,7 @@ const getPatronRequestColumns = (
 	return columns;
 };
 
-/**
- * Added by useDynamicPatronRequestColumns while VITE_FEATURE_PLACED_BY_STAFF is on: the
- * column lists below are built at module load, before the flags are read.
- */
+/** Added by useDynamicPatronRequestColumns while VITE_FEATURE_PLACED_BY_STAFF is on. */
 export const placedByStaffColumn = (t: TFunction): GridColDef => ({
 	field: "placedByStaff",
 	headerName: t("patron_request.placed_by.title"),
@@ -378,11 +374,3 @@ export const placedByStaffColumn = (t: TFunction): GridColDef => ({
 	valueGetter: (value: boolean | null | undefined) =>
 		t(`patron_request.placed_by.${placedBy(value)}`),
 });
-
-// Used in most scenarios
-export const standardPatronRequestColumns: GridColDef[] =
-	getPatronRequestColumns("standard");
-
-// Used for "exception" pages where the status is irrelevant as it's always ERROR
-export const patronRequestColumnsNoStatusFilter: GridColDef[] =
-	getPatronRequestColumns("noStatus");

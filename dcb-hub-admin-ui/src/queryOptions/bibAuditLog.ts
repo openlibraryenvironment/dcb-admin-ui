@@ -27,9 +27,12 @@ export const bibAuditLogQuery = (
 				`/bibs/${encodeURIComponent(bibId)}/audit-log`,
 				{ signal },
 			);
-			return Object.values(data ?? {})
-				.flat()
-				.sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+			return (
+				Object.values(data ?? {})
+					.flat()
+					// By time, not text: a different precision or offset sorts wrongly as a string
+					.sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+			);
 		},
 		// Rewritten only when the bib is next ingested
 		staleTime: 5 * 60_000,

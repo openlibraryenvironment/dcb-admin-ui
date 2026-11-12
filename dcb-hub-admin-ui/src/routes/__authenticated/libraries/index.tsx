@@ -313,16 +313,12 @@ function Libraries() {
 					query: getLibraries,
 					coreType: "libraries",
 				}}
-				disableAggregation
-				disableRowGrouping
 				disableHoverInteractions={false}
-				disablePivoting
 				editMode="row"
 				rowModesModel={rowModesModel}
 				onRowModesModelChange={setRowModesModel}
 				processRowUpdate={libraryMutation.requestGridEdit}
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("libraries.none_found")}

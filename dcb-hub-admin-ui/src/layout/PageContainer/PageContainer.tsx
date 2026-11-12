@@ -14,6 +14,8 @@ interface PageContainerProps {
 	hideTitleBox?: boolean;
 	hideBreadcrumbs?: boolean;
 	pageActions?: any;
+	/** What the Actions menu has in flight, translated, or null: see PageActionsMenu. */
+	pageActionsPending?: string | null;
 	mode?: "edit" | "view";
 	link?: string;
 	docLink?: string;
@@ -26,6 +28,7 @@ export default function PageContainer({
 	hideTitleBox,
 	hideBreadcrumbs,
 	pageActions,
+	pageActionsPending,
 	mode,
 	link,
 	docLink,
@@ -111,9 +114,13 @@ export default function PageContainer({
 				>
 					<Stack
 						direction="row"
+						useFlexGap
+						spacing={2}
 						sx={{
 							alignItems: "center",
 							justifyContent: "space-between",
+							// The actions drop below a long title rather than off the screen
+							flexWrap: "wrap",
 							p: 3,
 							pb: 0,
 						}}
@@ -124,6 +131,10 @@ export default function PageContainer({
 								spacing={1}
 								sx={{
 									alignItems: "baseline",
+									// Grows to share the row with the actions, and wraps its own text
+									flex: "1 1 16rem",
+									minWidth: 0,
+									overflowWrap: "anywhere",
 								}}
 							>
 								{renderTitle()}
@@ -140,7 +151,14 @@ export default function PageContainer({
 							</Stack>
 						)}
 						{pageActions && isAnAdmin && (
-							<PageActionsMenu actions={pageActions} mode={mode || "view"} />
+							// Right-aligned even when a narrow screen wraps them under the title
+							<Box sx={{ marginInlineStart: "auto" }}>
+								<PageActionsMenu
+									actions={pageActions}
+									mode={mode || "view"}
+									pending={pageActionsPending}
+								/>
+							</Box>
 						)}
 					</Stack>
 				</Box>

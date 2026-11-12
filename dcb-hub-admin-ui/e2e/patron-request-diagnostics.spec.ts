@@ -32,6 +32,16 @@ const REQUEST = {
 	suppliers: [SUPPLIER],
 };
 
+// TRACKED_REQUEST is in PICKUP_TRANSIT: the item has shipped, so no supplier fix-up applies
+const AT_SUPPLIER = {
+	...REQUEST,
+	status: "REQUEST_PLACED_AT_SUPPLYING_AGENCY",
+};
+
+const requestIs = (request: Record<string, unknown>) => ({
+	LoadPatronRequest: { patronRequests: { totalSize: 1, content: [request] } },
+});
+
 const mockRequest = (page: Page, extra: Record<string, unknown> = {}) =>
 	mockGraphQL(page, {
 		LoadConsortium: consortiumBasics,
@@ -173,23 +183,24 @@ test.describe("previous suppliers", () => {
 		expect(query).toBe(`patronRequest:"${REQUEST.id}"`);
 	});
 
-	test("is not offered without ADMIN, even from a shared link", async ({
+	test("opens from a shared link for a consortium administrator without ADMIN", async ({
 		page,
 	}) => {
 		await open(
 			page,
-			["CONSORTIUM_ADMIN"],
-			{},
+			["CONSORTIUM_ADMIN", "LIBRARY_ADMIN"],
+			{ LoadInactiveSupplierRequests: PREVIOUS },
 			`/patronRequests/${REQUEST.id}?tab=previousSuppliers`,
 		);
 
-		await expect(page.getByRole("tab", { name: "General" })).toHaveAttribute(
-			"aria-selected",
-			"true",
-		);
 		await expect(
 			page.getByRole("tab", { name: "Previous suppliers" }),
-		).toHaveCount(0);
+		).toHaveAttribute("aria-selected", "true");
+		await expect(
+			page
+				.getByRole("table", { name: "Previous suppliers" })
+				.getByRole("cell", { name: "GAMMA-BC-1" }),
+		).toBeVisible();
 	});
 });
 
@@ -203,16 +214,45 @@ test.describe("supplier fix-ups", () => {
 		return page.getByRole("menuitem", { name });
 	};
 
-	for (const roles of [["CONSORTIUM_ADMIN"], ["ADMIN"]]) {
-		test(`are not offered to ${roles.join(" ")} alone`, async ({ page }) => {
-			await open(page, roles);
-			await page.getByRole("button", { name: "Actions" }).click();
+	test("are offered to a consortium administrator without ADMIN, whom dcb-service admits", async ({
+		page,
+	}) => {
+		await open(
+			page,
+			["CONSORTIUM_ADMIN", "LIBRARY_ADMIN"],
+			requestIs(AT_SUPPLIER),
+		);
+		await page.getByRole("button", { name: "Actions" }).click();
 
-			await expect(
-				page.getByRole("menuitem", { name: "Skip supplier" }),
-			).toHaveCount(0);
-		});
-	}
+		await expect(
+			page.getByRole("menuitem", { name: "Skip supplier" }),
+		).toBeVisible();
+	});
+
+	test("are not offered to ADMIN alone, whom dcb-service refuses", async ({
+		page,
+	}) => {
+		await open(page, ["ADMIN"], requestIs(AT_SUPPLIER));
+		await page.getByRole("button", { name: "Actions" }).click();
+
+		await expect(
+			page.getByRole("menuitem", { name: "Skip supplier" }),
+		).toHaveCount(0);
+	});
+
+	test("are not offered once the item has left the supplier", async ({
+		page,
+	}) => {
+		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], requestIs(REQUEST));
+		await page.getByRole("button", { name: "Actions" }).click();
+
+		await expect(
+			page.getByRole("menuitem", { name: "Skip supplier" }),
+		).toHaveCount(0);
+		await expect(
+			page.getByRole("menuitem", { name: "Cancel supplier hold" }),
+		).toHaveCount(0);
+	});
 
 	test("skip warns that the request will be cancelled when re-resolution is off, then skips", async ({
 		page,
@@ -223,6 +263,7 @@ test.describe("supplier fix-ups", () => {
 			await route.fulfill({ json: { message: "re-resolution triggered" } });
 		});
 		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], {
+			...requestIs(AT_SUPPLIER),
 			LoadConsortiumFS: settings(false),
 		});
 
@@ -242,13 +283,81 @@ test.describe("supplier fix-ups", () => {
 		);
 	});
 
+	test("the dialog cannot be dismissed while the skip is running, and focuses Close after", async ({
+		page,
+	}) => {
+		let release = () => {};
+		const held = new Promise<void>((resolve) => (release = resolve));
+		const posts: string[] = [];
+		await page.route("**/suppliers/requests/**", async (route) => {
+			posts.push(route.request().url());
+			await held;
+			await route.fulfill({ json: { message: "re-resolution triggered" } });
+		});
+		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], {
+			...requestIs(AT_SUPPLIER),
+			LoadConsortiumFS: settings(true),
+		});
+
+		await (await menuItem(page, "Skip supplier")).click();
+		const dialog = page.getByRole("dialog", { name: "Skip this supplier?" });
+		await dialog.getByRole("button", { name: "Skip supplier" }).click();
+		await expect.poll(() => posts.length).toBe(1);
+		await page.keyboard.press("Escape");
+
+		await expect(dialog).toBeVisible();
+		release();
+		await expect(dialog.getByRole("status")).toContainText(
+			"DCB cancelled the hold at beta",
+		);
+		await expect(dialog.getByRole("button", { name: "Close" })).toBeFocused();
+		expect(posts).toHaveLength(1);
+	});
+
+	test("the outcome names the supplier the dialog was opened for", async ({
+		page,
+	}) => {
+		let skipped = false;
+		await page.route("**/suppliers/requests/**", async (route) => {
+			skipped = true;
+			await route.fulfill({ json: { message: "re-resolution triggered" } });
+		});
+		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], {
+			LoadConsortiumFS: settings(true),
+			// Re-resolution has moved the request on to gamma by the time it is refetched
+			LoadPatronRequest: () =>
+				requestIs(
+					skipped
+						? {
+								...AT_SUPPLIER,
+								suppliers: [
+									{
+										...SUPPLIER,
+										id: "6b6b6b6b-2222-5222-9222-222222222222",
+										localAgency: "gamma",
+									},
+								],
+							}
+						: AT_SUPPLIER,
+				).LoadPatronRequest,
+		});
+
+		await (await menuItem(page, "Skip supplier")).click();
+		const dialog = page.getByRole("dialog", { name: "Skip this supplier?" });
+		await dialog.getByRole("button", { name: "Skip supplier" }).click();
+
+		await expect(dialog.getByRole("status")).toContainText(
+			"DCB cancelled the hold at beta",
+		);
+	});
+
 	test("cancel says when the supplier did not confirm, and nothing was paused", async ({
 		page,
 	}) => {
 		await page.route("**/suppliers/requests/*/cancel", (route) =>
 			route.fulfill({ json: { paused: false, supplierStatus: "PLACED" } }),
 		);
-		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"]);
+		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], requestIs(AT_SUPPLIER));
 
 		await (await menuItem(page, "Cancel supplier hold")).click();
 		const dialog = page.getByRole("dialog");
@@ -267,16 +376,11 @@ test.describe("supplier fix-ups", () => {
 			body = route.request().postDataJSON();
 			await route.fulfill({ json: { activeNow: true } });
 		});
-		await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], {
-			LoadPatronRequest: {
-				patronRequests: {
-					totalSize: 1,
-					content: [
-						{ ...REQUEST, suppliers: [{ ...SUPPLIER, isActive: false }] },
-					],
-				},
-			},
-		});
+		await open(
+			page,
+			["ADMIN", "CONSORTIUM_ADMIN"],
+			requestIs({ ...REQUEST, suppliers: [{ ...SUPPLIER, isActive: false }] }),
+		);
 
 		await page.getByRole("button", { name: "Actions" }).click();
 		await expect(
@@ -296,6 +400,7 @@ test.describe("supplier fix-ups", () => {
 		test(`the skip dialog passes axe, ${scheme}`, async ({ page }) => {
 			await page.emulateMedia({ colorScheme: scheme });
 			await open(page, ["ADMIN", "CONSORTIUM_ADMIN"], {
+				...requestIs(AT_SUPPLIER),
 				LoadConsortiumFS: settings(true),
 			});
 			await (await menuItem(page, "Skip supplier")).click();

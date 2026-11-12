@@ -17,9 +17,9 @@ import Loading from "@components/Loading/Loading";
 import Error from "@components/Error/Error";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
-import { getClusters } from "@queries/getClusters";
-import { useState } from "react";
-import type { ClusterRecordsQueryVariables } from "@generated/graphql";
+import { clusterFullQuery } from "@/queryOptions/cluster";
+import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/cluster",
@@ -33,14 +33,9 @@ function ClusterDetails() {
 	const gqlClient = useGraphQLClient();
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
-	const { data, isLoading, error } = useQuery({
-		queryKey: ["cluster", "full", clusterId],
-		queryFn: () =>
-			gqlClient.request<any, ClusterRecordsQueryVariables>(getClusters, {
-				query: `id: ${clusterId}`,
-			}),
-		enabled: !!clusterId,
-	});
+	const { data, isLoading, error } = useQuery(
+		clusterFullQuery(gqlClient, clusterId),
+	);
 
 	const cluster = data?.instanceClusters?.content?.[0];
 	// No toolbar, so nothing to share: the page lives here. It needs a change handler -
@@ -48,14 +43,66 @@ function ClusterDetails() {
 	const [paginationModel, onPaginationModelChange] =
 		useState<GridPaginationModel>({ page: 0, pageSize: 25 });
 
-	const columns: GridColDef[] = [
-		{
-			field: "title",
-			headerName: t("ui.data_grid.title"),
-			minWidth: 300,
-			flex: 0.5,
-		},
-	];
+	const hostLmss = useQuery(hostLmsSelectionQuery(gqlClient));
+	const selectedBib = cluster?.selectedBib;
+	const columns: GridColDef[] = useMemo(() => {
+		const systems = new Map<string, string>(
+			(hostLmss.data?.hostLms?.content ?? []).map(
+				(system: { id: string; name: string }) => [system.id, system.name],
+			),
+		);
+		return [
+			{
+				field: "title",
+				headerName: t("ui.data_grid.title"),
+				minWidth: 300,
+				flex: 0.5,
+			},
+			{
+				field: "selected",
+				headerName: t("search.members.selected"),
+				minWidth: 120,
+				valueGetter: (_value, row) =>
+					row.id === selectedBib ? t("search.members.selected_yes") : "",
+			},
+			{
+				field: "sourceSystemId",
+				headerName: t("hostlms.hostlms_one"),
+				minWidth: 160,
+				valueGetter: (value: string | null) =>
+					(value && systems.get(value)) ?? value ?? "",
+			},
+			{
+				field: "sourceRecordId",
+				headerName: t("bibRecords.source_record_id"),
+				minWidth: 140,
+			},
+			{ field: "author", headerName: t("search.author"), minWidth: 180 },
+			{
+				field: "typeOfRecord",
+				headerName: t("bibRecords.record_type"),
+				minWidth: 120,
+			},
+			{
+				field: "processingState",
+				headerName: t("search.members.processing_state"),
+				minWidth: 160,
+				valueGetter: (_value, row) => row.sourceRecord?.processingState ?? "",
+			},
+			{
+				field: "lastProcessed",
+				headerName: t("search.members.last_processed"),
+				minWidth: 170,
+				type: "dateTime",
+				valueGetter: (_value, row) =>
+					row.sourceRecord?.lastProcessed
+						? new Date(row.sourceRecord.lastProcessed)
+						: null,
+				valueFormatter: (value: Date | null) =>
+					value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "",
+			},
+		];
+	}, [t, hostLmss.data, selectedBib]);
 
 	if (isLoading)
 		return (
@@ -149,14 +196,10 @@ function ClusterDetails() {
 					paginationMode="client"
 					sortingMode="client"
 					filterMode="client"
-					disableAggregation
-					disableRowGrouping
 					disableHoverInteractions={false}
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible={false}
 					pagination
-					disablePivoting
 					scrollbarVisible={false}
 					noResultsText={t("ui.data_grid.no_results")}
 					searchText=""

@@ -80,3 +80,20 @@ for (const scheme of ["light", "dark"] as const) {
 		await scanForViolations(page);
 	});
 }
+
+// A boolean was printed as the raw "true" or "false"
+test("a yes-or-no answer reads as Yes or No", async ({ page }) => {
+	await page.route("**/hostlmss/*/item/*", (route) =>
+		route.fulfill({ json: { status: "AVAILABLE", renewable: false } }),
+	);
+	await seedAuth(page, { roles: ADMIN_ROLES });
+	await page.goto(ITEMS);
+
+	await page.getByRole("button", { name: LOOK_UP }).first().click();
+
+	const dialog = page.getByRole("dialog", {
+		name: "Item 30000000000001 in alpha-lms",
+	});
+	await expect(dialog.getByRole("row", { name: /No$/ })).toBeVisible();
+	await expect(dialog.getByText("false", { exact: true })).toHaveCount(0);
+});

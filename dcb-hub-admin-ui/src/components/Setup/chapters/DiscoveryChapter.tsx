@@ -20,6 +20,7 @@ import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import useDCBServiceInfo from "@hooks/useDCBServiceInfo";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { errorForLog } from "@helpers/safeErrorLog";
 import {
 	BrandUploadError,
 	hasStagedImages,
@@ -209,7 +210,7 @@ export default function DiscoveryChapter() {
 			reset(getValues());
 			goNext();
 		} catch (failure: any) {
-			console.error("Discovery branding save failed:", failure);
+			console.error("Discovery branding save failed:", errorForLog(failure));
 			setError(describeGraphQLError(failure, t("setup.discovery.error")));
 		} finally {
 			setBusy(false);

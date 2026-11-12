@@ -108,6 +108,7 @@ test.describe("New library", () => {
 		await expect(systems).toHaveAccessibleDescription(
 			"Choose the system this library uses.",
 		);
+		await expect(main(page).getByRole("radio").first()).toBeFocused();
 	});
 
 	test("a link to a later question without its answers starts at the first", async ({
@@ -136,6 +137,42 @@ test.describe("New library", () => {
 		await expect(page).toHaveURL(
 			/\/libraries\/new\/profile\?ils=sierra&hostLms=SIERRA1$/,
 		);
+	});
+
+	test.describe("a Host LMS code edited into the link", () => {
+		// SIERRA1 is a Sierra system; ils=folio asks for FOLIO's chapters
+		test.beforeEach(async ({ page }) => {
+			await mockGraphQL(page, {
+				LoadConsortiumHeader: consortiumBasics,
+				LoadHostLmsSelection: oneSierra,
+			});
+		});
+
+		test("is not accepted as the connection for a different system", async ({
+			page,
+		}) => {
+			await page.goto("/libraries/new/connection?ils=folio&hostLms=SIERRA1");
+
+			await expect(
+				main(page).getByText(/no host lms with the code SIERRA1/i),
+			).toBeVisible();
+			await expect(
+				main(page).getByRole("button", { name: "Continue" }),
+			).toBeDisabled();
+		});
+
+		test("does not create a library on a different system", async ({
+			page,
+		}) => {
+			await page.goto("/libraries/new/profile?ils=folio&hostLms=SIERRA1");
+
+			await expect(
+				main(page).getByText(/no host lms with the code SIERRA1/i),
+			).toBeVisible();
+			await expect(
+				main(page).getByRole("button", { name: "Add the library" }),
+			).toHaveCount(0);
+		});
 	});
 
 	test("blocks the connection with empty required fields, and says which", async ({
@@ -204,6 +241,36 @@ test.describe("New library", () => {
 		await main(page).getByRole("button", { name: "Continue" }).click();
 		await expect(page).toHaveURL(/\/libraries\/new\/profile\?/);
 		expect(sent).toHaveLength(3);
+	});
+
+	test("a second click while the connection is being saved does not create it twice", async ({
+		page,
+	}) => {
+		let creates = 0;
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadHostLmsSelection: noHostLms,
+			UpdateHostLms: updated,
+			CreateHostLms: () => {
+				creates++;
+				return created;
+			},
+		});
+		await page.goto("/libraries/new/connection?ils=sierra");
+		await fillSierraHostLms(page);
+
+		// Both in one task, so the second lands before any re-render could disable the button
+		await main(page)
+			.getByRole("button", { name: /save and test the connection/i })
+			.evaluate((button: HTMLButtonElement) => {
+				button.click();
+				button.click();
+			});
+
+		await expect(
+			main(page).getByRole("button", { name: "Continue" }),
+		).toBeEnabled();
+		expect(creates).toBe(1);
 	});
 
 	test("shows the configuration and authentication checks the server ran", async ({
@@ -408,6 +475,18 @@ test.describe("New library", () => {
 			).toBe(0);
 		});
 
+		test("an empty answer moves focus to the first field it needs", async ({
+			page,
+		}) => {
+			await openProfile(page);
+
+			await main(page)
+				.getByRole("button", { name: /add the library/i })
+				.click();
+
+			await expect(main(page).getByLabel("Full name")).toBeFocused();
+		});
+
 		test("passes axe", async ({ page }) => {
 			await openProfile(page);
 			await scanForViolations(page);
@@ -426,6 +505,8 @@ test.describe("New library", () => {
 				createdInput = variables.input;
 				return { createLibrary: { id: LIBRARY_ID } };
 			},
+			// No library holds the agency yet
+			LoadLibraryBasics: { libraries: { totalSize: 0, content: [] } },
 			LoadLibrary: libraryDetail,
 			LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
 			LoadNumericRangeMappings: {
@@ -459,5 +540,117 @@ test.describe("New library", () => {
 		// Contacts are asked next, once there is a library to hold them
 		expect(createdInput.contacts).toEqual([]);
 		expect(createdInput.hostLmsCode).toBe("SIERRA1");
+
+		await main(page)
+			.getByRole("button", { name: /continue/i })
+			.click();
+		await expect(
+			main(page).getByRole("textbox", { name: /first name/i }),
+		).toBeFocused();
+	});
+
+	test("a second click while the library is being added does not add it twice", async ({
+		page,
+	}) => {
+		let created = 0;
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			LoadHostLmsSelection: oneSierra,
+			CreateLibrary: () => {
+				created++;
+				return { createLibrary: { id: LIBRARY_ID } };
+			},
+			LoadLibraryBasics: { libraries: { totalSize: 0, content: [] } },
+			LoadLibrary: libraryDetail,
+			LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
+			LoadNumericRangeMappings: {
+				numericRangeMappings: { totalSize: 0, content: [] },
+			},
+			LoadLocations: { locations: { totalSize: 0, content: [] } },
+		});
+		await page.goto("/libraries/new/profile?ils=sierra&hostLms=SIERRA1");
+		const chapter = main(page);
+		await chapter.getByLabel("Full name").fill("New Library");
+		await chapter.getByLabel("Short name").fill("New");
+		await chapter.getByLabel("Abbreviated name").fill("NEW");
+		await chapter
+			.getByRole("combobox", { name: /associated agency/i })
+			.fill("NEWAG");
+		await chapter.getByLabel("Address").fill("1 Library Street");
+		await chapter.getByRole("combobox", { name: "Type" }).click();
+		await page.getByRole("option", { name: "Public" }).click();
+		await chapter.getByLabel(/latitude/i).fill("51.5");
+		await chapter.getByLabel(/longitude/i).fill("-0.12");
+		await chapter
+			.getByRole("combobox", { name: /authentication profile/i })
+			.click();
+		await page.getByRole("option", { name: "Barcode and PIN" }).click();
+
+		// Both in one task, so the second lands before any re-render could disable the button
+		await chapter
+			.getByRole("button", { name: /add the library/i })
+			.evaluate((button: HTMLButtonElement) => {
+				button.click();
+				button.click();
+			});
+
+		await expect(page).toHaveURL(
+			new RegExp(`/libraries/${LIBRARY_ID}/setup/contacts$`),
+		);
+		expect(created).toBe(1);
+	});
+
+	test("refuses an agency that already belongs to a library, and says so on the field", async ({
+		page,
+	}) => {
+		let created = 0;
+		let asked = "";
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			LoadHostLmsSelection: oneSierra,
+			// createLibrary would id the new library by this code and save over the existing one
+			LoadLibraryBasics: (variables: { query: string }) => {
+				asked = variables.query;
+				return {
+					libraries: {
+						totalSize: 1,
+						content: [{ id: LIBRARY_ID, fullName: "Existing library" }],
+					},
+				};
+			},
+			CreateLibrary: () => {
+				created++;
+				return { createLibrary: { id: LIBRARY_ID } };
+			},
+		});
+		await page.goto("/libraries/new/profile?ils=sierra&hostLms=SIERRA1");
+		const chapter = main(page);
+		await chapter.getByLabel("Full name").fill("New Library");
+		await chapter.getByLabel("Short name").fill("New");
+		await chapter.getByLabel("Abbreviated name").fill("NEW");
+		const agency = chapter.getByRole("combobox", {
+			name: /associated agency/i,
+		});
+		await agency.fill("TAKEN");
+		await chapter.getByLabel("Address").fill("1 Library Street");
+		await chapter.getByRole("combobox", { name: "Type" }).click();
+		await page.getByRole("option", { name: "Public" }).click();
+		await chapter.getByLabel(/latitude/i).fill("51.5");
+		await chapter.getByLabel(/longitude/i).fill("-0.12");
+		await chapter
+			.getByRole("combobox", { name: /authentication profile/i })
+			.click();
+		await page.getByRole("option", { name: "Barcode and PIN" }).click();
+		await chapter.getByRole("button", { name: /add the library/i }).click();
+
+		await expect(agency).toBeFocused();
+		await expect(agency).toHaveAccessibleDescription(
+			/TAKEN already belongs to a library/,
+		);
+		await expect(page).toHaveURL(/\/libraries\/new\/profile/);
+		expect(asked).toBe("agencyCode:TAKEN");
+		expect(created).toBe(0);
 	});
 });

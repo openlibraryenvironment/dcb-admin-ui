@@ -66,7 +66,7 @@ export default function LibrariesChapter() {
 						<CustomLinkButton
 							to="/libraries/new/$step"
 							params={{ step: "system" }}
-							search={{}}
+							search={{ from: "setup" }}
 							startIcon={<LibraryAdd />}
 							variant="contained"
 						>

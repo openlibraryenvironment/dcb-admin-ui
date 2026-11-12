@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, Typography, Box, useTheme } from "@mui/material";
 import { Heatmap } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { demandHeatmapQueryOptions, StatsParams } from "@helpers/statsApi";
@@ -31,7 +32,7 @@ export default function DemandHeatmapChart({
 }: {
 	params: StatsParams;
 }) {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const client = useDcbRestClient();
 	// `palette.mode`, and NOT `theme.applyStyles("dark", …)`, which is what the rest of this
 	// application now uses. applyStyles emits a CSS rule; this returns an ARRAY OF COLOURS
@@ -45,8 +46,11 @@ export default function DemandHeatmapChart({
 
 	const days = useMemo(() => weekdayLabels(), []);
 
-	const { series, maxCount } = useMemo(() => {
+	const { series, maxCount, byHour } = useMemo(() => {
 		const cells = data ?? [];
+		// One column per hour, one value per day: the table reads the grid the chart draws
+		const counts = HOURS.map(() => new Array<number>(7).fill(0));
+		for (const c of cells) counts[c.hourOfDay][c.dayOfWeek] = c.requestCount;
 		const heatmapData = cells.map(
 			(c) => [c.hourOfDay, c.dayOfWeek, c.requestCount] as const,
 		);
@@ -56,8 +60,13 @@ export default function DemandHeatmapChart({
 				{ data: heatmapData.map((d) => [...d] as [number, number, number]) },
 			],
 			maxCount: max,
+			byHour: counts,
 		};
 	}, [data]);
+	const hourLabels = useMemo(() => {
+		const fmt = new Intl.DateTimeFormat(i18n.language, { hour: "numeric" });
+		return HOURS.map((h) => fmt.format(new Date(2023, 0, 1, h)));
+	}, [i18n.language]);
 
 	return (
 		<Card variant="outlined">
@@ -79,29 +88,39 @@ export default function DemandHeatmapChart({
 					height={CHART_HEIGHT}
 				>
 					{() => (
-						// The 24-hour axis is wide; allow horizontal scroll on narrow screens.
-						<Box sx={{ overflowX: "auto" }}>
-							<Box sx={{ minWidth: 640 }}>
-								<Heatmap
-									height={CHART_HEIGHT}
-									xAxis={[{ data: HOURS }]}
-									yAxis={[{ data: days }]}
-									zAxis={[
-										{
-											min: 0,
-											max: maxCount,
-											colorMap: {
-												type: "continuous",
+						<ChartFigure
+							label={t("insights.charts.demand_heatmap.title")}
+							categoryLabel={t("ui.chart_table.day")}
+							categories={days}
+							series={HOURS.map((h) => ({
+								label: hourLabels[h],
+								values: byHour[h],
+							}))}
+						>
+							{/* The 24-hour axis is wide; allow horizontal scroll on narrow screens. */}
+							<Box sx={{ overflowX: "auto" }}>
+								<Box sx={{ minWidth: 640 }}>
+									<Heatmap
+										height={CHART_HEIGHT}
+										xAxis={[{ data: HOURS }]}
+										yAxis={[{ data: days }]}
+										zAxis={[
+											{
 												min: 0,
 												max: maxCount,
-												color: heatRamp(isDark),
+												colorMap: {
+													type: "continuous",
+													min: 0,
+													max: maxCount,
+													color: heatRamp(isDark),
+												},
 											},
-										},
-									]}
-									series={series}
-								/>
+										]}
+										series={series}
+									/>
+								</Box>
 							</Box>
-						</Box>
+						</ChartFigure>
 					)}
 				</PanelState>
 			</CardContent>

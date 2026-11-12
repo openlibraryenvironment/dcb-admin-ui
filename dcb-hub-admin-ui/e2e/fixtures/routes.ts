@@ -843,7 +843,7 @@ export const ROUTES: ScannedRoute[] = [
 			// The parsed event type, so the audit log has been fetched AND interpreted -
 			// an empty grid would pass a scan without proving either.
 			await expect(
-				page.getByText("Match - high confidence").first(),
+				page.getByText("Match: shared identifier").first(),
 			).toBeVisible();
 		},
 	},

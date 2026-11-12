@@ -59,7 +59,6 @@
 		},
 		"incidence_one": "{{count}} matching audit event",
 		"incidence_other": "{{count}} matching audit events",
-		"group_by_request": "Group by patron request",
 		"patron_request": "Patron request",
 		"request_status": "Request status",
 		"no_request": "No request",
@@ -104,7 +103,25 @@
 		"audit_to_status": "toStatus"
 	},
 	"bibRecords": {
+		"match_points": {
+			"title": "Match points",
+			"explanation": "What this bib can cluster on. Two bibs that share a value in the last column are a match on that point.",
+			"domain": "Identifier",
+			"source_value": "As read from the record",
+			"value": "Match value",
+			"none": "This bib has no match points, so it cannot cluster with another.",
+			"error": "The match points could not be worked out.",
+			"compare": "Compare",
+			"compare_with": "Compare with bib UUID",
+			"compare_invalid": "Enter a bib's UUID.",
+			"compare_failed": "That bib's match points could not be worked out.",
+			"shared": "Shared with the other bib",
+			"shared_count_one": "{{count}} of this bib's {{total}} match points is shared with the other bib.",
+			"shared_count_other": "{{count}} of this bib's {{total}} match points are shared with the other bib."
+		},
 		"audit_log": {
+			"open_bib": "Open the matched bib",
+			"open_cluster": "Open the cluster",
 			"title": "Ingest audit log",
 			"time": "Time",
 			"process": "Process",
@@ -119,7 +136,8 @@
 			"back": "Back to bib records"
 		},
 		"bibs_one": "bib record",
-		"contributor_uuid": "Contributor UUID",
+		"cluster_title": "Cluster title",
+		"cluster_uuid": "Cluster UUID",
 		"edition": "Edition",
 		"large_print": "Large print?",
 		"metadata_score": "Metadata score",
@@ -348,9 +366,6 @@
 		"onboarding_stats_outstanding_other": "{{count}} still outstanding",
 		"onboarding_stats_ils_caption": "libraries in this consortium.",
 		"onboarding_stats_unknown_ils": "Other or unknown",
-		"onboarding_stats_first_request": "Median days to first request",
-		"onboarding_stats_first_request_caption_one": "From the library being created, across {{count}} library. {{waiting}} not yet used.",
-		"onboarding_stats_first_request_caption_other": "From the library being created, across {{count}} libraries. {{waiting}} not yet used.",
 		"new": {
 			"title": "Create a consortium",
 			"required_title": "No consortium has been set up yet",
@@ -469,6 +484,8 @@
 		"reason_completing_setup": "Completing library setup"
 	},
 	"items": {
+		"not_offered_reason": "Why it is not offered",
+		"no_decisions": "The library's system recorded no decisions about this item.",
 		"live_lookup": {
 			"action": "Ask the library's system about item {{barcode}}",
 			"title": "Item {{barcode}} in {{hostLms}}",
@@ -914,6 +931,7 @@
 			"context_hierarchy_omits_code": "The context hierarchy does not include {{code}}, so DCB will not use mappings imported for {{code}}. Add it first, unless every mapping for this system is kept under a shared context.",
 			"missing_required": "The client configuration is missing: {{fields}}",
 			"not_whole_number": "These settings must be whole numbers of 0 or more: {{fields}}",
+			"malformed": "dcb-service will refuse these settings as they are: {{fields}}. An email setting needs a full address, and Alma's alternative sharing library must be a different library.",
 			"ingest": "Should DCB harvest records from this system?",
 			"ingest_description": "DCB harvests bibliographic records from a system unless told not to.",
 			"base_url": "Base URL",
@@ -1128,6 +1146,9 @@
 			"immutable_note": "The code and the client class cannot be changed. They identify this system to every mapping, location and record already pointing at it, so changing one is a new Host LMS rather than an edit.",
 			"no_profile": "There is no guided form for this client class, so the client configuration cannot be edited here.",
 			"config_preserved_title": "Some configuration is not shown here",
+			"unsupported_class": "This deployment's dcb-service does not accept {{ils}} settings, so this Host LMS cannot be edited here. It can be from dcb-service 9.0.0.",
+			"settings_before": "The settings before this edit",
+			"settings_changed": "Changed (values not shown)",
 			"config_preserved_body": "These keys have no guided field. They are kept exactly as they are when you save: {{keys}}",
 			"changed": {
 				"name": "Name",
@@ -1710,6 +1731,9 @@
 			"section_change_record": "Change record",
 			"agency_helper": "Choose an existing agency, or type a new code to create one.",
 			"agency_will_be_created": "No agency matches “{{code}}”, so a new agency will be created with this code when the library is saved.",
+			"agency_has_library": "{{code}} already belongs to a library. Choose another agency, or finish that library's setup from its own page.",
+			"agency_fixed": "A library's agency is fixed once the library exists.",
+			"agency_locked": "Participation and limits belong to the library's agency, and only a consortium administrator can change them.",
 			"latitude_helper": "Decimal degrees between -90 and 90.",
 			"longitude_helper": "Decimal degrees between -180 and 180.",
 			"coordinates_from_agency": "Taken from agency {{code}}. DCB uses the agency's location for every library that shares it.",
@@ -1748,6 +1772,8 @@
 		"principal_label": "Principal label",
 		"request_tooltip": "This is a {{ils}} library. The primary contact(s) are {{contact}}",
 		"ruleset_loading": "Loading ruleset information",
+		"ruleset_admin_only": "Only administrators can view a ruleset's rules.",
+		"ruleset_load_failed": "The rules for {{name}} could not be loaded.",
 		"search_placeholder": "Search by name",
 		"selected_libraries": "Selected libraries",
 		"settings_title": "Settings for {{name}}",
@@ -1857,6 +1883,7 @@
 			"time_zone": "Time zone",
 			"title": "Contacts for {{name}}",
 			"minimum_explanation": "Every library needs at least one contact. Add more if different people handle implementation, operations and support.",
+			"stored_read_only": "Contacts the library already has are changed or removed on its Contacts page. Add new ones here.",
 			"numbered": "Contact #{{number}}",
 			"remove_numbered": "Remove contact {{number}}"
 		},
@@ -1974,7 +2001,9 @@
 			"done": {
 				"page_title": "Library setup",
 				"title": "{{library}} is set up",
-				"title_partial": "{{library}} still has setup to finish"
+				"title_unharvested": "{{library}} is set up, but nothing has been harvested yet",
+				"title_partial": "{{library}} still has setup to finish",
+				"back_to_consortium_setup": "Back to consortium setup"
 			},
 			"harvest": {
 				"harvested_one": "DCB has harvested {{count}} record from this library's system.",
@@ -2563,6 +2592,44 @@
 		}
 	},
 	"patron_request": {
+		"columns": {
+			"patronHostlmsCode": "Patron library",
+			"supplyingAgencyCode": "Supplying library",
+			"pickupLocationCode": "Pickup location",
+			"pickupLibrary": "Pickup library",
+			"dateCreated": "Request created",
+			"patronBarcode": "Patron barcode",
+			"clusterRecordTitle": "Title",
+			"pickupRequestId": "Pickup request UUID",
+			"pickupRequestStatus": "Pickup request status",
+			"pickupItemId": "Pickup item ID",
+			"canonicalPtype": "DCB canonical patron type",
+			"canonicalItemType": "DCB canonical item type",
+			"previousStatus": "Previous status",
+			"status": "Status",
+			"nextExpectedStatus": "Next status",
+			"errorMessage": "Error message",
+			"outOfSequenceFlag": "Out of sequence",
+			"pollCountForCurrentStatus": "Polling count",
+			"elapsedTimeInCurrentStatus": "Time in state (days)",
+			"isManuallySelectedItem": "Manually selected?",
+			"dateUpdated": "Request updated",
+			"description": "Description",
+			"requesterNote": "Requester note",
+			"id": "Request UUID",
+			"activeWorkflow": "Active workflow",
+			"isExpeditedCheckout": "On-site borrowing request?",
+			"renewalCount": "Renewal count",
+			"resolutionCount": "Resolution count",
+			"itemBarcode": "Item barcode",
+			"localItemStatus": "Local item status",
+			"rawLocalItemStatus": "Raw local item status",
+			"localItemType": "Local item type",
+			"localItemId": "Local item ID",
+			"localRequestStatus": "Local request status",
+			"rawLocalRequestStatus": "Raw local request status",
+			"localRequestId": "Local request ID"
+		},
 		"active": "isActive",
 		"active_workflow": "Active workflow",
 		"borrowing": "Borrowing",
@@ -2674,10 +2741,11 @@
 			"reactivate_title": "Reactivate this supplier?",
 			"reactivate_body": "DCB will treat {{agency}} as this request's active supplier again, so tracking and re-resolution resume.",
 			"outcome": {
+				"interrupted": "Your session was renewed or the service was unavailable, so nothing was changed. Try again.",
 				"skipped": "DCB cancelled the hold at {{agency}} and checked the request again. Its status on this page shows what happened.",
 				"cancelled": "The hold at {{agency}} is cancelled and the supplier is paused.",
-				"cancel_not_confirmed": "{{agency}} did not report the hold cancelled, so the supplier was not paused.",
-				"cancel_not_confirmed_status": "{{agency}} reports the hold as {{status}}, not cancelled, so the supplier was not paused.",
+				"cancel_not_confirmed": "{{agency}} did not report the hold cancelled, so the supplier was not paused. DCB keeps polling it: the request is re-resolved or cancelled once the hold's cancellation is seen.",
+				"cancel_not_confirmed_status": "{{agency}} reports the hold as {{status}}, not cancelled, so the supplier was not paused. DCB keeps polling it: the request is re-resolved or cancelled once the hold's cancellation is seen.",
 				"reactivated": "The supplier is active again.",
 				"reactivate_not_applied": "dcb-service did not reactivate the supplier.",
 				"forbidden": "Only consortium administrators can change a supplier.",
@@ -2824,7 +2892,7 @@
 		},
 		"tags": {
 			"title": "Tags",
-			"explanation": "Tags come from the consortium's tag list. Removing a tag takes off only the consortium's: a library that applied the same tag keeps it.",
+			"explanation": "Tags come from the consortium's tag list; add one from Actions. Removing a tag takes off only the consortium's: a library that applied the same tag keeps it.",
 			"tag": "Tag",
 			"add": "Add tag",
 			"added": "Tag {{label}} added.",
@@ -2834,7 +2902,8 @@
 			"none": "No tags on this request.",
 			"none_short": "None",
 			"manage": "Manage tags",
-			"add_first": "Add a tag",
+			"add_action": "Add a tag",
+			"add_title": "Add a tag to this request",
 			"applied_by": "Applied by {{who}}",
 			"consortium": "the consortium",
 			"all_applied": "Every active tag is already on this request.",
@@ -2946,6 +3015,11 @@
 			"items_not_shown_helper_item": "Items without an item type are usually the result of a missing or misconfigured item type mapping. Please review the item type mappings for this library.",
 			"items_not_shown_helper_location": "Items without an 'Agency' value are usually the result of a missing or misconfigured Location mapping, or a missing agency. Please review the Location mappings for this library and the agency configuration.",
 			"items_not_shown_long": "{{number}} item(s) unable to be shown. You may have missing mappings or other configuration issues.",
+			"availability_errors": "Some libraries' systems could not be asked about their items:",
+			"items_not_shown_check": "Items held but not offered for request",
+			"items_not_shown_loading": "Asking each library's system for every item it holds…",
+			"items_not_shown_failed": "The items held could not all be read.",
+			"items_not_shown_none": "Every item held is offered for request.",
 			"items_not_shown_resolution": "If the item(s) below belong to your library and should be available to users, please review the mappings in the 'Mappings' section. There may be incorrect or missing mappings preventing DCB from showing the items below"
 		},
 		"staff_request": {
@@ -3011,7 +3085,18 @@
 			"in_progress": "Exporting member records…",
 			"empty": "This cluster has no member records to export.",
 			"forbidden": "Only administrators can export a cluster's member records.",
-			"failed": "The member records could not be exported."
+			"failed": "The member records could not be exported.",
+			"interrupted": "Your session was renewed or the service was unavailable, so nothing was exported. Try again."
+		},
+		"reprocess_cluster": {
+			"action": "Reprocess cluster",
+			"title": "Reprocess this cluster?",
+			"body": "Every member except the selected bib leaves this cluster and is queued to be clustered again. At the next processing run each one rejoins this cluster, joins another, or starts a new one. Requests already placed are not changed.",
+			"confirm": "Reprocess",
+			"started": "Reprocessing has started. Members return or move as they are processed, so this page can change over the next few minutes.",
+			"forbidden": "Only administrators can reprocess a cluster.",
+			"interrupted": "Your session was renewed or the service was unavailable, so the cluster was not reprocessed. Try again.",
+			"failed": "The cluster could not be reprocessed."
 		},
 		"cluster_title": "Cluster details for {{record}}",
 		"cluster_tooltip": "View cluster record",
@@ -3020,6 +3105,26 @@
 		"date_available": "Date available",
 		"date_due": "Date due",
 		"event_type": "Event type",
+		"cluster_matched": "Cluster matched",
+		"members": {
+			"selected": "Selected bib",
+			"selected_yes": "Selected",
+			"processing_state": "Processing state",
+			"last_processed": "Last processed"
+		},
+		"cluster_explanation_empty": "No clustering events are held for this cluster. Only the most recent processing of each bib is kept, and only bibs that belong to the cluster now are shown.",
+		"clustering_event": {
+			"highConfidenceMatch": "Match: shared identifier",
+			"lowConfidenceCandidate": "Candidate: checking titles",
+			"exactTitleMatch": "Match: same title",
+			"titleSimilarityMatch": "Match: similar title",
+			"titleSimilarityNoMatch": "No match: titles differ",
+			"matchedCluster": "Joined existing cluster",
+			"mergedClusters": "Merged clusters",
+			"outdatedCluster": "Cluster skipped: out of date",
+			"newCluster": "New cluster",
+			"other": "Other"
+		},
 		"format": "Format",
 		"formatted_timestamp": "Timestamp",
 		"shared_index_unavailable_title": "Shared index is not configured on this system",
@@ -3089,6 +3194,26 @@
 		"submit_ticket": "Submit a support ticket"
 	},
 	"ui": {
+		"chart_table": {
+			"show": "Show as a table",
+			"hide": "Hide the table",
+			"show_named": "Show as a table: {{label}}",
+			"hide_named": "Hide the table: {{label}}",
+			"rows_shown": "{{from}}–{{to}} of {{count}}",
+			"first_page": "First page",
+			"previous_page": "Previous page",
+			"next_page": "Next page",
+			"last_page": "Last page",
+			"period": "Period",
+			"day": "Day",
+			"library": "Library",
+			"supplier": "Supplier",
+			"status": "Status",
+			"reason": "Reason",
+			"format": "Format",
+			"pickup_location": "Pickup location",
+			"patron_group": "Patron group"
+		},
 		"a11y": {
 			"empty": "Empty field",
 			"is_breadcrumb": "This is a breadcrumb trail",
@@ -3187,10 +3312,18 @@
 			"edit_summary": "Edit {{entity}}",
 			"edit_url": "Enter a valid URL",
 			"edit_url_required": "A valid URL is required.",
+			"expand_group": "Show this group's rows",
+			"collapse_group": "Hide this group's rows",
 			"export_failed": "The data grid export has failed. Please try again.",
+			"export_too_large": "This export would have {{count, number}} rows, more than the {{max, number}} an export can hold. Filter the grid to fewer rows and export again.",
 			"export_success": "Successfully exported {{count}} records from the data grid.",
 			"export_modal_title": "Exporting data",
 			"exporting_records": "Exporting {{count}} records from the data grid.",
+			"server_operators": {
+				"does_not_contain": "does not contain (blank left out)",
+				"does_not_equal": "does not equal (blank left out)",
+				"is_not": "is not (blank left out)"
+			},
 			"export": {
 				"current": "Current page",
 				"filtered": "Filtered results",
@@ -3288,6 +3421,7 @@
 			}
 		},
 		"error": {
+			"access_denied": "Your account does not have the role this action needs.",
 			"401": {
 				"name": "401 Unauthorised",
 				"summary": "Sorry, you do not have access to this page",
@@ -3384,6 +3518,7 @@
 			"not_a_number": "Enter the {{field}} as a number.",
 			"out_of_range": "Enter the {{field}} as a number between {{min}} and {{max}}.",
 			"non_negative_integer": "Enter the {{field}} as a whole number of 0 or more, or leave it blank.",
+			"integer_too_large": "{{field}} can be at most {{max, number}}.",
 			"positive_integer": "Enter the {{field}} as a whole number of 1 or more, or leave it blank."
 		},
 		"visibility": {
@@ -3653,6 +3788,8 @@
 			"library_user_provisioning": "Library account provisioning",
 			"audit_explorer": "Audit Explorer",
 			"local_holds": "Maximum local holds per agency",
+			"cluster_export": "Exporting a cluster's member records",
+			"consortium_match_points": "A bib's match points for consortium administrators",
 			"host_lms_probes": "Host LMS checks, the last connection check and ingest counts for chosen libraries",
 			"host_lms_circulation_settings": "Alma cancellation and renewal settings, visiting patron details for Sierra, Polaris and Koha, and the Sierra API version",
 			"settings_inheritance": "Settings inheritance",

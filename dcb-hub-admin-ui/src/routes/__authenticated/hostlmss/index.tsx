@@ -200,12 +200,8 @@ function HostLmss() {
 					query: getHostLms(),
 					coreType: "hostLms",
 				}}
-				disableAggregation
 				disableHoverInteractions={false}
-				disableRowGrouping
-				disablePivoting
 				listViewEnabled={false}
-				pivotingEnabled={false}
 				toolbarVisible
 				scrollbarVisible={false}
 				noResultsText={t("hostlms.no_results")}

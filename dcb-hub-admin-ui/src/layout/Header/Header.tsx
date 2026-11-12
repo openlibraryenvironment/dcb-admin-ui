@@ -231,7 +231,13 @@ export default function Header({
 						component="img"
 						src={isEmpty(headerImageURL) ? fallbackHeaderSrc : headerImageURL}
 						alt={String(t("consortium.logo_app_header"))}
-						sx={{ width: 36, height: 36, mt: !iconsVisible ? 1 : 0 }}
+						sx={{
+							width: 36,
+							height: 36,
+							mt: !iconsVisible ? 1 : 0,
+							// At 320px the logo's 36px is what pushed Logout off the screen
+							display: { xs: "none", sm: "block" },
+						}}
 					/>
 
 					<Typography
@@ -243,6 +249,14 @@ export default function Header({
 							fontWeight: "bold",
 							flexGrow: 1,
 							paddingInlineStart: 2,
+							// Shrinks and wraps to two lines before it pushes the actions out
+							minWidth: 0,
+							overflowWrap: "anywhere",
+							lineHeight: 1.2,
+							display: "-webkit-box",
+							WebkitLineClamp: 2,
+							WebkitBoxOrient: "vertical",
+							overflow: "hidden",
 						}}
 					>
 						{pageTitle}

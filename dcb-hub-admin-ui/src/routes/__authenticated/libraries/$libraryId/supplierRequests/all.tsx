@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
 import { useAuth } from "react-oidc-context";
-import { Grid, Tab, Tabs, Typography, useTheme } from "@mui/material";
+import { Grid, Typography, useTheme } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import type { GridRowModesModel } from "@mui/x-data-grid-premium";
 import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
@@ -181,12 +181,9 @@ function SupplierRequestsAll() {
 					<LibraryTabs libraryId={libraryId} value={5} />
 				</Grid>
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-					<Tabs value={0} sx={{ mb: 2 }}>
-						<Tab label={t("libraries.patronRequests.all_no_count")} />
-					</Tabs>
-
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 							mb: 2,
@@ -229,14 +226,10 @@ function SupplierRequestsAll() {
 							quickFilterFields: ["status", "description"],
 							wizard: true,
 						}}
-						disableAggregation
-						disableRowGrouping
 						disableHoverInteractions={false}
-						disablePivoting={true}
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible
 						noResultsText={t("patron_requests.no_results")}

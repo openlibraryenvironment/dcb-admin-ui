@@ -16,6 +16,8 @@ import {
 	missingRequiredClientConfig,
 	mergeClientConfigEdit,
 	notWholeNumberClientConfig,
+	malformedClientConfig,
+	canSaveHostLmsClass,
 	originOf,
 } from "./hostLmsClientConfig";
 import ADAPTER_DEFAULTS from "../../host-lms-defaults.json";
@@ -52,6 +54,43 @@ afterEach(() => {
  */
 describe("hostLmsClientConfig", () => {
 	describe("required fields per ILS", () => {
+		// The raw JSON editor holds what was typed, so a setting may sit at any path
+		// dcb-service reads it from, not only the one the guided form writes
+		it.each([
+			[
+				"an ORS ncipSystemId",
+				HOST_LMS_CLASSES.orsAppliance,
+				{ ncipSystemId: "ORS1" },
+				"ncip-system-id",
+			],
+			[
+				"a Foundation ncip.endpoint",
+				HOST_LMS_CLASSES.foundation,
+				{ ncip: { endpoint: "https://ncip.example.org" } },
+				"ncip-endpoint-url",
+			],
+			[
+				"a Foundation SIP2 base protocol set as an imperative capability",
+				HOST_LMS_CLASSES.foundation,
+				{ capabilities: { imperative: { "base-protocol": "SIP2" } } },
+				"ncip-endpoint-url",
+			],
+		])("accepts %s", (_, lmsClientClass, config, name) => {
+			expect(
+				missingRequiredClientConfig(lmsClientClass, config).map(
+					(problem) => problem.name,
+				),
+			).not.toContain(name);
+		});
+
+		it("still demands the SIP2 host when the imperative capability selects SIP2", () => {
+			expect(
+				missingRequiredClientConfig(HOST_LMS_CLASSES.foundation, {
+					capabilities: { imperative: { "base-protocol": "SIP2" } },
+				}).map((problem) => problem.name),
+			).toContain("sip2.host");
+		});
+
 		it("demands everything HostLmsConfigValidator demands for Sierra", () => {
 			const missing = missingRequiredClientConfig(
 				HOST_LMS_CLASSES.sierra,
@@ -779,6 +818,34 @@ describe("hostLmsClientConfig", () => {
 			);
 		});
 
+		it('reads a boolean stored as the string "true" as true, as dcb-service does', () => {
+			extendedConfig(true);
+			const stored = {
+				"base-url": "https://sierra.example.org",
+				key: "k",
+				secret: "s",
+				"page-size": "100",
+				ingest: "true",
+				"shared-system": "TRUE",
+			};
+
+			const { values } = clientConfigToFields(HOST_LMS_CLASSES.sierra, stored);
+
+			expect(values.ingest).toBe(true);
+			expect(values["shared-system"]).toBe(true);
+			const saved = buildClientConfig(HOST_LMS_CLASSES.sierra, values);
+			expect(saved.ingest).toBe(true);
+			expect(saved["shared-system"]).toBe(true);
+		});
+
+		it("still reads anything else as false", () => {
+			const { values } = clientConfigToFields(HOST_LMS_CLASSES.sierra, {
+				ingest: "false",
+			});
+
+			expect(values.ingest).toBe(false);
+		});
+
 		it("names keys the guided form has no field for", () => {
 			const { unmappedKeys } = clientConfigToFields(HOST_LMS_CLASSES.sierra, {
 				"base-url": "https://sierra.example.org",
@@ -1055,8 +1122,9 @@ describe("hostLmsClientConfig", () => {
 			expect(merged.nested).toEqual({ "also-bespoke": 7 });
 		});
 
-		// 8.71.0 never acted on it and 9.2.0 refuses it, so keeping it blocked every save
-		it("drops a Polaris borrower-lending-flow, and keeps other unmapped keys", () => {
+		// 9.2.0 refuses it, so keeping it there blocked every save
+		it("drops a Polaris borrower-lending-flow where 9.2.0 runs, and keeps other unmapped keys", () => {
+			circulationSettings(true);
 			const merged = mergeClientConfigEdit(
 				{ "borrower-lending-flow": "ILL", "some-bespoke-flag": "keep me" },
 				HOST_LMS_CLASSES.polaris,
@@ -1065,6 +1133,18 @@ describe("hostLmsClientConfig", () => {
 
 			expect(merged).not.toHaveProperty("borrower-lending-flow");
 			expect(merged["some-bespoke-flag"]).toBe("keep me");
+		});
+
+		// 8.71.0-9.1.0 return placeholder bibs and items when it is "ILL"
+		it("keeps a Polaris borrower-lending-flow before 9.2.0", () => {
+			circulationSettings(false);
+			const merged = mergeClientConfigEdit(
+				{ "borrower-lending-flow": "ILL" },
+				HOST_LMS_CLASSES.polaris,
+				{},
+			);
+
+			expect(merged["borrower-lending-flow"]).toBe("ILL");
 		});
 
 		it("clears a guided field the user emptied", () => {
@@ -1488,5 +1568,82 @@ describe("settings dcb-service reads from more than one place", () => {
 
 		expect(merged["base-protocol"]).toBe("SIP2");
 		expect(merged.capabilities).toEqual({ imperative: { other: "kept" } });
+	});
+});
+
+// HostLmsConfigValidator (9.2.0) answers 400 to both
+describe("malformedClientConfig", () => {
+	beforeEach(latestRelease);
+
+	it.each(["ops@localhost", "not an address", "a@b@c.org"])(
+		"refuses %s as a virtual patron email",
+		(email) => {
+			expect(
+				malformedClientConfig(HOST_LMS_CLASSES.sierra, {
+					"virtual-patron-email": email,
+				}).map((problem) => problem.name),
+			).toEqual(["virtual-patron-email"]);
+		},
+	);
+
+	it("accepts a full address, and a blank one", () => {
+		expect(
+			malformedClientConfig(HOST_LMS_CLASSES.sierra, {
+				"virtual-patron-email": "dcb-ops@library.example.org",
+			}),
+		).toEqual([]);
+		expect(malformedClientConfig(HOST_LMS_CLASSES.sierra, {})).toEqual([]);
+	});
+
+	it("refuses an Alma alternative sharing library that is the sharing library", () => {
+		expect(
+			malformedClientConfig(HOST_LMS_CLASSES.alma, {
+				"sharing-library-code": "RS",
+				"alternative-sharing-library-code": "RS",
+			}).map((problem) => problem.name),
+		).toEqual(["alternative-sharing-library-code"]);
+		expect(
+			malformedClientConfig(HOST_LMS_CLASSES.alma, {
+				"sharing-library-code": "RS",
+				"alternative-sharing-library-code": "RS2",
+			}),
+		).toEqual([]);
+	});
+});
+
+// 8.71.0 refuses a Sierra without page-size and a FOLIO without both harvest settings never
+// harvests; 9.2.0 defaults all three
+describe("settings dcb-service 9.2.0 defaults", () => {
+	const missingNames = (lmsClientClass: string) =>
+		missingRequiredClientConfig(lmsClientClass, {}).map((gap) => gap.name);
+
+	it("are required before 9.2.0", () => {
+		extendedConfig(true);
+		expect(missingNames(HOST_LMS_CLASSES.sierra)).toContain("page-size");
+		expect(missingNames(HOST_LMS_CLASSES.folio)).toEqual(
+			expect.arrayContaining(["record-syntax", "metadata-prefix"]),
+		);
+	});
+
+	it("are not required from 9.2.0", () => {
+		latestRelease();
+		expect(missingNames(HOST_LMS_CLASSES.sierra)).not.toContain("page-size");
+		expect(missingNames(HOST_LMS_CLASSES.folio)).not.toContain("record-syntax");
+		expect(missingNames(HOST_LMS_CLASSES.folio)).not.toContain(
+			"metadata-prefix",
+		);
+	});
+});
+
+// 8.71.0 answers "Unsupported LMS Client Class" to every save of a 9.0.0 class
+describe("canSaveHostLmsClass", () => {
+	it("refuses a Koha where the 9.0.0 settings are off", () => {
+		expect(canSaveHostLmsClass(HOST_LMS_CLASSES.koha)).toBe(false);
+		expect(canSaveHostLmsClass(HOST_LMS_CLASSES.sierra)).toBe(true);
+	});
+
+	it("allows every class from 9.0.0", () => {
+		extendedConfig(true);
+		expect(canSaveHostLmsClass(HOST_LMS_CLASSES.koha)).toBe(true);
 	});
 });

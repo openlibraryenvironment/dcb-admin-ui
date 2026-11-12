@@ -911,7 +911,7 @@ function LibraryProfile() {
 					<DataGrid
 						identifier="libraryGroups"
 						pagination
-						paginationModel={{ page: 0, pageSize: 20 }}
+						initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						type="groups"
@@ -940,15 +940,11 @@ function LibraryProfile() {
 						paginationMode="client"
 						sortingMode="client"
 						filterMode="client"
-						disableAggregation
-						disableRowGrouping
 						toolbarVisible={false}
 						scrollbarVisible={false}
 						noResultsText={t("groups.none_for_library")}
 						searchText=""
 						disableHoverInteractions
-						disablePivoting
-						pivotingEnabled={false}
 						listViewEnabled={false}
 					/>
 				</Grid>

@@ -1,5 +1,7 @@
 import {
 	isAuditExplorerEnabled,
+	isClusterExportEnabled,
+	isConsortiumMatchPointsEnabled,
 	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
 	isConfirmItemReturnedEnabled,
@@ -272,6 +274,23 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 				"resendLibraryUserInvite",
 			],
 		},
+	},
+	{
+		// A REST route older than 8.71.0; 9.1.0 is when it stopped building the zip on the
+		// R2DBC thread, so nothing to select or strip
+		id: "cluster_export",
+		flag: "VITE_FEATURE_CLUSTER_EXPORT",
+		enabled: isClusterExportEnabled,
+		since: "9.1.0",
+		fields: {},
+	},
+	{
+		// REST, so nothing to select or strip: 9.4.0 widens GET /bibs/{id}/matchpoints
+		id: "consortium_match_points",
+		flag: "VITE_FEATURE_CONSORTIUM_MATCH_POINTS",
+		enabled: isConsortiumMatchPointsEnabled,
+		since: "9.4.0",
+		fields: {},
 	},
 	{
 		// Shipped in 9.1.0, by V9_0_007__agency_max_local_holds.sql.

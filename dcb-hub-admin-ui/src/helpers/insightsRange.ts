@@ -69,6 +69,19 @@ export function intervalForSpan(
 	return "month";
 }
 
+/** A time-series bucket as a table reads it: its first day, or its month for a monthly series. */
+export const formatBucket = (
+	bucket: Date,
+	interval: TimeSeriesInterval,
+	language?: string,
+): string =>
+	new Intl.DateTimeFormat(
+		language,
+		interval === "month"
+			? { month: "long", year: "numeric" }
+			: { dateStyle: "medium" },
+	).format(bucket);
+
 // Human-readable turnaround: seconds -> "3.2 days" / "7 hrs" / "45 min".
 export function formatDuration(seconds: number | null | undefined): string {
 	if (!seconds || seconds <= 0) return "—";

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "react-oidc-context";
 import { isConsortiumStaff } from "@helpers/consortiumAccess";
+import { serverAdmits } from "@constants/serverRoles";
 import {
 	useInfiniteQuery,
 	useMutation,
@@ -22,7 +23,6 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import {
 	Accordion,
-	Box,
 	AccordionDetails,
 	AccordionSummary,
 	CircularProgress,
@@ -43,9 +43,7 @@ import PageLoading from "@components/Loading/PageLoading";
 import { CustomLink } from "@components/CustomLink/CustomLink";
 import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
 import Confirmation from "@components/Confirmation/Confirmation";
-import PageActionsMenu, {
-	Action,
-} from "@components/PageActionsMenu/PageActionsMenu";
+import type { Action } from "@components/PageActionsMenu/PageActionsMenu";
 import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
 import { useGridView } from "@hooks/useGridView";
 import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
@@ -63,6 +61,13 @@ import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { requestReferenceOf } from "@helpers/requestReference";
 import { getPatronRequest } from "@queries/getPatronRequest";
+import { getPatronRequestAudits } from "@queries/getPatronRequestAudits";
+import { getPatronRequestClusterMembers } from "@queries/getPatronRequestClusterMembers";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
+import { containsOnly } from "@filters/containsOnly";
+import { equalsOnly } from "@filters/equalsOnly";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { getLocation } from "@queries/getLocation";
 import { getPatronIdentities } from "@queries/getPatronIdentities";
@@ -83,6 +88,8 @@ import { placedBy } from "@helpers/placedBy";
 import PatronRequestNotes from "@components/PatronRequestNotes/PatronRequestNotes";
 import PatronRequestTags from "@components/PatronRequestTags/PatronRequestTags";
 import PatronRequestTagSummary from "@components/PatronRequestTags/PatronRequestTagSummary";
+import AddRequestTagDialog from "@components/PatronRequestTags/AddRequestTagDialog";
+import { REQUEST_TAGS_SECTION_ID } from "@helpers/requestTags";
 import {
 	confirmItemReturned,
 	isConfirmReturnEligible,
@@ -99,10 +106,13 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
 	LoadLocationQueryVariables,
 	LoadPatronIdentitiesQueryVariables,
+	LoadPatronRequestAuditsQuery,
+	LoadPatronRequestAuditsQueryVariables,
+	LoadPatronRequestClusterMembersQuery,
+	LoadPatronRequestClusterMembersQueryVariables,
 	LoadPatronRequestQueryVariables,
 } from "@generated/graphql";
 
-import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
 import { errorForLog } from "@helpers/safeErrorLog";
@@ -125,6 +135,7 @@ const REQUEST_TABS = [
 	"audit",
 	"notes",
 	"previousSuppliers",
+	"tags",
 ] as const;
 type RequestTab = (typeof REQUEST_TABS)[number];
 const requestTabSchema = z.object({
@@ -132,39 +143,49 @@ const requestTabSchema = z.object({
 });
 
 // Stable, so the audit grid's columns are not new on every render
-const AUDIT_COLUMNS: GridColDef[] = [
+// The operators dcb-service answers for audits, as Audit Explorer offers them
+const nextScheduledPollOf = (query: { state: { data: unknown } }) =>
+	(
+		query.state.data as
+			| { patronRequests?: { content?: { nextScheduledPoll?: string }[] } }
+			| undefined
+	)?.patronRequests?.content?.[0]?.nextScheduledPoll;
+
+const AUDIT_COLUMNS: GridColDef[] = constrainToServerOperators([
 	{
 		field: "auditDate",
 		headerName: "Audit date",
 		minWidth: 60,
 		flex: 0.2,
-		editable: false,
-		filterable: true,
-		sortable: true,
-		valueGetter: (value: string, row: { auditDate: string }) => {
-			const auditDate = row.auditDate;
-			return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
-		},
+		type: "dateTime",
+		filterOperators: luceneDateRangeOperators,
+		valueGetter: (_value, row) =>
+			row?.auditDate ? new Date(row.auditDate) : null,
+		valueFormatter: (value: Date | null) =>
+			value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss.SSS") : "",
 	},
 	{
 		field: "briefDescription",
 		headerName: "Description",
 		minWidth: 100,
 		flex: 0.4,
+		filterOperators: containsOnly,
 	},
 	{
 		field: "fromStatus",
 		headerName: "fromStatus",
 		minWidth: 50,
 		flex: 0.25,
+		filterOperators: equalsOnly,
 	},
 	{
 		field: "toStatus",
 		headerName: "toStatus",
 		minWidth: 50,
 		flex: 0.25,
+		filterOperators: equalsOnly,
 	},
-];
+]);
 
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	validateSearch: (search: Record<string, unknown>) => ({
@@ -218,19 +239,30 @@ function RouteComponent() {
 		useState(false);
 	const [rollbackErrorAlertVisibility, setRollbackErrorAlertVisibility] =
 		useState(false);
-	const [supplierAction, setSupplierAction] = useState<SupplierAction | null>(
-		null,
-	);
+	// The supplier as it was when the action was chosen: the refetch after a skip can bring
+	// back a different suppliers[0], and the dialog must act on and name the one it opened for
+	const [addingTag, setAddingTag] = useState(false);
+	const [supplierAction, setSupplierAction] = useState<{
+		action: SupplierAction;
+		supplier: { id: string; localAgency?: string | null };
+		isManuallySelectedItem?: boolean | null;
+	} | null>(null);
 	const navigate = useNavigate({ from: "/patronRequests/$id/" });
 	const requestedTab = useSearch({
 		from: "/__authenticated/patronRequests/$id/",
 		select: (search) => search.tab,
 	});
 	const isAdmin = auth?.user?.profile?.roles?.includes("ADMIN") ?? false;
+	// Read-only, and the only record of what a supplier fix-up did, which consortium
+	// administrators run: inactiveSupplierRequests admits any staff role
+	const canSeePreviousSuppliers = isConsortiumStaff(
+		(auth?.user?.profile?.roles as string[] | undefined) ?? [],
+	);
 	// A shared link to a tab this user or deployment does not have opens on General
 	const tabName: RequestTab =
 		(requestedTab === "notes" && !isRequestNotesEnabled()) ||
-		(requestedTab === "previousSuppliers" && !isAdmin)
+		(requestedTab === "tags" && !isRequestTagsEnabled()) ||
+		(requestedTab === "previousSuppliers" && !canSeePreviousSuppliers)
 			? "general"
 			: (requestedTab ?? "general");
 	const activeTab = REQUEST_TABS.indexOf(tabName);
@@ -264,21 +296,57 @@ function RouteComponent() {
 		enabled: !!id,
 		// Both windows come from dcb-service's own schedule rather than from a number
 		// picked here - see @helpers/patronRequestFreshness.
-		staleTime: (query) =>
-			staleTimeFromNextPoll(
-				(
-					query.state.data as
-						| {
-								patronRequests?: { content?: { nextScheduledPoll?: string }[] };
-						  }
-						| undefined
-				)?.patronRequests?.content?.[0]?.nextScheduledPoll,
-			),
-		refetchInterval: DETAIL_REFETCH_MS,
+		staleTime: (query) => staleTimeFromNextPoll(nextScheduledPollOf(query)),
+		// Asks again when dcb-service could next have moved it: 10s to 5 minutes
+		refetchInterval: (query) =>
+			staleTimeFromNextPoll(nextScheduledPollOf(query)),
 	});
 
 	const patronRequest = data?.patronRequests?.content?.[0];
-	const members = patronRequest?.clusterRecord?.members;
+	// Every member's harvested record, so only while the Bib tab is open
+	const clusterMembers = useQuery({
+		...nonCriticalQuery,
+		queryKey: ["patronRequest", id, "clusterMembers"],
+		queryFn: () =>
+			gqlClient.request<
+				LoadPatronRequestClusterMembersQuery,
+				LoadPatronRequestClusterMembersQueryVariables
+			>(getPatronRequestClusterMembers, { query: `id:${id}` }),
+		enabled: !!id && tabName === "bib",
+	});
+	const members: any[] | undefined =
+		clusterMembers.data?.patronRequests?.content?.[0]?.clusterRecord?.members ??
+		undefined;
+
+	// One page of the history, only while the History tab is open
+	const auditPage = useQuery({
+		...nonCriticalQuery,
+		queryKey: [
+			"patronRequest",
+			id,
+			"audits",
+			audit.paginationModel,
+			audit.sortModel,
+			audit.appliedFilterModel,
+		],
+		queryFn: () =>
+			gqlClient.request<
+				LoadPatronRequestAuditsQuery,
+				LoadPatronRequestAuditsQueryVariables
+			>(
+				getPatronRequestAudits,
+				buildServerGridQueryVars({
+					filterModel: audit.appliedFilterModel,
+					sortModel: audit.sortModel,
+					paginationModel: audit.paginationModel,
+					baseQuery: `patronRequest:"${id}"`,
+					defaultOrder: "auditDate",
+					defaultPageSize: requestAuditView.defaultPageSize,
+				}) as LoadPatronRequestAuditsQueryVariables,
+			),
+		enabled: !!id && tabName === "audit",
+		placeholderData: (previous) => previous,
+	});
 
 	// Keyed on - and gated by - the supplying agency, the way the patron and
 	// pickup library queries are. Keying on the request id and enabling on it
@@ -536,6 +604,14 @@ function RouteComponent() {
 		? "/search/" + patronRequest?.bibClusterId + "/cluster"
 		: "";
 
+	const openTab = (next: RequestTab) =>
+		navigate({
+			search: (previous: Record<string, unknown>) => ({
+				...previous,
+				tab: next === "general" ? undefined : next,
+			}),
+			replace: true,
+		});
 	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
 		const next = REQUEST_TABS[newValue];
 		navigate({
@@ -666,28 +742,48 @@ function RouteComponent() {
 		});
 	}
 
-	// ADMIN as asked, and CONSORTIUM_ADMIN because dcb-service refuses anyone without it
+	if (isRequestTagsEnabled()) {
+		pageActions.push({
+			key: "add-tag",
+			label: t("patron_request.tags.add_action"),
+			onClick: () => setAddingTag(true),
+		});
+	}
+
 	const supplier = patronRequest?.suppliers?.[0];
-	if (isAdmin && roles.includes("CONSORTIUM_ADMIN") && supplier?.id) {
-		for (const action of availableSupplierActions(supplier)) {
+	const supplierId = supplier?.id;
+	if (serverAdmits("supplierActions", roles) && supplier && supplierId) {
+		for (const action of availableSupplierActions(supplier, patronRequest)) {
 			pageActions.push({
 				key: `supplier-${action}`,
 				label: t(`patron_request.supplier_actions.${action}`),
-				onClick: () => setSupplierAction(action),
+				onClick: () =>
+					setSupplierAction({
+						action,
+						supplier: { id: supplierId, localAgency: supplier.localAgency },
+						isManuallySelectedItem: patronRequest?.isManuallySelectedItem,
+					}),
 			});
 		}
 	}
 
 	return (
-		<PageContainer title={patronRequest?.clusterRecord?.title}>
-			<Stack direction="row" sx={{ justifyContent: "flex-end", mb: 2 }}>
-				<PageActionsMenu actions={pageActions} pending={actionProgress} />
-			</Stack>
-			{supplierAction && supplier?.id && (
+		<PageContainer
+			title={patronRequest?.clusterRecord?.title}
+			pageActions={pageActions}
+			pageActionsPending={actionProgress}
+		>
+			{addingTag && (
+				<AddRequestTagDialog
+					patronRequestId={id}
+					onClose={() => setAddingTag(false)}
+				/>
+			)}
+			{supplierAction && (
 				<SupplierActionDialog
-					action={supplierAction}
-					supplier={{ id: supplier.id, localAgency: supplier.localAgency }}
-					isManuallySelectedItem={patronRequest?.isManuallySelectedItem}
+					action={supplierAction.action}
+					supplier={supplierAction.supplier}
+					isManuallySelectedItem={supplierAction.isManuallySelectedItem}
 					onClose={() => setSupplierAction(null)}
 				/>
 			)}
@@ -708,7 +804,7 @@ function RouteComponent() {
 					<Tab label={t("patron_request.general")} value={0} />
 					<Tab label={t("requesting.bib_record")} value={1} />
 					<Tab label={t("patron_request.supplying")} value={2} />
-					{isAdmin && (
+					{canSeePreviousSuppliers && (
 						<Tab
 							label={t("patron_request.previous_suppliers.title")}
 							value={7}
@@ -727,6 +823,9 @@ function RouteComponent() {
 							value={6}
 						/>
 					)}
+					{isRequestTagsEnabled() && (
+						<Tab label={t("patron_request.tags.title")} value={8} />
+					)}
 				</TabList>
 
 				<TabPanel value={0}>
@@ -742,7 +841,14 @@ function RouteComponent() {
 						</Grid>
 						{isRequestTagsEnabled() && (
 							<Grid size={{ xs: 4, sm: 8, md: 12, lg: 16 }}>
-								<PatronRequestTagSummary patronRequestId={id} />
+								<PatronRequestTagSummary
+									patronRequestId={id}
+									onManage={() =>
+										openTab("tags").then(() =>
+											document.getElementById(REQUEST_TAGS_SECTION_ID)?.focus(),
+										)
+									}
+								/>
 							</Grid>
 						)}
 						{patronLibrary?.fullName ? (
@@ -1364,11 +1470,6 @@ function RouteComponent() {
 							</Grid>
 						)}
 					</Grid>
-					{isRequestTagsEnabled() && (
-						<Box sx={{ mt: 4 }}>
-							<PatronRequestTags patronRequestId={id} />
-						</Box>
-					)}
 				</TabPanel>
 
 				<TabPanel value={1}>
@@ -1459,11 +1560,7 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("bibRecords.source_record_id")}
 								</Typography>
-								<RenderAttribute
-									attribute={
-										patronRequest?.clusterRecord?.members?.[0]?.sourceRecordId
-									}
-								/>
+								<RenderAttribute attribute={members?.[0]?.sourceRecordId} />
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1471,11 +1568,7 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("bibRecords.source_system_uuid")}
 								</Typography>
-								<RenderAttribute
-									attribute={
-										patronRequest?.clusterRecord?.members?.[0]?.sourceSystemId
-									}
-								/>
+								<RenderAttribute attribute={members?.[0]?.sourceSystemId} />
 							</Stack>
 						</Grid>
 					</Grid>
@@ -1492,7 +1585,11 @@ function RouteComponent() {
 							id="request_source_record"
 							expandIcon={<ExpandMore fontSize="large" />}
 						>
-							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+							<Typography
+								variant="h3"
+								component="span"
+								sx={{ fontWeight: "bold" }}
+							>
 								{t("bibRecords.source_record")}
 							</Typography>
 						</AccordionSummary>
@@ -2331,8 +2428,8 @@ function RouteComponent() {
 						{t("audit_log.title")}
 					</Typography>
 					<DataGrid
-						disablePivoting
-						rows={patronRequest?.audit ?? []}
+						rows={auditPage.data?.audits?.content ?? []}
+						rowCount={auditPage.data?.audits?.totalSize ?? 0}
 						columns={AUDIT_COLUMNS}
 						columnVisibilityModel={audit.columnVisibilityModel}
 						onColumnVisibilityModelChange={audit.onColumnVisibilityModelChange}
@@ -2340,33 +2437,27 @@ function RouteComponent() {
 						viewNotice={<GridViewNotice view={audit} />}
 						type="audits"
 						identifier="AuditPatronRequestDetails"
-						// This grid could show click-through details of its own for each audit log entry
-						// sortModel={[{ field: "auditDate", sort: "desc" }]}
-						// operationDataType="Audit"
-						filterMode="client"
+						filterMode="server"
 						filterModel={audit.filterModel}
 						onFilterModelChange={audit.onFilterModelChange}
-						disableAggregation={true}
 						disableHoverInteractions={true}
-						disableRowGrouping={true}
-						loading={patronRequestLoading}
+						loading={auditPage.isLoading || auditPage.isFetching}
 						listViewEnabled={false}
 						noResultsText={t("ui.data_grid.no_results")}
 						pagination
-						paginationMode="client"
+						paginationMode="server"
 						paginationModel={audit.paginationModel}
 						onPaginationModelChange={audit.onPaginationModelChange}
-						pivotingEnabled={false}
 						toolbarVisible
 						searchText={t("ui.data_grid.search_by_audit")}
 						scrollbarVisible={false}
-						sortingMode="client"
+						sortingMode="server"
 						sortModel={audit.sortModel}
 						onSortModelChange={audit.onSortModelChange}
 					/>
 				</TabPanel>
 
-				{isAdmin && (
+				{canSeePreviousSuppliers && (
 					<TabPanel value={7}>
 						<PreviousSuppliers patronRequestId={id} />
 					</TabPanel>
@@ -2375,6 +2466,12 @@ function RouteComponent() {
 				{isRequestNotesEnabled() && (
 					<TabPanel value={6}>
 						<PatronRequestNotes patronRequestId={id} />
+					</TabPanel>
+				)}
+
+				{isRequestTagsEnabled() && (
+					<TabPanel value={8}>
+						<PatronRequestTags patronRequestId={id} />
 					</TabPanel>
 				)}
 			</TabContext>

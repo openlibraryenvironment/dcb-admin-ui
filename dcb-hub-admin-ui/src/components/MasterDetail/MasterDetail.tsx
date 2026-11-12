@@ -28,6 +28,7 @@ import {
 
 import { formatDuration } from "@helpers/formatDuration";
 import { showItemDiagnostics } from "@helpers/itemDiagnostics";
+import ClusteringEventChip from "@components/ClusteringEventChip/ClusteringEventChip";
 import MasterDetailLayout from "./MasterDetailLayout";
 import RequestTagsAndNotes from "./components/RequestTagsAndNotes/RequestTagsAndNotes";
 import {
@@ -692,7 +693,17 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 										</Typography>
 									</StyledDataGridAccordionSummary>
 									<AccordionDetails id="item_decision_log">
-										{JSON.stringify(row?.decisionLogEntries, null, 2)}
+										{row?.decisionLogEntries?.length ? (
+											<List dense disablePadding>
+												{row.decisionLogEntries.map((entry: string) => (
+													<ListItem key={entry} disableGutters>
+														{entry}
+													</ListItem>
+												))}
+											</List>
+										) : (
+											t("items.no_decisions")
+										)}
 									</AccordionDetails>
 								</StyledDataGridAccordion>
 							</Grid>
@@ -859,7 +870,9 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 							<Typography variant="attributeTitle">
 								{t("search.event_type")}
 							</Typography>
-							<RenderAttribute attribute={row?.eventType} />
+							<div>
+								<ClusteringEventChip kind={row?.eventType} />
+							</div>
 						</Stack>
 					</Grid>
 					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -896,6 +909,27 @@ export default function MasterDetail({ row, type }: MasterDetailType) {
 									</Link>
 								) : (
 									<RenderAttribute attribute={row?.matchedBibId} />
+								)}
+							</Typography>
+						</Stack>
+					</Grid>
+					<Grid size={{ xs: 2, sm: 4, md: 4 }}>
+						<Stack direction="column">
+							<Typography variant="attributeTitle">
+								{t("search.cluster_matched")}
+							</Typography>
+							<Typography variant="attributeText" component="div">
+								{row?.matchedClusterId ? (
+									<Link
+										to="/search/$clusterId/cluster"
+										params={{ clusterId: row.matchedClusterId }}
+										underline="hover"
+										onClick={(e: React.MouseEvent) => e.stopPropagation()}
+									>
+										<RenderAttribute attribute={row.matchedClusterId} />
+									</Link>
+								) : (
+									<RenderAttribute attribute={row?.matchedClusterId} />
 								)}
 							</Typography>
 						</Stack>

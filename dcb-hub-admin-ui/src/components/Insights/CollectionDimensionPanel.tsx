@@ -11,6 +11,7 @@ import {
 	MenuItem,
 } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -90,19 +91,35 @@ export default function CollectionDimensionPanel({
 					height={CHART_HEIGHT}
 				>
 					{() => (
-						<BarChartPro
-							height={CHART_HEIGHT}
-							layout="horizontal"
-							yAxis={[{ scaleType: "band", data: rows.map((r) => r.category) }]}
+						<ChartFigure
+							label={t("insights.charts.collection_dimension.title")}
+							categoryLabel={t(
+								`insights.charts.collection_dimension.dim_${dimension}`,
+							)}
+							categories={rows.map((r) => r.category)}
 							series={[
 								{
-									data: rows.map((r) => r.requestCount),
 									label: t("insights.charts.collection_dimension.series"),
-									color: categorical[0],
+									values: rows.map((r) => r.requestCount),
 								},
 							]}
-							margin={{ left: 160 }}
-						/>
+						>
+							<BarChartPro
+								height={CHART_HEIGHT}
+								layout="horizontal"
+								yAxis={[
+									{ scaleType: "band", data: rows.map((r) => r.category) },
+								]}
+								series={[
+									{
+										data: rows.map((r) => r.requestCount),
+										label: t("insights.charts.collection_dimension.series"),
+										color: categorical[0],
+									},
+								]}
+								margin={{ left: 160 }}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 			</CardContent>

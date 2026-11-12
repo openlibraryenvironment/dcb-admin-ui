@@ -152,6 +152,9 @@ export interface HostLmsProfile {
 	groups: ClientConfigGroup[];
 }
 
+/** dcb-service 9.2.0 supplies a default for a few settings earlier releases demanded. */
+const defaultedFrom920 = (): boolean => isHostLmsCirculationSettingsEnabled();
+
 const field = (
 	path: string[],
 	labelKey: string,
@@ -184,8 +187,7 @@ const wholeNumber = (configField: ClientConfigField): ClientConfigField => ({
  * validator demands `default-agency-code` regardless.
  */
 const sharedSystemSet = (values: any): boolean =>
-	isHostLmsExtendedConfigEnabled() &&
-	(values?.["shared-system"] === true || values?.["shared-system"] === "true");
+	isHostLmsExtendedConfigEnabled() && readsAsTrue(values?.["shared-system"]);
 
 /**
  * `default-agency-code`, in the six profiles where it means "the agency to assume
@@ -209,16 +211,20 @@ const defaultAgencyCode = (): ClientConfigField => ({
 	requiredUnless: sharedSystemSet,
 });
 
-/** Foundation speaks NCIP unless told otherwise, as FoundationClient does. */
-const isSip2 = (values: any): boolean =>
-	String(values?.["base-protocol"] ?? "").toUpperCase() === "SIP2";
-
 /** ImperativeCapabilityConfig.setting reads this block before the top-level key. */
 const IMPERATIVE = (key: string): string[] => [
 	"capabilities",
 	"imperative",
 	key,
 ];
+
+/** Foundation speaks NCIP unless told otherwise, as FoundationClient does. */
+const isSip2 = (values: any): boolean =>
+	String(
+		[IMPERATIVE("base-protocol"), ["base-protocol"]]
+			.map((path) => readPath(values, path))
+			.find((value) => !isBlank(value)) ?? "",
+	).toUpperCase() === "SIP2";
 
 /** NcipPeerAuthProfile requires issuer, JWKS URL and audience only in this mode. */
 const isJwtRequired = (values: any): boolean =>
@@ -383,14 +389,18 @@ const SIERRA: HostLmsProfile = {
 					"secret",
 				),
 				defaultAgencyCode(),
-				field(
-					["page-size"],
-					"hostlms.config_fields.page_size",
-					"hostlms.config_fields.sierra_page_size_description",
-					"required",
-					"number",
-					"100",
-				),
+				{
+					// 8.71.0's validator requires it; 9.2.0's defaults it
+					...field(
+						["page-size"],
+						"hostlms.config_fields.page_size",
+						"hostlms.config_fields.sierra_page_size_description",
+						"required",
+						"number",
+						"100",
+					),
+					requiredUnless: defaultedFrom920,
+				},
 				field(
 					["patron-search-tag"],
 					"hostlms.config_fields.patron_search_tag",
@@ -682,22 +692,28 @@ const FOLIO: HostLmsProfile = {
 				defaultAgencyCode(),
 				// No default before dcb-service 9.2.0: the ingest source calls .get() on
 				// both, so a Host LMS created without them never harvests.
-				field(
-					["record-syntax"],
-					"hostlms.config_fields.record_syntax",
-					"hostlms.config_fields.folio_record_syntax_description",
-					"required",
-					"text",
-					"oai_dc",
-				),
-				field(
-					["metadata-prefix"],
-					"hostlms.config_fields.metadata_prefix",
-					"hostlms.config_fields.folio_metadata_prefix_description",
-					"required",
-					"text",
-					"marc21_withholdings",
-				),
+				{
+					...field(
+						["record-syntax"],
+						"hostlms.config_fields.record_syntax",
+						"hostlms.config_fields.folio_record_syntax_description",
+						"required",
+						"text",
+						"oai_dc",
+					),
+					requiredUnless: defaultedFrom920,
+				},
+				{
+					...field(
+						["metadata-prefix"],
+						"hostlms.config_fields.metadata_prefix",
+						"hostlms.config_fields.folio_metadata_prefix_description",
+						"required",
+						"text",
+						"marc21_withholdings",
+					),
+					requiredUnless: defaultedFrom920,
+				},
 				field(
 					["oai-set"],
 					"hostlms.config_fields.oai_set",
@@ -820,8 +836,8 @@ const POLARIS: HostLmsProfile = {
 					})),
 				},
 				// No virtual-patron-branch-id or enableDoubleDelete: PolarisConfig declares
-				// both and nothing calls either getter. No borrower-lending-flow: 8.71.0
-				// compares it with == and never matches, and 9.2.0 refuses it.
+				// both and nothing calls either getter. No borrower-lending-flow: 8.71.0-9.1.0
+				// return placeholder bibs and items for "ILL", and 9.2.0 refuses it.
 				VIRTUAL_PATRON_EMAIL,
 				field(
 					["hold-fetching-delay"],
@@ -1571,6 +1587,17 @@ const unreadSettings = (lmsClientClass: string): Set<string> =>
  * The types the picker offers: the ones this deployment's dcb-service will create.
  * Read per call, because the flag is injected after this module loads.
  */
+/**
+ * Whether this deployment's dcb-service accepts this class's settings at all. 8.71.0's
+ * validator answers "Unsupported LMS Client Class" for the 9.0.0 classes, so an existing
+ * Koha there can be read but every save of it is refused.
+ */
+export const canSaveHostLmsClass = (
+	lmsClientClass: string | undefined | null,
+): boolean =>
+	isHostLmsExtendedConfigEnabled() ||
+	!CLASSES_SINCE_9_0_0.has(lmsClientClass ?? "");
+
 export const creatableHostLmsProfiles = (): HostLmsProfile[] =>
 	isHostLmsExtendedConfigEnabled()
 		? HOST_LMS_PROFILES
@@ -1693,7 +1720,7 @@ export const buildClientConfig = (
 		if (isBlank(raw)) continue;
 
 		if (configField.type === "boolean") {
-			writePath(config, configField.path, raw === true || raw === "true");
+			writePath(config, configField.path, readsAsTrue(raw));
 			continue;
 		}
 		if (configField.type === "stringList") {
@@ -1768,7 +1795,7 @@ export const missingRequiredClientConfig = (
 			(configField) =>
 				configField.requirement === "required" &&
 				!(configField.requiredUnless?.(values) ?? false) &&
-				isBlank(readPath(values, configField.path)),
+				isBlank(effectiveClientConfigValue(values, configField)),
 		)
 		.map((configField) => ({
 			name: fieldName(configField),
@@ -1798,6 +1825,37 @@ export const notWholeNumberClientConfig = (
 				(configField.wholeNumber ?? configField.type === "number") &&
 				!isBlank(raw) &&
 				!isWholeNumber(raw)
+			);
+		})
+		.map((configField) => ({
+			name: fieldName(configField),
+			labelKey: configField.labelKey,
+			requirement: configField.requirement,
+		}));
+
+// dcb-service's VirtualPatronEmail.ADDRESS (9.2.0): one @, and a dot after it
+const EMAIL_ADDRESS = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+/**
+ * Settings dcb-service 9.2.0's HostLmsConfigValidator refuses with a 400: an email setting
+ * that is not an address (so "ops@localhost" is refused), and an Alma alternative sharing
+ * library that is the sharing library itself. Blocks submission, so the user is told by the
+ * field rather than by the server.
+ */
+export const malformedClientConfig = (
+	lmsClientClass: string | undefined | null,
+	values: any,
+): ClientConfigProblem[] =>
+	clientConfigFieldsFor(lmsClientClass)
+		.filter((configField) => {
+			const raw = readPath(values, configField.path);
+			if (isBlank(raw)) return false;
+			if (configField.type === "email")
+				return !EMAIL_ADDRESS.test(String(raw).trim());
+			return (
+				configField.path.join(".") === "alternative-sharing-library-code" &&
+				String(raw).trim() ===
+					String(readPath(values, ["sharing-library-code"]) ?? "").trim()
 			);
 		})
 		.map((configField) => ({
@@ -1871,6 +1929,13 @@ export const missingRecommendedClientConfig = (
 		}));
 
 /**
+ * A boolean setting as dcb-service reads it: Boolean.parseBoolean(String.valueOf(value)),
+ * so the string "true" stored through the JSON editor is true, in any case.
+ */
+export const readsAsTrue = (value: unknown): boolean =>
+	value === true || String(value ?? "").toLowerCase() === "true";
+
+/**
  * Hydrates the guided form from raw JSON, so switching out of the advanced
  * editor does not silently discard what was typed there. Keys the guided form
  * has no field for are reported rather than dropped in silence.
@@ -1888,7 +1953,7 @@ export const clientConfigToFields = (
 		if (raw === undefined) continue;
 
 		if (configField.type === "boolean") {
-			writePath(values, configField.path, raw === true);
+			writePath(values, configField.path, readsAsTrue(raw));
 			continue;
 		}
 		if (configField.type === "stringList") {
@@ -1942,8 +2007,10 @@ export const clientConfigToFields = (
  * what makes clearing a field clear it), then overlay the form's answers.
  */
 /**
- * Keys dcb-service 9.2.0 refuses outright and no release acts on. Kept, they block every
- * config save of a record written before; dropped, the Host LMS behaves exactly as it did.
+ * Keys dcb-service 9.2.0 refuses outright, so kept they block every config save of a
+ * record written before. Dropped only where 9.2.0 runs: 8.71.0-9.1.0 still act on
+ * borrower-lending-flow ("ILL" makes createBib and createItem return placeholders), and
+ * dropping it there would change how that Host LMS circulates.
  */
 const REFUSED_KEYS: Readonly<Record<string, readonly string[]>> = {
 	[HOST_LMS_CLASSES.polaris]: ["borrower-lending-flow"],
@@ -1956,7 +2023,10 @@ export const mergeClientConfigEdit = (
 ): Record<string, unknown> => {
 	const merged = structuredClone(existing ?? {}) as Record<string, unknown>;
 
-	for (const key of REFUSED_KEYS[lmsClientClass ?? ""] ?? []) {
+	const refused = isHostLmsCirculationSettingsEnabled()
+		? (REFUSED_KEYS[lmsClientClass ?? ""] ?? [])
+		: [];
+	for (const key of refused) {
 		delete merged[key];
 	}
 

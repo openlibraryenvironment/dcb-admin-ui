@@ -10,7 +10,7 @@ export const doesNotEqualFilter: GridFilterOperator = {
 		if (!filterItem.field || !filterItem.value || !filterItem.operator) {
 			return null;
 		}
-		return (params) => params[filterItem.field] !== filterItem.value;
+		return (value) => String(value ?? "") !== String(filterItem.value);
 	},
 	InputComponent: GridFilterInputValue,
 };

@@ -154,7 +154,7 @@ export const referenceValueMappingsQuery = (
 		gridId: referenceValueMappingsView.id,
 		document: getMappings,
 		baseQuery: REFERENCE_VALUE_MAPPINGS_BASE_QUERY,
-		defaultOrder: "lastImported",
+		defaultOrder: "fromCategory",
 		defaultPageSize: referenceValueMappingsView.defaultPageSize,
 		...models,
 	});

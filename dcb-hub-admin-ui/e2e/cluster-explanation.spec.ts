@@ -1,11 +1,11 @@
 import { test, expect } from "./fixtures/test";
 import { seedAuth } from "./fixtures/auth";
-import { mockGraphQL } from "./fixtures/graphql-mocks";
+import { mockGraphQL, overrideGraphQL } from "./fixtures/graphql-mocks";
 import { useAllFeatures } from "./fixtures/flags";
 import { CLUSTER_ID, mockClusterRest } from "./fixtures/cluster-mocks";
 import { MOCKS } from "./fixtures/routes";
 
-// From e2e/fixtures-data/cluster-audit-log.json: one match event, one new-cluster event.
+// From e2e/fixtures-data/cluster-audit-log.json: a match, a merge and a new-cluster event.
 const SUBJECT_BIB = "bb220000-2222-5222-9222-bbbbbbbbbbbb";
 const MATCHED_BIB = "99aa0000-9999-5999-9999-aaaaaaaaaaaa";
 const MATCH_EVENT = "ff660000-6666-5666-9666-ffffffffffff";
@@ -24,7 +24,7 @@ test("a match event links to the incoming bib and to the bib it matched, not to 
 
 	await page
 		.getByRole("row")
-		.filter({ hasText: "Match - high confidence" })
+		.filter({ hasText: "Match: shared identifier" })
 		.getByRole("button", { name: "Expand", exact: true })
 		.click();
 
@@ -46,10 +46,198 @@ test("an event that matched no bib offers no matched-against link", async ({
 
 	await page
 		.getByRole("row")
-		.filter({ hasText: "New Cluster" })
+		.filter({ hasText: "New cluster" })
 		.getByRole("button", { name: "Expand", exact: true })
 		.click();
 
 	await expect(page.getByRole("link", { name: SUBJECT_BIB })).toBeVisible();
 	await expect(page.locator('a[href*="/bibs/"]')).toHaveCount(1);
+});
+
+// Until 46daf41b the grid opened grouped by incoming bib, and the group row's count was the
+// "number of events" the column's own header still promises
+test("events are grouped under the bib they explain, with how many there are", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page
+			.getByRole("row")
+			.filter({ hasText: "Alpha and the art of clustering" })
+			.first(),
+	).toContainText("(3)");
+	await expect(
+		page.getByRole("row").filter({ hasText: "New cluster" }),
+	).toBeVisible();
+});
+
+// "Matched cluster … (merging with [n] …)" read as "Info" until every message format was parsed
+test("a merge is named as one, and links to the cluster it merged into", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await page
+		.getByRole("row")
+		.filter({ hasText: "Merged clusters" })
+		.getByRole("button", { name: "Expand", exact: true })
+		.click();
+
+	await expect(
+		page
+			.getByRole("tabpanel", { name: "Explain clustering" })
+			.getByRole("link", { name: CLUSTER_ID })
+			.first(),
+	).toHaveAttribute("href", new RegExp(`/search/${CLUSTER_ID}/cluster$`));
+});
+
+// The query throws, so the tab's own error branch never rendered: the route's does
+test("a failure to load is reported inside the cluster page, which stays", async ({
+	page,
+}) => {
+	await page.route("**/clusters/*/audit-log", (route) =>
+		route.fulfill({ status: 500, json: {} }),
+	);
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page
+			.getByRole("tabpanel", { name: "Explain clustering" })
+			.getByRole("heading", { name: "500 Server error" }),
+	).toBeVisible();
+	await expect(page.getByRole("tab", { name: "Items" })).toBeVisible();
+});
+
+// Every column is text, so aggregation could only ever count rows, which grouping already does
+test("the explanation offers no aggregation", async ({ page }) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+	const header = page
+		.getByRole("columnheader")
+		.filter({ hasText: "Event type" })
+		.first();
+	await header.hover();
+	await header.getByRole("button", { name: "Event type column menu" }).click();
+
+	await expect(
+		page.getByRole("menu").getByRole("combobox", { name: "Aggregation" }),
+	).toHaveCount(0);
+});
+
+// "Bib matched against" was 100px wide for a 36-character UUID, and text
+test("the bib and cluster an event matched are whole, and links", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation?show=matchedBibId`);
+	// Grouped rows make the grid a treegrid
+	const grid = page.getByRole("treegrid");
+
+	await expect(grid.getByRole("link", { name: MATCHED_BIB })).toHaveAttribute(
+		"href",
+		new RegExp(`/bibs/${MATCHED_BIB}$`),
+	);
+	await expect(grid.getByRole("link", { name: CLUSTER_ID })).toHaveAttribute(
+		"href",
+		new RegExp(`/search/${CLUSTER_ID}/cluster$`),
+	);
+});
+
+// Sorted newest first on a minute-precision string, a bib's outcome sat above its causes
+test("a bib's events read from cause to outcome", async ({ page }) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+	const rows = page.getByRole("row");
+	await expect(rows.filter({ hasText: "Merged clusters" })).toBeVisible();
+
+	const order = await rows.evaluateAll((all) =>
+		all
+			.map((row) => row.textContent ?? "")
+			.map((text) =>
+				["New cluster", "Match: shared identifier", "Merged clusters"].find(
+					(label) => text.includes(label),
+				),
+			)
+			.filter(Boolean),
+	);
+	expect(order).toEqual([
+		"New cluster",
+		"Match: shared identifier",
+		"Merged clusters",
+	]);
+});
+
+// It said only "No results", which reads as a fault
+test("an empty explanation says why it can be empty", async ({ page }) => {
+	await page.route("**/clusters/*/audit-log", (route) =>
+		route.fulfill({ json: { ingest: {} } }),
+	);
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page.getByText(/Only the most recent processing of each bib is kept/),
+	).toBeVisible();
+});
+
+// Each group row was a bare UUID
+test("each group names its bib by title and library", async ({ page }) => {
+	await overrideGraphQL(page, {
+		LoadHostLmsSelection: {
+			hostLms: {
+				totalSize: 1,
+				content: [
+					{
+						id: "cc330000-3333-5333-9333-cccccccccccc",
+						code: "alpha-lms",
+						name: "Alpha LMS",
+						lmsClientClass: null,
+					},
+				],
+			},
+		},
+	});
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page
+			.getByRole("row")
+			.filter({ hasText: "Alpha and the art of clustering · Alpha LMS" })
+			.first(),
+	).toContainText("(3)");
+});
+
+// A grid holding every row had no export: the toolbar drew one only for server grids
+test("the explanation downloads as CSV, with no request", async ({ page }) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+	await expect(
+		page.getByRole("row").filter({ hasText: "Merged clusters" }),
+	).toBeVisible();
+
+	const pending = page.waitForEvent("download");
+	await page.getByRole("button", { name: /export/i }).click();
+	await page
+		.getByRole("menuitem", { name: /^CSV \(comma separated\)$/ })
+		.click();
+	await page.getByRole("menuitem", { name: "Filtered results" }).click();
+	const file = await pending;
+
+	expect(file.suggestedFilename()).toMatch(/\.csv$/);
+	const chunks: Buffer[] = [];
+	for await (const chunk of await file.createReadStream())
+		chunks.push(Buffer.from(chunk));
+	const text = Buffer.concat(chunks).toString("utf8");
+	expect(text).toContain("2026-09-30");
+	expect(text.trim().split("\n").length).toBeGreaterThan(1);
+});
+
+// MUI's own label for a group's toggle is "hide children"
+test("a group's toggle says what it does, in the application's words", async ({
+	page,
+}) => {
+	await page.goto(`/search/${CLUSTER_ID}/clusterExplanation`);
+
+	await expect(
+		page.getByRole("button", { name: "Hide this group's rows" }).first(),
+	).toBeVisible();
+	await expect(page.getByRole("button", { name: "hide children" })).toHaveCount(
+		0,
+	);
 });

@@ -1,4 +1,7 @@
 import { afterEach, describe, it, expect, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { buildSchema, coerceInputValue, type GraphQLInputType } from "graphql";
 
 import {
 	agencyCodeFromHostLms,
@@ -182,14 +185,15 @@ describe("buildAgencyUpdateInput", () => {
 		expect(input.isSupplyingAgency).toBe(true);
 	});
 
-	it("sends no loan cap as null, never as zero", () => {
-		// A 0 would stop the library borrowing anything at all, which is the
-		// opposite of "no cap".
-		expect(buildAgencyUpdateInput(values()).maxConsortialLoans).toBeNull();
+	it("leaves out a blank loan cap, never null and never zero", () => {
+		// null fails updateAgency with a NullPointerException; 0 would stop the library
+		// borrowing anything at all
+		expect(buildAgencyUpdateInput(values())).not.toHaveProperty(
+			"maxConsortialLoans",
+		);
 		expect(
-			buildAgencyUpdateInput(values({ maxConsortialLoans: "   " }))
-				.maxConsortialLoans,
-		).toBeNull();
+			buildAgencyUpdateInput(values({ maxConsortialLoans: "   " })),
+		).not.toHaveProperty("maxConsortialLoans");
 	});
 
 	it("sends a stated loan cap as a number", () => {
@@ -482,5 +486,51 @@ describe("existingGroupIds", () => {
 				membership: [{ libraryGroup: null }, { libraryGroup: { id: "" } }],
 			}),
 		).toEqual([]);
+	});
+});
+
+// The conformance test reads documents, not the variables a form fills in: these coerce each
+// payload against the 8.71.0 input type, so an unknown key, a wrong type or a missing
+// required field fails here instead of on MOBIUS
+describe("against dcb-service 8.71.0's input types", () => {
+	const legacy = buildSchema(
+		readFileSync(
+			path.resolve(process.cwd(), "schema.v8.71.0.graphqls"),
+			"utf8",
+		),
+	);
+	const coerce = (type: string, value: unknown) => {
+		const problems: string[] = [];
+		coerceInputValue(
+			value,
+			legacy.getType(type) as GraphQLInputType,
+			(_path, _invalid, error) => problems.push(error.message),
+		);
+		return problems;
+	};
+
+	it.each([
+		["LibraryInput", () => buildLibraryInput(values())],
+		[
+			"UpdateLibraryInput",
+			() => buildLibraryUpdateInput(values(), "library-1"),
+		],
+		["UpdateAgencyInput", () => buildAgencyUpdateInput(values())],
+		[
+			"CreateLibraryContactInput",
+			() => buildContactInput(values().contacts[0], values(), "library-1"),
+		],
+	])("%s accepts what the form sends", (type, build) => {
+		expect(coerce(type, build())).toEqual([]);
+	});
+
+	// The guard itself, seen to fail
+	it("refuses a key the input type does not declare", () => {
+		expect(
+			coerce("UpdateAgencyInput", {
+				...buildAgencyUpdateInput(values()),
+				notAField: true,
+			}),
+		).not.toEqual([]);
 	});
 });

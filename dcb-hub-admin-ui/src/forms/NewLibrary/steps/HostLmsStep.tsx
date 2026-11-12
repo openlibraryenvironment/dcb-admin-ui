@@ -146,7 +146,7 @@ export default function HostLmsStep({ busy = false }: { busy?: boolean }) {
 						spacing={1}
 						sx={{ justifyContent: "space-between", alignItems: "baseline" }}
 					>
-						<Typography variant="h6" component="h3">
+						<Typography variant="h6" component="h2">
 							{t("hostlms.client_config.title")}
 						</Typography>
 						<ToggleButtonGroup

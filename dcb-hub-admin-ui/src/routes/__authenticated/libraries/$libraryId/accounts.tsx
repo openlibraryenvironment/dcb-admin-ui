@@ -330,18 +330,16 @@ function LibraryAccounts() {
 							paginationMode="client"
 							sortingMode="client"
 							filterMode="client"
-							disableAggregation
-							disableRowGrouping
 							toolbarVisible={false}
 							pagination
 							scrollbarVisible={false}
 							noResultsText={t("libraries.accounts.none")}
 							searchText=""
 							disableHoverInteractions
-							disablePivoting
 							listViewEnabled={false}
-							paginationModel={{ page: 0, pageSize: 25 }}
-							pivotingEnabled={false}
+							initialState={{
+								pagination: { paginationModel: { pageSize: 25 } },
+							}}
 						/>
 					</Grid>
 				)}

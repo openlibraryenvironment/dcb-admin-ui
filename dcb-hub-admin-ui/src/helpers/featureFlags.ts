@@ -59,7 +59,9 @@ export const isGuardedCleanupEnabled = (): boolean =>
  * `default-agency-code`, so a Host LMS marked shared cannot be saved there at all.
  */
 export const isHostLmsExtendedConfigEnabled = (): boolean =>
-	readFlag("VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG");
+	readFlag("VITE_FEATURE_HOST_LMS_EXTENDED_CONFIG") ||
+	// A deployment on 9.2.0 is past 9.0.0: one flag set without the other is a mistake
+	isHostLmsCirculationSettingsEnabled();
 
 /**
  * Host LMS settings no release before dcb-service 9.2.0 reads: Alma's cancellation and
@@ -77,9 +79,9 @@ export const isConfirmItemReturnedEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_CONFIRM_ITEM_RETURNED");
 
 /**
- * Insights depends on the /insights endpoints, first released in dcb-service 9.0.0.
- * Enable with VITE_FEATURE_INSIGHTS=true once the environment's dcb-service is new
- * enough; an older one answers 404 to all of them.
+ * Insights depends on the /insights endpoints. dcb-service serves them from 9.0.0 but
+ * answers them correctly from 9.2.0 (FEATURE_AVAILABILITY): enable
+ * VITE_FEATURE_INSIGHTS=true on 9.2.0 or later. Before 9.0.0 every one answers 404.
  */
 export const isInsightsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_INSIGHTS");
@@ -192,6 +194,19 @@ export const isHostLmsProbesEnabled = (): boolean =>
  */
 export const isInsightsTrendsEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_INSIGHTS_TRENDS");
+
+/**
+ * Exporting a cluster's member records - gated at dcb-service 9.1.0, although the route is
+ * older. Before 9.1.0 ClusterRecordController builds the zip on the thread that emitted the
+ * R2DBC result, with no bound on the member count, so one large cluster holds a database
+ * I/O thread while it is serialised.
+ */
+export const isClusterExportEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_CLUSTER_EXPORT");
+
+/** A bib's match points for CONSORTIUM_ADMIN as well as ADMIN, from dcb-service 9.4.0. */
+export const isConsortiumMatchPointsEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_CONSORTIUM_MATCH_POINTS");
 
 /**
  * Settings inheritance: `resolvedFunctionalSettings`, `settingsBearingGroupType` and the two

@@ -1,4 +1,9 @@
-import { Navigate, createFileRoute, useParams } from "@tanstack/react-router";
+import {
+	Navigate,
+	createFileRoute,
+	retainSearchParams,
+	useParams,
+} from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -8,7 +13,10 @@ import Error from "@components/Error/Error";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { libraryQuery } from "@/queryOptions/library";
 import { librarySetupCountsQuery } from "@/queryOptions/librarySetup";
-import { isLibrarySetupStepId } from "@helpers/librarySetupFlow";
+import {
+	isLibrarySetupStepId,
+	librarySetupSearchSchema,
+} from "@helpers/librarySetupFlow";
 import { libraryFlowState } from "@helpers/librarySetup";
 import i18n from "@/i18n";
 import { errorForDisplay } from "@helpers/safeErrorLog";
@@ -17,6 +25,8 @@ import { errorForDisplay } from "@helpers/safeErrorLog";
 export const Route = createFileRoute(
 	"/__authenticated/libraries/$libraryId/setup/",
 )({
+	validateSearch: librarySetupSearchSchema,
+	search: { middlewares: [retainSearchParams(["from"])] },
 	errorComponent: ({ error }) => (
 		<PageContainer hideTitleBox hideBreadcrumbs>
 			<Error
@@ -44,7 +54,16 @@ function LibrarySetupStart() {
 	const library = useQuery(libraryQuery(gqlClient, libraryId));
 	const counts = useQuery(librarySetupCountsQuery(gqlClient, library.data));
 
-	if (library.isError) {
+	// The counts query is disabled until the library is found, so it stays pending for an
+	// unknown id: wait on it only once there is a library
+	if (library.isPending || (library.data && counts.isPending)) {
+		return (
+			<PageContainer hideTitleBox hideBreadcrumbs>
+				<Skeleton variant="rounded" height={480} />
+			</PageContainer>
+		);
+	}
+	if (library.isError || !library.data || !counts.data) {
 		return (
 			<PageContainer hideTitleBox hideBreadcrumbs>
 				<Error
@@ -56,18 +75,8 @@ function LibrarySetupStart() {
 			</PageContainer>
 		);
 	}
-	if (library.isPending || counts.isPending) {
-		return (
-			<PageContainer hideTitleBox hideBreadcrumbs>
-				<Skeleton variant="rounded" height={480} />
-			</PageContainer>
-		);
-	}
 
-	const first = libraryFlowState(
-		library.data,
-		counts.data ?? {},
-	).firstIncompleteStep;
+	const first = libraryFlowState(library.data, counts.data).firstIncompleteStep;
 	return first && isLibrarySetupStepId(first) ? (
 		<Navigate
 			to="/libraries/$libraryId/setup/$step"

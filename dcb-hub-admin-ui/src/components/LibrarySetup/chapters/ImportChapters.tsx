@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormProvider } from "react-hook-form";
 
@@ -13,7 +13,8 @@ import type { LibraryChapterProps } from "./chapterProps";
 
 /**
  * A chapter whose step writes as it goes: an import, or a mapping made in place. Continue
- * refreshes the counts the rail reads, so what was just imported shows as done.
+ * refreshes the counts the rail reads before moving on, so what was just imported shows as
+ * done on the next page rather than a moment later.
  */
 function ImportChapter({
 	id,
@@ -23,6 +24,7 @@ function ImportChapter({
 	children,
 }: LibraryChapterProps & { id: string; children: ReactNode }) {
 	const queryClient = useQueryClient();
+	const [refreshing, setRefreshing] = useState(false);
 	const { methods } = useLibraryChapterForm(
 		id,
 		formValuesFromLibrary(library),
@@ -34,10 +36,16 @@ function ImportChapter({
 			<FormProvider {...methods}>{children}</FormProvider>
 			<SetupFooter
 				onBack={onBack}
-				onContinue={() => {
-					void invalidateLibraryCaches(queryClient);
+				onContinue={async () => {
+					setRefreshing(true);
+					try {
+						await invalidateLibraryCaches(queryClient);
+					} finally {
+						setRefreshing(false);
+					}
 					onNext();
 				}}
+				busy={refreshing}
 			/>
 		</>
 	);

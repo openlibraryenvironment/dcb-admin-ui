@@ -204,12 +204,8 @@ export default function OperatingWelcome() {
 			processRowUpdate={processRowUpdate}
 			rowModesModel={{}}
 			// Feature Flags
-			disableAggregation={true}
 			disableHoverInteractions={false}
-			disablePivoting={true}
-			disableRowGrouping={true}
 			listViewEnabled={false}
-			pivotingEnabled={false}
 			scrollbarVisible={true}
 			toolbarVisible={true}
 			noResultsText={t("libraries.none_found")}

@@ -159,9 +159,6 @@ export default function VersionInfo({ serviceInfo }: VersionInfoProps) {
 			columns={columns}
 			rows={rows}
 			loading={false}
-			disableAggregation
-			disableRowGrouping
-			disablePivoting
 			disableHoverInteractions={false}
 			pagination={false}
 			paginationMode="client"
@@ -169,12 +166,11 @@ export default function VersionInfo({ serviceInfo }: VersionInfoProps) {
 			filterMode="client"
 			rowModesModel={{}}
 			listViewEnabled={false}
-			pivotingEnabled={false}
 			toolbarVisible={false}
 			scrollbarVisible={true}
 			noResultsText={t("ui.data_grid.no_results")}
 			searchText=""
-			paginationModel={{ page: 0, pageSize: 20 }}
+			initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
 			getDetailPanelContent={({ row }: { row: VersionRow }) => (
 				<MasterDetail row={row} type="versionInfo" />
 			)}

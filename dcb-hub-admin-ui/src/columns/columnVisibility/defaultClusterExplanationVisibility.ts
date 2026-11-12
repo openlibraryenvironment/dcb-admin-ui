@@ -1,7 +1,8 @@
 import { GridColumnVisibilityModel } from "@mui/x-data-grid-premium";
 
 export const defaultClusterExplanationVisibility: GridColumnVisibilityModel = {
-	formattedTimestamp: false,
+	// The grouping column carries it, with the number of events
+	subjectId: false,
 	matchedBibId: false,
 	message: false,
 };

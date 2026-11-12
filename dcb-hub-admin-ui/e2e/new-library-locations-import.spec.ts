@@ -112,6 +112,33 @@ test.describe("Library setup - importing locations", () => {
 		expect(uploads).toBe(0);
 	});
 
+	// The handler called .match() on the body, so a JSON error threw inside its own catch
+	test("a refusal sent as JSON is reported, and the page stays", async ({
+		page,
+	}) => {
+		await page.route("**/locations/upload", (route) =>
+			route.fulfill({
+				status: 400,
+				json: { message: "Unknown agency code on line 7" },
+			}),
+		);
+
+		const importDialog = await openLocationsImport(page, {
+			existingLocations: 0,
+		});
+		await chooseFile(page);
+		await importDialog
+			.getByRole("button", { name: /^import locations$/i })
+			.click();
+
+		await expect(page.getByText(/An error occurred/).first()).toBeVisible();
+		await expect(
+			page.getByRole("heading", {
+				name: "Sorry, we were unable to load this page",
+			}),
+		).toHaveCount(0);
+	});
+
 	test("sends the file once, however often Import is pressed while it uploads", async ({
 		page,
 	}) => {

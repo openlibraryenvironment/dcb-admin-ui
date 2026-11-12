@@ -196,7 +196,7 @@ export default function ScopeAnnouncements({
 				</Grid>
 
 				<Grid size={{ xs: 4, sm: 8, md: 6 }}>
-					<Typography variant="h3" gutterBottom>
+					<Typography variant="h3" component="h2" gutterBottom>
 						{t("consortium.announcements.current")}
 					</Typography>
 

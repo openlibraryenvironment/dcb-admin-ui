@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Box } from "@mui/material";
+import {} from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -77,7 +78,17 @@ function FormatMixChart({
 	});
 
 	return (
-		<Box role="img" aria-label={chartLabel}>
+		<ChartFigure
+			label={chartLabel}
+			categoryLabel={t("ui.chart_table.format")}
+			categories={slices.map((s) => labelFor(s.derivedType))}
+			series={[
+				{
+					label: t("insights.collection.format_mix.series"),
+					values: slices.map((s) => s.titleCount),
+				},
+			]}
+		>
 			<BarChartPro
 				height={CHART_HEIGHT}
 				layout="horizontal"
@@ -96,6 +107,6 @@ function FormatMixChart({
 				]}
 				margin={{ left: 160 }}
 			/>
-		</Box>
+		</ChartFigure>
 	);
 }

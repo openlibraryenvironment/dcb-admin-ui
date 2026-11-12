@@ -20,6 +20,7 @@ import { useSetupNavigation } from "@hooks/useSetupNavigation";
 import { useConsortiumSetup } from "@hooks/useConsortiumSetup";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { errorForLog } from "@helpers/safeErrorLog";
 import { createConsortiumContact } from "@mutations/createConsortiumContact";
 import {
 	newConsortiumSchema,
@@ -163,7 +164,10 @@ export default function ContactsChapter() {
 			methods.reset(methods.getValues());
 			goNext();
 		} catch (failure: any) {
-			console.error("Consortium contact creation failed:", failure);
+			console.error(
+				"Consortium contact creation failed:",
+				errorForLog(failure),
+			);
 			setError(describeGraphQLError(failure, t("setup.contacts.error")));
 		} finally {
 			setBusy(false);

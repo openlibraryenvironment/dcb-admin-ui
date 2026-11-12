@@ -68,7 +68,64 @@ test.describe("New Host LMS", () => {
 		});
 		await expect(shared.getByRole("radio", { name: "No" })).toBeChecked();
 
+		// The client class menu stays mounted, aria-hidden, while it grows out: scanned
+		// then, axe composites its options against the page and reports their contrast
+		await expect(page.locator(".MuiMenu-root")).toHaveCount(0);
 		await scanForViolations(page);
+	});
+
+	test("a Host LMS created here is offered by New Library without a reload", async ({
+		page,
+	}) => {
+		let created = false;
+		const FOLIO_CLASS =
+			"org.olf.dcb.core.interaction.folio.ConsortialFolioHostLmsClient";
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			LoadHostLmsSelection: () => ({
+				hostLms: created
+					? {
+							totalSize: 1,
+							content: [
+								{
+									id: "host-lms-1",
+									code: "FOLIO1",
+									name: "Folio one",
+									lmsClientClass: FOLIO_CLASS,
+								},
+							],
+						}
+					: { totalSize: 0, content: [] },
+			}),
+			CreateHostLms: () => {
+				created = true;
+				return {
+					createHostLms: {
+						hostLms: { id: "host-lms-1", code: "FOLIO1" },
+						pingStatus: "OK",
+					},
+				};
+			},
+		});
+		await page.goto("/libraries/new/connection?ils=folio");
+		await expect(main(page).getByLabel(/host lms code/i)).toBeVisible();
+
+		// In-app, so the query cache New Library filled is the one the create must refresh
+		await page.evaluate(() => {
+			history.pushState({}, "", "/hostlmss/new");
+			dispatchEvent(new PopStateEvent("popstate"));
+		});
+		await fillFolio(page);
+		await submit(page);
+		await expect(
+			main(page).getByRole("button", { name: "Go to the Host LMS" }),
+		).toBeVisible();
+
+		await page.goBack();
+		await expect(
+			main(page).getByRole("radio", { name: /folio one \(FOLIO1\)/i }),
+		).toBeVisible();
 	});
 
 	test("sends a harvest answered no", async ({ page }) => {

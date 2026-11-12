@@ -16,7 +16,7 @@ import Confirmation from "@components/Confirmation/Confirmation";
 import i18n from "@/i18n";
 import { appUrl, clearAppStorage, storageKey } from "@helpers/appBase";
 import { canAccessDcbAdmin } from "@helpers/consortiumAccess";
-import { errorForDisplay } from "@helpers/safeErrorLog";
+import { errorForDisplay, errorForLog } from "@helpers/safeErrorLog";
 
 export const Route = createFileRoute("/__authenticated")({
 	component: AuthenticatedLayout,
@@ -70,7 +70,11 @@ function AuthenticatedLayout() {
 		onActive: () => {
 			if (showSessionWarning) {
 				setShowSessionWarning(false);
-				auth.signinSilent().catch(console.error); // Ensure token is fresh when user returns
+				auth
+					.signinSilent()
+					.catch((error) =>
+						console.error("Silent renew failed", errorForLog(error)),
+					);
 			}
 		},
 		onIdle: () => {

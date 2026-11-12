@@ -13,11 +13,7 @@ import {
 	DialogContent,
 	DialogTitle,
 	Divider,
-	FormControl,
-	FormHelperText,
-	InputLabel,
 	MenuItem,
-	Select,
 	TextField,
 } from "@mui/material";
 
@@ -367,29 +363,25 @@ export default function NewLocation({
 						    location decides whether its localId is required and in what
 						    shape. */}
 						{!scopedByCaller && hostLmsChoices.length > 1 && (
-							<FormControl fullWidth required>
-								<InputLabel id="new-location-host-lms-label">
-									{t("locations.new.host_lms")}
-								</InputLabel>
-								<Select
-									labelId="new-location-host-lms-label"
-									label={t("locations.new.host_lms")}
-									value={chosenHostLmsCode}
-									onChange={(event) => {
-										setChosenHostLmsCode(event.target.value);
-										clearLocalIdForNewHostLms();
-									}}
-								>
-									{hostLmsChoices.map((option) => (
-										<MenuItem key={option.code} value={option.code}>
-											{option.code} ({getILS(option.lmsClientClass)})
-										</MenuItem>
-									))}
-								</Select>
-								<FormHelperText>
-									{t("locations.new.host_lms_helper")}
-								</FormHelperText>
-							</FormControl>
+							<TextField
+								select
+								fullWidth
+								required
+								id="new-location-host-lms"
+								label={t("locations.new.host_lms")}
+								value={chosenHostLmsCode}
+								onChange={(event) => {
+									setChosenHostLmsCode(event.target.value);
+									clearLocalIdForNewHostLms();
+								}}
+								helperText={t("locations.new.host_lms_helper")}
+							>
+								{hostLmsChoices.map((option) => (
+									<MenuItem key={option.code} value={option.code}>
+										{option.code} ({getILS(option.lmsClientClass)})
+									</MenuItem>
+								))}
+							</TextField>
 						)}
 
 						<Controller
@@ -475,25 +467,24 @@ export default function NewLocation({
 							name="isPickup"
 							control={control}
 							render={({ field }) => (
-								<FormControl fullWidth error={!!errors.isPickup}>
-									<InputLabel>{t("locations.new.pickup_status")}</InputLabel>
-									<Select
-										{...field}
-										label={t("locations.new.pickup_status")}
-										value={field.value?.toString()}
-										onChange={(e) => field.onChange(e.target.value === "true")}
-									>
-										<MenuItem value="true">
-											{t("locations.new.pickup_enabled")}
-										</MenuItem>
-										<MenuItem value="false">
-											{t("locations.new.pickup_disabled")}
-										</MenuItem>
-									</Select>
-									{errors.isPickup && (
-										<FormHelperText>{errors.isPickup.message}</FormHelperText>
-									)}
-								</FormControl>
+								<TextField
+									{...field}
+									select
+									fullWidth
+									id="new-location-is-pickup"
+									label={t("locations.new.pickup_status")}
+									value={field.value?.toString()}
+									onChange={(e) => field.onChange(e.target.value === "true")}
+									error={!!errors.isPickup}
+									helperText={errors.isPickup?.message}
+								>
+									<MenuItem value="true">
+										{t("locations.new.pickup_enabled")}
+									</MenuItem>
+									<MenuItem value="false">
+										{t("locations.new.pickup_disabled")}
+									</MenuItem>
+								</TextField>
 							)}
 						/>
 
@@ -501,32 +492,24 @@ export default function NewLocation({
 							name="isEnabledForPickupAnywhere"
 							control={control}
 							render={({ field }) => (
-								<FormControl
+								<TextField
+									{...field}
+									select
 									fullWidth
+									id="new-location-pickup-anywhere"
+									label={t("locations.new.pickup_anywhere_status")}
+									value={field.value?.toString()}
+									onChange={(e) => field.onChange(e.target.value === "true")}
 									error={!!errors.isEnabledForPickupAnywhere}
+									helperText={errors.isEnabledForPickupAnywhere?.message}
 								>
-									<InputLabel>
-										{t("locations.new.pickup_anywhere_status")}
-									</InputLabel>
-									<Select
-										{...field}
-										label={t("locations.new.pickup_anywhere_status")}
-										value={field.value?.toString()}
-										onChange={(e) => field.onChange(e.target.value === "true")}
-									>
-										<MenuItem value="true">
-											{t("locations.new.pickup_anywhere_enabled")}
-										</MenuItem>
-										<MenuItem value="false">
-											{t("locations.new.pickup_anywhere_disabled")}
-										</MenuItem>
-									</Select>
-									{errors.isEnabledForPickupAnywhere && (
-										<FormHelperText>
-											{errors.isEnabledForPickupAnywhere.message}
-										</FormHelperText>
-									)}
-								</FormControl>
+									<MenuItem value="true">
+										{t("locations.new.pickup_anywhere_enabled")}
+									</MenuItem>
+									<MenuItem value="false">
+										{t("locations.new.pickup_anywhere_disabled")}
+									</MenuItem>
+								</TextField>
 							)}
 						/>
 

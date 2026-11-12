@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -60,26 +61,39 @@ export default function SupplierResponseSlaChart({
 					height={CHART_HEIGHT}
 				>
 					{() => (
-						<BarChartPro
-							height={CHART_HEIGHT}
-							layout="horizontal"
-							yAxis={[
-								{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
-							]}
-							xAxis={[
-								{ label: t("insights.charts.supplier_response.axis_hours") },
-							]}
+						<ChartFigure
+							label={t("insights.charts.supplier_response.title")}
+							categoryLabel={t("ui.chart_table.supplier")}
+							categories={rows.map((r) => r.supplierCode)}
 							series={[
 								{
-									data: rows.map((r) => r.medianResponseSeconds / 3600),
 									label: t("insights.charts.supplier_response.series"),
-									color: categorical[1],
-									valueFormatter: (v) =>
-										v == null ? "—" : formatDuration(v * 3600),
+									values: rows.map((r) => r.medianResponseSeconds),
+									format: formatDuration,
 								},
 							]}
-							margin={{ left: 140 }}
-						/>
+						>
+							<BarChartPro
+								height={CHART_HEIGHT}
+								layout="horizontal"
+								yAxis={[
+									{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
+								]}
+								xAxis={[
+									{ label: t("insights.charts.supplier_response.axis_hours") },
+								]}
+								series={[
+									{
+										data: rows.map((r) => r.medianResponseSeconds / 3600),
+										label: t("insights.charts.supplier_response.series"),
+										color: categorical[1],
+										valueFormatter: (v) =>
+											v == null ? "—" : formatDuration(v * 3600),
+									},
+								]}
+								margin={{ left: 140 }}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 			</CardContent>

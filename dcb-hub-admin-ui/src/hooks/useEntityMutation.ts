@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
@@ -117,6 +117,9 @@ export function useEntityMutation(entity: EntityKey) {
 	const definition = ENTITY_REGISTRY[entity];
 
 	const [pending, setPending] = useState<Pending | null>(null);
+	// Set in the click: a double click or Enter repeat lands before `busy` reaches a render
+	const submitting = useRef(false);
+	const [busy, setBusy] = useState(false);
 	const [alert, setAlert] = useState<AlertState>({
 		open: false,
 		severity: "success",
@@ -225,139 +228,160 @@ export function useEntityMutation(entity: EntityKey) {
 			changeCategory: string,
 			changeReferenceUrl: string,
 		) => {
-			if (!pending) return;
-			const audit: AuditFields = { reason, changeCategory, changeReferenceUrl };
+			if (!pending || submitting.current) return;
+			submitting.current = true;
+			setBusy(true);
+			try {
+				const audit: AuditFields = {
+					reason,
+					changeCategory,
+					changeReferenceUrl,
+				};
 
-			if (pending.kind === "delete") {
-				const { id, name, ownerId, redirect } = pending;
+				if (pending.kind === "delete") {
+					const { id, name, ownerId, redirect } = pending;
+					try {
+						const response = await runDelete({
+							input: { ...definition.buildDeleteId(id, { ownerId }), ...audit },
+						});
+
+						// A 200 carrying `errors` alongside a null payload does not throw -
+						// graphql-request only throws when `data` is absent. readDeleteOutcome
+						// reads a missing field as success, deliberately, so without this a
+						// rejected delete reported one that happened.
+						const problems = graphQLErrorsIn(response);
+						if (problems.length > 0) {
+							setPending(null);
+							failWith(
+								{ response: { errors: problems } },
+								failText("ui.data_grid.delete_error", name),
+							);
+							return;
+						}
+
+						const { success, message } = readDeleteOutcome(
+							response,
+							definition.deleteOperation,
+						);
+						// `success: false` is the server DECLINING, with a reason written for a
+						// human ("3 patron requests reference this location"). Nothing failed
+						// and nothing will change on a retry, so its message is the whole text
+						// rather than a detail line under "please reload the page and try
+						// again".
+						if (!success) {
+							setPending(null);
+							setAlert({
+								open: true,
+								severity: "error",
+								text: message ?? failText("ui.data_grid.delete_error", name),
+								title: t("ui.data_grid.error"),
+							});
+							return;
+						}
+
+						// Invalidate BEFORE navigating: the destination list reads from the
+						// same cache, so navigating first shows the deleted record until
+						// something else happens to refetch.
+						await invalidate();
+						setPending(null);
+
+						if (redirect) {
+							router.navigate({ to: redirect });
+							return;
+						}
+						succeed(
+							"ui.data_grid.delete_success",
+							"ui.data_grid.deleted",
+							name,
+						);
+					} catch (error) {
+						console.error(
+							`Error deleting ${entity} ${name}:`,
+							errorForLog(error),
+						);
+						setPending(null);
+						failWith(error, failText("ui.data_grid.delete_error", name));
+					}
+					return;
+				}
+
+				// Both edit paths converge here: the only difference is where the
+				// changed fields come from and who needs telling afterwards.
+				const isGridEdit = pending.kind === "gridEdit";
+				const id = isGridEdit ? String(pending.newRow.id) : pending.id;
+				const name = isGridEdit
+					? String(pending.newRow.name ?? pending.newRow.id)
+					: pending.name;
+				const changedFields = isGridEdit
+					? changedRowFields(pending.newRow, pending.oldRow)
+					: pending.changedFields;
+
+				const input = definition.normaliseUpdateFields
+					? definition.normaliseUpdateFields(changedFields)
+					: changedFields;
+
 				try {
-					const response = await runDelete({
-						input: { ...definition.buildDeleteId(id, { ownerId }), ...audit },
+					const response = await runUpdate({
+						// Stripped at the boundary, not at the call site: read
+						// stripUnsupportedKeys. The flags are read HERE rather than at module
+						// scope because window.__APP_ENV__ is assigned after an await in
+						// main.tsx.
+						input: stripUnsupportedKeys(
+							{ ...definition.buildUpdateId(id), ...input, ...audit },
+							unsupportedInputKeys(),
+						),
 					});
-
-					// A 200 carrying `errors` alongside a null payload does not throw -
-					// graphql-request only throws when `data` is absent. readDeleteOutcome
-					// reads a missing field as success, deliberately, so without this a
-					// rejected delete reported one that happened.
+					// Same non-throwing failure as the delete path: a 200 with `errors` and a
+					// null payload resolves normally, and reading the operation field off it
+					// would hand the grid a null row as the persisted one.
 					const problems = graphQLErrorsIn(response);
 					if (problems.length > 0) {
-						setPending(null);
-						failWith(
-							{ response: { errors: problems } },
-							failText("ui.data_grid.delete_error", name),
-						);
-						return;
+						throw { response: { errors: problems } };
 					}
 
-					const { success, message } = readDeleteOutcome(
-						response,
-						definition.deleteOperation,
-					);
-					// `success: false` is the server DECLINING, with a reason written for a
-					// human ("3 patron requests reference this location"). Nothing failed
-					// and nothing will change on a retry, so its message is the whole text
-					// rather than a detail line under "please reload the page and try
-					// again".
-					if (!success) {
-						setPending(null);
+					const updated = definition.updateOperation
+						? (response?.[definition.updateOperation] ?? response)
+						: response;
+
+					await invalidate();
+
+					if (isGridEdit) {
+						pending.resolve(updated);
+					} else {
+						pending.onSuccess?.(updated);
+					}
+					const successText = !isGridEdit ? pending.successText : undefined;
+					setPending(null);
+					if (successText) {
 						setAlert({
 							open: true,
-							severity: "error",
-							text: message ?? failText("ui.data_grid.delete_error", name),
-							title: t("ui.data_grid.error"),
+							severity: "success",
+							text: successText,
+							title: t("ui.data_grid.updated"),
 						});
-						return;
+					} else {
+						succeed("ui.data_grid.edit_success", "ui.data_grid.updated", name);
 					}
-
-					// Invalidate BEFORE navigating: the destination list reads from the
-					// same cache, so navigating first shows the deleted record until
-					// something else happens to refetch.
-					await invalidate();
-					setPending(null);
-
-					if (redirect) {
-						router.navigate({ to: redirect });
-						return;
-					}
-					succeed("ui.data_grid.delete_success", "ui.data_grid.deleted", name);
 				} catch (error) {
 					console.error(
-						`Error deleting ${entity} ${name}:`,
+						`Error updating ${entity} ${name}:`,
 						errorForLog(error),
 					);
+					if (isGridEdit) pending.reject(error);
+					const errorText = !isGridEdit ? pending.errorText : undefined;
 					setPending(null);
-					failWith(error, failText("ui.data_grid.delete_error", name));
+					// A caller's errorText says what the user was trying to do; failWith adds
+					// the server's reason beneath it. It is the summary now rather than the
+					// whole message, because "Could not enable pickup" on its own left the
+					// administrator with nothing to act on.
+					failWith(
+						error,
+						errorText ?? failText("ui.data_grid.edit_error", name),
+					);
 				}
-				return;
-			}
-
-			// Both edit paths converge here: the only difference is where the
-			// changed fields come from and who needs telling afterwards.
-			const isGridEdit = pending.kind === "gridEdit";
-			const id = isGridEdit ? String(pending.newRow.id) : pending.id;
-			const name = isGridEdit
-				? String(pending.newRow.name ?? pending.newRow.id)
-				: pending.name;
-			const changedFields = isGridEdit
-				? changedRowFields(pending.newRow, pending.oldRow)
-				: pending.changedFields;
-
-			const input = definition.normaliseUpdateFields
-				? definition.normaliseUpdateFields(changedFields)
-				: changedFields;
-
-			try {
-				const response = await runUpdate({
-					// Stripped at the boundary, not at the call site: read
-					// stripUnsupportedKeys. The flags are read HERE rather than at module
-					// scope because window.__APP_ENV__ is assigned after an await in
-					// main.tsx.
-					input: stripUnsupportedKeys(
-						{ ...definition.buildUpdateId(id), ...input, ...audit },
-						unsupportedInputKeys(),
-					),
-				});
-				// Same non-throwing failure as the delete path: a 200 with `errors` and a
-				// null payload resolves normally, and reading the operation field off it
-				// would hand the grid a null row as the persisted one.
-				const problems = graphQLErrorsIn(response);
-				if (problems.length > 0) {
-					throw { response: { errors: problems } };
-				}
-
-				const updated = definition.updateOperation
-					? (response?.[definition.updateOperation] ?? response)
-					: response;
-
-				await invalidate();
-
-				if (isGridEdit) {
-					pending.resolve(updated);
-				} else {
-					pending.onSuccess?.(updated);
-				}
-				const successText = !isGridEdit ? pending.successText : undefined;
-				setPending(null);
-				if (successText) {
-					setAlert({
-						open: true,
-						severity: "success",
-						text: successText,
-						title: t("ui.data_grid.updated"),
-					});
-				} else {
-					succeed("ui.data_grid.edit_success", "ui.data_grid.updated", name);
-				}
-			} catch (error) {
-				console.error(`Error updating ${entity} ${name}:`, errorForLog(error));
-				if (isGridEdit) pending.reject(error);
-				const errorText = !isGridEdit ? pending.errorText : undefined;
-				setPending(null);
-				// A caller's errorText says what the user was trying to do; failWith adds
-				// the server's reason beneath it. It is the summary now rather than the
-				// whole message, because "Could not enable pickup" on its own left the
-				// administrator with nothing to act on.
-				failWith(error, errorText ?? failText("ui.data_grid.edit_error", name));
+			} finally {
+				submitting.current = false;
+				setBusy(false);
 			}
 		},
 		[
@@ -376,6 +400,7 @@ export function useEntityMutation(entity: EntityKey) {
 	);
 
 	const cancel = useCallback(() => {
+		if (submitting.current) return;
 		// A dismissed grid edit must resolve with the ORIGINAL row. Leaving the
 		// promise open freezes the row in edit mode for the rest of the session.
 		if (pending?.kind === "gridEdit") pending.resolve(pending.oldRow);
@@ -399,10 +424,11 @@ export function useEntityMutation(entity: EntityKey) {
 						: undefined,
 			onConfirm: confirm,
 			onClose: cancel,
+			busy,
 			alert,
 			onAlertClose: () => setAlert((current) => ({ ...current, open: false })),
 		}),
-		[pending, entityName, confirm, cancel, alert],
+		[pending, entityName, confirm, cancel, alert, busy],
 	);
 
 	/**

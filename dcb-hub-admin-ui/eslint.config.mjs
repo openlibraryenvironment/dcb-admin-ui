@@ -48,6 +48,17 @@ const DATE_PROVIDER_IMPORTS = [
 	},
 ];
 
+// The Actions menu is the title row's, so it sits top right on every page.
+const PAGE_ACTIONS_IMPORT = {
+	group: [
+		"@components/PageActionsMenu/PageActionsMenu",
+		"**/PageActionsMenu/PageActionsMenu",
+	],
+	importNames: ["default"],
+	message:
+		"Pass the actions to PageContainer as pageActions (and pageActionsPending), which puts them top right beside the page title. Import only the Action type from here.",
+};
+
 export default [
 	{
 		// Flat config no longer reads .eslintignore - these paths are either
@@ -170,6 +181,7 @@ export default [
 				"error",
 				{
 					paths: [ZOD_IMPORT, ...DATE_PROVIDER_IMPORTS],
+					patterns: [PAGE_ACTIONS_IMPORT],
 				},
 			],
 			"no-duplicate-imports": 2,
@@ -188,6 +200,17 @@ export default [
 			// mutation/infinite property order, no-unstable-deps, no-rest-destructuring)
 			// remain enabled and do add value.
 			"@tanstack/query/exhaustive-deps": "off",
+		},
+	},
+	{
+		// The one place that renders the Actions menu. Restated without it, because flat
+		// config replaces a rule's options rather than merging them.
+		files: ["src/layout/PageContainer/PageContainer.tsx"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{ paths: [ZOD_IMPORT, ...DATE_PROVIDER_IMPORTS] },
+			],
 		},
 	},
 	{
@@ -272,6 +295,19 @@ export default [
 						"CallExpression[callee.object.name='console'] > Identifier[name=/^(e|err|error|reason)$/]",
 					message:
 						"Do not log a raw error: an AxiosError carries the bearer token, a GraphQL error the request's variables. Log errorForLog(error) from @helpers/safeErrorLog.",
+				},
+				// The name rule above missed `failure` and `fetchError`: inside a catch, any bare
+				// identifier handed to console is the caught value until shown otherwise
+				{
+					selector:
+						"CatchClause CallExpression[callee.object.name='console'] > Identifier",
+					message:
+						"Do not log a raw error: an AxiosError carries the bearer token, a GraphQL error the request's variables. Log errorForLog(error) from @helpers/safeErrorLog.",
+				},
+				{
+					selector: "CallExpression[arguments.0.object.name='console']",
+					message:
+						"`.catch(console.error)` logs the raw error. Pass (error) => console.error(…, errorForLog(error)).",
 				},
 				{
 					selector: "CallExpression[callee.property.name='waitForTimeout']",

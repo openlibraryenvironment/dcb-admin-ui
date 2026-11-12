@@ -13,6 +13,7 @@ import {
 	serialiseExportRows,
 } from "@helpers/dataGrid/serialiseExportRows";
 import {
+	ExportTooLargeError,
 	fetchExportPages,
 	isAbortError,
 } from "@helpers/dataGrid/fetchExportPages";
@@ -87,6 +88,8 @@ interface UseGridExportProps {
 }
 
 const EXPORT_PAGE_SIZE = 1000;
+/** 300 sequential OFFSET pages; docs/large-exports.md has what each one costs dcb-service. */
+export const MAX_EXPORT_ROWS = 300_000;
 const EMPTY_FILTER: GridFilterModel = { items: [] };
 
 const triggerDownload = (
@@ -358,6 +361,7 @@ export const useGridExport = ({
 								? Math.round((fetched / totalSize) * 100)
 								: 100,
 						}),
+					maxRows: MAX_EXPORT_ROWS,
 					signal: controller.signal,
 				});
 			}
@@ -370,6 +374,15 @@ export const useGridExport = ({
 		} catch (error) {
 			// A cancelled export is the outcome the user asked for, not a failure.
 			if (isAbortError(error)) return;
+			if (error instanceof ExportTooLargeError) {
+				onError(
+					t("ui.data_grid.export_too_large", {
+						count: error.totalSize,
+						max: error.maxRows,
+					}),
+				);
+				return;
+			}
 			console.error("Grid export failed", errorForLog(error));
 			onError(t("ui.data_grid.export_failed"));
 		} finally {

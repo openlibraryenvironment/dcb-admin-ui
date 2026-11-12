@@ -67,7 +67,8 @@ export const standardRefValueMappingColumns: GridColDef[] = [
 		flex: 0.5,
 		filterOperators: dateTimeRangeOperators,
 		editable: false,
-		sortable: true,
+		// dcb-service sorts by this in memory over every mapping, unpaged (8.71.0-9.3.0)
+		sortable: false,
 		valueGetter: (value: string, row: { lastImported: string }) => {
 			const lastImported = row.lastImported;
 			const formattedDate = dayjs(lastImported).format("YYYY-MM-DD HH:mm");

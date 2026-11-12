@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -57,24 +58,40 @@ export default function NetFlowChart({ params }: { params: StatsParams }) {
 					height={CHART_HEIGHT}
 				>
 					{() => (
-						<BarChartPro
-							height={CHART_HEIGHT}
-							xAxis={[
-								{ scaleType: "band", data: rows.map((r) => r.libraryCode) },
-							]}
+						<ChartFigure
+							label={t("insights.charts.net_flow.title")}
+							categoryLabel={t("ui.chart_table.library")}
+							categories={rows.map((r) => r.libraryCode)}
 							series={[
 								{
-									data: rows.map((r) => r.borrowedCount),
 									label: t("insights.charts.net_flow.borrowed"),
-									color: categorical[0],
+									values: rows.map((r) => r.borrowedCount),
 								},
 								{
-									data: rows.map((r) => r.suppliedCount),
 									label: t("insights.charts.net_flow.supplied"),
-									color: categorical[1],
+									values: rows.map((r) => r.suppliedCount),
 								},
 							]}
-						/>
+						>
+							<BarChartPro
+								height={CHART_HEIGHT}
+								xAxis={[
+									{ scaleType: "band", data: rows.map((r) => r.libraryCode) },
+								]}
+								series={[
+									{
+										data: rows.map((r) => r.borrowedCount),
+										label: t("insights.charts.net_flow.borrowed"),
+										color: categorical[0],
+									},
+									{
+										data: rows.map((r) => r.suppliedCount),
+										label: t("insights.charts.net_flow.supplied"),
+										color: categorical[1],
+									},
+								]}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 			</CardContent>

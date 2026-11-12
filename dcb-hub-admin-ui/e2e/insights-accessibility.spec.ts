@@ -6,7 +6,11 @@ import axe from "axe-core";
 import { seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
 import { enableInsights, mockInsights } from "./fixtures/insights-mocks";
-import { attachRuleOutcomes, expectPaintedScheme } from "./fixtures/axe";
+import {
+	attachRuleOutcomes,
+	expectPaintedScheme,
+	waitForTransitions,
+} from "./fixtures/axe";
 import { covers } from "./fixtures/coverage";
 import consortiumBasics from "./fixtures-data/consortium-basics.json";
 import libraries from "./fixtures-data/libraries.json";
@@ -98,6 +102,7 @@ async function scan(page: Page) {
 	expect(RULES).toContain("heading-order");
 	expect(RULES.length).toBeGreaterThan(50);
 
+	await waitForTransitions(page);
 	const results = await new AxeBuilder({ page }).withRules(RULES).analyze();
 	await attachRuleOutcomes(results);
 
@@ -174,6 +179,35 @@ for (const scheme of ["light", "dark"] as const) {
 				await page.goto(`/libraries/${LIBRARY}/insights?tab=gaps`);
 				await revealSubject(page, "Consortial lifeline");
 				await scan(page);
+			},
+		);
+
+		test(
+			"every chart's table has no violations",
+			covers(
+				`Every chart on Insights offers its numbers as a table, and every check axe can automate passes with them open, in ${scheme} mode.`,
+				["1.1.1"],
+				{ page: "Insights: chart tables", view: scheme },
+			),
+			async ({ page }) => {
+				let opened = 0;
+				for (const { tab, lastPanel } of SUBJECTS) {
+					await page.goto(`/consortium/insights?tab=${tab}`);
+					await revealSubject(page, lastPanel);
+
+					const show = page.getByRole("button", { name: /^Show as a table:/ });
+					const count = await show.count();
+					// Each opened one is renamed "Hide", so the first is always the next
+					for (let i = 0; i < count; i++) await show.first().click();
+					await expect(
+						page.getByRole("button", { name: /^Hide the table:/ }),
+					).toHaveCount(count);
+					await expect(page.getByRole("table")).not.toHaveCount(0);
+
+					await scan(page);
+					opened += count;
+				}
+				expect(opened).toBeGreaterThanOrEqual(10);
 			},
 		);
 

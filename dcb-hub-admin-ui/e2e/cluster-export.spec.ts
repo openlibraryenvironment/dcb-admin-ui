@@ -1,7 +1,7 @@
 import { test, expect } from "./fixtures/test";
 import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { mockGraphQL } from "./fixtures/graphql-mocks";
-import { useAllFeatures } from "./fixtures/flags";
+import { useAllFeatures, useAllFeaturesExcept } from "./fixtures/flags";
 import { CLUSTER_ID, mockClusterRest } from "./fixtures/cluster-mocks";
 import { MOCKS } from "./fixtures/routes";
 
@@ -60,6 +60,15 @@ test("says when the cluster has no members to export", async ({ page }) => {
 
 test("is not offered without ADMIN", async ({ page }) => {
 	await seedAuth(page, { roles: ["CONSORTIUM_ADMIN"] });
+	await page.goto(CLUSTER);
+
+	await expect(await exportItem(page, false)).toHaveCount(0);
+});
+
+// Before 9.1.0 dcb-service builds the zip on a database I/O thread, with no bound
+test("is not offered before dcb-service 9.1.0", async ({ page }) => {
+	await useAllFeaturesExcept(page, ["VITE_FEATURE_CLUSTER_EXPORT"]);
+	await seedAuth(page, { roles: ADMIN_ROLES });
 	await page.goto(CLUSTER);
 
 	await expect(await exportItem(page, false)).toHaveCount(0);

@@ -260,12 +260,8 @@ function GroupPatronRequests() {
 								quickFilterFields: ["status", "description"],
 								wizard: true,
 							}}
-							disableAggregation
 							disableHoverInteractions={false}
-							disableRowGrouping
-							disablePivoting
 							listViewEnabled={false}
-							pivotingEnabled={false}
 							toolbarVisible
 							scrollbarVisible={false}
 							noResultsText={t("patron_requests.no_results")}

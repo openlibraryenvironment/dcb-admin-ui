@@ -1,0 +1,123 @@
+import { test, expect } from "./fixtures/test";
+import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
+import { mockGraphQL, overrideGraphQL } from "./fixtures/graphql-mocks";
+import { useAllFeatures, useAllFeaturesExcept } from "./fixtures/flags";
+import { scanForViolations } from "./fixtures/axe";
+import { MOCKS } from "./fixtures/routes";
+import bibDetail from "./fixtures-data/bib-detail.json";
+
+const BIB_ID = "bb220000-2222-5222-9222-bbbbbbbbbbbb";
+const POINTS = [
+	{
+		value: "5d1a0000-1111-5111-9111-5d1a5d1a5d1a",
+		domain: "ISBN",
+		sourceValueHint: "9780000000001",
+	},
+];
+
+test.beforeEach(async ({ page }) => {
+	await useAllFeatures(page);
+	await mockGraphQL(page, MOCKS);
+	await overrideGraphQL(page, {
+		LoadBibMainDetails: bibDetail,
+		LoadBibSourceRecord: bibDetail,
+	});
+});
+
+// What answers "why did these two not cluster": nothing on the page showed it
+test("an ADMIN can see what the bib clusters on, fetched only when asked", async ({
+	page,
+}) => {
+	let fetched = 0;
+	await page.route(`**/bibs/${BIB_ID}/matchpoints`, (route) => {
+		fetched++;
+		return route.fulfill({ json: POINTS });
+	});
+	await seedAuth(page, { roles: ADMIN_ROLES });
+	await page.goto(`/bibs/${BIB_ID}`);
+
+	const summary = page.getByRole("button", { name: "Match points" });
+	await expect(summary).toBeVisible();
+	expect(fetched).toBe(0);
+
+	await summary.click();
+	const row = page.getByRole("row").filter({ hasText: "ISBN" });
+	await expect(row).toContainText("9780000000001");
+	await expect(row).toContainText(POINTS[0].value);
+	expect(fetched).toBe(1);
+	await scanForViolations(page);
+});
+
+// GET /bibs/{id}/matchpoints is @Secured(ADMINISTRATOR), 8.71.0-9.3.0
+test("is not offered without ADMIN before dcb-service 9.4.0", async ({
+	page,
+}) => {
+	await useAllFeaturesExcept(page, ["VITE_FEATURE_CONSORTIUM_MATCH_POINTS"]);
+	await seedAuth(page, { roles: ["CONSORTIUM_ADMIN"] });
+	await page.goto(`/bibs/${BIB_ID}`);
+	await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+
+	await expect(page.getByRole("button", { name: "Match points" })).toHaveCount(
+		0,
+	);
+});
+
+// Two bibs side by side: the shared values are why they cluster, or the missing ones why not
+test("compares the bib's match points with another bib's", async ({ page }) => {
+	const OTHER = "0be00000-1111-5111-9111-0be0be0be0be";
+	await page.route(`**/bibs/*/matchpoints`, (route) =>
+		route.fulfill({
+			json: route.request().url().includes(OTHER)
+				? [POINTS[0]]
+				: [
+						...POINTS,
+						{
+							value: "7a1e0000-2222-5222-9222-7a1e7a1e7a1e",
+							domain: "TITLE",
+							sourceValueHint: "alpha and the art of clustering",
+						},
+					],
+		}),
+	);
+	await seedAuth(page, { roles: ADMIN_ROLES });
+	await page.goto(`/bibs/${BIB_ID}`);
+	await page.getByRole("button", { name: "Match points" }).click();
+
+	await page
+		.getByRole("textbox", { name: "Compare with bib UUID" })
+		.fill(OTHER);
+	await page.getByRole("button", { name: "Compare", exact: true }).click();
+
+	await expect(
+		page.getByRole("status").filter({ hasText: "shared" }),
+	).toHaveText("1 of this bib's 2 match points is shared with the other bib.");
+	await expect(page.getByRole("row").filter({ hasText: "ISBN" })).toContainText(
+		"Yes",
+	);
+	await expect(
+		page.getByRole("row").filter({ hasText: "TITLE" }),
+	).toContainText("No");
+	await scanForViolations(page);
+});
+
+// 9.4.0 admits CONSORTIUM_ADMIN to the match points, and still not to the audit log
+test("is offered to a consortium administrator from dcb-service 9.4.0", async ({
+	page,
+}) => {
+	await page.route(`**/bibs/${BIB_ID}/matchpoints`, (route) =>
+		route.fulfill({ json: POINTS }),
+	);
+	let auditAsked = 0;
+	await page.route(`**/bibs/${BIB_ID}/audit-log`, (route) => {
+		auditAsked++;
+		return route.fulfill({ json: {} });
+	});
+	await seedAuth(page, { roles: ["CONSORTIUM_ADMIN"] });
+	await page.goto(`/bibs/${BIB_ID}`);
+
+	await page.getByRole("button", { name: "Match points" }).click();
+	await expect(page.getByRole("row").filter({ hasText: "ISBN" })).toContainText(
+		"9780000000001",
+	);
+	expect(auditAsked).toBe(0);
+});

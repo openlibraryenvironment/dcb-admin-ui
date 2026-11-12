@@ -1,5 +1,6 @@
 import type { GridSortModel } from "@mui/x-data-grid-premium";
 
+import { itemColumnVisibility } from "@columns/columnVisibility/itemColumnVisibility";
 import { defaultPatronRequestColumnVisibility } from "@columns/columnVisibility/defaultPatronRequestColumnVisibility";
 import { exceptionPatronRequestColumnVisibility } from "@columns/columnVisibility/exceptionPatronRequestColumnVisibility";
 import { finishedPatronRequestColumnVisibility } from "@columns/columnVisibility/finishedPatronRequestColumnVisibility";
@@ -146,9 +147,10 @@ export const catalogMetricsByHostLmsView: GridViewSpec = {
 const lastImportedFirst: GridSortModel = [
 	{ field: "lastImported", sort: "desc" },
 ];
+// Not lastImported: dcb-service sorts every mapping by it in memory, unpaged (8.71.0-9.3.0)
 export const referenceValueMappingsView = listView(
 	"referenceValueMappings",
-	lastImportedFirst,
+	[{ field: "fromCategory", sort: "asc" }],
 	20,
 	{ lastImported: false, toCategory: false },
 );
@@ -252,15 +254,13 @@ const recordView = (
 });
 
 // Holds every row client-side, so the reader's aggregates total the whole list: in the URL as agg
-export const clusterExplanationView: GridViewSpec = {
-	...recordView(
-		"ClusterExplainer",
-		[{ field: "formattedTimestamp", sort: "desc" }],
-		25,
-		defaultClusterExplanationVisibility,
-	),
-	aggregation: true,
-};
+export const clusterExplanationView = recordView(
+	"ClusterExplainer",
+	// Oldest first: within each bib, its matches come before the outcome they caused
+	[{ field: "timestamp", sort: "asc" }],
+	25,
+	defaultClusterExplanationVisibility,
+);
 export const clusterIdentifiersView = recordView(
 	"ClusterIdentifiers",
 	[{ field: "title", sort: "asc" }],
@@ -279,6 +279,7 @@ export const clusterItemsView = recordView(
 	"ClusterRecordItems",
 	soonestAvailable,
 	25,
+	itemColumnVisibility,
 );
 /** The items the standard availability check left out: the page's second grid. */
 export const NOT_SHOWN_NAMESPACE = "notShown";
@@ -286,7 +287,7 @@ export const clusterItemsNotShownView = recordView(
 	"ClusterRecordItemsNotShown",
 	soonestAvailable,
 	25,
-	{},
+	itemColumnVisibility,
 	NOT_SHOWN_NAMESPACE,
 );
 /** A request's audit log, on the request's own page: its parameters carry this namespace. */

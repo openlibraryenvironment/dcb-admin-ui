@@ -13,6 +13,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 import dayjs from "dayjs";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
@@ -135,7 +136,7 @@ export default function AuditIncidenceChart({ query }: { query: string }) {
 					}}
 				>
 					<Box>
-						<Typography variant="h6" gutterBottom>
+						<Typography variant="h6" component="h2" gutterBottom>
 							{t("audit_explorer.chart.title")}
 						</Typography>
 						<Typography variant="body2" color="text.secondary" gutterBottom>
@@ -217,17 +218,26 @@ export default function AuditIncidenceChart({ query }: { query: string }) {
 						</Typography>
 					</Box>
 				) : (
-					<BarChartPro
-						height={CHART_HEIGHT}
-						xAxis={[{ scaleType: "band", data: labels }]}
+					<ChartFigure
+						label={t("audit_explorer.chart.title")}
+						categoryLabel={t("ui.chart_table.period")}
+						categories={labels}
 						series={[
-							{
-								data: counts,
-								label: t("audit_explorer.chart.series"),
-								color: categorical[5],
-							},
+							{ label: t("audit_explorer.chart.series"), values: counts },
 						]}
-					/>
+					>
+						<BarChartPro
+							height={CHART_HEIGHT}
+							xAxis={[{ scaleType: "band", data: labels }]}
+							series={[
+								{
+									data: counts,
+									label: t("audit_explorer.chart.series"),
+									color: categorical[5],
+								},
+							]}
+						/>
+					</ChartFigure>
 				)}
 			</CardContent>
 		</Card>

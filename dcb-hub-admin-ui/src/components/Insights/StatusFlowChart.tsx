@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, Typography, Chip, Box } from "@mui/material";
 import { LineChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette, inkOn } from "@hooks/useChartPalette";
@@ -10,6 +11,7 @@ import { useChartPalette, inkOn } from "@hooks/useChartPalette";
 import PanelState from "./PanelState";
 import ChartExportToolbar from "./ChartExportToolbar";
 import { MAX_PLOT_SERIES } from "@helpers/insightsSearch";
+import { formatBucket } from "@helpers/insightsRange";
 import type { InsightsView } from "@hooks/useInsightsView";
 import {
 	timeSeriesQueryOptions,
@@ -31,7 +33,7 @@ export default function StatusFlowChart({
 	interval,
 	view,
 }: StatusFlowChartProps) {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const client = useDcbRestClient();
 	const { colorForStatus } = useChartPalette();
 
@@ -131,20 +133,32 @@ export default function StatusFlowChart({
 					height={CHART_HEIGHT}
 				>
 					{() => (
-						<LineChartPro
-							height={CHART_HEIGHT}
-							// The image and print export the MUI X Premium licence already covers,
-							// which nothing in this application used. A picture for a slide is a
-							// different need from the numbers, and this is where a reader looks for it.
-							showToolbar
-							slots={{ toolbar: ChartExportToolbar }}
-							// No `zoom`. The gestures it enables - wheel, pinch, drag-to-pan -
-							// have no keyboard or single-pointer equivalent and no reset, and
-							// the window is already the reader's to choose in the range control
-							// above, which unlike a zoom state travels in the URL.
-							xAxis={[{ data: xAxisData, scaleType: "time" }]}
-							series={series}
-						/>
+						<ChartFigure
+							label={t("insights.charts.status_flow.title")}
+							categoryLabel={t("ui.chart_table.period")}
+							categories={xAxisData.map((bucket) =>
+								formatBucket(bucket, interval, i18n.language),
+							)}
+							series={series.map((entry) => ({
+								label: entry.label,
+								values: entry.data,
+							}))}
+						>
+							<LineChartPro
+								height={CHART_HEIGHT}
+								// The image and print export the MUI X Premium licence already covers,
+								// which nothing in this application used. A picture for a slide is a
+								// different need from the numbers, and this is where a reader looks for it.
+								showToolbar
+								slots={{ toolbar: ChartExportToolbar }}
+								// No `zoom`. The gestures it enables - wheel, pinch, drag-to-pan -
+								// have no keyboard or single-pointer equivalent and no reset, and
+								// the window is already the reader's to choose in the range control
+								// above, which unlike a zoom state travels in the URL.
+								xAxis={[{ data: xAxisData, scaleType: "time" }]}
+								series={series}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 			</CardContent>

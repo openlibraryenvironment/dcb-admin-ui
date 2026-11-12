@@ -15,10 +15,9 @@ import {
 	TextField,
 	Typography,
 	Divider,
-	AccordionSummary,
 	useTheme,
 } from "@mui/material";
-import { Cancel, Delete, Edit, ExpandMore, Save } from "@mui/icons-material";
+import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
 import PageContainer from "@layout/PageContainer/PageContainer";
 import LibraryTabs from "@components/LibraryTabs/LibraryTabs";
@@ -30,14 +29,10 @@ import FormatArrayAsList from "@components/FormatArrayAsList/FormatArrayAsList";
 import EntityMutationDialogs from "@components/EntityMutationDialogs/EntityMutationDialogs";
 import Confirmation from "@components/Confirmation/Confirmation";
 import MoreActionsMenu from "@components/MoreActionsMenu/MoreActionsMenu";
-import {
-	StyledAccordion,
-	StyledAccordionDetails,
-} from "@components/StyledAccordion/StyledAccordion";
+import RulesetDetailsAccordion from "@components/RulesetDetailsAccordion/RulesetDetailsAccordion";
 
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
 import { useEntityMutation } from "@hooks/useEntityMutation";
-import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useUnsavedChangesWarning } from "@hooks/useUnsavedChangesWarning";
 import { getILS } from "@helpers/getILS";
 import { handleEdit } from "@helpers/actions/editAndDeleteActions";
@@ -58,7 +53,6 @@ function Service() {
 	const { libraryId } = Route.useParams();
 	const theme = useTheme();
 	const gqlClient = useGraphQLClient();
-	const client = useDcbRestClient();
 	const auth = useAuth();
 
 	const userRoles = (auth?.user?.profile?.roles as string[]) || [];
@@ -69,19 +63,6 @@ function Service() {
 
 	const firstEditableFieldRef = useRef<HTMLInputElement | null>(null);
 	const [editMode, setEditMode] = useState(false);
-
-	const [expandedAccordions, setExpandedAccordions] = useState({
-		bib1: false,
-		item1: false,
-		bib2: false,
-		item2: false,
-	});
-	const [bibSuppressionRuleset1, setBibSuppressionRuleset1] =
-		useState<any>(null);
-	const [itemSuppressionRuleset1, setItemSuppressionRuleset1] =
-		useState<any>(null);
-	const [itemSuppressionRuleset2, setItemSuppressionRuleset2] =
-		useState<any>(null);
 
 	const { data, isLoading, error } = useQuery({
 		queryKey: ["library", "service", libraryId],
@@ -165,36 +146,6 @@ function Service() {
 	const firstHostLms = library?.agency?.hostLms;
 	const secondHostLms = library?.secondHostLms;
 	const ils = getILS(firstHostLms?.lmsClientClass);
-
-	const fetchRuleset = async (
-		rulesetName: string,
-		setter: React.Dispatch<React.SetStateAction<any>>,
-	) => {
-		if (!rulesetName || !auth.user?.access_token) return;
-		try {
-			const response = await client.get(`/object-rules/${rulesetName}`);
-			setter(response.data);
-		} catch (fetchError) {
-			console.error(`Error fetching ruleset ${rulesetName}:`, fetchError);
-			setter({ error: `Failed to load details for ${rulesetName}.` });
-		}
-	};
-
-	const handleAccordionChange =
-		(
-			accordionKey: keyof typeof expandedAccordions,
-			rulesetName: string | undefined,
-			rulesetData: any,
-			setter: React.Dispatch<React.SetStateAction<any>>,
-		) =>
-		(event: React.SyntheticEvent, isExpanded: boolean) => {
-			setExpandedAccordions((prev) => ({
-				...prev,
-				[accordionKey]: isExpanded,
-			}));
-			if (isExpanded && !rulesetData && rulesetName)
-				fetchRuleset(rulesetName, setter);
-		};
 
 	if (isLoading)
 		return (
@@ -590,73 +541,23 @@ function Service() {
 
 						{firstHostLms.itemSuppressionRulesetName && (
 							<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-								<StyledAccordion
-									expanded={expandedAccordions.item1}
-									onChange={handleAccordionChange(
-										"item1",
-										firstHostLms.itemSuppressionRulesetName,
-										itemSuppressionRuleset1,
-										setItemSuppressionRuleset1,
-									)}
-								>
-									<AccordionSummary expandIcon={<ExpandMore />}>
-										<Typography
-											variant="h3"
-											sx={{
-												fontWeight: "bold",
-											}}
-										>
-											{t("libraries.suppression_ruleset_item", {
-												lms: firstHostLms.name,
-											})}
-										</Typography>
-									</AccordionSummary>
-									<StyledAccordionDetails>
-										{itemSuppressionRuleset1 ? (
-											<pre>
-												{JSON.stringify(itemSuppressionRuleset1, null, 2)}
-											</pre>
-										) : (
-											<Typography>{t("libraries.ruleset_loading")}</Typography>
-										)}
-									</StyledAccordionDetails>
-								</StyledAccordion>
+								<RulesetDetailsAccordion
+									title={t("libraries.suppression_ruleset_item", {
+										lms: firstHostLms.name,
+									})}
+									rulesetName={firstHostLms.itemSuppressionRulesetName}
+								/>
 							</Grid>
 						)}
 
 						{firstHostLms.suppressionRulesetName && (
 							<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-								<StyledAccordion
-									expanded={expandedAccordions.bib1}
-									onChange={handleAccordionChange(
-										"bib1",
-										firstHostLms.suppressionRulesetName,
-										bibSuppressionRuleset1,
-										setBibSuppressionRuleset1,
-									)}
-								>
-									<AccordionSummary expandIcon={<ExpandMore />}>
-										<Typography
-											variant="h3"
-											sx={{
-												fontWeight: "bold",
-											}}
-										>
-											{t("libraries.suppression_ruleset_bib", {
-												lms: firstHostLms.name,
-											})}
-										</Typography>
-									</AccordionSummary>
-									<StyledAccordionDetails>
-										{bibSuppressionRuleset1 ? (
-											<pre>
-												{JSON.stringify(bibSuppressionRuleset1, null, 2)}
-											</pre>
-										) : (
-											<Typography>{t("libraries.ruleset_loading")}</Typography>
-										)}
-									</StyledAccordionDetails>
-								</StyledAccordion>
+								<RulesetDetailsAccordion
+									title={t("libraries.suppression_ruleset_bib", {
+										lms: firstHostLms.name,
+									})}
+									rulesetName={firstHostLms.suppressionRulesetName}
+								/>
 							</Grid>
 						)}
 					</>
@@ -699,37 +600,12 @@ function Service() {
 
 						{secondHostLms.itemSuppressionRulesetName && (
 							<Grid size={{ xs: 4, sm: 8, md: 12 }}>
-								<StyledAccordion
-									expanded={expandedAccordions.item2}
-									onChange={handleAccordionChange(
-										"item2",
-										secondHostLms.itemSuppressionRulesetName,
-										itemSuppressionRuleset2,
-										setItemSuppressionRuleset2,
-									)}
-								>
-									<AccordionSummary expandIcon={<ExpandMore />}>
-										<Typography
-											variant="h3"
-											sx={{
-												fontWeight: "bold",
-											}}
-										>
-											{t("libraries.suppression_ruleset_item", {
-												lms: secondHostLms.name,
-											})}
-										</Typography>
-									</AccordionSummary>
-									<StyledAccordionDetails>
-										{itemSuppressionRuleset2 ? (
-											<pre>
-												{JSON.stringify(itemSuppressionRuleset2, null, 2)}
-											</pre>
-										) : (
-											<Typography>{t("libraries.ruleset_loading")}</Typography>
-										)}
-									</StyledAccordionDetails>
-								</StyledAccordion>
+								<RulesetDetailsAccordion
+									title={t("libraries.suppression_ruleset_item", {
+										lms: secondHostLms.name,
+									})}
+									rulesetName={secondHostLms.itemSuppressionRulesetName}
+								/>
 							</Grid>
 						)}
 					</>

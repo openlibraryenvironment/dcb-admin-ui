@@ -2,6 +2,7 @@ import { ReactNode, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { useQuery } from "@tanstack/react-query";
+import type { RequestOptions, Variables } from "graphql-request";
 import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { Grid, Stack, Typography, Box, Tooltip } from "@mui/material";
@@ -42,13 +43,9 @@ import { getLocations } from "@queries/getLocations";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
 import { getBibs } from "@queries/getBibs";
-import { getLibraryCreations } from "@queries/getLibraryCreations";
-import { earliest } from "@helpers/timeToFirstRequest";
 import type {
 	LoadBibsQueryVariables,
 	LoadLibrariesQueryVariables,
-	LoadLibraryCreationsQuery,
-	LoadLibraryCreationsQueryVariables,
 	LoadLocationsQueryVariables,
 	LoadMappingsQueryVariables,
 	LoadNumericRangeMappingsQueryVariables,
@@ -173,7 +170,6 @@ const mappingsTooltip = (t: TFunction, mappings: LibraryMappingsState) => (
 );
 
 // The change-log INSERT row for each library, which is when it was created
-const LIBRARY_CREATIONS_QUERY = 'entityType:"library" AND actionInfo:"INSERT"';
 
 function Onboarding() {
 	const { t } = useTranslation();
@@ -185,38 +181,35 @@ function Onboarding() {
 	// Fetch libraries and then batch-fetch the individual totalSize counts for each
 	const { data: librariesWithCounts, isLoading } = useQuery({
 		queryKey: ["LoadLibrariesForOnboardingWithCounts"],
-		queryFn: async () => {
-			const libRes = await gqlClient.request<any, LoadLibrariesQueryVariables>(
-				getLibraries,
-				{
-					order: "fullName",
-					orderBy: "ASC",
-					pageno: 0,
-					pagesize: 500,
-					query: "",
-				},
-			);
+		queryFn: async ({ signal }) => {
+			// Every request carries the query's signal: leaving the page cancels the
+			// counts still in flight, and no library still waiting starts
+			const ask = <T, V extends Variables>(
+				document: string,
+				variables: V,
+			): Promise<T> =>
+				gqlClient.request<T, V>({
+					document,
+					variables,
+					signal,
+				} as unknown as RequestOptions<V, T>);
+
+			const libRes = await ask<any, LoadLibrariesQueryVariables>(getLibraries, {
+				order: "fullName",
+				orderBy: "ASC",
+				pageno: 0,
+				pagesize: 500,
+				query: "",
+			});
 
 			const libs = libRes?.libraries?.content ?? [];
 
-			const creations = await gqlClient.request<
-				LoadLibraryCreationsQuery,
-				LoadLibraryCreationsQueryVariables
-			>(getLibraryCreations, {
-				query: LIBRARY_CREATIONS_QUERY,
-				pagesize: 500,
-			});
-			const createdAtByLibrary = new Map(
-				(creations?.dataChangeLog?.content ?? []).map((entry) => [
-					entry?.entityId,
-					entry?.timestampLogged,
-				]),
-			);
-			// Ten queries per library, bounded rather than all at once -
+			// Up to eight queries per library, bounded rather than all at once -
 			// see mapWithConcurrency. Six is roughly a browser's per-host
 			// connection limit, so this is the point past which extra parallelism
 			// only buys queueing.
 			const enriched = await mapWithConcurrency(libs, 6, async (lib: any) => {
+				signal.throwIfAborted();
 				const hostLmsCode = lib?.agency?.hostLms?.code;
 				const hostLmsId = lib?.agency?.hostLms?.id;
 				const agencyCode = lib?.agencyCode;
@@ -235,8 +228,6 @@ function Onboarding() {
 						bibCount: 0,
 						lastBorrowingRequestAt: null,
 						lastSupplyingRequestAt: null,
-						createdAt: createdAtByLibrary.get(lib?.id) ?? null,
-						firstRequestAt: null,
 						numericRangeMappingCount: requiresNumeric ? 0 : null,
 					};
 				}
@@ -250,92 +241,63 @@ function Onboarding() {
 						borrowingRes,
 						supplyingRes,
 						bibRes,
-						firstBorrowingRes,
-						firstSupplyingRes,
 					] = await Promise.all([
-						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+						ask<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`,
 							order: "id",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+						ask<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"patronType" OR fromCategory:"patronType") AND NOT deleted:true`,
 							order: "id",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
+						ask<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"Location" OR fromCategory:"Location") AND NOT deleted:true`,
 							order: "id",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadLocationsQueryVariables>(getLocations, {
+						ask<any, LoadLocationsQueryVariables>(getLocations, {
 							query: `hostSystem: ${hostLmsId} AND isPickup: true`,
 							order: "code",
 							orderBy: "ASC",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `patronHostlmsCode: "${hostLmsCode}"`,
-								order: "dateCreated",
-								orderBy: "DESC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `supplyingAgencyCode: "${agencyCode}"`,
-								order: "dateCreated",
-								orderBy: "DESC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
+						ask<any, LoadPatronRequestsQueryVariables>(getPatronRequests(), {
+							query: `patronHostlmsCode: "${hostLmsCode}"`,
+							order: "dateCreated",
+							orderBy: "DESC",
+							pageno: 0,
+							pagesize: 1,
+						}),
+						ask<any, LoadPatronRequestsQueryVariables>(getPatronRequests(), {
+							query: `supplyingAgencyCode: "${agencyCode}"`,
+							order: "dateCreated",
+							orderBy: "DESC",
+							pageno: 0,
+							pagesize: 1,
+						}),
 						// Ingest health: bibs live under the Host LMS, and zero of them
 						// means the library cannot supply anything however well the
 						// rest is configured.
-						gqlClient.request<any, LoadBibsQueryVariables>(getBibs, {
+						ask<any, LoadBibsQueryVariables>(getBibs, {
 							query: `sourceSystemId: ${hostLmsId}`,
 							order: "dateCreated",
 							pageno: 0,
 							pagesize: 1,
 						}),
-						// The oldest request each way: setup is done when the library first takes part
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `patronHostlmsCode: "${hostLmsCode}"`,
-								order: "dateCreated",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `supplyingAgencyCode: "${agencyCode}"`,
-								order: "dateCreated",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
 					]);
 
 					let numericRangePromise = null;
 					if (requiresNumeric) {
-						numericRangePromise = gqlClient.request<
+						numericRangePromise = ask<
 							any,
 							LoadNumericRangeMappingsQueryVariables
 						>(getNumericRangeMappings, {
@@ -368,16 +330,12 @@ function Onboarding() {
 						lastSupplyingRequestAt:
 							supplyingRes?.patronRequests?.content?.[0]?.dateCreated ?? null,
 						bibCount: bibRes?.sourceBibs?.totalSize ?? 0,
-						createdAt: createdAtByLibrary.get(lib?.id) ?? null,
-						firstRequestAt: earliest(
-							firstBorrowingRes?.patronRequests?.content?.[0]?.dateCreated,
-							firstSupplyingRes?.patronRequests?.content?.[0]?.dateCreated,
-						),
 						numericRangeMappingCount: requiresNumeric
 							? (numericRes?.numericRangeMappings?.totalSize ?? 0)
 							: null,
 					};
 				} catch (e) {
+					if (signal.aborted) throw e;
 					console.error(
 						"Failed fetching counts for",
 						lib.fullName,
@@ -889,12 +847,8 @@ function Onboarding() {
 						filterMode="client"
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
-						disableAggregation
 						disableHoverInteractions={false}
-						disableRowGrouping
-						disablePivoting
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible={false}
 						pagination
 						paginationModel={paginationModel}

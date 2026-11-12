@@ -207,7 +207,7 @@ function LibraryLocations() {
 				headerName: "Location UUID",
 				minWidth: 50,
 				flex: 0.8,
-				filterOperators: standardFilters,
+				filterOperators: equalsOnly,
 			},
 			{
 				field: "lastImported",
@@ -394,16 +394,12 @@ function LibraryLocations() {
 							baseQuery: presetQueryVariables,
 							wizard: true,
 						}}
-						disableAggregation
-						disableRowGrouping
 						disableHoverInteractions={false}
-						disablePivoting={true}
 						editMode="row"
 						rowModesModel={rowModesModel}
 						onRowModesModelChange={setRowModesModel}
 						processRowUpdate={locationMutation.requestGridEdit}
 						listViewEnabled={false}
-						pivotingEnabled={false}
 						toolbarVisible
 						scrollbarVisible={false}
 						noResultsText={t("locations.no_results")}

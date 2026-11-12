@@ -28,6 +28,18 @@ there rather than here:
 Keyset pagination, a `Slice` return type on the export path, and DataLoader
 batching would each cut this substantially. All three are `dcb-service` changes.
 
+## The row limit
+
+An export refuses a result set larger than `MAX_EXPORT_ROWS` (300,000, in
+`useGridExport.ts`). The check runs on the total that page 0 reports, so a refused
+export costs one request, and the user is told how many rows the grid holds and asked
+to filter it.
+
+Without it "All" was offered on `/bibs` and a library's bibs, which at 20 million
+records is about 20,000 sequential offset pages, each with its own `COUNT(*)`. The
+limit is 300 pages of 1000 rows, the largest case costed out above; raise it only
+with a measurement of what it costs dcb-service.
+
 ## Why the export outlives its access token
 
 An export large enough to matter runs for longer than a Keycloak access token

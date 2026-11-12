@@ -1,10 +1,14 @@
 import { useMemo, useState } from "react";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useSearch } from "@tanstack/react-router";
-import { Grid, Chip } from "@mui/material";
-import { CheckCircle, Warning, Info } from "@mui/icons-material";
-import { GridColDef, type GridRowModesModel } from "@mui/x-data-grid-premium";
+import { Grid } from "@mui/material";
+import {
+	GridColDef,
+	type GridRowGroupingModel,
+	type GridRowModesModel,
+} from "@mui/x-data-grid-premium";
 import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
 import { useGridView } from "@hooks/useGridView";
 import { validateGridSearch } from "@helpers/viewState/gridSearch";
@@ -12,12 +16,23 @@ import { rememberedViewRedirect } from "@helpers/viewState/viewRoute";
 import { clusterExplanationView } from "@constants/dataGrid/gridViews";
 
 import DataGrid from "@components/DataGrid/DataGrid";
+import Link from "@components/Link/Link";
 import MasterDetail from "@components/MasterDetail/MasterDetail";
 import Loading from "@components/Loading/Loading";
-import Error from "@components/Error/Error";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
-import { parseClusteringAuditLog } from "@helpers/parseClusteringAuditLog";
+import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { clusterMemberLabels } from "@helpers/clusterMemberLabels";
+import { clusterFullQuery } from "@/queryOptions/cluster";
+import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
+import {
+	CLUSTERING_EVENT_KINDS,
+	type ClusteringEventKind,
+	clusteringEventLabelKey,
+	parseClusteringAuditLog,
+} from "@helpers/parseClusteringAuditLog";
+import ClusteringEventChip from "@components/ClusteringEventChip/ClusteringEventChip";
 
 export const Route = createFileRoute(
 	"/__authenticated/search/$clusterId/clusterExplanation",
@@ -43,14 +58,19 @@ function ClusterExplanation() {
 	const { t } = useTranslation();
 	const { clusterId } = Route.useParams();
 	const client = useDcbRestClient();
+	const gqlClient = useGraphQLClient();
 
 	const gridId = clusterExplanationView.id;
 	const search = useSearch({
 		from: "/__authenticated/search/$clusterId/clusterExplanation",
 	});
 	const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
+	// Events grouped under the bib they explain: a group row's "(n)" is that bib's event count
+	const [rowGroupingModel, setRowGroupingModel] =
+		useState<GridRowGroupingModel>(["subjectId"]);
 
-	const { data, isLoading, isError } = useQuery({
+	// A failure throws to the route's error component, inside the cluster page's tabs
+	const { data, isLoading } = useQuery({
 		queryKey: ["clusterAuditLog", clusterId],
 		queryFn: async () => {
 			const res = await client.get(`/clusters/${clusterId}/audit-log`);
@@ -61,6 +81,21 @@ function ClusterExplanation() {
 
 	const rows = useMemo(() => parseClusteringAuditLog(data), [data]);
 
+	// Names for the group rows; without them a bib is its id, as before
+	const members = useQuery({
+		...clusterFullQuery(gqlClient, clusterId),
+		...nonCriticalQuery,
+	});
+	const hostLmss = useQuery(hostLmsSelectionQuery(gqlClient));
+	const memberLabels = useMemo(
+		() =>
+			clusterMemberLabels(
+				members.data?.instanceClusters?.content?.[0]?.members,
+				hostLmss.data?.hostLms?.content,
+			),
+		[members.data, hostLmss.data],
+	);
+
 	const columns: GridColDef[] = useMemo(
 		() => [
 			{
@@ -68,39 +103,23 @@ function ClusterExplanation() {
 				headerName: t("search.bib_record_id_and_number"),
 				minWidth: 200,
 				flex: 1,
+				valueFormatter: (value: string) => memberLabels.get(value) ?? value,
 			},
 			{
 				field: "eventType",
 				headerName: t("search.event_type"),
 				minWidth: 200,
 				flex: 0.75,
-				renderCell: (params) => {
-					let color: "success" | "warning" | "info" | "default" = "default";
-					let icon = <Info fontSize="small" />;
-
-					if (
-						params.value === "Match - high confidence" ||
-						params.value === "low confidence matches"
-					) {
-						color = "success";
-						icon = <CheckCircle fontSize="small" />;
-					} else if (params.value === "Warning") {
-						color = "warning";
-						icon = <Warning fontSize="small" />;
-					} else if (params.value === "Existing Cluster") {
-						color = "info";
-					}
-
-					return (
-						<Chip
-							label={params.value}
-							color={color}
-							icon={icon}
-							size="small"
-							variant="outlined"
-						/>
-					);
-				},
+				type: "singleSelect",
+				valueOptions: CLUSTERING_EVENT_KINDS.map((kind) => ({
+					value: kind,
+					label: t(clusteringEventLabelKey(kind)),
+				})),
+				// A group row has no event of its own
+				renderCell: (params) =>
+					params.value ? (
+						<ClusteringEventChip kind={params.value as ClusteringEventKind} />
+					) : null,
 			},
 			{
 				field: "matchCriteria",
@@ -115,14 +134,45 @@ function ClusterExplanation() {
 				flex: 0.75,
 			},
 			{
-				field: "formattedTimestamp",
+				// A date, to the second, so a bib's run sorts from the matches to their outcome
+				field: "timestamp",
 				headerName: t("search.formatted_timestamp"),
-				minWidth: 150,
+				minWidth: 170,
+				type: "dateTime",
+				valueGetter: (value: string | null) => (value ? new Date(value) : null),
+				valueFormatter: (value: Date | null) =>
+					value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss") : "",
 			},
 			{
 				field: "matchedBibId",
 				headerName: t("search.bib_matched_against"),
-				width: 100,
+				// A whole UUID, so it can be read and copied
+				minWidth: 290,
+				renderCell: ({ value }) =>
+					value ? (
+						<Link
+							to="/bibs/$bibId"
+							params={{ bibId: value }}
+							onClick={(e: React.MouseEvent) => e.stopPropagation()}
+						>
+							{value}
+						</Link>
+					) : null,
+			},
+			{
+				field: "matchedClusterId",
+				headerName: t("search.cluster_matched"),
+				minWidth: 290,
+				renderCell: ({ value }) =>
+					value ? (
+						<Link
+							to="/search/$clusterId/cluster"
+							params={{ clusterId: value }}
+							onClick={(e: React.MouseEvent) => e.stopPropagation()}
+						>
+							{value}
+						</Link>
+					) : null,
 			},
 			{
 				field: "message",
@@ -130,7 +180,7 @@ function ClusterExplanation() {
 				minWidth: 200,
 			},
 		],
-		[t],
+		[t, memberLabels],
 	);
 	const view = useGridView(clusterExplanationView, columns, search);
 
@@ -141,15 +191,6 @@ function ClusterExplanation() {
 					document_type: t("nav.search.cluster_explainer").toLowerCase(),
 				})}
 				subtitle={t("ui.info.wait")}
-			/>
-		);
-	if (isError)
-		return (
-			<Error
-				title={t("search.items_error_title")}
-				message={t("ui.info.connection_issue")}
-				action={t("ui.actions.reload")}
-				onAction={() => location.reload()}
 			/>
 		);
 
@@ -171,7 +212,6 @@ function ClusterExplanation() {
 					sortingMode="client"
 					filterMode="client"
 					pagination
-					disablePivoting
 					paginationModel={view.paginationModel}
 					onPaginationModelChange={view.onPaginationModelChange}
 					sortModel={view.sortModel}
@@ -181,19 +221,22 @@ function ClusterExplanation() {
 					columnVisibilityModel={view.columnVisibilityModel}
 					onColumnVisibilityModelChange={view.onColumnVisibilityModelChange}
 					columnLayout={view.columnLayout}
-					getDetailPanelContent={({ row }: any) => (
-						<MasterDetail row={row} type="ClusterExplainer" />
-					)}
-					disableAggregation={false}
-					aggregationModel={view.aggregationModel}
-					onAggregationModelChange={view.onAggregationModelChange}
+					getDetailPanelContent={({ row }: any) =>
+						row?.eventType ? (
+							<MasterDetail row={row} type="ClusterExplainer" />
+						) : null
+					}
+					rowGroupingModel={rowGroupingModel}
+					onRowGroupingModelChange={setRowGroupingModel}
+					groupingColDef={{ minWidth: 350 }}
+					// Open, so every event shows without a click per bib
+					defaultGroupingExpansionDepth={-1}
 					disableRowGrouping={false}
 					disableHoverInteractions={false}
 					listViewEnabled={false}
-					pivotingEnabled={false}
 					toolbarVisible
 					scrollbarVisible={false}
-					noResultsText={t("ui.data_grid.no_results")}
+					noResultsText={t("search.cluster_explanation_empty")}
 					searchText={t("ui.data_grid.search")}
 					rowModesModel={rowModesModel}
 					onRowModesModelChange={setRowModesModel}

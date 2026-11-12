@@ -36,6 +36,7 @@ import {
 	GridExportConfig,
 	useGridExport,
 } from "@hooks/useGridExport";
+import { exportClientGrid } from "@helpers/dataGrid/exportClientGrid";
 import { constrainToServerOperators } from "@filters/serverFilterOperators";
 import { handleDataGridRowClick } from "@helpers/dataGrid/handleDataGridRowClick";
 import type { DataGridType } from "@constants/dataGrid/types";
@@ -93,7 +94,7 @@ interface CustomDataGridProps extends Omit<
 	identifier: string;
 	listViewEnabled: boolean;
 	noResultsText: string;
-	pivotingEnabled: boolean;
+	pivotingEnabled?: boolean;
 	scrollbarVisible: boolean;
 	toolbarVisible: boolean;
 	searchText: string;
@@ -136,7 +137,7 @@ export default function DataGrid({
 	noResultsText,
 	onExport,
 	parentApiRef,
-	pivotingEnabled,
+	pivotingEnabled = false,
 	scrollbarVisible,
 	searchText,
 	styleOverrides,
@@ -154,6 +155,9 @@ export default function DataGrid({
 	viewNotice,
 	rowSelection = false,
 	columnLayout,
+	disableAggregation = true,
+	disableRowGrouping = true,
+	disablePivoting = true,
 	...rest
 }: CustomDataGridProps) {
 	const { t } = useTranslation();
@@ -233,13 +237,18 @@ export default function DataGrid({
 		skipped: rollback.skippedCount,
 	});
 
+	// A grid that holds every row exports them itself; a server grid needs exportConfig
 	const handleExport = exportConfig
 		? (fileType: string, exportMode: string) =>
 				runExport({
 					mode: exportMode as ExportMode,
 					format: fileType as ExportFormat,
 				})
-		: onExport;
+		: (onExport ??
+			(paginationMode === "server"
+				? undefined
+				: (fileType: string, exportMode: string) =>
+						exportClientGrid(apiRef, fileType, exportMode, identifier)));
 
 	// During its render-phase state initialisation MUI clamps the controlled
 	// `paginationModel` page against `rowCount`. Callers pass a transient
@@ -342,6 +351,11 @@ export default function DataGrid({
 				rows={stableRows}
 				rowModesModel={rowModesModel}
 				paginationMode={paginationMode}
+				// Off unless a grid opts in, and always off on a server-paged grid: they would
+				// aggregate or group only the one page of rows the grid holds
+				disableAggregation={paginationMode === "server" || disableAggregation}
+				disableRowGrouping={paginationMode === "server" || disableRowGrouping}
+				disablePivoting={paginationMode === "server" || disablePivoting}
 				loading={loading}
 				pageSizeOptions={PAGE_SIZE_OPTIONS}
 				// Nothing to page through yet. Shown, the bar moves when the grid resizes to the
@@ -370,6 +384,9 @@ export default function DataGrid({
 				localeText={{
 					toolbarQuickFilterPlaceholder: searchText ?? t("ui.data_grid.search"),
 					columnsManagementSearchTitle: t("ui.data_grid.find_column"),
+					// A group row's toggle: MUI's own are "see children" and "hide children"
+					treeDataExpand: t("ui.data_grid.expand_group"),
+					treeDataCollapse: t("ui.data_grid.collapse_group"),
 					toolbarExportCSV: t("ui.data_grid.export.current"),
 					toolbarExportPrint: t("ui.data_grid.print_current_page"),
 					filterOperatorDoesNotEqual: t("ui.data_grid.filters.not_equal"),
