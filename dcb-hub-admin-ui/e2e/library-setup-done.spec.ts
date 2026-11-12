@@ -141,3 +141,29 @@ test("a library set up on its own does not offer consortium setup", async ({
 		page.getByRole("link", { name: "Back to consortium setup" }),
 	).toHaveCount(0);
 });
+
+test("Continue on an import chapter waits for the refreshed counts before moving on", async ({
+	page,
+}) => {
+	await mockSetup(page, { harvested: 12 });
+	let continued = false;
+	await page.route("**/graphql", async (route) => {
+		if (
+			continued &&
+			route.request().postDataJSON()?.operationName === "LoadMappings"
+		) {
+			await new Promise((resolve) => setTimeout(resolve, 1500));
+		}
+		await route.fallback();
+	});
+	await page.goto(`/libraries/${LIBRARY.id}/setup/refMappings`);
+	const next = page.getByRole("main").getByRole("button", { name: "Continue" });
+	await expect(next).toBeEnabled();
+
+	continued = true;
+	await next.click();
+
+	await expect(next).toBeDisabled();
+	await expect(page).toHaveURL(/\/setup\/refMappings$/);
+	await expect(page).not.toHaveURL(/\/setup\/refMappings$/);
+});
