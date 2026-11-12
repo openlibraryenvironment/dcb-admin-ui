@@ -211,16 +211,20 @@ const defaultAgencyCode = (): ClientConfigField => ({
 	requiredUnless: sharedSystemSet,
 });
 
-/** Foundation speaks NCIP unless told otherwise, as FoundationClient does. */
-const isSip2 = (values: any): boolean =>
-	String(values?.["base-protocol"] ?? "").toUpperCase() === "SIP2";
-
 /** ImperativeCapabilityConfig.setting reads this block before the top-level key. */
 const IMPERATIVE = (key: string): string[] => [
 	"capabilities",
 	"imperative",
 	key,
 ];
+
+/** Foundation speaks NCIP unless told otherwise, as FoundationClient does. */
+const isSip2 = (values: any): boolean =>
+	String(
+		[IMPERATIVE("base-protocol"), ["base-protocol"]]
+			.map((path) => readPath(values, path))
+			.find((value) => !isBlank(value)) ?? "",
+	).toUpperCase() === "SIP2";
 
 /** NcipPeerAuthProfile requires issuer, JWKS URL and audience only in this mode. */
 const isJwtRequired = (values: any): boolean =>
@@ -1791,7 +1795,7 @@ export const missingRequiredClientConfig = (
 			(configField) =>
 				configField.requirement === "required" &&
 				!(configField.requiredUnless?.(values) ?? false) &&
-				isBlank(readPath(values, configField.path)),
+				isBlank(effectiveClientConfigValue(values, configField)),
 		)
 		.map((configField) => ({
 			name: fieldName(configField),

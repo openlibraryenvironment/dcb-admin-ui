@@ -54,6 +54,43 @@ afterEach(() => {
  */
 describe("hostLmsClientConfig", () => {
 	describe("required fields per ILS", () => {
+		// The raw JSON editor holds what was typed, so a setting may sit at any path
+		// dcb-service reads it from, not only the one the guided form writes
+		it.each([
+			[
+				"an ORS ncipSystemId",
+				HOST_LMS_CLASSES.orsAppliance,
+				{ ncipSystemId: "ORS1" },
+				"ncip-system-id",
+			],
+			[
+				"a Foundation ncip.endpoint",
+				HOST_LMS_CLASSES.foundation,
+				{ ncip: { endpoint: "https://ncip.example.org" } },
+				"ncip-endpoint-url",
+			],
+			[
+				"a Foundation SIP2 base protocol set as an imperative capability",
+				HOST_LMS_CLASSES.foundation,
+				{ capabilities: { imperative: { "base-protocol": "SIP2" } } },
+				"ncip-endpoint-url",
+			],
+		])("accepts %s", (_, lmsClientClass, config, name) => {
+			expect(
+				missingRequiredClientConfig(lmsClientClass, config).map(
+					(problem) => problem.name,
+				),
+			).not.toContain(name);
+		});
+
+		it("still demands the SIP2 host when the imperative capability selects SIP2", () => {
+			expect(
+				missingRequiredClientConfig(HOST_LMS_CLASSES.foundation, {
+					capabilities: { imperative: { "base-protocol": "SIP2" } },
+				}).map((problem) => problem.name),
+			).toContain("sip2.host");
+		});
+
 		it("demands everything HostLmsConfigValidator demands for Sierra", () => {
 			const missing = missingRequiredClientConfig(
 				HOST_LMS_CLASSES.sierra,
