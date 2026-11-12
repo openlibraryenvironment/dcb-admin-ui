@@ -42,13 +42,9 @@ import { getLocations } from "@queries/getLocations";
 import { getPatronRequests } from "@queries/getPatronRequests";
 import { getNumericRangeMappings } from "@queries/getNumericRangeMappings";
 import { getBibs } from "@queries/getBibs";
-import { getLibraryCreations } from "@queries/getLibraryCreations";
-import { earliest } from "@helpers/timeToFirstRequest";
 import type {
 	LoadBibsQueryVariables,
 	LoadLibrariesQueryVariables,
-	LoadLibraryCreationsQuery,
-	LoadLibraryCreationsQueryVariables,
 	LoadLocationsQueryVariables,
 	LoadMappingsQueryVariables,
 	LoadNumericRangeMappingsQueryVariables,
@@ -173,7 +169,6 @@ const mappingsTooltip = (t: TFunction, mappings: LibraryMappingsState) => (
 );
 
 // The change-log INSERT row for each library, which is when it was created
-const LIBRARY_CREATIONS_QUERY = 'entityType:"library" AND actionInfo:"INSERT"';
 
 function Onboarding() {
 	const { t } = useTranslation();
@@ -199,20 +194,7 @@ function Onboarding() {
 
 			const libs = libRes?.libraries?.content ?? [];
 
-			const creations = await gqlClient.request<
-				LoadLibraryCreationsQuery,
-				LoadLibraryCreationsQueryVariables
-			>(getLibraryCreations, {
-				query: LIBRARY_CREATIONS_QUERY,
-				pagesize: 500,
-			});
-			const createdAtByLibrary = new Map(
-				(creations?.dataChangeLog?.content ?? []).map((entry) => [
-					entry?.entityId,
-					entry?.timestampLogged,
-				]),
-			);
-			// Ten queries per library, bounded rather than all at once -
+			// Up to eight queries per library, bounded rather than all at once -
 			// see mapWithConcurrency. Six is roughly a browser's per-host
 			// connection limit, so this is the point past which extra parallelism
 			// only buys queueing.
@@ -235,8 +217,6 @@ function Onboarding() {
 						bibCount: 0,
 						lastBorrowingRequestAt: null,
 						lastSupplyingRequestAt: null,
-						createdAt: createdAtByLibrary.get(lib?.id) ?? null,
-						firstRequestAt: null,
 						numericRangeMappingCount: requiresNumeric ? 0 : null,
 					};
 				}
@@ -250,8 +230,6 @@ function Onboarding() {
 						borrowingRes,
 						supplyingRes,
 						bibRes,
-						firstBorrowingRes,
-						firstSupplyingRes,
 					] = await Promise.all([
 						gqlClient.request<any, LoadMappingsQueryVariables>(getMappings, {
 							query: `(toContext:"${hostLmsCode}" OR fromContext:"${hostLmsCode}") AND (toCategory:"ItemType" OR fromCategory:"ItemType") AND NOT deleted:true`,
@@ -310,27 +288,6 @@ function Onboarding() {
 							pageno: 0,
 							pagesize: 1,
 						}),
-						// The oldest request each way: setup is done when the library first takes part
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `patronHostlmsCode: "${hostLmsCode}"`,
-								order: "dateCreated",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
-						gqlClient.request<any, LoadPatronRequestsQueryVariables>(
-							getPatronRequests(),
-							{
-								query: `supplyingAgencyCode: "${agencyCode}"`,
-								order: "dateCreated",
-								orderBy: "ASC",
-								pageno: 0,
-								pagesize: 1,
-							},
-						),
 					]);
 
 					let numericRangePromise = null;
@@ -368,11 +325,6 @@ function Onboarding() {
 						lastSupplyingRequestAt:
 							supplyingRes?.patronRequests?.content?.[0]?.dateCreated ?? null,
 						bibCount: bibRes?.sourceBibs?.totalSize ?? 0,
-						createdAt: createdAtByLibrary.get(lib?.id) ?? null,
-						firstRequestAt: earliest(
-							firstBorrowingRes?.patronRequests?.content?.[0]?.dateCreated,
-							firstSupplyingRes?.patronRequests?.content?.[0]?.dateCreated,
-						),
 						numericRangeMappingCount: requiresNumeric
 							? (numericRes?.numericRangeMappings?.totalSize ?? 0)
 							: null,
