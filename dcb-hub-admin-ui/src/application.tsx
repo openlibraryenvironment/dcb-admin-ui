@@ -5,6 +5,7 @@ import { AuthProvider } from "react-oidc-context";
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 import { LicenseInfo } from "@mui/x-license";
+import { keepMuiXTelemetryOff } from "@helpers/muiXTelemetry";
 
 import { applyLanguage } from "./i18n";
 import { useLocaleStore } from "@hooks/useLocaleStore";
@@ -227,6 +228,7 @@ export async function mountDcbAdmin(
 	await applyLanguage();
 	useLocaleStore.subscribe(() => void applyLanguage());
 
+	keepMuiXTelemetryOff();
 	if (cfg.VITE_MUI_X_LICENSE_KEY) {
 		LicenseInfo.setLicenseKey(cfg.VITE_MUI_X_LICENSE_KEY);
 	}
