@@ -3,17 +3,23 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 type Asset = { path: string; label: string; filepath?: string };
-type Plugin = string | [string, { assets?: Asset[] }];
+type GitLabOptions = {
+	assets?: Asset[];
+	successComment?: string | false;
+	successCommentCondition?: string | false;
+};
+type Plugin = string | [string, GitLabOptions];
 
 const releaseConfig = JSON.parse(
 	readFileSync(resolve(__dirname, "../../.releaserc.json"), "utf8"),
 ) as { plugins: Plugin[] };
 
-const gitlabAssets =
+const gitlab =
 	releaseConfig.plugins.find(
-		(plugin): plugin is [string, { assets?: Asset[] }] =>
+		(plugin): plugin is [string, GitLabOptions] =>
 			Array.isArray(plugin) && plugin[0] === "@semantic-release/gitlab",
-	)?.[1].assets ?? [];
+	)?.[1] ?? {};
+const gitlabAssets = gitlab.assets ?? [];
 
 /** Links to the latest report, in the wiki and docs/testing.md, are built on these paths. */
 describe("the release report's permanent link", () => {
@@ -24,5 +30,15 @@ describe("the release report's permanent link", () => {
 		expect(gitlabAssets.find((asset) => asset.path === path)?.filepath).toBe(
 			filepath,
 		);
+	});
+});
+
+// It comments on every merged MR in the release at once, and a POST is never retried: 2.2.0's
+// 216 commits drew a 429, and 2.3.0's 157 a dropped connection, each failing the release job
+// after the tag and release existed. `successComment: false` is the deprecated form.
+describe("the release's last step", () => {
+	it("posts no comment on the merge requests a release includes", () => {
+		expect(gitlab.successCommentCondition).toBe(false);
+		expect(gitlab).not.toHaveProperty("successComment");
 	});
 });
