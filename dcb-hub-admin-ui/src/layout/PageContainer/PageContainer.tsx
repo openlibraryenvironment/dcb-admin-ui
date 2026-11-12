@@ -128,6 +128,8 @@ export default function PageContainer({
 								spacing={1}
 								sx={{
 									alignItems: "baseline",
+									// Grows to share the row with the actions, and wraps its own text
+									flex: "1 1 16rem",
 									minWidth: 0,
 									overflowWrap: "anywhere",
 								}}
@@ -146,7 +148,10 @@ export default function PageContainer({
 							</Stack>
 						)}
 						{pageActions && isAnAdmin && (
-							<PageActionsMenu actions={pageActions} mode={mode || "view"} />
+							// Right-aligned even when a narrow screen wraps them under the title
+							<Box sx={{ marginInlineStart: "auto" }}>
+								<PageActionsMenu actions={pageActions} mode={mode || "view"} />
+							</Box>
 						)}
 					</Stack>
 				</Box>
