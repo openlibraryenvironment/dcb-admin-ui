@@ -6,6 +6,12 @@ import { useAllFeatures } from "./fixtures/flags";
 import { CLUSTER_ID, mockClusterRest } from "./fixtures/cluster-mocks";
 import { MOCKS } from "./fixtures/routes";
 import clusterRecord from "./fixtures-data/cluster-record.json";
+import consortiumBasics from "./fixtures-data/consortium-basics.json";
+import libraries from "./fixtures-data/libraries.json";
+import {
+	patronRequestDetailMocks,
+	TRACKED_REQUEST,
+} from "./fixtures/patron-request-detail";
 
 // The page's Actions button sits top right, beside the title, on every page. A cluster's
 // title is a whole book title, which is what once pushed it to the left of a second line.
@@ -41,33 +47,56 @@ const actionsPlacement = (page: Page) =>
 		};
 	});
 
-test.beforeEach(async ({ page }) => {
-	await useAllFeatures(page);
-	await seedAuth(page);
-	await mockGraphQL(page, MOCKS);
-	await overrideGraphQL(page, { ClusterRecordsTitleOnly: withLongTitle });
-	await mockClusterRest(page);
+test.describe("a cluster", () => {
+	test.beforeEach(async ({ page }) => {
+		await useAllFeatures(page);
+		await seedAuth(page);
+		await mockGraphQL(page, MOCKS);
+		await overrideGraphQL(page, { ClusterRecordsTitleOnly: withLongTitle });
+		await mockClusterRest(page);
+	});
+
+	test("a long title leaves Actions top right, on the title's row", async ({
+		page,
+	}) => {
+		await page.goto(`/search/${CLUSTER_ID}/cluster`);
+		await expect(page.locator("#page-title")).toContainText(LONG_TITLE);
+
+		const placement = await actionsPlacement(page);
+		expect(placement.gapToRight).toBeLessThanOrEqual(1);
+		expect(placement.besideTitle).toBe(true);
+	});
+
+	test("at 320px Actions may drop under the title, but stays at the right", async ({
+		page,
+	}) => {
+		await page.setViewportSize({ width: 320, height: 640 });
+		await page.goto(`/search/${CLUSTER_ID}/cluster`);
+		await expect(page.locator("#page-title")).toContainText(LONG_TITLE);
+
+		const placement = await actionsPlacement(page);
+		expect(placement.gapToRight).toBeLessThanOrEqual(1);
+		expect(placement.onScreen).toBe(true);
+	});
 });
 
-test("a long title leaves Actions top right, on the title's row", async ({
+// Rendered its own menu inside the page content until the menu became PageContainer's
+test("a patron request's Actions are top right, on the title's row", async ({
 	page,
 }) => {
-	await page.goto(`/search/${CLUSTER_ID}/cluster`);
-	await expect(page.locator("#page-title")).toContainText(LONG_TITLE);
+	await useAllFeatures(page);
+	await seedAuth(page);
+	await mockGraphQL(page, {
+		LoadConsortium: consortiumBasics,
+		LoadConsortiumHeader: consortiumBasics,
+		LoadHostLms: { hostLms: { totalSize: 0, content: [] } },
+		LoadLibraryDirectory: libraries,
+		...patronRequestDetailMocks,
+	});
+	await page.goto(`/patronRequests/${TRACKED_REQUEST.id}`);
+	await expect(page.locator("#page-title")).toBeVisible();
 
 	const placement = await actionsPlacement(page);
 	expect(placement.gapToRight).toBeLessThanOrEqual(1);
 	expect(placement.besideTitle).toBe(true);
-});
-
-test("at 320px Actions may drop under the title, but stays at the right", async ({
-	page,
-}) => {
-	await page.setViewportSize({ width: 320, height: 640 });
-	await page.goto(`/search/${CLUSTER_ID}/cluster`);
-	await expect(page.locator("#page-title")).toContainText(LONG_TITLE);
-
-	const placement = await actionsPlacement(page);
-	expect(placement.gapToRight).toBeLessThanOrEqual(1);
-	expect(placement.onScreen).toBe(true);
 });

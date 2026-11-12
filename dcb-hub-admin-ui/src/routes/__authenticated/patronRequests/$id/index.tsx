@@ -43,9 +43,7 @@ import PageLoading from "@components/Loading/PageLoading";
 import { CustomLink } from "@components/CustomLink/CustomLink";
 import CopyToClipboardButton from "@components/CopyToClipboardButton/CopyToClipboardButton";
 import Confirmation from "@components/Confirmation/Confirmation";
-import PageActionsMenu, {
-	Action,
-} from "@components/PageActionsMenu/PageActionsMenu";
+import type { Action } from "@components/PageActionsMenu/PageActionsMenu";
 import { translateWorkflow } from "@constants/workflows/DCBWorkflows";
 import { useGridView } from "@hooks/useGridView";
 import GridViewNotice from "@components/DataGrid/components/GridViewNotice";
@@ -714,10 +712,11 @@ function RouteComponent() {
 	}
 
 	return (
-		<PageContainer title={patronRequest?.clusterRecord?.title}>
-			<Stack direction="row" sx={{ justifyContent: "flex-end", mb: 2 }}>
-				<PageActionsMenu actions={pageActions} pending={actionProgress} />
-			</Stack>
+		<PageContainer
+			title={patronRequest?.clusterRecord?.title}
+			pageActions={pageActions}
+			pageActionsPending={actionProgress}
+		>
 			{addingTag && (
 				<AddRequestTagDialog
 					patronRequestId={id}

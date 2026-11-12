@@ -14,6 +14,8 @@ interface PageContainerProps {
 	hideTitleBox?: boolean;
 	hideBreadcrumbs?: boolean;
 	pageActions?: any;
+	/** What the Actions menu has in flight, translated, or null: see PageActionsMenu. */
+	pageActionsPending?: string | null;
 	mode?: "edit" | "view";
 	link?: string;
 	docLink?: string;
@@ -26,6 +28,7 @@ export default function PageContainer({
 	hideTitleBox,
 	hideBreadcrumbs,
 	pageActions,
+	pageActionsPending,
 	mode,
 	link,
 	docLink,
@@ -150,7 +153,11 @@ export default function PageContainer({
 						{pageActions && isAnAdmin && (
 							// Right-aligned even when a narrow screen wraps them under the title
 							<Box sx={{ marginInlineStart: "auto" }}>
-								<PageActionsMenu actions={pageActions} mode={mode || "view"} />
+								<PageActionsMenu
+									actions={pageActions}
+									mode={mode || "view"}
+									pending={pageActionsPending}
+								/>
 							</Box>
 						)}
 					</Stack>
