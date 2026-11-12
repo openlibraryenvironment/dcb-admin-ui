@@ -89,6 +89,15 @@ interface BrandTokens {
 	headerHover: string;
 	headerActive: string;
 	/**
+	 * A text or outlined button's hover and pressed grounds, and the primary label on each.
+	 * The label is `main`, shaded by `inkWithin` only as far as the ground needs: several
+	 * brands' `main` clears the floor on the page and nowhere darker.
+	 */
+	buttonHover: string;
+	buttonActive: string;
+	buttonHoverText: string;
+	buttonActiveText: string;
+	/**
 	 * The bar under the selected tab, and the one place a brand's accent may be itself:
 	 * WCAG 1.4.11 asks 3:1 of a graphical object where text needs 4.5:1.
 	 *
@@ -985,42 +994,34 @@ const components: ThemeOptions["components"] = {
 					textTransform: "none",
 					fontSize: "0.95rem",
 					":hover": {
-						backgroundColor: darken(theme.palette.background.default, 0.08),
+						backgroundColor: theme.palette.primary.buttonHover,
 					},
 					":active": {
 						border: `1px solid ${theme.palette.primary.light}`,
 						outline: `1px solid ${theme.palette.primary.light}`,
-						backgroundColor: darken(theme.palette.background.default, 0.16),
+						backgroundColor: theme.palette.primary.buttonActive,
 					},
-					...theme.applyStyles("dark", {
-						":hover": {
-							backgroundColor: lighten(theme.palette.background.default, 0.08),
-						},
-						":active": {
-							border: `1px solid ${theme.palette.primary.light}`,
-							outline: `1px solid ${theme.palette.primary.light}`,
-							backgroundColor: lighten(theme.palette.background.default, 0.16),
-						},
-					}),
 				}),
 			},
 			{
 				props: { variant: "text" },
 				style: ({ theme }) => ({
-					":hover": {
-						backgroundColor: darken(theme.palette.background.default, 0.08),
-					},
-					":active": {
-						backgroundColor: darken(theme.palette.background.default, 0.16),
-					},
-					...theme.applyStyles("dark", {
-						":hover": {
-							backgroundColor: lighten(theme.palette.background.default, 0.08),
-						},
-						":active": {
-							backgroundColor: lighten(theme.palette.background.default, 0.16),
-						},
-					}),
+					":hover": { backgroundColor: theme.palette.primary.buttonHover },
+					":active": { backgroundColor: theme.palette.primary.buttonActive },
+				}),
+			},
+			{
+				props: { variant: "text", color: "primary" },
+				style: ({ theme }) => ({
+					":hover": { color: theme.palette.primary.buttonHoverText },
+					":active": { color: theme.palette.primary.buttonActiveText },
+				}),
+			},
+			{
+				props: { variant: "outlined", color: "primary" },
+				style: ({ theme }) => ({
+					":hover": { color: theme.palette.primary.buttonHoverText },
+					":active": { color: theme.palette.primary.buttonActiveText },
 				}),
 			},
 			{
@@ -1296,6 +1297,28 @@ const liftWithin = (
 		(amount) => getContrastRatio(text, lighten(header, amount)) >= floor,
 	) ?? candidates[candidates.length - 1];
 
+/** A ground pressed further from the page: darker in light mode, lighter in dark. */
+const tint = (ground: string, amount: number, mode: "light" | "dark") =>
+	mode === "dark" ? lighten(ground, amount) : darken(ground, amount);
+
+/** The least shading of `ink` that is readable on `ground`: darker in light mode. */
+const inkWithin = (
+	ink: string,
+	ground: string,
+	floor: number,
+	mode: "light" | "dark",
+): string => {
+	const shade = (amount: number) =>
+		amount === 0 ? ink : tint(ink, amount, mode === "dark" ? "dark" : "light");
+	const amounts = [0, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4];
+	// getLuminance rounds to three places, so 4.49:1 can read as 4.5: the margin absorbs it
+	return shade(
+		amounts.find(
+			(amount) => getContrastRatio(shade(amount), ground) >= floor + 0.02,
+		) ?? amounts[amounts.length - 1],
+	);
+};
+
 const buildTheme = (
 	{
 		primary,
@@ -1336,6 +1359,20 @@ const buildTheme = (
 						headerFloor,
 						[0.28, 0.2, 0.12],
 					),
+				),
+				buttonHover: tint(backgroundDefault, 0.08, mode),
+				buttonActive: tint(backgroundDefault, 0.16, mode),
+				buttonHoverText: inkWithin(
+					primary.main,
+					tint(backgroundDefault, 0.08, mode),
+					headerFloor,
+					mode,
+				),
+				buttonActiveText: inkWithin(
+					primary.main,
+					tint(backgroundDefault, 0.16, mode),
+					headerFloor,
+					mode,
 				),
 				...primary,
 			},

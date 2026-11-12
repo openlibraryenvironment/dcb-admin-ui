@@ -103,6 +103,9 @@ describe("theme contrast", () => {
 				// would notice by looking at the token list.
 				["headerText / headerHover", p.headerText, p.headerHover],
 				["headerText / headerActive", p.headerText, p.headerActive],
+				// A primary text or outlined button's label, while hovered and pressed
+				["buttonHoverText / buttonHover", p.buttonHoverText, p.buttonHover],
+				["buttonActiveText / buttonActive", p.buttonActiveText, p.buttonActive],
 				[
 					"linkedFooterText / linkedFooterBackground",
 					p.linkedFooterText,
