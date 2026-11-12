@@ -204,6 +204,10 @@ export const isInsightsTrendsEnabled = (): boolean =>
 export const isClusterExportEnabled = (): boolean =>
 	readFlag("VITE_FEATURE_CLUSTER_EXPORT");
 
+/** A bib's match points for CONSORTIUM_ADMIN as well as ADMIN, from dcb-service 9.4.0. */
+export const isConsortiumMatchPointsEnabled = (): boolean =>
+	readFlag("VITE_FEATURE_CONSORTIUM_MATCH_POINTS");
+
 /**
  * Settings inheritance: `resolvedFunctionalSettings`, `settingsBearingGroupType` and the two
  * scoped write mutations, on no dcb-service release yet. Gates the DOCUMENT, not only the

@@ -10,6 +10,10 @@ describe("serverAdmits", () => {
 		["updateAgency", ["ADMIN"], false],
 		["readRulesets", ["ADMIN"], true],
 		["readRulesets", ["CONSORTIUM_ADMIN", "LIBRARY_ADMIN"], false],
+		["readMatchPoints", ["ADMIN"], true],
+		["readMatchPoints", ["CONSORTIUM_ADMIN"], false],
+		["readMatchPointsSince940", ["CONSORTIUM_ADMIN"], true],
+		["readMatchPointsSince940", ["LIBRARY_ADMIN"], false],
 	] as const)("%s for %j is %s", (operation, roles, expected) => {
 		expect(serverAdmits(operation, roles)).toBe(expected);
 	});

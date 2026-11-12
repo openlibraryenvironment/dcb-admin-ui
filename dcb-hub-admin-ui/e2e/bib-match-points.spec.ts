@@ -1,7 +1,7 @@
 import { test, expect } from "./fixtures/test";
 import { ADMIN_ROLES, seedAuth } from "./fixtures/auth";
 import { mockGraphQL, overrideGraphQL } from "./fixtures/graphql-mocks";
-import { useAllFeatures } from "./fixtures/flags";
+import { useAllFeatures, useAllFeaturesExcept } from "./fixtures/flags";
 import { scanForViolations } from "./fixtures/axe";
 import { MOCKS } from "./fixtures/routes";
 import bibDetail from "./fixtures-data/bib-detail.json";
@@ -49,7 +49,10 @@ test("an ADMIN can see what the bib clusters on, fetched only when asked", async
 });
 
 // GET /bibs/{id}/matchpoints is @Secured(ADMINISTRATOR), 8.71.0-9.3.0
-test("is not offered without ADMIN", async ({ page }) => {
+test("is not offered without ADMIN before dcb-service 9.4.0", async ({
+	page,
+}) => {
+	await useAllFeaturesExcept(page, ["VITE_FEATURE_CONSORTIUM_MATCH_POINTS"]);
 	await seedAuth(page, { roles: ["CONSORTIUM_ADMIN"] });
 	await page.goto(`/bibs/${BIB_ID}`);
 	await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -95,4 +98,26 @@ test("compares the bib's match points with another bib's", async ({ page }) => {
 		page.getByRole("row").filter({ hasText: "TITLE" }),
 	).toContainText("No");
 	await scanForViolations(page);
+});
+
+// 9.4.0 admits CONSORTIUM_ADMIN to the match points, and still not to the audit log
+test("is offered to a consortium administrator from dcb-service 9.4.0", async ({
+	page,
+}) => {
+	await page.route(`**/bibs/${BIB_ID}/matchpoints`, (route) =>
+		route.fulfill({ json: POINTS }),
+	);
+	let auditAsked = 0;
+	await page.route(`**/bibs/${BIB_ID}/audit-log`, (route) => {
+		auditAsked++;
+		return route.fulfill({ json: {} });
+	});
+	await seedAuth(page, { roles: ["CONSORTIUM_ADMIN"] });
+	await page.goto(`/bibs/${BIB_ID}`);
+
+	await page.getByRole("button", { name: "Match points" }).click();
+	await expect(page.getByRole("row").filter({ hasText: "ISBN" })).toContainText(
+		"9780000000001",
+	);
+	expect(auditAsked).toBe(0);
 });

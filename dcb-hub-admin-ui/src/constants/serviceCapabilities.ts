@@ -1,6 +1,7 @@
 import {
 	isAuditExplorerEnabled,
 	isClusterExportEnabled,
+	isConsortiumMatchPointsEnabled,
 	isAnnouncementsEnabled,
 	isConsortiumBrandingEnabled,
 	isConfirmItemReturnedEnabled,
@@ -281,6 +282,14 @@ export const SERVICE_CAPABILITIES: ReadonlyArray<ServiceCapability> = [
 		flag: "VITE_FEATURE_CLUSTER_EXPORT",
 		enabled: isClusterExportEnabled,
 		since: "9.1.0",
+		fields: {},
+	},
+	{
+		// REST, so nothing to select or strip: 9.4.0 widens GET /bibs/{id}/matchpoints
+		id: "consortium_match_points",
+		flag: "VITE_FEATURE_CONSORTIUM_MATCH_POINTS",
+		enabled: isConsortiumMatchPointsEnabled,
+		since: "9.4.0",
 		fields: {},
 	},
 	{

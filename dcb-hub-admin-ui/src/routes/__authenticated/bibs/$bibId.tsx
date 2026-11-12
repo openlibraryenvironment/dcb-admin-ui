@@ -34,6 +34,8 @@ import { Bib } from "@models/Bib";
 import { Agency } from "@models/Agency";
 import { Library } from "@models/Library";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
+import { isConsortiumMatchPointsEnabled } from "@helpers/featureFlags";
+import { serverAdmits } from "@constants/serverRoles";
 import type {
 	LoadAgencyQueryVariables,
 	LoadBibMainDetailsQueryVariables,
@@ -53,8 +55,15 @@ function SourceBibDetails() {
 
 	const [isCanonicalExpanded, setIsCanonicalExpanded] = useState(true);
 	const [isSourceRecordExpanded, setIsSourceRecordExpanded] = useState(false);
+	const roles = useAuth()?.user?.profile?.roles as string[] | undefined;
 	// dcb-service serves the audit log to ADMIN alone
-	const isAdmin = useAuth()?.user?.profile?.roles?.includes("ADMIN") ?? false;
+	const isAdmin = roles?.includes("ADMIN") ?? false;
+	const canReadMatchPoints = serverAdmits(
+		isConsortiumMatchPointsEnabled()
+			? "readMatchPointsSince940"
+			: "readMatchPoints",
+		roles,
+	);
 
 	const {
 		data: bibData,
@@ -419,7 +428,7 @@ function SourceBibDetails() {
 					)}
 				</StyledAccordionDetails>
 			</StyledAccordion>
-			{isAdmin && <BibMatchPoints bibId={bibId} />}
+			{canReadMatchPoints && <BibMatchPoints bibId={bibId} />}
 			{isAdmin && <BibAuditLog bibId={bibId} />}
 		</PageContainer>
 	);

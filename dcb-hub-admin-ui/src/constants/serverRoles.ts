@@ -10,6 +10,10 @@ export const SERVER_ROLES = {
 	updateAgency: ["CONSORTIUM_ADMIN"],
 	/** ObjectRulesetController, class-level @Secured(ADMINISTRATOR). */
 	readRulesets: ["ADMIN"],
+	/** BibController matchPoints, under its class-level @Secured(ADMINISTRATOR) to 9.3.0. */
+	readMatchPoints: ["ADMIN"],
+	/** The same from 9.4.0, which admits CONSORTIUM_ADMIN too: VITE_FEATURE_CONSORTIUM_MATCH_POINTS. */
+	readMatchPointsSince940: ["ADMIN", "CONSORTIUM_ADMIN"],
 } as const satisfies Record<string, readonly string[]>;
 
 export type ServerOperation = keyof typeof SERVER_ROLES;
