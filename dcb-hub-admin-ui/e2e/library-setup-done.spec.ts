@@ -86,3 +86,30 @@ test("a failed count is reported as a failure, not as setup not started", async 
 	await expect(page.getByText("Not started")).toHaveCount(0);
 	await expect(page.getByText(/still has setup to finish/)).toHaveCount(0);
 });
+
+test("a set-up library with nothing harvested does not claim to be simply set up", async ({
+	page,
+}) => {
+	await mockSetup(page, { harvested: 0 });
+	await page.goto(`/libraries/${LIBRARY.id}/setup/done`);
+
+	await expect(
+		page.getByRole("heading", {
+			level: 1,
+			name: `${LIBRARY.fullName} is set up, but nothing has been harvested yet`,
+		}),
+	).toBeVisible();
+});
+
+test("a set-up, harvested library is set up", async ({ page }) => {
+	await mockSetup(page, { harvested: 12 });
+	await page.goto(`/libraries/${LIBRARY.id}/setup/done`);
+
+	await expect(
+		page.getByRole("heading", {
+			level: 1,
+			name: `${LIBRARY.fullName} is set up`,
+			exact: true,
+		}),
+	).toBeVisible();
+});

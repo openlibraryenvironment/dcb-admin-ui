@@ -139,6 +139,11 @@ function LibrarySetupDone() {
 	const ingest = harvest.data
 		? evaluateLibraryIngest(harvest.data, library)
 		: undefined;
+	const titleKey = !complete
+		? "libraries.setup.done.title_partial"
+		: ingest?.isIngestOutstanding
+			? "libraries.setup.done.title_unharvested"
+			: "libraries.setup.done.title";
 
 	return (
 		<PageContainer
@@ -148,11 +153,7 @@ function LibrarySetupDone() {
 		>
 			<Stack spacing={3} sx={{ maxWidth: 780 }}>
 				<Typography variant="h1" component="h1">
-					{complete
-						? t("libraries.setup.done.title", { library: library.fullName })
-						: t("libraries.setup.done.title_partial", {
-								library: library.fullName,
-							})}
+					{t(titleKey, { library: library.fullName })}
 				</Typography>
 
 				<List>
