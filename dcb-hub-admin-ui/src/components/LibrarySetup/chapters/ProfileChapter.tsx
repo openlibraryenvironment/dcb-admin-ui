@@ -25,6 +25,7 @@ import {
 	readConsortiumPresence,
 } from "@/queryOptions/consortium";
 import { describeGraphQLError } from "@helpers/graphQLErrors";
+import { HOST_LMS_CLASSES } from "@helpers/hostLmsClientConfig";
 import type { NewLibrarySearch } from "@helpers/librarySetupFlow";
 import type { NewLibraryFormValues } from "@schemas/newLibrarySchema";
 import { useLibraryChapterForm } from "../useLibraryChapterForm";
@@ -80,8 +81,13 @@ export default function ProfileChapter(props: ProfileChapterProps) {
 
 	if (isLoading) return <Skeleton variant="rounded" height={480} />;
 
+	const wanted = props.search.ils
+		? HOST_LMS_CLASSES[props.search.ils]
+		: undefined;
 	const hostLms = (data?.hostLms?.content ?? []).find(
-		(candidate: any) => candidate.code === props.search.hostLms,
+		(candidate: any) =>
+			candidate.code === props.search.hostLms &&
+			candidate.lmsClientClass === wanted,
 	);
 	if (!hostLms) {
 		return (

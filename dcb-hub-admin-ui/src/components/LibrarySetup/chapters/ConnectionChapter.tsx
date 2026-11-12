@@ -134,9 +134,12 @@ export default function ConnectionChapter({
 		</Typography>
 	);
 
-	// Answered already: the code is in the link, so a colleague opening it lands here
+	// Answered already: the code is in the link, so a colleague opening it lands here.
+	// Of this system only: a hand-edited code for another would build the wrong chapters
 	if (search.hostLms) {
-		const connected = all.find((hostLms) => hostLms.code === search.hostLms);
+		const connected = sameType.find(
+			(hostLms) => hostLms.code === search.hostLms,
+		);
 		return (
 			<>
 				{systemLine}

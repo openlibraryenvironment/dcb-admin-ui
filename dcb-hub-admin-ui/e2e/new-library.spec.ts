@@ -139,6 +139,42 @@ test.describe("New library", () => {
 		);
 	});
 
+	test.describe("a Host LMS code edited into the link", () => {
+		// SIERRA1 is a Sierra system; ils=folio asks for FOLIO's chapters
+		test.beforeEach(async ({ page }) => {
+			await mockGraphQL(page, {
+				LoadConsortiumHeader: consortiumBasics,
+				LoadHostLmsSelection: oneSierra,
+			});
+		});
+
+		test("is not accepted as the connection for a different system", async ({
+			page,
+		}) => {
+			await page.goto("/libraries/new/connection?ils=folio&hostLms=SIERRA1");
+
+			await expect(
+				main(page).getByText(/no host lms with the code SIERRA1/i),
+			).toBeVisible();
+			await expect(
+				main(page).getByRole("button", { name: "Continue" }),
+			).toBeDisabled();
+		});
+
+		test("does not create a library on a different system", async ({
+			page,
+		}) => {
+			await page.goto("/libraries/new/profile?ils=folio&hostLms=SIERRA1");
+
+			await expect(
+				main(page).getByText(/no host lms with the code SIERRA1/i),
+			).toBeVisible();
+			await expect(
+				main(page).getByRole("button", { name: "Add the library" }),
+			).toHaveCount(0);
+		});
+	});
+
 	test("blocks the connection with empty required fields, and says which", async ({
 		page,
 	}) => {
