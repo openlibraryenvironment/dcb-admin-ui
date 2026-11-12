@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -58,24 +59,36 @@ export default function FailureTaxonomyChart({
 				>
 					{() => (
 						// Magnitude ranking -> one hue, horizontal for legible reason labels.
-						<BarChartPro
-							height={CHART_HEIGHT}
-							// The image and print export the MUI X Premium licence already covers,
-							// which nothing in this application used. A picture for a slide is a
-							// different need from the numbers, and this is where a reader looks for it.
-							showToolbar
-							slots={{ toolbar: ChartExportToolbar }}
-							layout="horizontal"
-							yAxis={[{ scaleType: "band", data: rows.map((r) => r.reason) }]}
+						<ChartFigure
+							label={t("insights.charts.failure_taxonomy.title")}
+							categoryLabel={t("ui.chart_table.reason")}
+							categories={rows.map((r) => r.reason)}
 							series={[
 								{
-									data: rows.map((r) => r.count),
 									label: t("insights.charts.failure_taxonomy.series"),
-									color: categorical[0],
+									values: rows.map((r) => r.count),
 								},
 							]}
-							margin={{ left: 160 }}
-						/>
+						>
+							<BarChartPro
+								height={CHART_HEIGHT}
+								// The image and print export the MUI X Premium licence already covers,
+								// which nothing in this application used. A picture for a slide is a
+								// different need from the numbers, and this is where a reader looks for it.
+								showToolbar
+								slots={{ toolbar: ChartExportToolbar }}
+								layout="horizontal"
+								yAxis={[{ scaleType: "band", data: rows.map((r) => r.reason) }]}
+								series={[
+									{
+										data: rows.map((r) => r.count),
+										label: t("insights.charts.failure_taxonomy.series"),
+										color: categorical[0],
+									},
+								]}
+								margin={{ left: 160 }}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 

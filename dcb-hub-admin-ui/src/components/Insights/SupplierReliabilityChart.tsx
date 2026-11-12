@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -65,31 +66,47 @@ export default function SupplierReliabilityChart({
 				>
 					{() => (
 						// Status encoding (good/critical) - labelled via the legend, never colour alone.
-						<BarChartPro
-							height={CHART_HEIGHT}
-							// The image and print export the MUI X Premium licence already covers,
-							// which nothing in this application used. A picture for a slide is a
-							// different need from the numbers, and this is where a reader looks for it.
-							showToolbar
-							slots={{ toolbar: ChartExportToolbar }}
-							xAxis={[
-								{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
-							]}
+						<ChartFigure
+							label={t("insights.charts.supplier_reliability.title")}
+							categoryLabel={t("ui.chart_table.supplier")}
+							categories={rows.map((r) => r.supplierCode)}
 							series={[
 								{
-									data: rows.map((r) => r.fulfilledCount),
 									label: t("insights.charts.supplier_reliability.fulfilled"),
-									color: status.good,
-									stack: "total",
+									values: rows.map((r) => r.fulfilledCount),
 								},
 								{
-									data: rows.map((r) => r.failedCount),
 									label: t("insights.charts.supplier_reliability.failed"),
-									color: status.critical,
-									stack: "total",
+									values: rows.map((r) => r.failedCount),
 								},
 							]}
-						/>
+						>
+							<BarChartPro
+								height={CHART_HEIGHT}
+								// The image and print export the MUI X Premium licence already covers,
+								// which nothing in this application used. A picture for a slide is a
+								// different need from the numbers, and this is where a reader looks for it.
+								showToolbar
+								slots={{ toolbar: ChartExportToolbar }}
+								xAxis={[
+									{ scaleType: "band", data: rows.map((r) => r.supplierCode) },
+								]}
+								series={[
+									{
+										data: rows.map((r) => r.fulfilledCount),
+										label: t("insights.charts.supplier_reliability.fulfilled"),
+										color: status.good,
+										stack: "total",
+									},
+									{
+										data: rows.map((r) => r.failedCount),
+										label: t("insights.charts.supplier_reliability.failed"),
+										color: status.critical,
+										stack: "total",
+									},
+								]}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 

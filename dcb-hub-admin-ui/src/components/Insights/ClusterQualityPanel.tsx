@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Box, Typography } from "@mui/material";
+import { Alert, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -55,8 +56,6 @@ function ClusterQualityBody({ rows }: { rows: ClusterSizeStat[] }) {
 	const singlePct =
 		quality.singleHolderPct != null ? quality.singleHolderPct.toFixed(1) : "—";
 
-	// The chart is one of two renderings of the same numbers; the sentence below carries
-	// them in text, so the SVG needs a label rather than a full description.
 	const chartLabel = t("insights.collection.cluster_quality.chart_label", {
 		single: singlePct,
 	});
@@ -79,7 +78,17 @@ function ClusterQualityBody({ rows }: { rows: ClusterSizeStat[] }) {
 				</Alert>
 			)}
 
-			<Box role="img" aria-label={chartLabel}>
+			<ChartFigure
+				label={chartLabel}
+				categoryLabel={t("insights.collection.cluster_quality.axis_holders")}
+				categories={buckets.map((b) => b.label)}
+				series={[
+					{
+						label: t("insights.collection.cluster_quality.series"),
+						values: buckets.map((b) => b.clusterCount),
+					},
+				]}
+			>
 				<BarChartPro
 					height={CHART_HEIGHT}
 					xAxis={[
@@ -97,7 +106,7 @@ function ClusterQualityBody({ rows }: { rows: ClusterSizeStat[] }) {
 						},
 					]}
 				/>
-			</Box>
+			</ChartFigure>
 		</>
 	);
 }

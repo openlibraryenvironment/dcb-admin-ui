@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
@@ -54,24 +55,37 @@ export default function TimeInStatusChart({ params }: { params: StatsParams }) {
 					height={CHART_HEIGHT}
 				>
 					{() => (
-						<BarChartPro
-							height={CHART_HEIGHT}
-							layout="horizontal"
-							yAxis={[{ scaleType: "band", data: rows.map((r) => r.status) }]}
-							xAxis={[
-								{ label: t("insights.charts.time_in_status.axis_hours") },
-							]}
+						<ChartFigure
+							label={t("insights.charts.time_in_status.title")}
+							categoryLabel={t("ui.chart_table.status")}
+							categories={rows.map((r) => r.status)}
 							series={[
 								{
-									data: rows.map((r) => r.medianDwellSeconds / 3600),
 									label: t("insights.charts.time_in_status.series"),
-									color: categorical[0],
-									valueFormatter: (v) =>
-										v == null ? "—" : formatDuration(v * 3600),
+									values: rows.map((r) => r.medianDwellSeconds),
+									format: formatDuration,
 								},
 							]}
-							margin={{ left: 180 }}
-						/>
+						>
+							<BarChartPro
+								height={CHART_HEIGHT}
+								layout="horizontal"
+								yAxis={[{ scaleType: "band", data: rows.map((r) => r.status) }]}
+								xAxis={[
+									{ label: t("insights.charts.time_in_status.axis_hours") },
+								]}
+								series={[
+									{
+										data: rows.map((r) => r.medianDwellSeconds / 3600),
+										label: t("insights.charts.time_in_status.series"),
+										color: categorical[0],
+										valueFormatter: (v) =>
+											v == null ? "—" : formatDuration(v * 3600),
+									},
+								]}
+								margin={{ left: 180 }}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 			</CardContent>

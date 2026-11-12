@@ -172,7 +172,7 @@ export async function waitForDialogToSettle(page: Page) {
  * contrast failure in no state the user ever sees still. Infinite ones, spinners and
  * skeleton pulses, never finish and are left alone.
  */
-async function waitForTransitions(page: Page) {
+export async function waitForTransitions(page: Page) {
 	await page.evaluate(() =>
 		Promise.all(
 			document

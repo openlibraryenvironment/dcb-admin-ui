@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useQuery, type QueryFunction } from "@tanstack/react-query";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { BarChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import PanelState from "./PanelState";
 
@@ -14,6 +15,8 @@ interface BarStatPanelProps<T> {
 	titleKey: string;
 	subtitleKey: string;
 	seriesLabelKey: string;
+	/** Heads the first column of the chart's table: what each bar stands for. */
+	categoryLabelKey: string;
 	// A statsApi *QueryOptions(...) result. Built by the parent with the rest client.
 	queryOptions: {
 		queryKey: readonly unknown[];
@@ -37,6 +40,7 @@ export default function BarStatPanel<T>({
 	titleKey,
 	subtitleKey,
 	seriesLabelKey,
+	categoryLabelKey,
 	queryOptions,
 	getLabel,
 	metric,
@@ -78,23 +82,30 @@ export default function BarStatPanel<T>({
 					isRetrying={isFetching}
 					height={CHART_HEIGHT}
 				>
-					{() =>
-						horizontal ? (
-							<BarChartPro
-								height={CHART_HEIGHT}
-								layout="horizontal"
-								yAxis={bandAxis}
-								series={series}
-								margin={{ left: 160 }}
-							/>
-						) : (
-							<BarChartPro
-								height={CHART_HEIGHT}
-								xAxis={bandAxis}
-								series={series}
-							/>
-						)
-					}
+					{() => (
+						<ChartFigure
+							label={t(titleKey)}
+							categoryLabel={t(categoryLabelKey)}
+							categories={labels}
+							series={[{ label: t(seriesLabelKey), values }]}
+						>
+							{horizontal ? (
+								<BarChartPro
+									height={CHART_HEIGHT}
+									layout="horizontal"
+									yAxis={bandAxis}
+									series={series}
+									margin={{ left: 160 }}
+								/>
+							) : (
+								<BarChartPro
+									height={CHART_HEIGHT}
+									xAxis={bandAxis}
+									series={series}
+								/>
+							)}
+						</ChartFigure>
+					)}
 				</PanelState>
 			</CardContent>
 		</Card>

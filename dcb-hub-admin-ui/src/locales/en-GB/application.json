@@ -3197,6 +3197,26 @@
 		"submit_ticket": "Submit a support ticket"
 	},
 	"ui": {
+		"chart_table": {
+			"show": "Show as a table",
+			"hide": "Hide the table",
+			"show_named": "Show as a table: {{label}}",
+			"hide_named": "Hide the table: {{label}}",
+			"rows_shown": "{{from}}–{{to}} of {{count}}",
+			"first_page": "First page",
+			"previous_page": "Previous page",
+			"next_page": "Next page",
+			"last_page": "Last page",
+			"period": "Period",
+			"day": "Day",
+			"library": "Library",
+			"supplier": "Supplier",
+			"status": "Status",
+			"reason": "Reason",
+			"format": "Format",
+			"pickup_location": "Pickup location",
+			"patron_group": "Patron group"
+		},
 		"a11y": {
 			"empty": "Empty field",
 			"is_breadcrumb": "This is a breadcrumb trail",

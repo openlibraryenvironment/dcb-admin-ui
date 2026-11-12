@@ -10,12 +10,13 @@ import {
 	Typography,
 } from "@mui/material";
 import { LineChartPro } from "@mui/x-charts-pro";
+import ChartFigure from "@components/ChartFigure/ChartFigure";
 
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { useChartPalette } from "@hooks/useChartPalette";
 import MetricInfo from "./MetricInfo";
 import PanelState from "./PanelState";
-import { formatDuration } from "@helpers/insightsRange";
+import { formatBucket, formatDuration } from "@helpers/insightsRange";
 import type { MetricId } from "@helpers/insightsMetrics";
 import {
 	trendQueryOptions,
@@ -64,7 +65,7 @@ export default function DurationTrendPanel({
 	params: StatsParams;
 	interval: TimeSeriesInterval;
 }) {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const client = useDcbRestClient();
 	const { categorical } = useChartPalette();
 
@@ -145,34 +146,54 @@ export default function DurationTrendPanel({
 					height={CHART_HEIGHT}
 				>
 					{() => (
-						<LineChartPro
-							height={CHART_HEIGHT}
-							xAxis={[{ data: buckets, scaleType: "time" }]}
-							yAxis={[
-								{ valueFormatter: (value: number) => formatDuration(value) },
-							]}
+						<ChartFigure
+							label={title}
+							categoryLabel={t("ui.chart_table.period")}
+							categories={buckets.map((bucket) =>
+								formatBucket(bucket, interval, i18n.language),
+							)}
 							series={[
 								{
-									data: p50,
 									label: t("insights.trends.durations.p50"),
-									color: categorical[0],
-									// connectNulls is deliberately OFF: a missing bucket is a
-									// period with no observations, and joining across it would
-									// draw a measurement nobody took.
-									valueFormatter: (value: number | null) =>
-										formatDuration(value),
-									showMark: true,
+									values: p50,
+									format: formatDuration,
 								},
 								{
-									data: p95,
 									label: t("insights.trends.durations.p95"),
-									color: categorical[1],
-									valueFormatter: (value: number | null) =>
-										formatDuration(value),
-									showMark: true,
+									values: p95,
+									format: formatDuration,
 								},
 							]}
-						/>
+						>
+							<LineChartPro
+								height={CHART_HEIGHT}
+								xAxis={[{ data: buckets, scaleType: "time" }]}
+								yAxis={[
+									{ valueFormatter: (value: number) => formatDuration(value) },
+								]}
+								series={[
+									{
+										data: p50,
+										label: t("insights.trends.durations.p50"),
+										color: categorical[0],
+										// connectNulls is deliberately OFF: a missing bucket is a
+										// period with no observations, and joining across it would
+										// draw a measurement nobody took.
+										valueFormatter: (value: number | null) =>
+											formatDuration(value),
+										showMark: true,
+									},
+									{
+										data: p95,
+										label: t("insights.trends.durations.p95"),
+										color: categorical[1],
+										valueFormatter: (value: number | null) =>
+											formatDuration(value),
+										showMark: true,
+									},
+								]}
+							/>
+						</ChartFigure>
 					)}
 				</PanelState>
 			</CardContent>
