@@ -61,6 +61,13 @@ import { useGraphQLClient } from "@/hooks/useGraphQLClient";
 import { useDcbRestClient } from "@hooks/useDcbRestClient";
 import { requestReferenceOf } from "@helpers/requestReference";
 import { getPatronRequest } from "@queries/getPatronRequest";
+import { getPatronRequestAudits } from "@queries/getPatronRequestAudits";
+import { getPatronRequestClusterMembers } from "@queries/getPatronRequestClusterMembers";
+import { buildServerGridQueryVars } from "@helpers/dataGrid/utilities";
+import { constrainToServerOperators } from "@filters/serverFilterOperators";
+import { luceneDateRangeOperators } from "@filters/luceneDateRangeOperators";
+import { containsOnly } from "@filters/containsOnly";
+import { equalsOnly } from "@filters/equalsOnly";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { getLocation } from "@queries/getLocation";
 import { getPatronIdentities } from "@queries/getPatronIdentities";
@@ -99,10 +106,13 @@ import PageContainer from "@layout/PageContainer/PageContainer";
 import type {
 	LoadLocationQueryVariables,
 	LoadPatronIdentitiesQueryVariables,
+	LoadPatronRequestAuditsQuery,
+	LoadPatronRequestAuditsQueryVariables,
+	LoadPatronRequestClusterMembersQuery,
+	LoadPatronRequestClusterMembersQueryVariables,
 	LoadPatronRequestQueryVariables,
 } from "@generated/graphql";
 
-import { DETAIL_REFETCH_MS } from "@constants/refetchIntervals";
 import { nonCriticalQuery } from "@helpers/queryPolicy";
 import { agencyCodeForHostLmsQuery } from "@/queryOptions/libraries";
 import { errorForLog } from "@helpers/safeErrorLog";
@@ -133,39 +143,49 @@ const requestTabSchema = z.object({
 });
 
 // Stable, so the audit grid's columns are not new on every render
-const AUDIT_COLUMNS: GridColDef[] = [
+// The operators dcb-service answers for audits, as Audit Explorer offers them
+const nextScheduledPollOf = (query: { state: { data: unknown } }) =>
+	(
+		query.state.data as
+			| { patronRequests?: { content?: { nextScheduledPoll?: string }[] } }
+			| undefined
+	)?.patronRequests?.content?.[0]?.nextScheduledPoll;
+
+const AUDIT_COLUMNS: GridColDef[] = constrainToServerOperators([
 	{
 		field: "auditDate",
 		headerName: "Audit date",
 		minWidth: 60,
 		flex: 0.2,
-		editable: false,
-		filterable: true,
-		sortable: true,
-		valueGetter: (value: string, row: { auditDate: string }) => {
-			const auditDate = row.auditDate;
-			return dayjs(auditDate).format("YYYY-MM-DD HH:mm:ss.SSS");
-		},
+		type: "dateTime",
+		filterOperators: luceneDateRangeOperators,
+		valueGetter: (_value, row) =>
+			row?.auditDate ? new Date(row.auditDate) : null,
+		valueFormatter: (value: Date | null) =>
+			value ? dayjs(value).format("YYYY-MM-DD HH:mm:ss.SSS") : "",
 	},
 	{
 		field: "briefDescription",
 		headerName: "Description",
 		minWidth: 100,
 		flex: 0.4,
+		filterOperators: containsOnly,
 	},
 	{
 		field: "fromStatus",
 		headerName: "fromStatus",
 		minWidth: 50,
 		flex: 0.25,
+		filterOperators: equalsOnly,
 	},
 	{
 		field: "toStatus",
 		headerName: "toStatus",
 		minWidth: 50,
 		flex: 0.25,
+		filterOperators: equalsOnly,
 	},
-];
+]);
 
 export const Route = createFileRoute("/__authenticated/patronRequests/$id/")({
 	validateSearch: (search: Record<string, unknown>) => ({
@@ -276,21 +296,57 @@ function RouteComponent() {
 		enabled: !!id,
 		// Both windows come from dcb-service's own schedule rather than from a number
 		// picked here - see @helpers/patronRequestFreshness.
-		staleTime: (query) =>
-			staleTimeFromNextPoll(
-				(
-					query.state.data as
-						| {
-								patronRequests?: { content?: { nextScheduledPoll?: string }[] };
-						  }
-						| undefined
-				)?.patronRequests?.content?.[0]?.nextScheduledPoll,
-			),
-		refetchInterval: DETAIL_REFETCH_MS,
+		staleTime: (query) => staleTimeFromNextPoll(nextScheduledPollOf(query)),
+		// Asks again when dcb-service could next have moved it: 10s to 5 minutes
+		refetchInterval: (query) =>
+			staleTimeFromNextPoll(nextScheduledPollOf(query)),
 	});
 
 	const patronRequest = data?.patronRequests?.content?.[0];
-	const members = patronRequest?.clusterRecord?.members;
+	// Every member's harvested record, so only while the Bib tab is open
+	const clusterMembers = useQuery({
+		...nonCriticalQuery,
+		queryKey: ["patronRequest", id, "clusterMembers"],
+		queryFn: () =>
+			gqlClient.request<
+				LoadPatronRequestClusterMembersQuery,
+				LoadPatronRequestClusterMembersQueryVariables
+			>(getPatronRequestClusterMembers, { query: `id:${id}` }),
+		enabled: !!id && tabName === "bib",
+	});
+	const members: any[] | undefined =
+		clusterMembers.data?.patronRequests?.content?.[0]?.clusterRecord?.members ??
+		undefined;
+
+	// One page of the history, only while the History tab is open
+	const auditPage = useQuery({
+		...nonCriticalQuery,
+		queryKey: [
+			"patronRequest",
+			id,
+			"audits",
+			audit.paginationModel,
+			audit.sortModel,
+			audit.appliedFilterModel,
+		],
+		queryFn: () =>
+			gqlClient.request<
+				LoadPatronRequestAuditsQuery,
+				LoadPatronRequestAuditsQueryVariables
+			>(
+				getPatronRequestAudits,
+				buildServerGridQueryVars({
+					filterModel: audit.appliedFilterModel,
+					sortModel: audit.sortModel,
+					paginationModel: audit.paginationModel,
+					baseQuery: `patronRequest:"${id}"`,
+					defaultOrder: "auditDate",
+					defaultPageSize: requestAuditView.defaultPageSize,
+				}) as LoadPatronRequestAuditsQueryVariables,
+			),
+		enabled: !!id && tabName === "audit",
+		placeholderData: (previous) => previous,
+	});
 
 	// Keyed on - and gated by - the supplying agency, the way the patron and
 	// pickup library queries are. Keying on the request id and enabling on it
@@ -1504,11 +1560,7 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("bibRecords.source_record_id")}
 								</Typography>
-								<RenderAttribute
-									attribute={
-										patronRequest?.clusterRecord?.members?.[0]?.sourceRecordId
-									}
-								/>
+								<RenderAttribute attribute={members?.[0]?.sourceRecordId} />
 							</Stack>
 						</Grid>
 						<Grid size={{ xs: 2, sm: 4, md: 4 }}>
@@ -1516,11 +1568,7 @@ function RouteComponent() {
 								<Typography variant="attributeTitle">
 									{t("bibRecords.source_system_uuid")}
 								</Typography>
-								<RenderAttribute
-									attribute={
-										patronRequest?.clusterRecord?.members?.[0]?.sourceSystemId
-									}
-								/>
+								<RenderAttribute attribute={members?.[0]?.sourceSystemId} />
 							</Stack>
 						</Grid>
 					</Grid>
@@ -2376,7 +2424,8 @@ function RouteComponent() {
 						{t("audit_log.title")}
 					</Typography>
 					<DataGrid
-						rows={patronRequest?.audit ?? []}
+						rows={auditPage.data?.audits?.content ?? []}
+						rowCount={auditPage.data?.audits?.totalSize ?? 0}
 						columns={AUDIT_COLUMNS}
 						columnVisibilityModel={audit.columnVisibilityModel}
 						onColumnVisibilityModelChange={audit.onColumnVisibilityModelChange}
@@ -2384,24 +2433,21 @@ function RouteComponent() {
 						viewNotice={<GridViewNotice view={audit} />}
 						type="audits"
 						identifier="AuditPatronRequestDetails"
-						// This grid could show click-through details of its own for each audit log entry
-						// sortModel={[{ field: "auditDate", sort: "desc" }]}
-						// operationDataType="Audit"
-						filterMode="client"
+						filterMode="server"
 						filterModel={audit.filterModel}
 						onFilterModelChange={audit.onFilterModelChange}
 						disableHoverInteractions={true}
-						loading={patronRequestLoading}
+						loading={auditPage.isLoading || auditPage.isFetching}
 						listViewEnabled={false}
 						noResultsText={t("ui.data_grid.no_results")}
 						pagination
-						paginationMode="client"
+						paginationMode="server"
 						paginationModel={audit.paginationModel}
 						onPaginationModelChange={audit.onPaginationModelChange}
 						toolbarVisible
 						searchText={t("ui.data_grid.search_by_audit")}
 						scrollbarVisible={false}
-						sortingMode="client"
+						sortingMode="server"
 						sortModel={audit.sortModel}
 						onSortModelChange={audit.onSortModelChange}
 					/>

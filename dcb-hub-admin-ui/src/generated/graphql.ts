@@ -2218,14 +2218,6 @@ export type LoadPatronRequestQuery = {
 				localHomeLibraryCode: string | null;
 				lastValidated: string | null;
 			} | null;
-			audit: Array<{
-				id: string;
-				auditDate: string | null;
-				briefDescription: string | null;
-				fromStatus: string | null;
-				toStatus: string | null;
-				auditData: Record<string, any> | null;
-			} | null> | null;
 			clusterRecord: {
 				id: string;
 				title: string | null;
@@ -2233,35 +2225,6 @@ export type LoadPatronRequestQuery = {
 				isDeleted: boolean | null;
 				dateCreated: string | null;
 				dateUpdated: string | null;
-				members: Array<{
-					id: string;
-					dateCreated: string | null;
-					dateUpdated: string | null;
-					title: string | null;
-					author: string | null;
-					placeOfPublication: string | null;
-					publisher: string | null;
-					dateOfPublication: string | null;
-					edition: string | null;
-					isLargePrint: boolean | null;
-					clusterReason: string | null;
-					typeOfRecord: string | null;
-					canonicalMetadata: Record<string, any> | null;
-					metadataScore: number | null;
-					processVersion: number | null;
-					sourceSystemId: string | null;
-					sourceRecordId: string | null;
-					sourceRecord: {
-						id: string;
-						hostLmsId: string;
-						remoteId: string;
-						lastFetched: string;
-						lastProcessed: string | null;
-						processingState: ProcessingStatus | null;
-						processingInformation: string | null;
-						sourceRecordData: Record<string, any> | null;
-					} | null;
-				} | null> | null;
 			} | null;
 			suppliers: Array<{
 				id: string;
@@ -2297,6 +2260,57 @@ export type LoadPatronRequestQuery = {
 					lastValidated: string | null;
 				} | null;
 			} | null> | null;
+		} | null> | null;
+	} | null;
+};
+
+export type LoadPatronRequestAuditsQueryVariables = Exact<{
+	query: string;
+	pageno: number;
+	pagesize: number;
+	order: string;
+	orderBy: string;
+}>;
+
+export type LoadPatronRequestAuditsQuery = {
+	audits: {
+		totalSize: number | null;
+		content: Array<{
+			id: string;
+			auditDate: string | null;
+			briefDescription: string | null;
+			fromStatus: string | null;
+			toStatus: string | null;
+		} | null> | null;
+	};
+};
+
+export type LoadPatronRequestClusterMembersQueryVariables = Exact<{
+	query: string;
+}>;
+
+export type LoadPatronRequestClusterMembersQuery = {
+	patronRequests: {
+		content: Array<{
+			id: string;
+			clusterRecord: {
+				id: string;
+				members: Array<{
+					id: string;
+					sourceRecordId: string | null;
+					sourceSystemId: string | null;
+					sourceRecord: {
+						id: string;
+						hostLmsId: string;
+						remoteId: string;
+						lastFetched: string;
+						lastProcessed: string | null;
+						processingState: ProcessingStatus | null;
+						processingInformation: string | null;
+						sourceRecordData: Record<string, any> | null;
+					} | null;
+				} | null> | null;
+			} | null;
 		} | null> | null;
 	} | null;
 };
