@@ -6,6 +6,7 @@ import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 import { LicenseInfo } from "@mui/x-license";
 import { keepMuiXTelemetryOff } from "@helpers/muiXTelemetry";
+import { serviceLivenessCheck } from "@helpers/serviceLiveness";
 
 import { applyLanguage } from "./i18n";
 import { useLocaleStore } from "@hooks/useLocaleStore";
@@ -144,6 +145,14 @@ const recoverSession = (): Promise<boolean> => {
 	return sessionRecovery;
 };
 
+const dcbServiceIsUp = serviceLivenessCheck(async () => {
+	const response = await fetch(
+		`${window.__APP_ENV__?.VITE_DCB_API_BASE}/health/liveness`,
+		{ signal: AbortSignal.timeout(10_000) },
+	);
+	if (!response.ok) throw new Error(`liveness ${response.status}`);
+});
+
 const handleServiceErrors = (error: any) => {
 	const isNetworkError =
 		error.message?.includes("Failed to fetch") ||
@@ -186,10 +195,13 @@ const handleServiceErrors = (error: any) => {
 			// (keyed on access_token) has produced a client carrying the new one.
 			setTimeout(() => void queryClient.refetchQueries({ type: "active" }), 0);
 		});
-	} else if (isServiceUnavailable && router) {
-		router.navigate({ to: "/maintenance", replace: true });
-	} else if (isNetworkError && router) {
-		router.navigate({ to: "/networkError", replace: true });
+	} else if ((isServiceUnavailable || isNetworkError) && router) {
+		// Only when dcb-service itself is down. Otherwise the failure is that request's,
+		// and the page that made it says so.
+		const to = isServiceUnavailable ? "/maintenance" : "/networkError";
+		void dcbServiceIsUp().then((up) => {
+			if (!up) void router?.navigate({ to, replace: true });
+		});
 	}
 };
 
