@@ -120,7 +120,11 @@ export const CleanupProgressDialog = ({
 										}}
 									>
 										<CheckCircleOutlined color="success" />
-										<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+										<Typography
+											variant="h3"
+											component="span"
+											sx={{ fontWeight: "bold" }}
+										>
 											{t("ui.data_grid.success_count")} {successRows.length}
 										</Typography>
 									</Stack>
@@ -172,7 +176,11 @@ export const CleanupProgressDialog = ({
 									}}
 								>
 									<ErrorOutlined color="error" />
-									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									<Typography
+										variant="h3"
+										component="span"
+										sx={{ fontWeight: "bold" }}
+									>
 										{t("ui.data_grid.error_count")} {errorRows.length}
 									</Typography>
 								</Stack>
@@ -223,7 +231,11 @@ export const CleanupProgressDialog = ({
 									}}
 								>
 									<WarningAmber color="warning" />
-									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									<Typography
+										variant="h3"
+										component="span"
+										sx={{ fontWeight: "bold" }}
+									>
 										{t("patron_requests.cleanup_refused_count")}{" "}
 										{refusedRows.length}
 									</Typography>
@@ -275,7 +287,11 @@ export const CleanupProgressDialog = ({
 									}}
 								>
 									<WarningAmber color="warning" />
-									<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+									<Typography
+										variant="h3"
+										component="span"
+										sx={{ fontWeight: "bold" }}
+									>
 										{t("ui.data_grid.skipped_count")} {skippedRows.length}
 									</Typography>
 								</Stack>

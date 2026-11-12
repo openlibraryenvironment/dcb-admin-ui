@@ -152,6 +152,7 @@ function LocationMappings() {
 					{/* Primary Host LMS Grid */}
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 						}}
@@ -190,6 +191,7 @@ function LocationMappings() {
 						<>
 							<Typography
 								variant="h3"
+								component="h2"
 								sx={{
 									fontWeight: "bold",
 									mt: 4,

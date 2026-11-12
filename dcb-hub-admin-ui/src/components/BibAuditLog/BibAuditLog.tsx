@@ -38,7 +38,7 @@ export default function BibAuditLog({ bibId }: { bibId: string }) {
 				id="bib-audit-log-summary"
 				expandIcon={<ExpandMore fontSize="large" />}
 			>
-				<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+				<Typography variant="h3" component="span" sx={{ fontWeight: "bold" }}>
 					{t("bibRecords.audit_log.title")}
 				</Typography>
 			</AccordionSummary>

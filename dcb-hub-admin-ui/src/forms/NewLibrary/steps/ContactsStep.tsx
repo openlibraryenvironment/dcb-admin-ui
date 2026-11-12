@@ -94,7 +94,7 @@ export default function ContactsStep() {
 			{fields.map((field, index) => (
 				<Paper key={field.id} sx={{ p: 3 }} variant="outlined">
 					<Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-						<Typography variant="h6" component="h3">
+						<Typography variant="h6" component="h2">
 							{t("libraries.contacts.numbered", { number: index + 1 })}
 						</Typography>
 						{fields.length > 1 && !isStored(index) && (

@@ -780,7 +780,11 @@ const components: ThemeOptions["components"] = {
 	},
 	MuiAccordion: {
 		defaultProps: {
-			slotProps: { transition: { timeout: 400, unmountOnExit: true } },
+			slotProps: {
+				// Never deeper than the page's h1 allows: MUI's default is h3
+				heading: { component: "h2" },
+				transition: { timeout: 400, unmountOnExit: true },
+			},
 		},
 		styleOverrides: {
 			root: ({ theme }) => ({

@@ -146,6 +146,7 @@ function AllMappings() {
 					{/* Primary Host LMS Grid */}
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 						}}
@@ -185,6 +186,7 @@ function AllMappings() {
 						<>
 							<Typography
 								variant="h3"
+								component="h2"
 								sx={{
 									fontWeight: "bold",
 									mt: 4,

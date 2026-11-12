@@ -386,7 +386,7 @@ function SourceBibDetails() {
 					id="source-bibs-json-summary"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
-					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+					<Typography variant="h3" component="span" sx={{ fontWeight: "bold" }}>
 						{t("patron_request.canonical_metadata")}
 					</Typography>
 				</AccordionSummary>
@@ -405,7 +405,7 @@ function SourceBibDetails() {
 					id="source-bibs-source-record-json-summary"
 					expandIcon={<ExpandMore fontSize="large" />}
 				>
-					<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+					<Typography variant="h3" component="span" sx={{ fontWeight: "bold" }}>
 						{t("bibRecords.source_record")}
 					</Typography>
 				</AccordionSummary>

@@ -208,6 +208,7 @@ function Exception() {
 				>
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 						}}

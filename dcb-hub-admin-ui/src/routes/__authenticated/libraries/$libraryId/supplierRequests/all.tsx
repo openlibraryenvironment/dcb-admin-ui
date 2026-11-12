@@ -183,6 +183,7 @@ function SupplierRequestsAll() {
 				<Grid size={{ xs: 4, sm: 8, md: 12 }}>
 					<Typography
 						variant="h3"
+						component="h2"
 						sx={{
 							fontWeight: "bold",
 							mb: 2,

@@ -1585,7 +1585,11 @@ function RouteComponent() {
 							id="request_source_record"
 							expandIcon={<ExpandMore fontSize="large" />}
 						>
-							<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+							<Typography
+								variant="h3"
+								component="span"
+								sx={{ fontWeight: "bold" }}
+							>
 								{t("bibRecords.source_record")}
 							</Typography>
 						</AccordionSummary>

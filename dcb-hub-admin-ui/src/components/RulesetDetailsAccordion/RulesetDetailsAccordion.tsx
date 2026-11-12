@@ -61,7 +61,7 @@ export default function RulesetDetailsAccordion({
 			onChange={(_, isExpanded) => setExpanded(isExpanded)}
 		>
 			<AccordionSummary expandIcon={<ExpandMore />}>
-				<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+				<Typography variant="h3" component="span" sx={{ fontWeight: "bold" }}>
 					{title}
 				</Typography>
 			</AccordionSummary>

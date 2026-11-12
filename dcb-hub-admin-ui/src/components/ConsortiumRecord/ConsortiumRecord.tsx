@@ -808,7 +808,7 @@ export default function ConsortiumRecord({ section }: ConsortiumRecordProps) {
 							{/* Without Symposia the only fields left are the mark this console
 					    puts in its own app bar, so patron-facing wording would name a
 					    place these images never reach. */}
-							<Typography variant="h3" sx={{ mt: 2 }}>
+							<Typography variant="h3" component="h2" sx={{ mt: 2 }}>
 								{isSymposiaEnabled()
 									? t("consortium.brand.section")
 									: t("consortium.brand.section_chrome")}

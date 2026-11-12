@@ -295,14 +295,14 @@ function ItemsPageComponent() {
 
 				<Stack direction="column" sx={{ mb: 2 }}>
 					{items.length > 0 && (
-						<Typography variant="h4">
+						<Typography variant="h4" component="p">
 							{t("requesting.shared_index.items_for_cluster", {
 								number: items.length,
 							})}
 						</Typography>
 					)}
 					{itemsNotShown.length > 0 && (
-						<Typography variant="h4">
+						<Typography variant="h4" component="p">
 							{t("requesting.shared_index.items_not_shown_long", {
 								number: itemsNotShown.length,
 								id: clusterId,
@@ -356,7 +356,7 @@ function ItemsPageComponent() {
 						}
 					>
 						<AccordionSummary expandIcon={<ExpandMore />}>
-							<Typography variant="h6">
+							<Typography variant="h6" component="span">
 								{unfiltered.data
 									? t("requesting.shared_index.items_not_shown", {
 											number: itemsNotShown.length,

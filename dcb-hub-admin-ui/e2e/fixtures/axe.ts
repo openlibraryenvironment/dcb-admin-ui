@@ -1,6 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import type { AxeResults, Result } from "axe-core";
+import axe, { type AxeResults, type Result } from "axe-core";
 import type { AxeRuleOutcome } from "../../scripts/report-facts";
 import { test } from "./test";
 
@@ -17,6 +17,19 @@ export const WCAG_TAGS = [
 	"wcag21a",
 	"wcag21aa",
 	"wcag22aa",
+];
+
+/**
+ * The tag sets as rule ids, plus heading-order: axe tags it best-practice, so the WCAG tags
+ * never run it, and headings that skip a level are how a screen-reader user misreads a
+ * page's outline (1.3.1). One list, because `.withTags` and `.withRules` each set `runOnly`
+ * and the second replaces the first.
+ */
+export const SCAN_RULES = [
+	...new Set([
+		...axe.getRules(WCAG_TAGS).map((rule) => rule.ruleId),
+		"heading-order",
+	]),
 ];
 
 /**
@@ -192,7 +205,7 @@ export async function scanForViolations(page: Page) {
 	await waitForTransitions(page);
 
 	const results = await new AxeBuilder({ page })
-		.withTags(WCAG_TAGS)
+		.withRules(SCAN_RULES)
 		.exclude("[data-e2e-licence-watermark]")
 		.analyze();
 	await attachRuleOutcomes(results);

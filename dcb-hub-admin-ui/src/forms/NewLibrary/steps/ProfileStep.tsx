@@ -53,7 +53,7 @@ const Section = ({
 }) => (
 	<Stack spacing={2}>
 		<Divider textAlign="left">
-			<Typography variant="subtitle2" component="h3" color="text.secondary">
+			<Typography variant="subtitle2" component="h2" color="text.secondary">
 				{title}
 			</Typography>
 		</Divider>

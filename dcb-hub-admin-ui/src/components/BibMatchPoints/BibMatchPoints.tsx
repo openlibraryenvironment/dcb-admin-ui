@@ -62,7 +62,7 @@ export default function BibMatchPoints({ bibId }: { bibId: string }) {
 				id={SUMMARY_ID}
 				expandIcon={<ExpandMore fontSize="large" />}
 			>
-				<Typography variant="h3" sx={{ fontWeight: "bold" }}>
+				<Typography variant="h3" component="span" sx={{ fontWeight: "bold" }}>
 					{t("bibRecords.match_points.title")}
 				</Typography>
 			</AccordionSummary>

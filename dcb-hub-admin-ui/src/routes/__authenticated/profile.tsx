@@ -43,7 +43,9 @@ function Profile() {
 			</Typography>
 			<List className="list-profile">
 				<ListSubheader sx={{ backgroundColor: "transparent" }}>
-					<Typography variant="h6">{t("profile.details")}</Typography>
+					<Typography variant="h6" component="h2">
+						{t("profile.details")}
+					</Typography>
 				</ListSubheader>
 				<ListItem>
 					<ListItemIcon>
@@ -104,7 +106,9 @@ function Profile() {
 
 			<List className="list-profile">
 				<ListSubheader sx={{ backgroundColor: "transparent" }}>
-					<Typography variant="h6">{t("theme.appearance")}</Typography>
+					<Typography variant="h6" component="h2">
+						{t("theme.appearance")}
+					</Typography>
 				</ListSubheader>
 				<ListItem>
 					<ThemeControls />
@@ -112,7 +116,9 @@ function Profile() {
 			</List>
 			<List className="list-profile">
 				<ListSubheader sx={{ backgroundColor: "transparent" }}>
-					<Typography variant="h6">{t("profile.language")}</Typography>
+					<Typography variant="h6" component="h2">
+						{t("profile.language")}
+					</Typography>
 				</ListSubheader>
 				<ListItem>
 					<LanguageSwitcher />

@@ -348,7 +348,7 @@ function AuditExplorer() {
 						flexWrap: "wrap",
 					}}
 				>
-					<Typography variant="subtitle1">
+					<Typography variant="subtitle1" component="p">
 						{t("audit_explorer.incidence", { count: totalSize })}
 					</Typography>
 				</Stack>
