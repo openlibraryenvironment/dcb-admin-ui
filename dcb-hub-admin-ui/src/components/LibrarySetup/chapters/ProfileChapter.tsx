@@ -17,6 +17,7 @@ import {
 	type LibraryFormDefaults,
 } from "@forms/NewLibrary/libraryPayloads";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useSingleFlight } from "@hooks/useSingleFlight";
 import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
 import { libraryBasicsByAgencyCodeQuery } from "@/queryOptions/library";
 import { serverAdmits } from "@constants/serverRoles";
@@ -133,6 +134,9 @@ function ProfileForm({
 	const queryClient = useQueryClient();
 	const auth = useAuth();
 	const writes = useLibrarySetupWrites();
+	// Validation and the agency check run before any write is pending
+	const submit = useSingleFlight();
+	const busy = writes.busy || submit.running;
 	const canUpdateAgency = serverAdmits(
 		"updateAgency",
 		auth?.user?.profile?.roles as string[] | undefined,
@@ -228,7 +232,7 @@ function ProfileForm({
 	return (
 		<>
 			<FormProvider {...methods}>
-				<form noValidate aria-busy={writes.busy}>
+				<form noValidate aria-busy={busy}>
 					<ProfileStep
 						existing={!!libraryId}
 						agencyLocked={!!libraryId && !canUpdateAgency}
@@ -252,8 +256,8 @@ function ProfileForm({
 							search,
 						}))
 				}
-				onContinue={() => void onContinue()}
-				busy={writes.busy}
+				onContinue={() => void submit.run(onContinue)}
+				busy={busy}
 				continueLabel={
 					libraryId ? undefined : t("libraries.setup.profile.create")
 				}

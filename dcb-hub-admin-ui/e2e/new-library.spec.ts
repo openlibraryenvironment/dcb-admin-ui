@@ -243,6 +243,36 @@ test.describe("New library", () => {
 		expect(sent).toHaveLength(3);
 	});
 
+	test("a second click while the connection is being saved does not create it twice", async ({
+		page,
+	}) => {
+		let creates = 0;
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadHostLmsSelection: noHostLms,
+			UpdateHostLms: updated,
+			CreateHostLms: () => {
+				creates++;
+				return created;
+			},
+		});
+		await page.goto("/libraries/new/connection?ils=sierra");
+		await fillSierraHostLms(page);
+
+		// Both in one task, so the second lands before any re-render could disable the button
+		await main(page)
+			.getByRole("button", { name: /save and test the connection/i })
+			.evaluate((button: HTMLButtonElement) => {
+				button.click();
+				button.click();
+			});
+
+		await expect(
+			main(page).getByRole("button", { name: "Continue" }),
+		).toBeEnabled();
+		expect(creates).toBe(1);
+	});
+
 	test("shows the configuration and authentication checks the server ran", async ({
 		page,
 	}) => {
@@ -517,6 +547,58 @@ test.describe("New library", () => {
 		await expect(
 			main(page).getByRole("textbox", { name: /first name/i }),
 		).toBeFocused();
+	});
+
+	test("a second click while the library is being added does not add it twice", async ({
+		page,
+	}) => {
+		let created = 0;
+		await mockGraphQL(page, {
+			LoadConsortiumHeader: consortiumBasics,
+			LoadLibraries: libraries,
+			LoadHostLmsSelection: oneSierra,
+			CreateLibrary: () => {
+				created++;
+				return { createLibrary: { id: LIBRARY_ID } };
+			},
+			LoadLibraryBasics: { libraries: { totalSize: 0, content: [] } },
+			LoadLibrary: libraryDetail,
+			LoadMappings: { referenceValueMappings: { totalSize: 0, content: [] } },
+			LoadNumericRangeMappings: {
+				numericRangeMappings: { totalSize: 0, content: [] },
+			},
+			LoadLocations: { locations: { totalSize: 0, content: [] } },
+		});
+		await page.goto("/libraries/new/profile?ils=sierra&hostLms=SIERRA1");
+		const chapter = main(page);
+		await chapter.getByLabel("Full name").fill("New Library");
+		await chapter.getByLabel("Short name").fill("New");
+		await chapter.getByLabel("Abbreviated name").fill("NEW");
+		await chapter
+			.getByRole("combobox", { name: /associated agency/i })
+			.fill("NEWAG");
+		await chapter.getByLabel("Address").fill("1 Library Street");
+		await chapter.getByRole("combobox", { name: "Type" }).click();
+		await page.getByRole("option", { name: "Public" }).click();
+		await chapter.getByLabel(/latitude/i).fill("51.5");
+		await chapter.getByLabel(/longitude/i).fill("-0.12");
+		await chapter
+			.getByRole("combobox", { name: /authentication profile/i })
+			.click();
+		await page.getByRole("option", { name: "Barcode and PIN" }).click();
+
+		// Both in one task, so the second lands before any re-render could disable the button
+		await chapter
+			.getByRole("button", { name: /add the library/i })
+			.evaluate((button: HTMLButtonElement) => {
+				button.click();
+				button.click();
+			});
+
+		await expect(page).toHaveURL(
+			new RegExp(`/libraries/${LIBRARY_ID}/setup/contacts$`),
+		);
+		expect(created).toBe(1);
 	});
 
 	test("refuses an agency that already belongs to a library, and says so on the field", async ({

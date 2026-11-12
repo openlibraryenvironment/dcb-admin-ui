@@ -27,6 +27,7 @@ import {
 	shouldCreateHostLms,
 } from "@forms/NewLibrary/libraryPayloads";
 import { useGraphQLClient } from "@hooks/useGraphQLClient";
+import { useSingleFlight } from "@hooks/useSingleFlight";
 import { hostLmsSelectionQuery } from "@/queryOptions/hostLms";
 import { updateHostLmsMutation } from "@mutations/updateHostLms";
 import { createHostLmsRecord } from "@helpers/hostLmsCreation";
@@ -110,7 +111,10 @@ export default function ConnectionChapter({
 			),
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: ["hostlmss"] }),
 	});
-	const busy = create.isPending || update.isPending;
+	// Validation runs before the create is pending
+	const save = useSingleFlight();
+	const testing = create.isPending || update.isPending;
+	const busy = testing || save.running;
 
 	const goTo = (step: "system" | "profile", next: NewLibrarySearch) =>
 		navigate({ to: "/libraries/new/$step", params: { step }, search: next });
@@ -282,7 +286,7 @@ export default function ConnectionChapter({
 			if (existing) goTo("profile", { ils, hostLms: existing.code });
 			return;
 		}
-		void saveNew();
+		void save.run(saveNew);
 	};
 
 	return (
@@ -338,7 +342,7 @@ export default function ConnectionChapter({
 					<Typography variant="h2" component="h2" sx={{ fontSize: "1.25rem" }}>
 						{t("hostlms.verification.step")}
 					</Typography>
-					<HostLmsVerification result={result} isVerifying={busy} />
+					<HostLmsVerification result={result} isVerifying={testing} />
 				</Stack>
 			)}
 
