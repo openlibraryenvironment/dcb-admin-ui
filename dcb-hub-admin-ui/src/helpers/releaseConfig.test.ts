@@ -3,7 +3,11 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 type Asset = { path: string; label: string; filepath?: string };
-type GitLabOptions = { assets?: Asset[]; successComment?: string | false };
+type GitLabOptions = {
+	assets?: Asset[];
+	successComment?: string | false;
+	successCommentCondition?: string | false;
+};
 type Plugin = string | [string, GitLabOptions];
 
 const releaseConfig = JSON.parse(
@@ -30,9 +34,11 @@ describe("the release report's permanent link", () => {
 });
 
 // It comments on every merged MR in the release at once, and a POST is never retried: 2.2.0's
-// 216 commits drew a 429 that failed the release job after the tag and release existed.
+// 216 commits drew a 429, and 2.3.0's 157 a dropped connection, each failing the release job
+// after the tag and release existed. `successComment: false` is the deprecated form.
 describe("the release's last step", () => {
 	it("posts no comment on the merge requests a release includes", () => {
-		expect(gitlab.successComment).toBe(false);
+		expect(gitlab.successCommentCondition).toBe(false);
+		expect(gitlab).not.toHaveProperty("successComment");
 	});
 });

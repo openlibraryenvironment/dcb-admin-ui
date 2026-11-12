@@ -20,7 +20,7 @@
 		[
 			"@semantic-release/gitlab",
 			{
-				"successComment": false,
+				"successCommentCondition": false,
 				"assets": [
 					{
 						"path": "reports/release-report.html",
